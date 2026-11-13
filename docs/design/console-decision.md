@@ -15,7 +15,15 @@ reconnect, and wait options using an argument array. Missing executables and
 nonzero viewer exits are reported. Closing Pirwa does not stop a guest/viewer.
 
 The default tests replace virt-viewer with a fixture that verifies the exact
-URI/UUID argument shape. Real-KVM tests validate generated SPICE configuration
-and guest startup, not an interactive graphical session. Install virt-viewer
-for actual desktop use. Input capture/release, fullscreen, resize, audio,
-Wayland behavior, and a full Linux installation still need release acceptance.
+URI/UUID argument shape. The earlier automated real-KVM tests validate generated
+SPICE configuration and guest startup. A separate
+[Fedora installation run](../research/linux-install/README.md) now covers the
+production creation form, graphical installation, shutdown, Settings ISO eject,
+disk boot, and reopening the actual viewer in a private GNOME Wayland desktop.
+Keyboard and pointer input and fullscreen switching worked there. Its minimal
+desktop needed private audio policy services before the normal viewer launch
+connected promptly. Install virt-viewer for desktop use.
+
+Audible output, microphone forwarding, clipboard, guest resolution changes,
+physical capture/release, and the broader Wayland/performance matrix remain
+release acceptance work.

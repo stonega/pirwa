@@ -109,3 +109,8 @@ scroll CPU work with Vulkan. They are investigation samples, not sufficient
 evidence for a universal renderer override. Pirwa retains GTK's default selection.
 Cold caches, physical presentation latency, real-daemon memory, guest throughput,
 and full viewer/install acceptance remain open.
+
+Follow-up: the [Fedora installation run](linux-install/README.md) covers one
+complete graphical install, ISO eject, installed-disk boot, and desktop session.
+Audio, guest resolution changes, physical input/accessibility, and the broader
+console/performance matrix remain open.

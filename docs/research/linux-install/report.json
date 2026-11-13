@@ -1,0 +1,61 @@
+{
+  "date": "2026-11-13",
+  "source_commit": "1af72e99777b51da66fcda2f18a7e76206993d04",
+  "application_binary_sha256": "6a2d953ec2c6a30a7b059a257b239eabb9cb893e20ecab91d4c813cdcf312482",
+  "iso": {
+    "filename": "Fedora-Workstation-Live-43-1.6.x86_64.iso",
+    "bytes": 2742190080,
+    "sha256": "2a4a16c009244eb5ab2198700eb04103793b62407e8596f30a3e0cc8ac294d77"
+  },
+  "guest": {
+    "uuid": "5bd7dff7-47ad-4dde-ba73-a7a7603cb148",
+    "name": "pirwa-install-ed77d0ac",
+    "cpus": 4,
+    "memory_mib": 4096,
+    "disk_gib": 32,
+    "firmware": "UEFI"
+  },
+  "checks": {
+    "production_form_create_and_start": "passed",
+    "graphical_install_success": "passed",
+    "production_console_reopened": "passed",
+    "graceful_shutdown": "passed",
+    "settings_iso_eject_and_xml_confirmation": "passed",
+    "disk_boot_and_first_run_setup": "passed",
+    "installed_desktop_root_vda3_btrfs": "passed",
+    "injected_keyboard_and_pointer": "passed",
+    "fullscreen_switching": "passed",
+    "audio_output": "not_tested",
+    "guest_resize": "not_tested"
+  },
+  "cleanup": {
+    "vm_absent": true,
+    "owned_volume_absent": true,
+    "empty_pool_removed": true,
+    "baseline": {
+      "boxes-unknown": {
+        "state": "shut off",
+        "xml_sha256": "e92d40463112e63ec243da74c5f9e559712c61b52f84ba96a23b2c7e1a3d84a9",
+        "unchanged": true
+      },
+      "boxes-unknown-3": {
+        "state": "shut off",
+        "xml_sha256": "94f777d3c9c253ae0d354cf0f2606dbaba54a9776533ff3a7f04167b51938d39",
+        "unchanged": true
+      }
+    }
+  },
+  "desktop_fixture": {
+    "controller_exit_code": 0,
+    "compositor_exit_code": 0,
+    "outer_launcher_exit_code": 143,
+    "private_processes_absent": true,
+    "private_mounts_absent": true,
+    "temporary_directory_removed_manually": true
+  },
+  "notes": [
+    "Audio output and guest resize remain untested.",
+    "Outer launcher ended with SIGTERM after inner success; its leftover private directory was explicitly checked and removed.",
+    "Private PipeWire Pulse, null sink, and WirePlumber policy services were required for prompt normal console connection."
+  ]
+}

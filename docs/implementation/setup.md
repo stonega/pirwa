@@ -74,7 +74,10 @@ exports before removing its directories. The result directory contains report.js
 screenshots, per-case stdout/stderr, the compositor log, and the session log.
 Use `--build build-sanitize` with the sanitizer environment to exercise that
 binary. An optional command after `--` runs inside the virtual desktop instead
-of the default matrix.
+of the default matrix. For a longer interactive installation check, increase
+`--command-timeout` (default 600 seconds, maximum 7200). This extends only the
+command deadline; it does not provision a VM or add audio services. Custom
+commands receive `PIRWA_QA_ISOLATED=1` and must report their own acceptance results.
 
 The matrix includes Boxes onboarding at normal size and at 200% text/dark/720 px.
 Its fixtures verify dismissal, one-time behavior across windows, manual reopening,
@@ -86,6 +89,9 @@ This is GNOME Shell and its compositor with a virtual monitor, not a complete
 logged-in hardware session. Missing authentication/camera/PipeWire services and
 the host's AT-SPI activation failure can appear in session logs. The UI exercise
 uses GTK's test accessibility backend; it does not certify screen-reader access.
+The [Linux installation record](../research/linux-install/README.md) describes
+the separate real-guest run, including the private audio services needed by the
+viewer. The five-case matrix above continues to use synthetic VMs only.
 
 The same tool supports profiling without `--exercise`; the Python standard-library
 wrapper `scripts/profile-ui.py` creates isolated 0–1,000-domain fixtures and saves

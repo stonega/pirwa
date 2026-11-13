@@ -53,6 +53,12 @@ Create allocates the disk and boots the VM. Open Console to install
 Linux. The dialog shows progress. Cancel rolls back newly allocated resources;
 an in-flight libvirt call may take time to finish before cancellation completes.
 
+After installation finishes, shut down the guest. Open **Settings**, enable
+**Eject installation media**, and choose **Save Changes**. Then choose **Start**
+and **Open Console** to boot the installed system from its disk and finish the
+distribution's first-run setup. This workflow has been exercised with Fedora
+Workstation 43; other installers may present different steps.
+
 For an existing standalone qcow2 image, enable Import. Pirwa copies it into an
 owned volume and uses the image's virtual capacity; the disk-capacity field
 does not resize imports. Select legacy BIOS if that is how the image was

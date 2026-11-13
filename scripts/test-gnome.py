@@ -53,7 +53,9 @@ def session(args):
             ["gnome-shell", "--version"], text=True).strip(),
         "shell_command": shell_args,
         "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
-        "scope": "Programmed production GTK UI actions; not physical input, screen reader, or guest console certification",
+        "scope": ("Custom command in an isolated desktop; inspect the command's own results"
+                  if args.command else
+                  "Programmed production GTK UI actions; not physical input, screen reader, or guest console certification"),
         "cases": [],
         "passed": False,
     }
@@ -61,7 +63,7 @@ def session(args):
 
     def execute(name, command):
         result = subprocess.run(command, cwd=ROOT, env=env, capture_output=True,
-                                text=True, timeout=600)
+                                text=True, timeout=args.command_timeout)
         (output / f"{name}.stdout.log").write_text(result.stdout)
         (output / f"{name}.stderr.log").write_text(result.stderr)
         case = {"name": name, "command": command, "returncode": result.returncode}
@@ -123,9 +125,13 @@ def main():
     parser.add_argument("--build", default="build")
     parser.add_argument("--output", type=Path, default=ROOT / "build/qa/gnome")
     parser.add_argument("--session-root", help=argparse.SUPPRESS)
+    parser.add_argument("--command-timeout", type=int, default=600,
+                        help="Seconds allowed for each command (1–7200; default: 600)")
     parser.add_argument("command", nargs=argparse.REMAINDER,
                         help="Optional command after --, run instead of the default UI matrix")
     args = parser.parse_args()
+    if not 1 <= args.command_timeout <= 7200:
+        parser.error("Use a command timeout between 1 and 7200 seconds")
     if args.command[:1] == ["--"]:
         args.command = args.command[1:]
     args.output = args.output.resolve()
@@ -147,9 +153,11 @@ def main():
             env[f"XDG_{suffix}"] = str(path)
         env.update(GSETTINGS_BACKEND="memory", XDG_CURRENT_DESKTOP="GNOME",
                    XDG_SESSION_TYPE="wayland", GVFS_DISABLE_FUSE="1", LC_ALL="C")
+        env["PIRWA_QA_ISOLATED"] = "1"
         command = ["dbus-run-session", "--", sys.executable, str(Path(__file__).resolve()),
                    "--build", args.build, "--output", str(args.output),
                    "--session-root", directory]
+        command += ["--command-timeout", str(args.command_timeout)]
         if args.command:
             command += ["--", *args.command]
         try:

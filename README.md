@@ -4,9 +4,10 @@ A native GNOME virtual machine manager built around libvirt. Performance and
 responsiveness come first. Inspired by GNOME Boxes, built with C17, GTK 4,
 libadwaita, libvirt/libvirt-glib, libxml2, libosinfo, and Meson.
 
-**Status: functional v0.1 development build.** Release acceptance remains open
-for full Linux installation, real Wayland console/accessibility testing, and
-the complete performance contract.
+**Status: functional v0.1 development build.** A full Fedora installation,
+ISO eject, and installed-disk boot passed in virtual GNOME. Release acceptance
+remains open for the broader console/audio/accessibility matrix and the complete
+performance contract. See the [installation evidence](docs/research/linux-install/README.md).
 
 ## Features
 
