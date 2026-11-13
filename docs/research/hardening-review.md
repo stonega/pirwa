@@ -101,6 +101,9 @@ Saved evidence: [failure report](virtual-gnome/startup-failure-report.json),
 [watchdog trace](virtual-gnome/startup-failure.log), and
 [partial raw samples](virtual-gnome/startup-failure-partial.json).
 
+Follow-up at `c60ee96`: [100 measured launches](boxes-import/README.md#startup-follow-up)
+completed without a timeout. The original intermittent cause remains unresolved.
+
 Short renderer diagnostics showed lower launch cost/PSS with Cairo and lower
 scroll CPU work with Vulkan. They are investigation samples, not sufficient
 evidence for a universal renderer override. Pirwa retains GTK's default selection.

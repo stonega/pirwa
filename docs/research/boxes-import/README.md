@@ -53,6 +53,21 @@ socket locations, offline instructions, and preference handling. There was no
 installed Boxes Flatpak on this host, so connection/control/viewer behavior
 against an actual Flatpak runtime remains an integration acceptance item.
 
+## Startup follow-up
+
+The optimized build at `c60ee96` completed one warmup and 100 measured launches
+with no readiness timeout in the isolated 60 Hz GNOME desktop. Launch to
+after-paint measured p50 432.761 ms and p95 483.132 ms. This is the non-unique QA
+application with 100 synthetic domains and GTK's test accessibility backend;
+the test URI disables automatic Boxes onboarding, which is covered by the
+separate UI scenarios above. It measures submission, not physical presentation
+or production single-instance activation, and makes no cold-cache claim.
+
+The prior intermittent startup failure was not reproduced. Its cause remains
+unresolved; a successful repeat is not proof of a fix. Evidence:
+[raw samples and environment](startup-100.json),
+[session report](startup-100-report.json).
+
 ## Source references
 
 Reviewed GNOME Boxes at commit `78cd19e85b70e796aa17ca26fde611e9bd31608a`:
