@@ -47,7 +47,25 @@ meson install -C build
 The headless tests use `test:///default`. The test driver ships with typical
 libvirt installations but some distributions split it into a separate package.
 It requires neither a running libvirt daemon nor KVM. It must remain the default
-for automated tests. Real-KVM tests are a later, explicitly opt-in workflow.
+for automated tests. `PIRWA_RUN_KVM_TESTS=1 ./build/tests/test-kvm` is a separate,
+explicitly opt-in workflow using disposable resources; see the README.
+
+Eight default checks cover inventory, configuration, stable model reconciliation,
+backend behavior, storage rollback/reference protection, 1,000-domain scale, and
+desktop/AppStream metadata. None requires a display.
+
+`./build/tests/test-ui --exercise` requires a real desktop display and uses only
+the libvirt test driver. It runs the production window, checks lifecycle actions,
+settings, cancellation of the destructive dialog, accessible header labels,
+search focus, stable selection, creation-button visibility, and closing with a
+detail request pending. Add `--large-text --dark --width 720` for the narrow,
+200% font variant. This is a programmed action test, not physical input or a
+screen-reader certification. `--snapshot FILE.png` captures only Pirwa's window.
+This executable is deliberately excluded from the headless Meson test command.
+
+The same tool supports profiling without `--exercise`; the Python standard-library
+wrapper `scripts/profile-ui.py` creates isolated 0–1,000-domain fixtures and saves
+raw measurements. See the performance design for methodology.
 
 `examples/run-test-driver.sh` launches the UI with synthetic domains on your
 normal desktop. `PIRWA_LIBVIRT_URI` affects only a newly launched application

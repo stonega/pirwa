@@ -26,6 +26,7 @@ typedef enum
 typedef struct
 {
   PirwaOperation operation;
+  guint64 request_id; /* Correlates progress; zero is valid for non-UI callers. */
   const char *uuid;
   PirwaCreate options;
   gboolean eject;
@@ -34,6 +35,7 @@ typedef struct
 
 typedef struct
 {
+  guint64 serial; /* Monotonic completion order within one backend. */
   GPtrArray *machines;
   GStrv pools;
   PirwaDetails *details;
@@ -51,3 +53,5 @@ void pirwa_backend_request_async (PirwaBackend *self, const PirwaRequest *reques
 PirwaReply *pirwa_backend_request_finish (PirwaBackend *self, GAsyncResult *result, GError **error);
 void pirwa_reply_free (PirwaReply *reply);
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (PirwaReply, pirwa_reply_free)
+
+guint64 pirwa_backend_result_serial (GAsyncResult *result);

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pirwa\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-13 12:47+0800\n"
+"POT-Creation-Date: 2026-11-13 14:36+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,221 +21,225 @@ msgstr ""
 msgid "Show the application version"
 msgstr ""
 
-#: src/pirwa-window.c:89 src/pirwa-window.c:977
+#: src/pirwa-window.c:106 src/pirwa-window.c:1024
 msgid "Select a Virtual Machine"
 msgstr ""
 
-#: src/pirwa-window.c:90
+#: src/pirwa-window.c:107
 msgid "Choose a machine to view its controls."
 msgstr ""
 
-#: src/pirwa-window.c:331
+#: src/pirwa-window.c:343
 #, c-format
 msgid "%u CPUs · %u MiB RAM"
 msgstr ""
 
-#: src/pirwa-window.c:371
+#: src/pirwa-window.c:387
 msgid "Shutdown requested. Waiting for the guest."
 msgstr ""
 
-#: src/pirwa-window.c:373
+#: src/pirwa-window.c:389
 msgid "Restart requested. Waiting for the guest."
 msgstr ""
 
-#: src/pirwa-window.c:392
+#: src/pirwa-window.c:408
 msgid "Virtual machine created and started. Choose Open Console to continue."
 msgstr ""
 
-#: src/pirwa-window.c:411
+#: src/pirwa-window.c:427
 msgid "Working…"
 msgstr ""
 
-#: src/pirwa-window.c:451
+#: src/pirwa-window.c:472
 msgid "Loading resources…"
 msgstr ""
 
-#: src/pirwa-window.c:495
+#: src/pirwa-window.c:522
 msgid "Remove Virtual Machine?"
 msgstr ""
 
-#: src/pirwa-window.c:495
+#: src/pirwa-window.c:522
 msgid "Force Stop Virtual Machine?"
 msgstr ""
 
-#: src/pirwa-window.c:496
+#: src/pirwa-window.c:523
 msgid ""
 "The VM definition will be removed. Its storage is kept unless you explicitly "
 "choose to delete the verified Pirwa disk."
 msgstr ""
 
-#: src/pirwa-window.c:498
+#: src/pirwa-window.c:525
 msgid "Force stopping can lose unsaved work in the guest."
 msgstr ""
 
-#: src/pirwa-window.c:499 src/pirwa-window.c:779 src/pirwa-window.c:1019
+#: src/pirwa-window.c:526 src/pirwa-window.c:817 src/pirwa-window.c:1071
 msgid "Cancel"
 msgstr ""
 
-#: src/pirwa-window.c:500 src/pirwa-window.c:995
+#: src/pirwa-window.c:527 src/pirwa-window.c:1045
 msgid "Remove"
 msgstr ""
 
-#: src/pirwa-window.c:500 src/pirwa-window.c:995
+#: src/pirwa-window.c:527 src/pirwa-window.c:1045
 msgid "Force Stop"
 msgstr ""
 
-#: src/pirwa-window.c:511
+#: src/pirwa-window.c:538
 msgid "Also delete the verified Pirwa disk"
 msgstr ""
 
-#: src/pirwa-window.c:610
+#: src/pirwa-window.c:642
 msgid "Select ISO or qcow2 Image"
 msgstr ""
 
-#: src/pirwa-window.c:674
+#: src/pirwa-window.c:706
 msgid "Virtual Machine Settings"
 msgstr ""
 
-#: src/pirwa-window.c:674 src/pirwa-window.c:696 src/pirwa-window.c:901
-#: src/pirwa-window.c:931
+#: src/pirwa-window.c:706 src/pirwa-window.c:731 src/pirwa-window.c:942
+#: src/pirwa-window.c:944 src/pirwa-window.c:977
 msgid "New Virtual Machine"
 msgstr ""
 
-#: src/pirwa-window.c:691
+#: src/pirwa-window.c:723
 msgid "Resources"
 msgstr ""
 
-#: src/pirwa-window.c:694
+#: src/pirwa-window.c:726
+msgid "The virtual machine starts after creation."
+msgstr ""
+
+#: src/pirwa-window.c:729
 msgid "Name"
 msgstr ""
 
-#: src/pirwa-window.c:698
+#: src/pirwa-window.c:733
 msgid "Virtual CPUs"
 msgstr ""
 
-#: src/pirwa-window.c:699
+#: src/pirwa-window.c:734
 msgid "Memory (MiB)"
 msgstr ""
 
-#: src/pirwa-window.c:707
+#: src/pirwa-window.c:742
 msgid "Eject installation media"
 msgstr ""
 
-#: src/pirwa-window.c:713
+#: src/pirwa-window.c:748
 msgid "Disk capacity (GiB)"
 msgstr ""
 
-#: src/pirwa-window.c:716
+#: src/pirwa-window.c:751
 msgid "Installation Media"
 msgstr ""
 
-#: src/pirwa-window.c:720
+#: src/pirwa-window.c:755
 msgid "Local ISO or qcow2 path"
 msgstr ""
 
-#: src/pirwa-window.c:723
+#: src/pirwa-window.c:758
 msgid "Choose a file"
 msgstr ""
 
-#: src/pirwa-window.c:728
+#: src/pirwa-window.c:763
 msgid "Import a standalone qcow2 image"
 msgstr ""
 
-#: src/pirwa-window.c:731
+#: src/pirwa-window.c:766
 msgid "Use legacy BIOS instead of UEFI"
 msgstr ""
 
-#: src/pirwa-window.c:734
+#: src/pirwa-window.c:769
 msgid ""
 "Import copies the source into a new owned volume and uses its virtual "
 "capacity. The original image stays unchanged."
 msgstr ""
 
-#: src/pirwa-window.c:751
+#: src/pirwa-window.c:786
 msgid "Directory storage pool"
 msgstr ""
 
-#: src/pirwa-window.c:782
+#: src/pirwa-window.c:820
 msgid "Save Changes"
 msgstr ""
 
-#: src/pirwa-window.c:782
-msgid "Create and Start"
+#: src/pirwa-window.c:820
+msgid "Create"
 msgstr ""
 
-#: src/pirwa-window.c:899
+#: src/pirwa-window.c:938
 msgid "Virtual Machines"
 msgstr ""
 
-#: src/pirwa-window.c:904
+#: src/pirwa-window.c:947
 msgid "Session"
 msgstr ""
 
-#: src/pirwa-window.c:904
+#: src/pirwa-window.c:947
 msgid "System"
 msgstr ""
 
-#: src/pirwa-window.c:906
+#: src/pirwa-window.c:949 src/pirwa-window.c:951
 msgid "Choose the local libvirt connection"
 msgstr ""
 
-#: src/pirwa-window.c:911
+#: src/pirwa-window.c:956 src/pirwa-window.c:958
 msgid "Refresh and reconnect"
 msgstr ""
 
-#: src/pirwa-window.c:919
+#: src/pirwa-window.c:966
 msgid "Connecting to libvirt"
 msgstr ""
 
-#: src/pirwa-window.c:925
+#: src/pirwa-window.c:971
 msgid "No Virtual Machines"
 msgstr ""
 
-#: src/pirwa-window.c:928
+#: src/pirwa-window.c:974
 msgid "Create a Linux virtual machine or import a standalone qcow2 image."
 msgstr ""
 
-#: src/pirwa-window.c:934
+#: src/pirwa-window.c:980
 msgid "Connection Unavailable"
 msgstr ""
 
-#: src/pirwa-window.c:936
+#: src/pirwa-window.c:982
 msgid "Reconnect"
 msgstr ""
 
-#: src/pirwa-window.c:994
+#: src/pirwa-window.c:1044
 msgid "Start"
 msgstr ""
 
-#: src/pirwa-window.c:994
+#: src/pirwa-window.c:1044
 msgid "Open Console"
 msgstr ""
 
-#: src/pirwa-window.c:994
+#: src/pirwa-window.c:1044
 msgid "Shut Down"
 msgstr ""
 
-#: src/pirwa-window.c:994
+#: src/pirwa-window.c:1044
 msgid "Restart"
 msgstr ""
 
-#: src/pirwa-window.c:994
+#: src/pirwa-window.c:1044
 msgid "Pause"
 msgstr ""
 
-#: src/pirwa-window.c:995
+#: src/pirwa-window.c:1045
 msgid "Resume"
 msgstr ""
 
-#: src/pirwa-window.c:995
+#: src/pirwa-window.c:1045
 msgid "Settings"
 msgstr ""
 
-#: src/pirwa-window.c:1026
+#: src/pirwa-window.c:1078
 msgid "Local virtual machines managed by libvirt"
 msgstr ""
 
-#: src/pirwa-window.c:1049
+#: src/pirwa-window.c:1104
 msgid "Test Driver"
 msgstr ""
 

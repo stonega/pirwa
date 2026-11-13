@@ -15,12 +15,12 @@ agents may be needed for the best resize/integration experience.
 
 ## Create or import
 
-Choose New Virtual Machine. Enter a name, CPU count, memory, disk capacity,
+Choose the + button (New Virtual Machine). Enter a name, CPU count, memory, disk capacity,
 local bootable x86 Linux ISO, and active directory storage pool. The session
 connection can create a private pool named pirwa. System mode requires an
 existing pool that your libvirt connection can write to.
 
-Create and Start allocates the disk and boots the VM. Open Console to install
+Create allocates the disk and boots the VM. Open Console to install
 Linux. The dialog shows progress. Cancel rolls back newly allocated resources;
 an in-flight libvirt call may take time to finish before cancellation completes.
 
@@ -49,7 +49,8 @@ Losing the ownership record prevents automatic disk deletion.
 Lifecycle events update the list automatically. After a disconnect Pirwa retries
 five times with increasing delays. Refresh reconnects manually. Connection
 switching is disabled during an operation. Ctrl+N opens creation; Ctrl+R or F5
-refreshes/reconnects.
+refreshes/reconnects. Ctrl+F focuses search. The collection receives initial
+keyboard focus when machines are available.
 
 The test-driver example uses synthetic VMs. Its controls can be exercised without
 real guests, but creation and real console access require QEMU/KVM.

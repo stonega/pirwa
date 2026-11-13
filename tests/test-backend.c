@@ -1,5 +1,11 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
+#define _POSIX_C_SOURCE 200809L
 #include "pirwa-backend.h"
+#include <errno.h>
+#include <fcntl.h>
+#include <glib/gstdio.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 typedef struct
 {
@@ -7,6 +13,7 @@ typedef struct
   PirwaReply *reply;
   GError *error;
   GThread *caller;
+  guint64 serial;
 } Result;
 
 static void
@@ -14,6 +21,7 @@ done (GObject *source, GAsyncResult *result, gpointer data)
 {
   Result *r = data;
   g_assert_true (g_thread_self () == r->caller);
+  r->serial = pirwa_backend_result_serial (result);
   r->reply = pirwa_backend_request_finish (PIRWA_BACKEND (source), result, &r->error);
   g_main_loop_quit (r->loop);
 }
@@ -27,7 +35,8 @@ timed_out (gpointer data)
 }
 
 static PirwaReply *
-run (PirwaBackend *backend, const PirwaRequest *request, GCancellable *cancel, GError **error)
+run_serial (PirwaBackend *backend, const PirwaRequest *request, GCancellable *cancel,
+            guint64 *serial, GError **error)
 {
   g_autoptr (GMainLoop) loop = g_main_loop_new (NULL, FALSE);
   Result result = { .loop = loop, .caller = g_thread_self () };
@@ -35,9 +44,17 @@ run (PirwaBackend *backend, const PirwaRequest *request, GCancellable *cancel, G
   pirwa_backend_request_async (backend, request, cancel, done, &result);
   g_main_loop_run (loop);
   g_source_remove (timeout);
+  if (serial)
+    *serial = result.serial;
   if (result.error)
     g_propagate_error (error, result.error);
   return result.reply;
+}
+
+static PirwaReply *
+run (PirwaBackend *backend, const PirwaRequest *request, GCancellable *cancel, GError **error)
+{
+  return run_serial (backend, request, cancel, NULL, error);
 }
 
 static PirwaMachine *
@@ -189,6 +206,101 @@ test_lifecycle_events (void)
   pirwa_backend_stop (backend);
 }
 
+typedef struct
+{
+  PirwaBackend *backend;
+  const char *path;
+  gboolean stopped_during_connect;
+} BlockedConnect;
+
+static gboolean
+release_blocked_connect (gpointer data)
+{
+  BlockedConnect *blocked = data;
+  int fd = open (blocked->path, O_WRONLY | O_NONBLOCK);
+  if (fd < 0 && errno == ENXIO)
+    return G_SOURCE_CONTINUE;
+  g_assert_cmpint (fd, >=, 0);
+  pirwa_backend_stop (blocked->backend);
+  blocked->stopped_during_connect = TRUE;
+  const char node[] = "<node/>";
+  g_assert_cmpint (write (fd, node, sizeof node - 1), ==, sizeof node - 1);
+  close (fd);
+  return G_SOURCE_REMOVE;
+}
+
+static void
+test_stop_in_flight (void)
+{
+  g_autoptr (GError) error = NULL;
+  g_autofree char *directory = g_dir_make_tmp ("pirwa-blocked-connect-XXXXXX", &error);
+  g_assert_no_error (error);
+  g_autofree char *path = g_build_filename (directory, "node.xml", NULL);
+  g_assert_cmpint (mkfifo (path, 0600), ==, 0);
+  g_autofree char *uri = g_strconcat ("test://", path, NULL);
+  g_autoptr (PirwaBackend) backend = pirwa_backend_new (uri);
+  BlockedConnect blocked = { .backend = backend, .path = path };
+  guint release = g_timeout_add (5, release_blocked_connect, &blocked);
+  PirwaRequest request = { .operation = PIRWA_REFRESH };
+  g_autoptr (PirwaReply) reply = run (backend, &request, NULL, &error);
+  if (!blocked.stopped_during_connect)
+    g_source_remove (release);
+  g_assert_true (blocked.stopped_during_connect);
+  g_assert_null (reply);
+  g_assert_error (error, G_IO_ERROR, G_IO_ERROR_CANCELLED);
+  g_unlink (path);
+  g_rmdir (directory);
+}
+
+static void
+progress_id (PirwaBackend *backend, guint64 id, double fraction, const char *stage, gpointer data)
+{
+  (void)backend;
+  g_assert_cmpfloat (fraction, >=, 0);
+  g_assert_nonnull (stage);
+  g_array_append_val ((GArray *)data, id);
+}
+
+static void
+test_result_order_and_progress (void)
+{
+  g_autoptr (PirwaBackend) backend = pirwa_backend_new ("test:///default");
+  g_autoptr (GArray) ids = g_array_new (FALSE, FALSE, sizeof (guint64));
+  g_signal_connect (backend, "progress", G_CALLBACK (progress_id), ids);
+  g_autoptr (GError) error = NULL;
+  g_autofree char *path = NULL;
+  int fd = g_file_open_tmp ("pirwa-media-XXXXXX", &path, &error);
+  g_assert_no_error (error);
+  close (fd);
+  PirwaRequest request
+      = { .operation = PIRWA_CREATE,
+          .options
+          = { .name = "test-create", .source = path, .cpus = 1, .memory_mb = 256, .disk_gb = 4 } };
+  guint64 previous = 0;
+  for (guint64 id = 41; id < 43; id++)
+    {
+      request.request_id = id;
+      guint64 serial = 0;
+      /* The built-in test driver has no KVM domain capabilities, so this is
+       * a deterministic pre-allocation failure after the first progress event. */
+      g_autoptr (PirwaReply) reply = run_serial (backend, &request, NULL, &serial, &error);
+      g_assert_null (reply);
+      g_assert_nonnull (error);
+      g_assert_cmpuint (serial, >, previous);
+      previous = serial;
+      g_clear_error (&error);
+    }
+  while (g_main_context_iteration (NULL, FALSE))
+    {
+    }
+  g_assert_cmpuint (ids->len, ==, 2);
+  g_assert_cmpuint (g_array_index (ids, guint64, 0), ==, 41);
+  g_assert_cmpuint (g_array_index (ids, guint64, 1), ==, 42);
+  g_signal_handlers_disconnect_by_data (backend, ids);
+  pirwa_backend_stop (backend);
+  g_unlink (path);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -197,5 +309,7 @@ main (int argc, char **argv)
   g_test_add_func ("/backend/cancellation-and-stop", test_cancellation_and_stop);
   g_test_add_func ("/backend/reconnect-and-missing", test_reconnect_and_missing);
   g_test_add_func ("/backend/lifecycle-events", test_lifecycle_events);
+  g_test_add_func ("/backend/stop-in-flight", test_stop_in_flight);
+  g_test_add_func ("/backend/result-order-and-progress", test_result_order_and_progress);
   return g_test_run ();
 }

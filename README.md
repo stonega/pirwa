@@ -22,7 +22,7 @@ the complete performance contract.
 - Confirmed removal; optional disk deletion requires an ownership record,
   matching domain/volume metadata, and checks for references from other VMs.
 - Desktop/AppStream integration, gettext infrastructure, Fedora RPM recipe,
-  headless tests, sanitizer checks, and CI configuration.
+  headless tests, native desktop QA, sanitizer checks, and CI configuration.
 
 ## Build and run
 
@@ -65,6 +65,14 @@ and cleans its resources:
 
 It uses the Fedora UEFI shell ISO by default. Set PIRWA_TEST_ISO to another local
 bootable x86 ISO if needed. It does not automate a full Linux installation.
+
+On a desktop, exercise the actual window and test-driver controls:
+
+    ./build/tests/test-ui --exercise
+    ./build/tests/test-ui --exercise --large-text --dark --width 720
+
+The desktop tool also measures startup, idle CPU/PSS, and scrolling. See the
+[performance workflow](docs/design/performance.md) for commands and measurement limits.
 
 ## Documents
 

@@ -10,9 +10,10 @@ the connection opens. Event callbacks only enqueue coalesced reconciliation;
 they do not make blocking libvirt calls.
 
     main.c → pirwa-window.c → pirwa-backend.c
-                                  ├─ pirwa-inventory.c: one bulk state query
-                                  ├─ pirwa-config.c: escaped XML and image checks
-                                  └─ pirwa-provision.c: storage, media, ownership
+                 │                ├─ pirwa-inventory.c: one bulk state query
+                 │                ├─ pirwa-config.c: escaped XML and image checks
+                 │                └─ pirwa-provision.c: storage, media, ownership
+                 └─ pirwa-model.c: ordered, stable snapshot reconciliation
 
 Libvirt manages QEMU/KVM. Pirwa does not launch QEMU itself or call virsh in
 application logic. The console launches virt-viewer with an argument array,
@@ -31,6 +32,13 @@ and reads; lifecycle refreshes are coalesced. Selecting another VM cancels old
 detail requests. Switching connections uses a new backend, so late callbacks
 from the old backend are discarded.
 
+Each backend completion has a monotonically increasing serial. Snapshot and
+connection-error delivery use the same ordering fence, so an older callback
+cannot replace newer state. Selected-detail requests have a separate generation
+counter, including when the same UUID is selected again. Settings fetches fresh
+details before opening. Progress carries the foreground request ID; queued
+progress from an earlier job cannot update a later job's dialog.
+
 There are no collection screenshot or stats timers. A disconnected backend
 tries reconnect at 1/2/4/8/16-second intervals, then waits for manual reconnect.
 Mutations are never replayed automatically. Healthy connections have no polling
@@ -38,7 +46,10 @@ or retry timer.
 
 ## Cancellation and shutdown
 
-Cancellation is checked before operations and between image upload chunks.
+Caller cancellation and backend shutdown feed a combined worker cancellable,
+including requests submitted without a caller cancellable. Cancellation is
+checked before operations, during pre-removal reference scans, and between
+image upload chunks and partial stream sends.
 It cannot interrupt an in-flight synchronous libvirt RPC. After a mutation
 commits, the result reports success rather than a misleading cancellation.
 Closing the window cancels work, stops the queue, and prevents late UI access.
@@ -67,8 +78,13 @@ responsible for full format validation. Source files are never modified.
 Each created disk has a UUID-derived name, namespaced domain metadata, and a
 durable user-data ownership record scoped by connection URI hash. Disk deletion
 requires all identities and the current volume path/key to match. Other VM
-definitions are checked for disk/backing-store references. Unknown ownership
-means keep the disk. Cleanup preserves storage if domain rollback fails.
+definitions are checked for disk/backing-store references, including symlink and
+hardlink aliases. Missing unrelated media does not prevent cleanup; inaccessible
+or unparseable references do. Unknown ownership means keep the disk. Rollback
+refuses a running domain or uncertain state. Both rollback and removal recheck
+all domains after undefining and before deleting storage, so a racing start
+that leaves a transient guest keeps its disk. Incomplete cleanup keeps ownership
+evidence and reports the error.
 Cross-client storage changes cannot be made atomic with libvirt; callers should
 not concurrently reassign disks while confirming deletion.
 

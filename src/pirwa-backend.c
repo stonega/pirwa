@@ -16,6 +16,7 @@ typedef struct
   GWeakRef owner;
   GMainContext *context;
   GAsyncQueue *queue;
+  GCancellable *shutdown;
   char *uri;
   virConnectPtr connection;
   int event_id;
@@ -24,6 +25,8 @@ typedef struct
   gint refresh_pending;
   guint retries;
   gint64 last_progress;
+  guint64 serial;
+  guint64 active_request;
 } BackendState;
 
 struct _PirwaBackend
@@ -76,6 +79,7 @@ state_unref (gpointer data)
   g_weak_ref_clear (&state->owner);
   g_main_context_unref (state->context);
   g_async_queue_unref (state->queue);
+  g_object_unref (state->shutdown);
   g_free (state->uri);
   g_free (state);
 }
@@ -87,6 +91,8 @@ typedef struct
   char *message;
   double fraction;
   gboolean progress;
+  guint64 serial;
+  guint64 request_id;
 } Delivery;
 
 static gboolean
@@ -96,12 +102,12 @@ deliver (gpointer data)
   if (!g_atomic_int_get (&delivery->backend->state->stopping))
     {
       if (delivery->progress)
-        g_signal_emit_by_name (delivery->backend, "progress", delivery->fraction,
-                               delivery->message);
+        g_signal_emit_by_name (delivery->backend, "progress", delivery->request_id,
+                               delivery->fraction, delivery->message);
       else if (delivery->reply)
         g_signal_emit_by_name (delivery->backend, "inventory", delivery->reply);
       else
-        g_signal_emit_by_name (delivery->backend, "error", delivery->message);
+        g_signal_emit_by_name (delivery->backend, "error", delivery->serial, delivery->message);
     }
   return G_SOURCE_REMOVE;
 }
@@ -127,6 +133,8 @@ post (BackendState *state, PirwaReply *reply, const char *message, double fracti
     }
   Delivery *delivery = g_new0 (Delivery, 1);
   delivery->backend = owner;
+  delivery->serial = state->serial;
+  delivery->request_id = state->active_request;
   delivery->reply = reply;
   delivery->message = g_strdup (message);
   delivery->fraction = fraction;
@@ -370,7 +378,7 @@ execute (BackendState *state, const PirwaRequest *request, GCancellable *cancell
       break;
     case PIRWA_REMOVE:
       if (!pirwa_provision_remove (state->connection, domain, request->uuid, request->delete_disk,
-                                   error))
+                                   cancellable, error))
         goto fail;
       break;
     case PIRWA_CONSOLE:
@@ -430,6 +438,13 @@ fail:
   return NULL;
 }
 
+static void
+forward_cancel (GCancellable *source, gpointer destination)
+{
+  (void)source;
+  g_cancellable_cancel (destination);
+}
+
 static gpointer
 worker (gpointer data)
 {
@@ -455,13 +470,24 @@ worker (gpointer data)
       if (job->request.operation == PIRWA_REFRESH && !job->task)
         g_atomic_int_set (&state->refresh_pending, 0);
       g_autoptr (GError) error = NULL;
+      g_autoptr (GCancellable) cancellable = g_cancellable_new ();
+      GCancellable *caller = job->task ? g_task_get_cancellable (job->task) : NULL;
+      gulong shutdown_id
+          = g_cancellable_connect (state->shutdown, G_CALLBACK (forward_cancel), cancellable, NULL);
+      gulong caller_id
+          = caller ? g_cancellable_connect (caller, G_CALLBACK (forward_cancel), cancellable, NULL)
+                   : 0;
       PirwaReply *reply = NULL;
+      state->active_request = job->request.request_id;
       if (g_atomic_int_get (&state->stopping))
         g_set_error_literal (&error, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Connection closed");
       else
-        reply
-            = execute (state, &job->request, job->task ? g_task_get_cancellable (job->task) : NULL,
-                       job->task && job->request.operation <= PIRWA_RECONNECT, &error);
+        reply = execute (state, &job->request, cancellable,
+                         job->task && job->request.operation <= PIRWA_RECONNECT, &error);
+      if (caller_id)
+        g_cancellable_disconnect (caller, caller_id);
+      if (shutdown_id)
+        g_cancellable_disconnect (state->shutdown, shutdown_id);
       if (!state->connection)
         state->retries++;
       else if (!reply && virConnectIsAlive (state->connection) == 0)
@@ -469,8 +495,14 @@ worker (gpointer data)
           close_connection (state);
           state->retries = 1;
         }
+      state->serial++;
+      if (reply)
+        reply->serial = state->serial;
       if (job->task)
         {
+          guint64 *serial = g_new (guint64, 1);
+          *serial = state->serial;
+          g_task_set_task_data (job->task, serial, g_free);
           if (reply)
             g_task_return_pointer (job->task, reply, (GDestroyNotify)pirwa_reply_free);
           else
@@ -490,6 +522,7 @@ pirwa_backend_stop (PirwaBackend *self)
 {
   if (g_atomic_int_compare_and_exchange (&self->state->stopping, 0, 1))
     {
+      g_cancellable_cancel (self->state->shutdown);
       Job *job = g_new0 (Job, 1);
       job->stop = TRUE;
       g_async_queue_push (self->state->queue, job);
@@ -522,9 +555,9 @@ pirwa_backend_class_init (PirwaBackendClass *klass)
   g_signal_new ("inventory", G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL,
                 G_TYPE_NONE, 1, G_TYPE_POINTER);
   g_signal_new ("error", G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL,
-                G_TYPE_NONE, 1, G_TYPE_STRING);
+                G_TYPE_NONE, 2, G_TYPE_UINT64, G_TYPE_STRING);
   g_signal_new ("progress", G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL,
-                G_TYPE_NONE, 2, G_TYPE_DOUBLE, G_TYPE_STRING);
+                G_TYPE_NONE, 3, G_TYPE_UINT64, G_TYPE_DOUBLE, G_TYPE_STRING);
 }
 
 static void
@@ -543,6 +576,7 @@ pirwa_backend_new (const char *uri)
   g_weak_ref_init (&state->owner, self);
   state->context = g_main_context_ref_thread_default ();
   state->queue = g_async_queue_new_full (job_free);
+  state->shutdown = g_cancellable_new ();
   state->uri = g_strdup (uri);
   state->event_id = -1;
   self->state = state;
@@ -583,4 +617,12 @@ pirwa_backend_request_finish (PirwaBackend *self, GAsyncResult *result, GError *
 {
   g_return_val_if_fail (g_task_is_valid (result, self), NULL);
   return g_task_propagate_pointer (G_TASK (result), error);
+}
+
+guint64
+pirwa_backend_result_serial (GAsyncResult *result)
+{
+  g_return_val_if_fail (G_IS_TASK (result), 0);
+  const guint64 *serial = g_task_get_task_data (G_TASK (result));
+  return serial ? *serial : 0;
 }

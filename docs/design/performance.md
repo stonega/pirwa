@@ -10,7 +10,9 @@ power profile, and the exact release build before accepting or revising them.
 See [recorded results](../research/benchmarks.jsonl) for the release-build
 0/100/1,000-domain synthetic bulk-read samples. The 1,000-domain run measured
 p95 12.898 ms. This is not a real-daemon, first-frame, or guest benchmark.
-The complete release budgets below remain provisional and unverified.
+Native desktop measurements and remaining gaps are recorded in
+[implementation validation](../research/v0.1-validation.md). Partial measurements
+do not establish the complete release budgets below.
 
 ## Provisional release budgets
 
@@ -38,12 +40,23 @@ performance or guest boot speed from inventory microbenchmarks.
    inventory requests against `test:///default`, including connect/close. Its
    JSON reports the actual domain count and p50/p95 wall time. This is a small
    development baseline, not a QEMU or UI benchmark.
-3. In M0 add isolated test-driver fixtures for 0/100/1,000 domains and save raw
-   samples. Measure a real QEMU session separately; synthetic domains do not
-   reproduce daemon I/O, storage, or graphics costs.
-4. Use Sysprof for process start, first frame, scroll frame times, allocations,
-   and main-thread stalls. Mark inventory/command spans in M0. Measure process
-   PSS using `/proc/<pid>/smaps_rollup`; report renderer and viewer costs separately.
+3. Run `GDK_BACKEND=wayland ./scripts/profile-ui.py --domains 100 --launches 30
+   --idle-seconds 60 --output build/qa/native-ui-100.json` on a quiet desktop
+   (enter this as one line). The Python standard-library wrapper generates isolated
+   libvirt test-driver XML. It warms once, saves every launch sample, then samples
+   the production window/backend with normal GTK animations and accessibility.
+   It records all-thread process CPU, `/proc/self/smaps_rollup` PSS, passive frame
+   counts, renderer, monitor refresh/scale, source revision, binary hash, packages,
+   power profile, and host load. Do not interact with the windows during sampling.
+4. Use `--domains 1000 --scroll-seconds 5` for a large collection. The harness
+   scrolls 40 pixels per frame and records before-paint to after-paint CPU work.
+   That span excludes compositor presentation and GPU completion. Startup spans
+   end at after-paint or connection readiness in a non-unique QA application;
+   they do not include production single-instance bus activation. No cold-cache
+   claim is made. Synthetic domains live inside the process, unlike a real daemon.
+   Measure a real QEMU session separately. Use Sysprof/presentation traces for
+   actual frame latency, allocations, backend stalls, and wakeups. Those gates
+   remain open; a CPU work sample alone does not pass the frame-time budget.
 5. For guest throughput compare the same domain XML and guest workload launched
    with Pirwa and direct libvirt/virsh, in alternating repeated runs. Record
    vCPU/RAM, CPU mode, KVM, storage format, I/O mode, network backend, video, and
@@ -54,9 +67,17 @@ sample count, domain count, and environment. Re-run affected benchmarks when
 backend, collection, provisioning defaults, or display code changes. Never add
 arbitrary sleep-based timing assertions to the correctness test suite.
 
+`GSK_RENDERER=cairo` can be used for a separate renderer comparison. Keep its
+results separate from the default renderer and record scrolling CPU as well as
+startup/memory. Pirwa leaves renderer selection to GTK. Idle measurements start
+with keyboard focus on the collection; focusing search deliberately activates
+the normal text cursor animation. The connecting spinner stops when its page
+is hidden. The profiling harness adds no tick callback during idle sampling.
+
 ## Design constraints
 
 Bulk RPCs, lifecycle events, virtualized rows, lazy details, bounded background
 work, and no collection thumbnails are the starting choices. Measure them. The
-initial refresh reconnects; M1 introduces connection reuse and incremental
-updates. Optimizing GTK startup cannot speed up the guest's boot process.
+persistent connection is reused for incremental updates; only an explicit
+reconnect or a lost connection reopens it. Optimizing GTK startup cannot speed
+up the guest's boot process.

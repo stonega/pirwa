@@ -145,6 +145,8 @@ upload (virConnectPtr connection, virStorageVolPtr volume, int fd, guint64 size,
       ssize_t sent = 0;
       while (sent < count)
         {
+          if (g_cancellable_set_error_if_cancelled (cancellable, error))
+            goto out;
           int written = virStreamSend (stream, buffer + sent, count - sent);
           if (written <= 0)
             {
@@ -328,32 +330,15 @@ pirwa_provision_create (virConnectPtr connection, const PirwaCreate *o, GCancell
 out:
   if (!result)
     {
-      gboolean safe_to_delete = TRUE;
-      g_autofree char *defined
-          = domain ? virDomainGetXMLDesc (domain, VIR_DOMAIN_XML_INACTIVE) : NULL;
-      if (domain
-          && (!defined
-              || virDomainUndefineFlags (domain,
-                                         strstr (defined, "<nvram") ? VIR_DOMAIN_UNDEFINE_NVRAM : 0)
-                     < 0))
-        {
-          /* Never remove storage if the definition could not be rolled back. */
-          safe_to_delete = FALSE;
-          g_prefix_error (error,
-                          "Rollback could not remove the VM definition; its disk was kept. ");
-        }
-      if (volume && safe_to_delete && virStorageVolDelete (volume, 0) < 0)
-        {
-          safe_to_delete = FALSE;
-          g_prefix_error (
-              error,
-              "Rollback could not remove the allocated disk; its ownership record was kept. ");
-        }
-      if (safe_to_delete)
+      g_autoptr (GError) rollback_error = NULL;
+      if (pirwa_provision_rollback (connection, domain, volume, &rollback_error))
         {
           g_autofree char *file = ledger_path (connection, uuid);
           g_unlink (file);
         }
+      else
+        g_prefix_error (error, "Rollback incomplete; ownership record and storage were kept (%s). ",
+                        rollback_error->message);
     }
   if (domain)
     virDomainFree (domain);
@@ -365,8 +350,8 @@ out:
   return result;
 }
 
-static gboolean
-references_volume (const char *xml, const char *path, const char *name)
+gboolean
+pirwa_provision_references (const char *xml, const char *path, const char *name)
 {
   if (!xml)
     return TRUE;
@@ -374,6 +359,11 @@ references_volume (const char *xml, const char *path, const char *name)
                                XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING);
   if (!doc)
     return TRUE;
+  if (doc->intSubset || doc->extSubset)
+    {
+      xmlFreeDoc (doc);
+      return TRUE;
+    }
   xmlXPathContext *context = xmlXPathNewContext (doc);
   xmlXPathObject *sources = xmlXPathEvalExpression (BAD_CAST "//disk//source", context);
   struct stat target;
@@ -388,10 +378,15 @@ references_volume (const char *xml, const char *path, const char *name)
       struct stat other;
       if (volume && g_str_equal ((const char *)volume, name))
         used = TRUE;
-      if (file
-          && (g_str_equal ((const char *)file, path) || g_stat ((const char *)file, &other) < 0
-              || (target.st_dev == other.st_dev && target.st_ino == other.st_ino)))
-        used = TRUE;
+      if (file)
+        {
+          if (g_str_equal ((const char *)file, path))
+            used = TRUE;
+          else if (g_stat ((const char *)file, &other) == 0)
+            used |= target.st_dev == other.st_dev && target.st_ino == other.st_ino;
+          else if (errno != ENOENT && errno != ENOTDIR)
+            used = TRUE; /* Inaccessible paths remain ambiguous; absent unrelated files do not. */
+        }
       xmlFree (file);
       xmlFree (volume);
     }
@@ -402,10 +397,121 @@ references_volume (const char *xml, const char *path, const char *name)
   return used;
 }
 
+static gboolean
+volume_unused (virConnectPtr connection, virStorageVolPtr volume, const char *skip_uuid,
+               GCancellable *cancellable, GError **error)
+{
+  g_autofree char *path = virStorageVolGetPath (volume);
+  const char *name = virStorageVolGetName (volume);
+  if (!path || !name)
+    {
+      pirwa_libvirt_error (error, "Cannot identify storage");
+      return FALSE;
+    }
+  virDomainPtr *domains = NULL;
+  int count = virConnectListAllDomains (connection, &domains, 0);
+  if (count < 0)
+    {
+      pirwa_libvirt_error (error, "Cannot check shared disks");
+      return FALSE;
+    }
+  gboolean shared = FALSE;
+  gboolean cancelled = FALSE;
+  for (int i = 0; i < count; i++)
+    {
+      if (!shared && !cancelled)
+        cancelled = g_cancellable_set_error_if_cancelled (cancellable, error);
+      if (shared || cancelled)
+        {
+          virDomainFree (domains[i]);
+          continue;
+        }
+      char other_uuid[VIR_UUID_STRING_BUFLEN];
+      if (virDomainGetUUIDString (domains[i], other_uuid) < 0)
+        shared = TRUE;
+      else if (!skip_uuid || !g_str_equal (other_uuid, skip_uuid))
+        {
+          g_autofree char *current = virDomainGetXMLDesc (domains[i], 0);
+          if (pirwa_provision_references (current, path, name))
+            shared = TRUE;
+          int persistent = virDomainIsPersistent (domains[i]);
+          if (persistent < 0)
+            shared = TRUE;
+          if (persistent == 1)
+            {
+              g_autofree char *inactive = virDomainGetXMLDesc (domains[i], VIR_DOMAIN_XML_INACTIVE);
+              if (pirwa_provision_references (inactive, path, name))
+                shared = TRUE;
+            }
+        }
+      virDomainFree (domains[i]);
+    }
+  free (domains);
+  if (cancelled)
+    return FALSE;
+  if (shared)
+    g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_BUSY,
+                         "Another VM may use this disk; storage was kept");
+  return !shared;
+}
+
+gboolean
+pirwa_provision_rollback (virConnectPtr connection, virDomainPtr domain, virStorageVolPtr volume,
+                          GError **error)
+{
+  char uuid[VIR_UUID_STRING_BUFLEN];
+  g_autofree char *xml = NULL;
+  g_autoptr (PirwaDetails) details = NULL;
+  if (domain)
+    {
+      if (virDomainIsActive (domain) != 0)
+        {
+          g_set_error_literal (
+              error, G_IO_ERROR, G_IO_ERROR_BUSY,
+              "VM is running or its state is unknown; its definition and disk were kept");
+          return FALSE;
+        }
+      if (virDomainGetUUIDString (domain, uuid) < 0)
+        {
+          pirwa_libvirt_error (error, "Cannot identify rollback domain");
+          return FALSE;
+        }
+      xml = virDomainGetXMLDesc (domain, VIR_DOMAIN_XML_INACTIVE);
+      if (!xml)
+        {
+          pirwa_libvirt_error (error, "Cannot inspect rollback domain");
+          return FALSE;
+        }
+      details = pirwa_config_parse (xml, error);
+      if (!details)
+        return FALSE;
+    }
+  if (volume && !volume_unused (connection, volume, domain ? uuid : NULL, NULL, error))
+    return FALSE;
+  if (domain
+      && virDomainUndefineFlags (domain, details->has_nvram ? VIR_DOMAIN_UNDEFINE_NVRAM : 0) < 0)
+    {
+      pirwa_libvirt_error (error, "Cannot remove rollback definition");
+      return FALSE;
+    }
+  /* Scan again without excluding the old UUID: a racing start can leave a
+   * running transient domain after undefine. Never unlink its backing volume. */
+  if (volume && !volume_unused (connection, volume, NULL, NULL, error))
+    return FALSE;
+  if (volume && virStorageVolDelete (volume, 0) < 0)
+    {
+      pirwa_libvirt_error (error, "Cannot remove rollback storage");
+      return FALSE;
+    }
+  return TRUE;
+}
+
 gboolean
 pirwa_provision_remove (virConnectPtr connection, virDomainPtr domain, const char *uuid,
-                        gboolean delete_disk, GError **error)
+                        gboolean delete_disk, GCancellable *cancellable, GError **error)
 {
+  if (g_cancellable_set_error_if_cancelled (cancellable, error))
+    return FALSE;
   if (virDomainIsActive (domain) != 0 || virDomainIsPersistent (domain) != 1)
     {
       g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_BUSY,
@@ -443,45 +549,19 @@ pirwa_provision_remove (virConnectPtr connection, virDomainPtr domain, const cha
                                "The owned storage volume has changed; it was kept");
           goto out;
         }
-      virDomainPtr *domains = NULL;
-      int count = virConnectListAllDomains (connection, &domains, 0);
-      if (count < 0)
-        {
-          pirwa_libvirt_error (error, "Cannot check shared disks");
-          goto out;
-        }
-      gboolean shared = FALSE;
-      for (int i = 0; i < count; i++)
-        {
-          char other_uuid[VIR_UUID_STRING_BUFLEN];
-          if (virDomainGetUUIDString (domains[i], other_uuid) < 0)
-            shared = TRUE;
-          else if (!g_str_equal (other_uuid, uuid))
-            {
-              g_autofree char *other = virDomainGetXMLDesc (domains[i], 0);
-              if (references_volume (other, path, details->volume_name))
-                shared = TRUE;
-              if (virDomainIsPersistent (domains[i]) == 1)
-                {
-                  g_autofree char *inactive
-                      = virDomainGetXMLDesc (domains[i], VIR_DOMAIN_XML_INACTIVE);
-                  if (references_volume (inactive, path, details->volume_name))
-                    shared = TRUE;
-                }
-            }
-          virDomainFree (domains[i]);
-        }
-      free (domains);
-      if (shared)
-        {
-          g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_BUSY,
-                               "Another VM may use this disk; storage was kept");
-          goto out;
-        }
+      if (!volume_unused (connection, volume, uuid, cancellable, error))
+        goto out;
     }
+  if (g_cancellable_set_error_if_cancelled (cancellable, error))
+    goto out;
   if (virDomainUndefineFlags (domain, details->has_nvram ? VIR_DOMAIN_UNDEFINE_NVRAM : 0) < 0)
     {
       pirwa_libvirt_error (error, "Cannot remove virtual machine");
+      goto out;
+    }
+  if (volume && !volume_unused (connection, volume, NULL, NULL, error))
+    {
+      g_prefix_error (error, "Definition removed; storage was kept. ");
       goto out;
     }
   if (volume && virStorageVolDelete (volume, 0) < 0)
