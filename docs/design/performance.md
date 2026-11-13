@@ -74,6 +74,16 @@ with keyboard focus on the collection; focusing search deliberately activates
 the normal text cursor animation. The connecting spinner stops when its page
 is hidden. The profiling harness adds no tick callback during idle sampling.
 
+For measurements without interference from the active desktop, the virtual
+GNOME wrapper accepts a command after `--`. For example, enter this as one line:
+
+    ./scripts/test-gnome.py --output build/qa/gnome-profile -- env GTK_A11Y=test ./scripts/profile-ui.py --domains 100 --launches 30 --idle-seconds 60 --output build/qa/gnome-profile/native-ui.json
+
+Keep virtual-desktop results separate from physical-display results. This
+example explicitly uses GTK's test accessibility backend because AT-SPI service
+activation is unavailable in the isolated host session; that setting is
+recorded in the raw profile. It is not a production accessibility measurement.
+
 ## Design constraints
 
 Bulk RPCs, lifecycle events, virtualized rows, lazy details, bounded background

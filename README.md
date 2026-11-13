@@ -71,6 +71,14 @@ On a desktop, exercise the actual window and test-driver controls:
     ./build/tests/test-ui --exercise
     ./build/tests/test-ui --exercise --large-text --dark --width 720
 
+For an isolated virtual GNOME desktop with a 1280×800, 60 Hz monitor:
+
+    ./scripts/test-gnome.py --output build/qa/gnome
+
+This requires GNOME Shell with headless support and dbus-run-session. It runs
+the light, large-text/dark, and empty-collection cases, saves screenshots/logs,
+and tears down its private compositor and settings directories.
+
 The desktop tool also measures startup, idle CPU/PSS, and scrolling. See the
 [performance workflow](docs/design/performance.md) for commands and measurement limits.
 

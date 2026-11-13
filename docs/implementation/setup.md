@@ -63,6 +63,22 @@ detail request pending. Add `--large-text --dark --width 720` for the narrow,
 screen-reader certification. `--snapshot FILE.png` captures only Pirwa's window.
 This executable is deliberately excluded from the headless Meson test command.
 
+`./scripts/test-gnome.py --output build/qa/gnome` runs the three UI variants in
+one disposable GNOME Shell Wayland desktop (1280×800 at 60 Hz). Install
+gnome-shell and dbus-run-session first. Runtime, configuration, data, cache,
+D-Bus, and GSettings are isolated; no settings are written to your desktop.
+The wrapper disables GVFS FUSE mounting in the test session so teardown cannot
+leave an orphan mount. The result directory contains report.json, app-only PNG
+screenshots, per-case stdout/stderr, the compositor log, and the session log.
+Use `--build build-sanitize` with the sanitizer environment to exercise that
+binary. An optional command after `--` runs inside the virtual desktop instead
+of the default matrix.
+
+This is GNOME Shell and its compositor with a virtual monitor, not a complete
+logged-in hardware session. Missing authentication/camera/PipeWire services and
+the host's AT-SPI activation failure can appear in session logs. The UI exercise
+uses GTK's test accessibility backend; it does not certify screen-reader access.
+
 The same tool supports profiling without `--exercise`; the Python standard-library
 wrapper `scripts/profile-ui.py` creates isolated 0–1,000-domain fixtures and saves
 raw measurements. See the performance design for methodology.
