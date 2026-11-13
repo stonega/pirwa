@@ -173,6 +173,23 @@ verified ownership path. The guest, volume, and empty pool are absent, and both
 existing Boxes definitions/states match their baseline. See [cleanup.json](cleanup.json)
 and the [acceptance summary](report.json).
 
+## Development RPM
+
+The unsigned Fedora 45 RPM was rebuilt from `b10b0fd`; all nine package-time
+checks passed. Digest verification, runtime dependency declarations, expected
+payload files, and desktop metadata passed. Its extracted binary launched in
+the private GNOME desktop and paused/resumed the synthetic test domain.
+See the [package report](rpm-validation.json), [paused](rpm-paused.png), and
+[resumed](rpm-resumed.png) screenshots.
+
+Artifact: `build/pirwa-0.1.0-0.1.dev.fc45.x86_64.rpm`. Its SHA-256 and full runtime
+requirements are in the package report. This is a staged payload smoke test;
+the RPM was not installed system-wide. As documented for this host, BuildRequires
+checks used `--nodeps` with matching development RPMs extracted into a temporary
+pkg-config prefix. A normal developer installation still needs the declared
+BuildRequires and normal runtime packages. This is a development candidate,
+not a signed release.
+
 ## Remaining acceptance
 
 Cold startup, physical presentation/scrolling traces, real-daemon large
