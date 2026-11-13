@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Pirwa
+GenericName=Virtual Machine Manager
+Comment=Manage local virtual machines
+Exec=pirwa
+Icon=io.github.pirwa.Pirwa
+Terminal=false
+Categories=GNOME;GTK;System;Emulator;
+Keywords=virtual;machine;VM;KVM;QEMU;libvirt;
+StartupNotify=true

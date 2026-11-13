@@ -1,0 +1,26 @@
+project('pirwa', 'c',
+  version: '0.1.0-dev',
+  meson_version: '>= 1.3.0',
+  license: 'GPL-3.0-or-later',
+  default_options: ['c_std=c17', 'warning_level=3', 'werror=true', 'buildtype=debugoptimized'],
+)
+
+gnome = import('gnome')
+glib_dep = dependency('glib-2.0', version: '>= 2.76')
+gio_dep = dependency('gio-2.0', version: '>= 2.76')
+gtk_dep = dependency('gtk4', version: '>= 4.12')
+adwaita_dep = dependency('libadwaita-1', version: '>= 1.4')
+libvirt_dep = dependency('libvirt', version: '>= 9.0', include_type: 'system')
+
+config = configuration_data()
+config.set_quoted('PIRWA_VERSION', meson.project_version())
+# Development identity; choose a controlled reverse-DNS ID before distribution.
+config.set_quoted('PIRWA_APPLICATION_ID', 'io.github.pirwa.Pirwa')
+configure_file(output: 'config.h', configuration: config)
+project_includes = include_directories('.', 'src')
+
+subdir('src')
+subdir('data')
+subdir('tests')
+
+gnome.post_install(gtk_update_icon_cache: true, update_desktop_database: true)

@@ -1,0 +1,7 @@
+/build*/
+/.codegraph/
+/.cache/
+/.env
+/.env.*
+*.swp
+compile_commands.json
