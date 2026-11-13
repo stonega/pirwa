@@ -8,6 +8,9 @@ libadwaita, libvirt/libvirt-glib, libxml2, libosinfo, and Meson.
 ISO eject, and installed-disk boot passed in virtual GNOME. Release acceptance
 remains open for the broader console/audio/accessibility matrix and the complete
 performance contract. See the [installation evidence](docs/research/linux-install/README.md).
+The [console/performance follow-up](docs/research/console-performance/README.md)
+records resize, input, digital audio, reconnect, startup/idle measurements, and
+the remaining storage measurement uncertainty.
 
 ## Features
 

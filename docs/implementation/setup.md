@@ -101,6 +101,14 @@ raw measurements. See the performance design for methodology.
 normal desktop. `PIRWA_LIBVIRT_URI` affects only a newly launched application
 process; an already-running single-instance app keeps its connection.
 
+Extended opt-in checks use `scripts/console-session.py`, `scripts/profile-guest.py`,
+and the non-default `qa-vm` executable. See the
+[console/performance record](../research/console-performance/README.md) for their
+private desktop/audio setup, measurements, identity guards, and cleanup.
+These tools require `PIRWA_RUN_KVM_TESTS=1` and disposable guests. They add no
+runtime dependency to the application. In `qa-vm`, `stop` means force stop and
+is intended only for test-resource cleanup.
+
 `scripts/benchmark.sh [build-directory]` runs the headless inventory benchmark.
 It uses the built-in test driver and does not touch real guests.
 

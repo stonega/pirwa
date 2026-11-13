@@ -41,6 +41,9 @@ turns a slow shutdown into Force Stop. Force Stop has a separate confirmation.
 Open Console launches virt-viewer in another window. Install virt-viewer first.
 Console input, fullscreen, and guest resize are handled by the viewer. Guest
 agents may be needed for the best resize/integration experience.
+The viewer's default release shortcut is Ctrl+Alt. To capture input again, move
+outside the guest display, move back, and click it. GNOME may ask whether to
+allow the viewer to inhibit desktop shortcuts.
 
 ## Create or import
 

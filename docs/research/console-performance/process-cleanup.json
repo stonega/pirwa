@@ -1,0 +1,15 @@
+{
+  "signalled": [
+    {
+      "pid": 1825022,
+      "name": "ibus-extension-",
+      "signal": "SIGTERM"
+    },
+    {
+      "pid": 1826848,
+      "name": "sleep",
+      "signal": "SIGTERM"
+    }
+  ],
+  "remaining": {}
+}

@@ -14,6 +14,14 @@ Native desktop measurements and remaining gaps are recorded in
 [implementation validation](../research/v0.1-validation.md). Partial measurements
 do not establish the complete release budgets below.
 
+The [console/performance follow-up](../research/console-performance/README.md)
+records 30 warm launches each at 100 and 1,000 domains, a 60-second idle sample,
+scroll CPU work, and 30 paired real-KVM starts. The 100-domain run measured
+p95 496.378 ms through after-paint, 96.1 MiB idle PSS, and 0.0019% idle CPU.
+Start backend overhead was p95 27.127 ms over persistent direct libvirt.
+Presentation and cold-cache gates remain separate. Guest storage results are
+inconclusive: substantial variation also occurred with the manager closed.
+
 ## Provisional release budgets
 
 | Measure | Target | Conditions |

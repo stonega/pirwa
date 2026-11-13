@@ -1,0 +1,22 @@
+{
+  "guest_xml_unchanged_during_workloads": true,
+  "graceful_final_shutdown_timed_out_seconds": 30,
+  "filesystem_unmounted_before_force_stop": true,
+  "explicit_force_stop": true,
+  "removed_with_pirwa_ownership_checks": true,
+  "vm_absent": true,
+  "owned_disk_absent": true,
+  "pool_removed": true,
+  "baseline": {
+    "boxes-unknown": {
+      "state": "shut off",
+      "xml_sha256": "e92d40463112e63ec243da74c5f9e559712c61b52f84ba96a23b2c7e1a3d84a9",
+      "unchanged": true
+    },
+    "boxes-unknown-3": {
+      "state": "shut off",
+      "xml_sha256": "94f777d3c9c253ae0d354cf0f2606dbaba54a9776533ff3a7f04167b51938d39",
+      "unchanged": true
+    }
+  }
+}

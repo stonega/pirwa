@@ -1,0 +1,10 @@
+{
+  "uuid": "4036e883-e4cc-4bc6-ad73-7016bf1b3e01",
+  "viewer_pid": 1803670,
+  "guest_marker_before": "before",
+  "guest_marker_after": "beforeafter",
+  "host_window_menu_after_release": true,
+  "recapture": "Move outside the display and click back into it after host window controls",
+  "injected_events": true,
+  "passed": true
+}

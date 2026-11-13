@@ -1,0 +1,29 @@
+{
+  "source_commit": "415f466",
+  "application_source_changed": false,
+  "release_binary_sha256": "ef0902622206b7cbd9ac3ccf790ea2fc592b1a437bcd5659a260bf3b7f4a07b0",
+  "qemu_version": "QEMU emulator version 11.1.3 (qemu-11.1.3-1.fc45)",
+  "fixture_uuid": "4036e883-e4cc-4bc6-ad73-7016bf1b3e01",
+  "guest_cpus": 4,
+  "guest_memory_mib": 4096,
+  "guest_disk_gib": 16,
+  "guest_xml_sha256": "7564329ca59eb52a0b848ff13b6a4ab71c4d08c84c2f15e1bd17d546d4314cbc",
+  "console": {
+    "guest_framebuffer_resize": "passed",
+    "injected_input_release_recapture": "passed",
+    "digital_audio_transport": "passed",
+    "same_viewer_reconnect": "passed"
+  },
+  "storage_acceptance": "inconclusive; A/A control exceeds provisional thresholds",
+  "desktop_cleanup": {
+    "initial_outer_exit_code": 143,
+    "fixed_v2_outer_exit_code": 0,
+    "fixed_smoke_outer_exit_code": 0,
+    "private_processes_absent_after_explicit_reaping": true,
+    "private_mounts_absent": true,
+    "private_directories_removed": true
+  },
+  "default_checks_passed": 9,
+  "address_undefined_checks_passed_with_detect_leaks_zero": 9,
+  "dependency_leak_finding_remains": true
+}

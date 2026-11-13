@@ -1,0 +1,527 @@
+{
+  "source_commit": "415f4661dce085ea222df048af9545ad5ca7f559",
+  "source_dirty": true,
+  "scope": "Alternating manager-absent/manager-idle samples in the same running VM; warm host caches, guest O_DIRECT. Separate from start latency and cold boot.",
+  "workload_sha256": "db8c228cd8656645f37189a547c03bfcca348b3c148e4c79930530bd059ee2d5",
+  "parameters": {
+    "read_passes": 8,
+    "cpu_iterations": 24000000,
+    "settle_seconds": 5,
+    "pairs": 12
+  },
+  "host_load_at_start": [
+    3.2021484375,
+    4.1494140625,
+    3.75
+  ],
+  "samples": [
+    {
+      "cpu_seconds": 3.1189380540000116,
+      "cpu_digest": "e1cb905ff44a54ea93fe63d418e3939a07b4c6bb4d6f86b55cee327b5c09c975",
+      "write_mib_s": 2016.9835133067377,
+      "read_mib_s": 2413.9246998791073,
+      "write_seconds": 0.5076888300000064,
+      "read_seconds": 3.393643554999983,
+      "write_bytes": 1073741824,
+      "read_bytes": 8589934592,
+      "guest_direct_io": true,
+      "pair": 0,
+      "manager_present": false,
+      "host_load": [
+        3.1669921875,
+        4.07080078125,
+        3.734375
+      ]
+    },
+    {
+      "cpu_seconds": 3.1491073120000124,
+      "cpu_digest": "e1cb905ff44a54ea93fe63d418e3939a07b4c6bb4d6f86b55cee327b5c09c975",
+      "write_mib_s": 1307.0249313563024,
+      "read_mib_s": 2421.588948373649,
+      "write_seconds": 0.7834586590000185,
+      "read_seconds": 3.3829027859999883,
+      "write_bytes": 1073741824,
+      "read_bytes": 8589934592,
+      "guest_direct_io": true,
+      "pair": 0,
+      "manager_present": true,
+      "host_load": [
+        3.22119140625,
+        4.0517578125,
+        3.7314453125
+      ]
+    },
+    {
+      "cpu_seconds": 3.2999062049999566,
+      "cpu_digest": "e1cb905ff44a54ea93fe63d418e3939a07b4c6bb4d6f86b55cee327b5c09c975",
+      "write_mib_s": 1676.1870983741671,
+      "read_mib_s": 2268.3341223288635,
+      "write_seconds": 0.6109103219999952,
+      "read_seconds": 3.6114609040000687,
+      "write_bytes": 1073741824,
+      "read_bytes": 8589934592,
+      "guest_direct_io": true,
+      "pair": 1,
+      "manager_present": true,
+      "host_load": [
+        3.412109375,
+        4.0498046875,
+        3.73583984375
+      ]
+    },
+    {
+      "cpu_seconds": 3.1613761589999285,
+      "cpu_digest": "e1cb905ff44a54ea93fe63d418e3939a07b4c6bb4d6f86b55cee327b5c09c975",
+      "write_mib_s": 1073.785224023445,
+      "read_mib_s": 2362.8530061758383,
+      "write_seconds": 0.9536357709999947,
+      "read_seconds": 3.4669951869999522,
+      "write_bytes": 1073741824,
+      "read_bytes": 8589934592,
+      "guest_direct_io": true,
+      "pair": 1,
+      "manager_present": false,
+      "host_load": [
+        2.88330078125,
+        3.89990234375,
+        3.69140625
+      ]
+    },
+    {
+      "cpu_seconds": 3.0401140139999825,
+      "cpu_digest": "e1cb905ff44a54ea93fe63d418e3939a07b4c6bb4d6f86b55cee327b5c09c975",
+      "write_mib_s": 1166.9575819363122,
+      "read_mib_s": 2563.1141452397287,
+      "write_seconds": 0.877495477000025,
+      "read_seconds": 3.196112048000032,
+      "write_bytes": 1073741824,
+      "read_bytes": 8589934592,
+      "guest_direct_io": true,
+      "pair": 2,
+      "manager_present": false,
+      "host_load": [
+        2.47802734375,
+        3.7578125,
+        3.6474609375
+      ]
+    },
+    {
+      "cpu_seconds": 2.9451541689999203,
+      "cpu_digest": "e1cb905ff44a54ea93fe63d418e3939a07b4c6bb4d6f86b55cee327b5c09c975",
+      "write_mib_s": 987.8015832632431,
+      "read_mib_s": 2630.201413850587,
+      "write_seconds": 1.0366454329999897,
+      "read_seconds": 3.114590372000066,
+      "write_bytes": 1073741824,
+      "read_bytes": 8589934592,
+      "guest_direct_io": true,
+      "pair": 2,
+      "manager_present": true,
+      "host_load": [
+        2.2568359375,
+        3.6669921875,
+        3.61865234375
+      ]
+    },
+    {
+      "cpu_seconds": 3.093307275999905,
+      "cpu_digest": "e1cb905ff44a54ea93fe63d418e3939a07b4c6bb4d6f86b55cee327b5c09c975",
+      "write_mib_s": 1024.9187504918477,
+      "read_mib_s": 1995.7321035091318,
+      "write_seconds": 0.999103587000036,
+      "read_seconds": 4.104759344000058,
+      "write_bytes": 1073741824,
+      "read_bytes": 8589934592,
+      "guest_direct_io": true,
+      "pair": 3,
+      "manager_present": true,
+      "host_load": [
+        2.83984375,
+        3.71875,
+        3.63623046875
+      ]
+    },
+    {
+      "cpu_seconds": 3.75597188200004,
+      "cpu_digest": "e1cb905ff44a54ea93fe63d418e3939a07b4c6bb4d6f86b55cee327b5c09c975",
+      "write_mib_s": 1256.5722039493808,
+      "read_mib_s": 2539.6381999426662,
+      "write_seconds": 0.8149153680000154,
+      "read_seconds": 3.225656316000027,
+      "write_bytes": 1073741824,
+      "read_bytes": 8589934592,
+      "guest_direct_io": true,
+      "pair": 3,
+      "manager_present": false,
+      "host_load": [
+        2.4375,
+        3.5849609375,
+        3.59375
+      ]
+    },
+    {
+      "cpu_seconds": 3.0674026550000235,
+      "cpu_digest": "e1cb905ff44a54ea93fe63d418e3939a07b4c6bb4d6f86b55cee327b5c09c975",
+      "write_mib_s": 1224.1527352606265,
+      "read_mib_s": 2671.394052367291,
+      "write_seconds": 0.8364969259999953,
+      "read_seconds": 3.0665636889999632,
+      "write_bytes": 1073741824,
+      "read_bytes": 8589934592,
+      "guest_direct_io": true,
+      "pair": 4,
+      "manager_present": false,
+      "host_load": [
+        2.45068359375,
+        3.54931640625,
+        3.58154296875
+      ]
+    },
+    {
+      "cpu_seconds": 3.302628638999977,
+      "cpu_digest": "e1cb905ff44a54ea93fe63d418e3939a07b4c6bb4d6f86b55cee327b5c09c975",
+      "write_mib_s": 1312.8907322762825,
+      "read_mib_s": 2732.437235900842,
+      "write_seconds": 0.7799582820000523,
+      "read_seconds": 2.9980560550000064,
+      "write_bytes": 1073741824,
+      "read_bytes": 8589934592,
+      "guest_direct_io": true,
+      "pair": 4,
+      "manager_present": true,
+      "host_load": [
+        2.2705078125,
+        3.45654296875,
+        3.5498046875
+      ]
+    },
+    {
+      "cpu_seconds": 3.033466166999915,
+      "cpu_digest": "e1cb905ff44a54ea93fe63d418e3939a07b4c6bb4d6f86b55cee327b5c09c975",
+      "write_mib_s": 1318.9979263098942,
+      "read_mib_s": 2831.8142843040628,
+      "write_seconds": 0.7763469369999711,
+      "read_seconds": 2.8928450729999895,
+      "write_bytes": 1073741824,
+      "read_bytes": 8589934592,
+      "guest_direct_io": true,
+      "pair": 5,
+      "manager_present": true,
+      "host_load": [
+        2.15478515625,
+        3.3916015625,
+        3.52734375
+      ]
+    },
+    {
+      "cpu_seconds": 3.0873108680000314,
+      "cpu_digest": "e1cb905ff44a54ea93fe63d418e3939a07b4c6bb4d6f86b55cee327b5c09c975",
+      "write_mib_s": 1012.0248986232917,
+      "read_mib_s": 2406.140562826387,
+      "write_seconds": 1.0118328129999554,
+      "read_seconds": 3.4046223760000203,
+      "write_bytes": 1073741824,
+      "read_bytes": 8589934592,
+      "guest_direct_io": true,
+      "pair": 5,
+      "manager_present": false,
+      "host_load": [
+        2.3603515625,
+        3.373046875,
+        3.51904296875
+      ]
+    },
+    {
+      "cpu_seconds": 2.920343819999971,
+      "cpu_digest": "e1cb905ff44a54ea93fe63d418e3939a07b4c6bb4d6f86b55cee327b5c09c975",
+      "write_mib_s": 1295.8705476549912,
+      "read_mib_s": 2821.2864485210343,
+      "write_seconds": 0.7902023870000221,
+      "read_seconds": 2.903639935000001,
+      "write_bytes": 1073741824,
+      "read_bytes": 8589934592,
+      "guest_direct_io": true,
+      "pair": 6,
+      "manager_present": false,
+      "host_load": [
+        2.57470703125,
+        3.37109375,
+        3.51611328125
+      ]
+    },
+    {
+      "cpu_seconds": 2.7740326900000127,
+      "cpu_digest": "e1cb905ff44a54ea93fe63d418e3939a07b4c6bb4d6f86b55cee327b5c09c975",
+      "write_mib_s": 1163.2327905945801,
+      "read_mib_s": 2443.548495819148,
+      "write_seconds": 0.8803053079999472,
+      "read_seconds": 3.352501501000006,
+      "write_bytes": 1073741824,
+      "read_bytes": 8589934592,
+      "guest_direct_io": true,
+      "pair": 6,
+      "manager_present": true,
+      "host_load": [
+        2.33203125,
+        3.29248046875,
+        3.48876953125
+      ]
+    },
+    {
+      "cpu_seconds": 3.0544334329999856,
+      "cpu_digest": "e1cb905ff44a54ea93fe63d418e3939a07b4c6bb4d6f86b55cee327b5c09c975",
+      "write_mib_s": 1213.095909124301,
+      "read_mib_s": 2778.461228817141,
+      "write_seconds": 0.8441212209999094,
+      "read_seconds": 2.948394570000005,
+      "write_bytes": 1073741824,
+      "read_bytes": 8589934592,
+      "guest_direct_io": true,
+      "pair": 7,
+      "manager_present": true,
+      "host_load": [
+        2.337890625,
+        3.24560546875,
+        3.4697265625
+      ]
+    },
+    {
+      "cpu_seconds": 3.040843457000051,
+      "cpu_digest": "e1cb905ff44a54ea93fe63d418e3939a07b4c6bb4d6f86b55cee327b5c09c975",
+      "write_mib_s": 1294.634013709389,
+      "read_mib_s": 2735.3579633126874,
+      "write_seconds": 0.790957126999956,
+      "read_seconds": 2.99485482700004,
+      "write_bytes": 1073741824,
+      "read_bytes": 8589934592,
+      "guest_direct_io": true,
+      "pair": 7,
+      "manager_present": false,
+      "host_load": [
+        2.13818359375,
+        3.17138671875,
+        3.44287109375
+      ]
+    },
+    {
+      "cpu_seconds": 3.0623055460000614,
+      "cpu_digest": "e1cb905ff44a54ea93fe63d418e3939a07b4c6bb4d6f86b55cee327b5c09c975",
+      "write_mib_s": 1013.4683972110098,
+      "read_mib_s": 2513.7931233370527,
+      "write_seconds": 1.0103916439999239,
+      "read_seconds": 3.2588202759999376,
+      "write_bytes": 1073741824,
+      "read_bytes": 8589934592,
+      "guest_direct_io": true,
+      "pair": 8,
+      "manager_present": false,
+      "host_load": [
+        2.10107421875,
+        3.11328125,
+        3.41943359375
+      ]
+    },
+    {
+      "cpu_seconds": 3.784704302000023,
+      "cpu_digest": "e1cb905ff44a54ea93fe63d418e3939a07b4c6bb4d6f86b55cee327b5c09c975",
+      "write_mib_s": 1236.2382134117006,
+      "read_mib_s": 2759.8676384863606,
+      "write_seconds": 0.8283193230000734,
+      "read_seconds": 2.9682582910000974,
+      "write_bytes": 1073741824,
+      "read_bytes": 8589934592,
+      "guest_direct_io": true,
+      "pair": 8,
+      "manager_present": true,
+      "host_load": [
+        2.0908203125,
+        3.05859375,
+        3.39599609375
+      ]
+    },
+    {
+      "cpu_seconds": 3.246253003999982,
+      "cpu_digest": "e1cb905ff44a54ea93fe63d418e3939a07b4c6bb4d6f86b55cee327b5c09c975",
+      "write_mib_s": 1200.8870671307718,
+      "read_mib_s": 2568.974043691191,
+      "write_seconds": 0.8527029959999481,
+      "read_seconds": 3.188821630999996,
+      "write_bytes": 1073741824,
+      "read_bytes": 8589934592,
+      "guest_direct_io": true,
+      "pair": 9,
+      "manager_present": true,
+      "host_load": [
+        1.85498046875,
+        2.95751953125,
+        3.3564453125
+      ]
+    },
+    {
+      "cpu_seconds": 3.231603011000061,
+      "cpu_digest": "e1cb905ff44a54ea93fe63d418e3939a07b4c6bb4d6f86b55cee327b5c09c975",
+      "write_mib_s": 1293.8431268149254,
+      "read_mib_s": 2644.208821861187,
+      "write_seconds": 0.7914406150000559,
+      "read_seconds": 3.0980911689999857,
+      "write_bytes": 1073741824,
+      "read_bytes": 8589934592,
+      "guest_direct_io": true,
+      "pair": 9,
+      "manager_present": false,
+      "host_load": [
+        1.87744140625,
+        2.92529296875,
+        3.341796875
+      ]
+    },
+    {
+      "cpu_seconds": 3.0791093990000036,
+      "cpu_digest": "e1cb905ff44a54ea93fe63d418e3939a07b4c6bb4d6f86b55cee327b5c09c975",
+      "write_mib_s": 1218.561833570002,
+      "read_mib_s": 2491.0269579774326,
+      "write_seconds": 0.8403348699999924,
+      "read_seconds": 3.2886035109999057,
+      "write_bytes": 1073741824,
+      "read_bytes": 8589934592,
+      "guest_direct_io": true,
+      "pair": 10,
+      "manager_present": false,
+      "host_load": [
+        2.1328125,
+        2.9296875,
+        3.33642578125
+      ]
+    },
+    {
+      "cpu_seconds": 3.2017802879998953,
+      "cpu_digest": "e1cb905ff44a54ea93fe63d418e3939a07b4c6bb4d6f86b55cee327b5c09c975",
+      "write_mib_s": 1065.4564435485054,
+      "read_mib_s": 2556.439403980367,
+      "write_seconds": 0.961090438000042,
+      "read_seconds": 3.2044569439999577,
+      "write_bytes": 1073741824,
+      "read_bytes": 8589934592,
+      "guest_direct_io": true,
+      "pair": 10,
+      "manager_present": true,
+      "host_load": [
+        2.529296875,
+        2.98193359375,
+        3.34716796875
+      ]
+    },
+    {
+      "cpu_seconds": 3.5419683669999813,
+      "cpu_digest": "e1cb905ff44a54ea93fe63d418e3939a07b4c6bb4d6f86b55cee327b5c09c975",
+      "write_mib_s": 1150.8896150818173,
+      "read_mib_s": 2519.4333184414,
+      "write_seconds": 0.8897464939999509,
+      "read_seconds": 3.251524833000076,
+      "write_bytes": 1073741824,
+      "read_bytes": 8589934592,
+      "guest_direct_io": true,
+      "pair": 11,
+      "manager_present": true,
+      "host_load": [
+        2.521484375,
+        2.9658203125,
+        3.337890625
+      ]
+    },
+    {
+      "cpu_seconds": 3.458707564000065,
+      "cpu_digest": "e1cb905ff44a54ea93fe63d418e3939a07b4c6bb4d6f86b55cee327b5c09c975",
+      "write_mib_s": 1277.6365719726812,
+      "read_mib_s": 2717.1824693285334,
+      "write_seconds": 0.8014798749999272,
+      "read_seconds": 3.0148876980000523,
+      "write_bytes": 1073741824,
+      "read_bytes": 8589934592,
+      "guest_direct_io": true,
+      "pair": 11,
+      "manager_present": false,
+      "host_load": [
+        2.33740234375,
+        2.90185546875,
+        3.310546875
+      ]
+    }
+  ],
+  "warmup": {
+    "cpu_seconds": 3.776677393,
+    "cpu_digest": "e1cb905ff44a54ea93fe63d418e3939a07b4c6bb4d6f86b55cee327b5c09c975",
+    "write_mib_s": 1525.1337802224182,
+    "read_mib_s": 1671.5756130914222,
+    "write_seconds": 0.6714165099999718,
+    "read_seconds": 4.900765443000012,
+    "write_bytes": 1073741824,
+    "read_bytes": 8589934592,
+    "guest_direct_io": true
+  },
+  "ratios": {
+    "cpu_seconds": {
+      "paired_ratios": [
+        1.009672926322249,
+        1.0438195390338652,
+        0.968764380361143,
+        0.8235704028627422,
+        1.07668572093609,
+        0.9825593523612356,
+        0.9498993478103686,
+        1.0044691468640552,
+        1.2359002866136424,
+        1.0045333516988484,
+        1.0398397306181233,
+        1.0240728079663444
+      ],
+      "median_ratio": 1.0071031390105487,
+      "minimum_ratio": 0.8235704028627422,
+      "maximum_ratio": 1.2359002866136424
+    },
+    "write_mib_s": {
+      "paired_ratios": [
+        0.6480097247862499,
+        1.5610077889631766,
+        0.8464759975458588,
+        0.8156465241476367,
+        1.0724893180888604,
+        1.3033255684758283,
+        0.8976458278950529,
+        0.9370184131409736,
+        1.2198093367427507,
+        0.9281550771050698,
+        0.8743556659960816,
+        0.9007957664399309
+      ],
+      "median_ratio": 0.9144754217725004,
+      "minimum_ratio": 0.6480097247862499,
+      "maximum_ratio": 1.5610077889631766
+    },
+    "read_mib_s": {
+      "paired_ratios": [
+        1.0031750155648707,
+        0.959997983962638,
+        1.0261741244475804,
+        0.7858332354404602,
+        1.0228506848248229,
+        1.1769114107688106,
+        0.8661114496544996,
+        1.0157578152777682,
+        1.0978897240448509,
+        0.9715473386413407,
+        1.0262592284653738,
+        0.9272227194458527
+      ],
+      "median_ratio": 1.0094664154213193,
+      "minimum_ratio": 0.7858332354404602,
+      "maximum_ratio": 1.1769114107688106
+    }
+  },
+  "host_load_at_end": [
+    2.33740234375,
+    2.90185546875,
+    3.310546875
+  ],
+  "completed": true
+}

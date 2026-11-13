@@ -15,6 +15,7 @@ test('scale-1000', scale_benchmark, args: ['1000'], timeout: 30)
 
 # Never part of the default test suite: requires explicit environment opt-in.
 executable('test-kvm', 'test-kvm.c', dependencies: core_dep)
+executable('qa-vm', 'qa-vm.c', dependencies: core_dep)
 
 provision_test = executable('test-provision', 'test-provision.c', dependencies: core_dep)
 test('provision', provision_test)

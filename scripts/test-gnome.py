@@ -6,12 +6,59 @@ import os
 from pathlib import Path
 import runpy
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
 import time
 
 ROOT = Path(__file__).resolve().parent.parent
+
+
+def session_processes(runtime):
+    """Only this user's processes carrying this run's exact private runtime."""
+    processes = {}
+    for proc in Path('/proc').iterdir():
+        if not proc.name.isdigit() or int(proc.name) == os.getpid():
+            continue
+        try:
+            if proc.stat().st_uid != os.getuid():
+                continue
+            env = dict(item.split('=', 1) for item in (proc / 'environ').read_text().split('\0')
+                       if '=' in item)
+            if env.get('XDG_RUNTIME_DIR') == str(runtime):
+                processes[int(proc.name)] = (proc / 'comm').read_text().strip()
+        except (FileNotFoundError, PermissionError, ProcessLookupError):
+            continue
+    return processes
+
+
+def terminate_session_processes(base, output):
+    """Some desktop helpers survive losing their bus; reap only our fixture."""
+    runtime = base / 'runtime'
+    signalled = []
+    for sig in (signal.SIGTERM, signal.SIGKILL):
+        for pid, name in session_processes(runtime).items():
+            try:
+                descriptor = os.pidfd_open(pid)
+                try:
+                    if pid in session_processes(runtime):
+                        signal.pidfd_send_signal(descriptor, sig)
+                        signalled.append({'pid': pid, 'name': name, 'signal': sig.name})
+                finally:
+                    os.close(descriptor)
+            except ProcessLookupError:
+                pass
+        deadline = time.monotonic() + 3
+        while session_processes(runtime) and time.monotonic() < deadline:
+            time.sleep(.05)
+        if not session_processes(runtime):
+            break
+    remaining = session_processes(runtime)
+    (output / 'process-cleanup.json').write_text(json.dumps(
+        {'signalled': signalled, 'remaining': remaining}, indent=2) + '\n')
+    if remaining:
+        raise RuntimeError(f'Test desktop processes remain: {remaining}')
 
 
 def unmount_session_filesystems(base, output):
@@ -77,7 +124,8 @@ def session(args):
         print(f"PASS {name}", flush=True)
 
     with (output / "gnome-shell.log").open("w") as log:
-        shell = subprocess.Popen(shell_args, stdout=log, stderr=subprocess.STDOUT)
+        shell = subprocess.Popen(shell_args, stdout=log, stderr=subprocess.STDOUT,
+                                 start_new_session=True)
         try:
             # Wait for compositor initialization, not merely socket creation.
             deadline = time.monotonic() + 30
@@ -163,9 +211,12 @@ def main():
         try:
             with (args.output / "session.log").open("w") as log:
                 result = subprocess.run(command, cwd=ROOT, env=env, stdout=log,
-                                        stderr=subprocess.STDOUT)
+                                        stderr=subprocess.STDOUT, start_new_session=True)
         finally:
-            unmount_session_filesystems(base, args.output)
+            try:
+                terminate_session_processes(base, args.output)
+            finally:
+                unmount_session_filesystems(base, args.output)
         code = result.returncode
     print(f"{'PASS' if code == 0 else 'FAIL'} virtual GNOME desktop: {args.output}")
     return code

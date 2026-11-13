@@ -1,0 +1,8 @@
+{
+  "samples": 30,
+  "scope": "Persistent production backend request completion versus persistent direct libvirt virDomainCreate; same domain, alternating order; guest boot excluded",
+  "direct_p50_ms": 176.8055,
+  "pirwa_p50_ms": 179.623,
+  "overhead_p50_ms": 1.543999999999997,
+  "overhead_p95_ms": 27.12700000000001
+}

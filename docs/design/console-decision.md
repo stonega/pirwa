@@ -24,6 +24,11 @@ Keyboard and pointer input and fullscreen switching worked there. Its minimal
 desktop needed private audio policy services before the normal viewer launch
 connected promptly. Install virt-viewer for desktop use.
 
-Audible output, microphone forwarding, clipboard, guest resolution changes,
-physical capture/release, and the broader Wayland/performance matrix remain
-release acceptance work.
+The [console/performance follow-up](../research/console-performance/README.md)
+also confirms guest framebuffer resizing, injected input release/recapture,
+same-process viewer reconnect after power cycling, and a guest-generated 440 Hz
+tone captured digitally at the host's private audio sink.
+
+Physical audio output/latency, microphone forwarding, clipboard, physical
+capture/release, and the broader Wayland/performance matrix remain release
+acceptance work.
