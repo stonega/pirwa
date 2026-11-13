@@ -67,8 +67,8 @@ This executable is deliberately excluded from the headless Meson test command.
 one disposable GNOME Shell Wayland desktop (1280×800 at 60 Hz). Install
 gnome-shell and dbus-run-session first. Runtime, configuration, data, cache,
 D-Bus, and GSettings are isolated; no settings are written to your desktop.
-The wrapper disables GVFS FUSE mounting in the test session so teardown cannot
-leave an orphan mount. The result directory contains report.json, app-only PNG
+The wrapper disables GVFS FUSE mounting and unmounts remaining test-session FUSE
+exports before removing its directories. The result directory contains report.json, app-only PNG
 screenshots, per-case stdout/stderr, the compositor log, and the session log.
 Use `--build build-sanitize` with the sanitizer environment to exercise that
 binary. An optional command after `--` runs inside the virtual desktop instead

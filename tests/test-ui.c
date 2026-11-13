@@ -431,7 +431,13 @@ static gboolean
 timeout (gpointer data)
 {
   Run *run = data;
-  g_error ("UI QA timed out at step %d", run->step);
+  g_error ("UI QA timed out at step %d (mapped=%d, new-enabled=%d, first-paint=%" G_GINT64_FORMAT
+           ", ready=%" G_GINT64_FORMAT ", frames=%" G_GINT64_FORMAT
+           ", renderer=%s, size=%dx%d, active=%d)",
+           run->step, gtk_widget_get_mapped (GTK_WIDGET (run->window)), enabled (run, "new"),
+           run->first_paint, run->ready, run->frame_count, run->renderer ? run->renderer : "none",
+           gtk_widget_get_width (GTK_WIDGET (run->window)),
+           gtk_widget_get_height (GTK_WIDGET (run->window)), gtk_window_is_active (run->window));
   return G_SOURCE_REMOVE;
 }
 

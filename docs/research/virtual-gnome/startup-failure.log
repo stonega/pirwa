@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/home/stone/Gnome/pirwa/./scripts/profile-ui.py", line 145, in <module>
+    main()
+    ~~~~^^
+  File "/home/stone/Gnome/pirwa/./scripts/profile-ui.py", line 115, in main
+    report["launch_samples"].append(run())
+                                    ~~~^^
+  File "/home/stone/Gnome/pirwa/./scripts/profile-ui.py", line 100, in run
+    raise RuntimeError(f"UI profiling failed ({result.returncode}): {result.stderr}\n{result.stdout}")
+RuntimeError: UI profiling failed (-6): 
+** (test-ui:1409483): ERROR **: 16:26:35.985: UI QA timed out at step 0
+
+

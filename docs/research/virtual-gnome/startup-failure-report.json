@@ -1,0 +1,39 @@
+{
+  "source_commit": "8cecaa7ffb7bac17c4091cb86230a443b5a75dde",
+  "source_dirty": false,
+  "gnome_shell": "GNOME Shell 51.1",
+  "shell_command": [
+    "gnome-shell",
+    "--headless",
+    "--wayland",
+    "--no-x11",
+    "--virtual-monitor",
+    "1280x800@60",
+    "--wayland-display",
+    "pirwa-qa-wayland"
+  ],
+  "isolation": "Private D-Bus, runtime/config/data/cache directories; memory GSettings",
+  "scope": "Programmed production GTK UI actions; not physical input, screen reader, or guest console certification",
+  "cases": [
+    {
+      "name": "command",
+      "command": [
+        "env",
+        "GTK_A11Y=test",
+        "./scripts/profile-ui.py",
+        "--domains",
+        "100",
+        "--launches",
+        "30",
+        "--idle-seconds",
+        "60",
+        "--output",
+        "build/qa/virtual-gnome-profile/native-ui.json"
+      ],
+      "returncode": 1
+    }
+  ],
+  "passed": false,
+  "error": "command failed (1); see /home/stone/Gnome/pirwa/build/qa/virtual-gnome-profile",
+  "shell_exitcode": 0
+}

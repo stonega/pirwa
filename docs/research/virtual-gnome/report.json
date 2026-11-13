@@ -1,0 +1,120 @@
+{
+  "source_commit": "79d3312bdf32fb5218186164f7eacc4fcd7ab621",
+  "source_dirty": true,
+  "gnome_shell": "GNOME Shell 51.1",
+  "shell_command": [
+    "gnome-shell",
+    "--headless",
+    "--wayland",
+    "--no-x11",
+    "--virtual-monitor",
+    "1280x800@60",
+    "--wayland-display",
+    "pirwa-qa-wayland"
+  ],
+  "isolation": "Private D-Bus, runtime/config/data/cache directories; memory GSettings",
+  "scope": "Programmed production GTK UI actions; not physical input, screen reader, or guest console certification",
+  "cases": [
+    {
+      "name": "light",
+      "command": [
+        "/home/stone/Gnome/pirwa/build/tests/test-ui",
+        "--exercise",
+        "--snapshot",
+        "/home/stone/Gnome/pirwa/build/qa/virtual-gnome/light.png"
+      ],
+      "returncode": 0,
+      "metrics": {
+        "main_monotonic_us": 273696513809,
+        "first_paint_monotonic_us": 273697228117,
+        "ready_monotonic_us": 273697228158,
+        "main_to_first_paint_ms": 714.308,
+        "sample_wall_ms": 0.0,
+        "sample_cpu_percent": 0.0,
+        "sample_frames": 0,
+        "pss_kib": -1,
+        "exercise_steps": 10,
+        "domains": 1,
+        "renderer": "GskVulkanRenderer",
+        "text_scale": 1,
+        "scroll": false,
+        "focus_kind": "not-sampled",
+        "initial_focus_kind": "not-sampled",
+        "active": false,
+        "refresh_millihz": 60000,
+        "surface_scale": 1,
+        "frame_work_us": []
+      }
+    },
+    {
+      "name": "large-dark",
+      "command": [
+        "/home/stone/Gnome/pirwa/build/tests/test-ui",
+        "--exercise",
+        "--large-text",
+        "--dark",
+        "--width",
+        "720",
+        "--snapshot",
+        "/home/stone/Gnome/pirwa/build/qa/virtual-gnome/large-dark.png"
+      ],
+      "returncode": 0,
+      "metrics": {
+        "main_monotonic_us": 273697960322,
+        "first_paint_monotonic_us": 273698581641,
+        "ready_monotonic_us": 273698581746,
+        "main_to_first_paint_ms": 621.319,
+        "sample_wall_ms": 0.0,
+        "sample_cpu_percent": 0.0,
+        "sample_frames": 0,
+        "pss_kib": -1,
+        "exercise_steps": 10,
+        "domains": 1,
+        "renderer": "GskVulkanRenderer",
+        "text_scale": 2,
+        "scroll": false,
+        "focus_kind": "not-sampled",
+        "initial_focus_kind": "not-sampled",
+        "active": false,
+        "refresh_millihz": 60000,
+        "surface_scale": 1,
+        "frame_work_us": []
+      }
+    },
+    {
+      "name": "empty",
+      "command": [
+        "/home/stone/Gnome/pirwa/build/tests/test-ui",
+        "--exercise",
+        "--uri",
+        "test:///tmp/pirwa-gnome-88pncb_5/node.xml",
+        "--snapshot",
+        "/home/stone/Gnome/pirwa/build/qa/virtual-gnome/empty.png"
+      ],
+      "returncode": 0,
+      "metrics": {
+        "main_monotonic_us": 273699375047,
+        "first_paint_monotonic_us": 273699715119,
+        "ready_monotonic_us": 273699715137,
+        "main_to_first_paint_ms": 340.072,
+        "sample_wall_ms": 0.0,
+        "sample_cpu_percent": 0.0,
+        "sample_frames": 0,
+        "pss_kib": -1,
+        "exercise_steps": 10,
+        "domains": 0,
+        "renderer": "GskVulkanRenderer",
+        "text_scale": 1,
+        "scroll": false,
+        "focus_kind": "not-sampled",
+        "initial_focus_kind": "not-sampled",
+        "active": false,
+        "refresh_millihz": 60000,
+        "surface_scale": 1,
+        "frame_work_us": []
+      }
+    }
+  ],
+  "passed": true,
+  "shell_exitcode": 0
+}
