@@ -28,6 +28,11 @@ application code retains strict warnings.
 For an existing build, use `meson setup build --reconfigure`. After changing
 dependency installations or compiler settings, use a fresh build directory.
 
+Once `build` is configured, `./scripts/run-dev.sh` rebuilds and launches Pirwa.
+It resolves the project directory automatically, forwards application arguments,
+and uses an installed virt-viewer or the temporary development viewer recorded
+in `/tmp/pirwa-build-deps-path`. Run it as your regular desktop user.
+
 For a sanitizer run:
 
 ```sh

@@ -52,6 +52,14 @@ sockets for your distribution.
 The default is qemu:///session. Choose System explicitly in the header to see
 system VMs. Run as your regular desktop user.
 
+For subsequent development runs, rebuild and launch with:
+
+    ./scripts/run-dev.sh
+
+The launcher works from any directory and forwards application arguments, such
+as `--version`. It prefers an installed virt-viewer and falls back to the local
+temporary dependency prefix when available.
+
 For a safe synthetic demonstration without KVM:
 
     ./examples/run-test-driver.sh
