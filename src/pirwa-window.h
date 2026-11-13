@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 #pragma once
 
+#include "pirwa-boxes.h"
 #include <adwaita.h>
 
 G_BEGIN_DECLS
@@ -9,5 +10,7 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (PirwaWindow, pirwa_window, PIRWA, WINDOW, AdwApplicationWindow)
 
 GtkWindow *pirwa_window_new (GtkApplication *application, const char *uri);
+GtkWindow *pirwa_window_new_with_boxes (GtkApplication *application, const char *uri,
+                                        const PirwaBoxesPaths *paths);
 
 G_END_DECLS

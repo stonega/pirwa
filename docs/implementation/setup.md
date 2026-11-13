@@ -50,9 +50,11 @@ It requires neither a running libvirt daemon nor KVM. It must remain the default
 for automated tests. `PIRWA_RUN_KVM_TESTS=1 ./build/tests/test-kvm` is a separate,
 explicitly opt-in workflow using disposable resources; see the README.
 
-Eight default checks cover inventory, configuration, stable model reconciliation,
+Nine default checks cover inventory, configuration, stable model reconciliation,
 backend behavior, storage rollback/reference protection, 1,000-domain scale, and
-desktop/AppStream metadata. None requires a display.
+desktop/AppStream metadata, plus Boxes discovery/preferences/cancellation.
+None requires a display. `gio-unix-2.0` is an explicit GLib component dependency
+for desktop-entry detection; Fedora's existing glib2-devel package supplies it.
 
 `./build/tests/test-ui --exercise` requires a real desktop display and uses only
 the libvirt test driver. It runs the production window, checks lifecycle actions,
@@ -63,16 +65,22 @@ detail request pending. Add `--large-text --dark --width 720` for the narrow,
 screen-reader certification. `--snapshot FILE.png` captures only Pirwa's window.
 This executable is deliberately excluded from the headless Meson test command.
 
-`./scripts/test-gnome.py --output build/qa/gnome` runs the three UI variants in
+`./scripts/test-gnome.py --output build/qa/gnome` runs the five UI variants in
 one disposable GNOME Shell Wayland desktop (1280×800 at 60 Hz). Install
 gnome-shell and dbus-run-session first. Runtime, configuration, data, cache,
-D-Bus, and GSettings are isolated; no settings are written to your desktop.
+D-Bus, state, and GSettings are isolated; no settings are written to your desktop.
 The wrapper disables GVFS FUSE mounting and unmounts remaining test-session FUSE
 exports before removing its directories. The result directory contains report.json, app-only PNG
 screenshots, per-case stdout/stderr, the compositor log, and the session log.
 Use `--build build-sanitize` with the sanitizer environment to exercise that
 binary. An optional command after `--` runs inside the virtual desktop instead
 of the default matrix.
+
+The matrix includes Boxes onboarding at normal size and at 200% text/dark/720 px.
+Its fixtures verify dismissal, one-time behavior across windows, manual reopening,
+offline Flatpak guidance/rescan, selecting the existing VM without duplication,
+and closing a modal through the window close request while keeping the backend
+alive. The synthetic fixtures do not connect to your real guests.
 
 This is GNOME Shell and its compositor with a virtual monitor, not a complete
 logged-in hardware session. Missing authentication/camera/PipeWire services and

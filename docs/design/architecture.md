@@ -44,6 +44,31 @@ tries reconnect at 1/2/4/8/16-second intervals, then waits for manual reconnect.
 Mutations are never replayed automatically. Healthy connections have no polling
 or retry timer.
 
+## GNOME Boxes onboarding
+
+`pirwa-boxes.c` performs one cancellable discovery job away from GTK. It checks
+for the native executable or desktop entry, lists persistent Session domains
+through a temporary read-only libvirt connection, and ignores guestfs helpers.
+This matches Boxes' shared Session model, including machines originally created
+by other managers. No domain XML is rewritten and no disk is read or copied.
+
+Stable Boxes Flatpak definitions are read from
+`~/.var/app/org.gnome.Boxes/config/libvirt/qemu`. Discovery reads only bounded
+regular XML files without following final symlinks; DTD-bearing definitions are
+rejected. Machines are deduplicated by UUID within each library. A matching
+user-owned runtime libvirt socket supplies the explicit local connection URI.
+An offline library offers Open Boxes and Refresh; it is not silently migrated
+into the host session. Native and Flatpak libraries remain separate connections.
+
+`pirwa-boxes-dialog.c` presents virtualized machine rows and explains reuse and
+ownership. The automatic guide waits until the window is mapped and foreground
+work/dialogs have finished. A header action requests a fresh scan manually.
+Closing or skipping the guide records completion; a later automatic startup
+reads only the small preference file rather than rescanning the libraries.
+Choosing Flatpak also remembers the connection. Preferences are written
+atomically on a worker under `XDG_STATE_HOME/pirwa/boxes-import.ini`, with a
+GApplication hold until the write completes. Import adds no disk ownership.
+
 ## Cancellation and shutdown
 
 Caller cancellation and backend shutdown feed a combined worker cancellable,
@@ -52,7 +77,10 @@ checked before operations, during pre-removal reference scans, and between
 image upload chunks and partial stream sends.
 It cannot interrupt an in-flight synchronous libvirt RPC. After a mutation
 commits, the result reports success rather than a misleading cancellation.
-Closing the window cancels work, stops the queue, and prevents late UI access.
+Closing the actual window cancels work, stops the queue, and prevents late UI access.
+With a modal dialog open, a window close request first closes that dialog and
+keeps the backend alive. A busy dialog can reject closing until its operation
+is cancelled. Disposal always cancels the window's work independently.
 Foreground requests hold GApplication until completion, so closing the last
 window does not terminate a worker in the middle of provisioning rollback.
 The backend thread cleans up independently without blocking GTK on join.

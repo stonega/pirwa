@@ -24,3 +24,6 @@ executable('test-ui', 'test-ui.c', dependencies: ui_dep)
 
 model_test = executable('test-model', 'test-model.c', dependencies: core_dep)
 test('model', model_test)
+
+boxes_test = executable('test-boxes', 'test-boxes.c', dependencies: core_dep)
+test('boxes', boxes_test, timeout: 30, env: backend_environment)

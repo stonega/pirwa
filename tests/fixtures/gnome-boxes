@@ -1,0 +1,3 @@
+#!/bin/sh
+# Installation detection fixture. Discovery must never execute it.
+exit 99

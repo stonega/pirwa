@@ -1,0 +1,52 @@
+{
+  "source_commit": "1bcadf6bc01ddc35a9a2a2e6b18f155fa9f8f03c",
+  "source_dirty": true,
+  "gnome_shell": "GNOME Shell 51.1",
+  "shell_command": [
+    "gnome-shell",
+    "--headless",
+    "--wayland",
+    "--no-x11",
+    "--virtual-monitor",
+    "1280x800@60",
+    "--wayland-display",
+    "pirwa-qa-wayland"
+  ],
+  "isolation": "Private D-Bus, runtime/config/data/cache directories; memory GSettings",
+  "scope": "Programmed production GTK UI actions; not physical input, screen reader, or guest console certification",
+  "cases": [
+    {
+      "name": "command",
+      "command": [
+        "env",
+        "GTK_A11Y=test",
+        "python3",
+        "build/qa/preview-native-boxes.py"
+      ],
+      "returncode": 0,
+      "metrics": {
+        "main_monotonic_us": 275478084606,
+        "first_paint_monotonic_us": 275478855771,
+        "ready_monotonic_us": 275478855814,
+        "main_to_first_paint_ms": 771.165,
+        "sample_wall_ms": 999.0,
+        "sample_cpu_percent": 0.0469,
+        "sample_frames": 0,
+        "pss_kib": 135570,
+        "exercise_steps": 0,
+        "domains": 2,
+        "renderer": "GskVulkanRenderer",
+        "text_scale": 1,
+        "scroll": false,
+        "focus_kind": "GtkButton",
+        "initial_focus_kind": "GtkButton",
+        "active": false,
+        "refresh_millihz": 60000,
+        "surface_scale": 1,
+        "frame_work_us": []
+      }
+    }
+  ],
+  "passed": true,
+  "shell_exitcode": 0
+}

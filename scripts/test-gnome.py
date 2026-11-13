@@ -52,7 +52,7 @@ def session(args):
         "gnome_shell": subprocess.check_output(
             ["gnome-shell", "--version"], text=True).strip(),
         "shell_command": shell_args,
-        "isolation": "Private D-Bus, runtime/config/data/cache directories; memory GSettings",
+        "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
         "scope": "Programmed production GTK UI actions; not physical input, screen reader, or guest console certification",
         "cases": [],
         "passed": False,
@@ -99,6 +99,9 @@ def session(args):
                 uri = fixture(Path(args.session_root), 0)
                 execute("empty", [binary, "--exercise", "--uri", uri,
                                   "--snapshot", str(output / "empty.png")])
+                execute("boxes", [binary, "--boxes-exercise", "--snapshot", str(output / "boxes.png")])
+                execute("boxes-large-dark", [binary, "--boxes-exercise", "--large-text", "--dark",
+                                             "--width", "720", "--snapshot", str(output / "boxes-large-dark.png")])
             report["passed"] = True
         except Exception as error:
             report["error"] = str(error)
@@ -138,7 +141,7 @@ def main():
         env = os.environ.copy()
         for key in ("DISPLAY", "WAYLAND_DISPLAY", "DBUS_SESSION_BUS_ADDRESS"):
             env.pop(key, None)
-        for suffix in ("RUNTIME_DIR", "CONFIG_HOME", "DATA_HOME", "CACHE_HOME"):
+        for suffix in ("RUNTIME_DIR", "CONFIG_HOME", "DATA_HOME", "CACHE_HOME", "STATE_HOME"):
             path = base / suffix.split("_", 1)[0].lower()
             path.mkdir(mode=0o700)
             env[f"XDG_{suffix}"] = str(path)

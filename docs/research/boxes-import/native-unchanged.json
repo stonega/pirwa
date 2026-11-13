@@ -1,0 +1,13 @@
+{
+  "unchanged": true,
+  "machines": {
+    "boxes-unknown": {
+      "xml_sha256": "5593947c7c612872cef9a92315a8c766d763156b19870d8f3eb383f34a4418ba",
+      "state": "shut off"
+    },
+    "boxes-unknown-3": {
+      "xml_sha256": "620f41b9b0fcb06c347d50c37f1e48c4595c9cb4ce279a3d43e9c708647fd5d9",
+      "state": "shut off"
+    }
+  }
+}

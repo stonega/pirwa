@@ -2,6 +2,7 @@
 /* Explicit desktop QA, never run by the default headless test suite. */
 #include "pirwa-machine.h"
 #include "pirwa-window.h"
+#include <glib/gstdio.h>
 #include <locale.h>
 #include <sys/resource.h>
 #include <time.h>
@@ -43,6 +44,10 @@ typedef struct
   gboolean finished;
   const char *snapshot;
   PirwaMachine *original;
+  gboolean boxes_exercise;
+  PirwaBoxesPaths *boxes_paths;
+  char *boxes_root;
+  char *boxes_uuid;
 } Run;
 
 static gint64
@@ -72,6 +77,29 @@ find_type (GtkWidget *root, GType type)
        child = gtk_widget_get_next_sibling (child))
     {
       GtkWidget *found = find_type (child, type);
+      if (found)
+        return found;
+    }
+  return NULL;
+}
+
+static GtkWidget *
+find_machine_list (GtkWidget *root)
+{
+  if (GTK_IS_LIST_VIEW (root))
+    {
+      GListModel *model = G_LIST_MODEL (gtk_list_view_get_model (GTK_LIST_VIEW (root)));
+      if (GTK_IS_SINGLE_SELECTION (model))
+        model = gtk_single_selection_get_model (GTK_SINGLE_SELECTION (model));
+      while (GTK_IS_FILTER_LIST_MODEL (model))
+        model = gtk_filter_list_model_get_model (GTK_FILTER_LIST_MODEL (model));
+      if (model && g_list_model_get_item_type (model) == PIRWA_TYPE_MACHINE)
+        return root;
+    }
+  for (GtkWidget *child = gtk_widget_get_first_child (root); child;
+       child = gtk_widget_get_next_sibling (child))
+    {
+      GtkWidget *found = find_machine_list (child);
       if (found)
         return found;
     }
@@ -160,7 +188,10 @@ finish (Run *run)
   run->finished = TRUE;
   if (!run->exercise)
     save_snapshot (run);
-  gtk_window_close (run->window);
+  if (adw_application_window_get_visible_dialog (ADW_APPLICATION_WINDOW (run->window)))
+    gtk_window_destroy (run->window); /* Profiling may end with onboarding open. */
+  else
+    gtk_window_close (run->window);
 }
 
 static gboolean
@@ -270,9 +301,102 @@ assert_visible_button (GtkWidget *dialog, GtkWidget *button)
 }
 
 static gboolean
+watch_boxes (gpointer data)
+{
+  Run *run = data;
+  AdwDialog *dialog
+      = adw_application_window_get_visible_dialog (ADW_APPLICATION_WINDOW (run->window));
+  GtkWidget *use = dialog ? find_button (GTK_WIDGET (dialog), "Use Machines") : NULL;
+  switch (run->step)
+    {
+    case 0:
+      if (!dialog || !use || !gtk_widget_get_mapped (use) || !run->first_paint)
+        break;
+      run->ready = g_get_monotonic_time ();
+      g_assert_cmpstr (adw_dialog_get_title (dialog), ==, "Import from GNOME Boxes");
+      assert_visible_button (GTK_WIDGET (dialog), use);
+      g_assert_true (gtk_widget_get_sensitive (use));
+      GtkWidget *view = find_machine_list (GTK_WIDGET (dialog));
+      GtkSingleSelection *selection
+          = GTK_SINGLE_SELECTION (gtk_list_view_get_model (GTK_LIST_VIEW (view)));
+      g_assert_cmpuint (g_list_model_get_n_items (G_LIST_MODEL (selection)), ==, 1);
+      PirwaMachine *machine = gtk_single_selection_get_selected_item (selection);
+      g_assert_nonnull (machine);
+      run->boxes_uuid = g_strdup (pirwa_machine_get_uuid (machine));
+      run->domains = 1;
+      save_snapshot (run);
+      GtkWidget *source = find_type (GTK_WIDGET (dialog), GTK_TYPE_DROP_DOWN);
+      g_assert_cmpuint (g_list_model_get_n_items (gtk_drop_down_get_model (GTK_DROP_DOWN (source))),
+                        ==, 2);
+      gtk_drop_down_set_selected (GTK_DROP_DOWN (source), 1);
+      run->step++;
+      break;
+    case 1:
+      if (!dialog || !use)
+        break;
+      g_assert_false (gtk_widget_get_sensitive (use));
+      g_assert_true (
+          gtk_widget_get_visible (find_button (GTK_WIDGET (dialog), "Open GNOME Boxes")));
+      g_signal_emit_by_name (find_button (GTK_WIDGET (dialog), "Refresh Library"), "clicked");
+      run->step++;
+      break;
+    case 2:
+      if (!dialog || !use || !gtk_widget_get_mapped (use) || !gtk_widget_get_sensitive (use))
+        break;
+      if (run->requested_width == 720)
+        gtk_window_close (run->window); /* Close the dialog while keeping its backend alive. */
+      else
+        g_signal_emit_by_name (find_button (GTK_WIDGET (dialog), "Not Now"), "clicked");
+      run->step++;
+      break;
+    case 3:
+      if (dialog || !enabled (run, "import-boxes"))
+        break;
+      g_assert_true (g_file_test (run->boxes_paths->state_file, G_FILE_TEST_EXISTS));
+      GtkWindow *previous = run->window;
+      run->window = pirwa_window_new_with_boxes (run->application, run->boxes_paths->native_uri,
+                                                 run->boxes_paths);
+      gtk_window_set_default_size (run->window, run->requested_width, 680);
+      gtk_window_present (run->window);
+      gtk_window_close (previous);
+      run->step++;
+      break;
+    case 4:
+      if (!enabled (run, "new") || !enabled (run, "import-boxes"))
+        break;
+      g_assert_null (dialog); /* The automatic introduction is shown once. */
+      activate (run, "import-boxes");
+      run->step++;
+      break;
+    case 5:
+      if (!dialog || !use || !gtk_widget_get_mapped (use))
+        break;
+      g_assert_true (gtk_widget_get_sensitive (use));
+      g_signal_emit_by_name (use, "clicked");
+      run->step++;
+      break;
+    case 6:
+      if (dialog || !enabled (run, "import-boxes") || !enabled (run, "pause"))
+        break;
+      GtkWidget *list = find_machine_list (GTK_WIDGET (run->window));
+      GtkSingleSelection *model
+          = GTK_SINGLE_SELECTION (gtk_list_view_get_model (GTK_LIST_VIEW (list)));
+      g_assert_cmpuint (g_list_model_get_n_items (G_LIST_MODEL (model)), ==, 1);
+      g_assert_cmpstr (pirwa_machine_get_uuid (gtk_single_selection_get_selected_item (model)), ==,
+                       run->boxes_uuid);
+      run->watch = 0;
+      finish (run);
+      return G_SOURCE_REMOVE;
+    }
+  return G_SOURCE_CONTINUE;
+}
+
+static gboolean
 watch (gpointer data)
 {
   Run *run = data;
+  if (run->boxes_exercise)
+    return watch_boxes (data);
   AdwDialog *dialog
       = adw_application_window_get_visible_dialog (ADW_APPLICATION_WINDOW (run->window));
   if (!run->ready)
@@ -285,7 +409,7 @@ watch (gpointer data)
       g_assert_false (gtk_spinner_get_spinning (GTK_SPINNER (spinner)));
       if (run->exercise)
         g_assert_cmpint (gtk_widget_get_width (GTK_WIDGET (run->window)), <=, run->requested_width);
-      GtkWidget *list = find_type (GTK_WIDGET (run->window), GTK_TYPE_LIST_VIEW);
+      GtkWidget *list = find_machine_list (GTK_WIDGET (run->window));
       g_assert_nonnull (list);
       run->domains = g_list_model_get_n_items (
           G_LIST_MODEL (gtk_list_view_get_model (GTK_LIST_VIEW (list))));
@@ -304,7 +428,7 @@ watch (gpointer data)
           return G_SOURCE_REMOVE;
         }
     }
-  GtkWidget *view = find_type (GTK_WIDGET (run->window), GTK_TYPE_LIST_VIEW);
+  GtkWidget *view = find_machine_list (GTK_WIDGET (run->window));
   g_assert_nonnull (view);
   GtkSingleSelection *selection
       = GTK_SINGLE_SELECTION (gtk_list_view_get_model (GTK_LIST_VIEW (view)));
@@ -464,6 +588,8 @@ main (int argc, char **argv)
             "Scroll 40 pixels per frame during sampling", NULL },
           { "exercise", 0, 0, G_OPTION_ARG_NONE, &run.exercise, "Exercise the test-driver UI",
             NULL },
+          { "boxes-exercise", 0, 0, G_OPTION_ARG_NONE, &run.boxes_exercise,
+            "Exercise the first-run GNOME Boxes guide with isolated fixtures", NULL },
           { "duration", 0, 0, G_OPTION_ARG_INT, &run.duration, "Idle sample seconds", "SECONDS" },
           { "large-text", 0, 0, G_OPTION_ARG_NONE, &large, "Double the desktop font size", NULL },
           { "dark", 0, 0, G_OPTION_ARG_NONE, &dark, "Use dark appearance", NULL },
@@ -479,6 +605,8 @@ main (int argc, char **argv)
     }
   if (!uri)
     uri = g_strdup ("test:///default");
+  if (run.boxes_exercise)
+    run.exercise = TRUE;
   if (run.duration < 0 || run.duration > 300 || width < 600 || width > 1920
       || (run.scrolling && run.duration == 0)
       || (run.exercise && !g_str_has_prefix (uri, "test:///")))
@@ -489,6 +617,34 @@ main (int argc, char **argv)
   setlocale (LC_ALL, "C");
   if (run.exercise)
     g_setenv ("GTK_A11Y", "test", TRUE);
+  if (run.boxes_exercise)
+    {
+      run.boxes_root = g_dir_make_tmp ("pirwa-boxes-ui-XXXXXX", &error);
+      g_assert_no_error (error);
+      run.boxes_paths = g_new0 (PirwaBoxesPaths, 1);
+      run.boxes_paths->native_uri = g_strdup (uri);
+      run.boxes_paths->state_file = g_build_filename (run.boxes_root, "state.ini", NULL);
+      run.boxes_paths->flatpak_root = g_strdup (run.boxes_root);
+      run.boxes_paths->runtime_root = g_build_filename (run.boxes_root, "runtime", NULL);
+      g_autofree char *directory
+          = g_build_filename (run.boxes_root, "config", "libvirt", "qemu", NULL);
+      g_assert_cmpint (g_mkdir_with_parents (directory, 0700), ==, 0);
+      g_autofree char *file = g_build_filename (directory, "boxes.xml", NULL);
+      g_assert_true (g_file_set_contents (
+          file,
+          "<domain><name>Flatpak "
+          "Example</name><uuid>11111111-1111-4111-8111-111111111111</uuid></domain>",
+          -1, &error));
+      g_assert_no_error (error);
+      g_autofree char *bin = g_build_filename (run.boxes_root, "bin", NULL);
+      g_assert_cmpint (g_mkdir (bin, 0700), ==, 0);
+      g_autofree char *program = g_build_filename (bin, "gnome-boxes", NULL);
+      g_assert_true (g_file_set_contents (program, "#!/bin/sh\nexit 99\n", -1, &error));
+      g_assert_no_error (error);
+      g_assert_cmpint (g_chmod (program, 0700), ==, 0);
+      g_autofree char *path = g_strconcat (bin, ":", g_getenv ("PATH"), NULL);
+      g_setenv ("PATH", path, TRUE);
+    }
   if (!gtk_init_check ())
     {
       g_printerr ("A desktop display is required for explicit UI QA.\n");
@@ -519,7 +675,8 @@ main (int argc, char **argv)
   g_assert_no_error (error);
   run.application = GTK_APPLICATION (application);
   run.snapshot = snapshot;
-  run.window = pirwa_window_new (run.application, uri);
+  run.window = run.boxes_paths ? pirwa_window_new_with_boxes (run.application, uri, run.boxes_paths)
+                               : pirwa_window_new (run.application, uri);
   run.requested_width = width;
   gtk_window_set_default_size (run.window, width, 680);
   g_signal_connect (run.window, "map", G_CALLBACK (mapped), &run);
@@ -561,5 +718,24 @@ main (int argc, char **argv)
   g_free (run.initial_focus_kind);
   g_free (uri);
   g_free (snapshot);
+  if (run.boxes_root)
+    {
+      const char *files[] = { "state.ini", "bin/gnome-boxes", "config/libvirt/qemu/boxes.xml" };
+      const char *dirs[] = { "bin", "config/libvirt/qemu", "config/libvirt", "config" };
+      for (guint i = 0; i < G_N_ELEMENTS (files); i++)
+        {
+          g_autofree char *file = g_build_filename (run.boxes_root, files[i], NULL);
+          g_unlink (file);
+        }
+      for (guint i = 0; i < G_N_ELEMENTS (dirs); i++)
+        {
+          g_autofree char *dir = g_build_filename (run.boxes_root, dirs[i], NULL);
+          g_rmdir (dir);
+        }
+      g_rmdir (run.boxes_root);
+    }
+  pirwa_boxes_paths_free (run.boxes_paths);
+  g_free (run.boxes_root);
+  g_free (run.boxes_uuid);
   return result;
 }

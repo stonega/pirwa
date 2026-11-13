@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pirwa\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-13 14:36+0800\n"
+"POT-Creation-Date: 2026-11-13 16:19+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,231 +16,306 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
 #: src/main.c:46
 msgid "Show the application version"
 msgstr ""
 
-#: src/pirwa-window.c:106 src/pirwa-window.c:1024
+#: src/pirwa-window.c:122 src/pirwa-window.c:1254
 msgid "Select a Virtual Machine"
 msgstr ""
 
-#: src/pirwa-window.c:107
+#: src/pirwa-window.c:123
 msgid "Choose a machine to view its controls."
 msgstr ""
 
-#: src/pirwa-window.c:343
+#: src/pirwa-window.c:373
 #, c-format
 msgid "%u CPUs · %u MiB RAM"
 msgstr ""
 
-#: src/pirwa-window.c:387
+#: src/pirwa-window.c:417
 msgid "Shutdown requested. Waiting for the guest."
 msgstr ""
 
-#: src/pirwa-window.c:389
+#: src/pirwa-window.c:419
 msgid "Restart requested. Waiting for the guest."
 msgstr ""
 
-#: src/pirwa-window.c:408
+#: src/pirwa-window.c:438
 msgid "Virtual machine created and started. Choose Open Console to continue."
 msgstr ""
 
-#: src/pirwa-window.c:427
+#: src/pirwa-window.c:458
 msgid "Working…"
 msgstr ""
 
-#: src/pirwa-window.c:472
+#: src/pirwa-window.c:503
 msgid "Loading resources…"
 msgstr ""
 
-#: src/pirwa-window.c:522
+#: src/pirwa-window.c:553
 msgid "Remove Virtual Machine?"
 msgstr ""
 
-#: src/pirwa-window.c:522
+#: src/pirwa-window.c:553
 msgid "Force Stop Virtual Machine?"
 msgstr ""
 
-#: src/pirwa-window.c:523
+#: src/pirwa-window.c:554
 msgid ""
 "The VM definition will be removed. Its storage is kept unless you explicitly "
 "choose to delete the verified Pirwa disk."
 msgstr ""
 
-#: src/pirwa-window.c:525
+#: src/pirwa-window.c:556
 msgid "Force stopping can lose unsaved work in the guest."
 msgstr ""
 
-#: src/pirwa-window.c:526 src/pirwa-window.c:817 src/pirwa-window.c:1071
+#: src/pirwa-window.c:557 src/pirwa-window.c:853 src/pirwa-window.c:1301
 msgid "Cancel"
 msgstr ""
 
-#: src/pirwa-window.c:527 src/pirwa-window.c:1045
+#: src/pirwa-window.c:558 src/pirwa-window.c:1275
 msgid "Remove"
 msgstr ""
 
-#: src/pirwa-window.c:527 src/pirwa-window.c:1045
+#: src/pirwa-window.c:558 src/pirwa-window.c:1275
 msgid "Force Stop"
 msgstr ""
 
-#: src/pirwa-window.c:538
+#: src/pirwa-window.c:569
 msgid "Also delete the verified Pirwa disk"
 msgstr ""
 
-#: src/pirwa-window.c:642
+#: src/pirwa-window.c:678
 msgid "Select ISO or qcow2 Image"
 msgstr ""
 
-#: src/pirwa-window.c:706
+#: src/pirwa-window.c:742
 msgid "Virtual Machine Settings"
 msgstr ""
 
-#: src/pirwa-window.c:706 src/pirwa-window.c:731 src/pirwa-window.c:942
-#: src/pirwa-window.c:944 src/pirwa-window.c:977
+#: src/pirwa-window.c:742 src/pirwa-window.c:767 src/pirwa-window.c:1166
+#: src/pirwa-window.c:1168 src/pirwa-window.c:1207
 msgid "New Virtual Machine"
 msgstr ""
 
-#: src/pirwa-window.c:723
+#: src/pirwa-window.c:759
 msgid "Resources"
 msgstr ""
 
-#: src/pirwa-window.c:726
+#: src/pirwa-window.c:762
 msgid "The virtual machine starts after creation."
 msgstr ""
 
-#: src/pirwa-window.c:729
+#: src/pirwa-window.c:765
 msgid "Name"
 msgstr ""
 
-#: src/pirwa-window.c:733
+#: src/pirwa-window.c:769
 msgid "Virtual CPUs"
 msgstr ""
 
-#: src/pirwa-window.c:734
+#: src/pirwa-window.c:770
 msgid "Memory (MiB)"
 msgstr ""
 
-#: src/pirwa-window.c:742
+#: src/pirwa-window.c:778
 msgid "Eject installation media"
 msgstr ""
 
-#: src/pirwa-window.c:748
+#: src/pirwa-window.c:784
 msgid "Disk capacity (GiB)"
 msgstr ""
 
-#: src/pirwa-window.c:751
+#: src/pirwa-window.c:787
 msgid "Installation Media"
 msgstr ""
 
-#: src/pirwa-window.c:755
+#: src/pirwa-window.c:791
 msgid "Local ISO or qcow2 path"
 msgstr ""
 
-#: src/pirwa-window.c:758
+#: src/pirwa-window.c:794
 msgid "Choose a file"
 msgstr ""
 
-#: src/pirwa-window.c:763
+#: src/pirwa-window.c:799
 msgid "Import a standalone qcow2 image"
 msgstr ""
 
-#: src/pirwa-window.c:766
+#: src/pirwa-window.c:802
 msgid "Use legacy BIOS instead of UEFI"
 msgstr ""
 
-#: src/pirwa-window.c:769
+#: src/pirwa-window.c:805
 msgid ""
 "Import copies the source into a new owned volume and uses its virtual "
 "capacity. The original image stays unchanged."
 msgstr ""
 
-#: src/pirwa-window.c:786
+#: src/pirwa-window.c:822
 msgid "Directory storage pool"
 msgstr ""
 
-#: src/pirwa-window.c:820
+#: src/pirwa-window.c:856
 msgid "Save Changes"
 msgstr ""
 
-#: src/pirwa-window.c:820
+#: src/pirwa-window.c:856
 msgid "Create"
 msgstr ""
 
-#: src/pirwa-window.c:938
+#: src/pirwa-window.c:906 src/pirwa-boxes-dialog.c:196
+msgid "Boxes Flatpak"
+msgstr ""
+
+#: src/pirwa-window.c:983
+msgid "GNOME Boxes library selected. Existing disks remain in place."
+msgstr ""
+
+#: src/pirwa-window.c:1162
 msgid "Virtual Machines"
 msgstr ""
 
-#: src/pirwa-window.c:947
+#: src/pirwa-window.c:1171 src/pirwa-boxes-dialog.c:196
 msgid "Session"
 msgstr ""
 
-#: src/pirwa-window.c:947
+#: src/pirwa-window.c:1171
 msgid "System"
 msgstr ""
 
-#: src/pirwa-window.c:949 src/pirwa-window.c:951
+#: src/pirwa-window.c:1173 src/pirwa-window.c:1175
 msgid "Choose the local libvirt connection"
 msgstr ""
 
-#: src/pirwa-window.c:956 src/pirwa-window.c:958
+#: src/pirwa-window.c:1180 src/pirwa-window.c:1182
 msgid "Refresh and reconnect"
 msgstr ""
 
-#: src/pirwa-window.c:966
+#: src/pirwa-window.c:1186 src/pirwa-window.c:1188 src/pirwa-boxes-dialog.c:170
+msgid "Import from GNOME Boxes"
+msgstr ""
+
+#: src/pirwa-window.c:1196
 msgid "Connecting to libvirt"
 msgstr ""
 
-#: src/pirwa-window.c:971
+#: src/pirwa-window.c:1201
 msgid "No Virtual Machines"
 msgstr ""
 
-#: src/pirwa-window.c:974
+#: src/pirwa-window.c:1204
 msgid "Create a Linux virtual machine or import a standalone qcow2 image."
 msgstr ""
 
-#: src/pirwa-window.c:980
+#: src/pirwa-window.c:1210
 msgid "Connection Unavailable"
 msgstr ""
 
-#: src/pirwa-window.c:982
+#: src/pirwa-window.c:1212
 msgid "Reconnect"
 msgstr ""
 
-#: src/pirwa-window.c:1044
+#: src/pirwa-window.c:1274
 msgid "Start"
 msgstr ""
 
-#: src/pirwa-window.c:1044
+#: src/pirwa-window.c:1274
 msgid "Open Console"
 msgstr ""
 
-#: src/pirwa-window.c:1044
+#: src/pirwa-window.c:1274
 msgid "Shut Down"
 msgstr ""
 
-#: src/pirwa-window.c:1044
+#: src/pirwa-window.c:1274
 msgid "Restart"
 msgstr ""
 
-#: src/pirwa-window.c:1044
+#: src/pirwa-window.c:1274
 msgid "Pause"
 msgstr ""
 
-#: src/pirwa-window.c:1045
+#: src/pirwa-window.c:1275
 msgid "Resume"
 msgstr ""
 
-#: src/pirwa-window.c:1045
+#: src/pirwa-window.c:1275
 msgid "Settings"
 msgstr ""
 
-#: src/pirwa-window.c:1078
+#: src/pirwa-window.c:1308
 msgid "Local virtual machines managed by libvirt"
 msgstr ""
 
-#: src/pirwa-window.c:1104
+#: src/pirwa-window.c:1346
 msgid "Test Driver"
+msgstr ""
+
+#: src/pirwa-boxes-dialog.c:86
+#, c-format
+msgid ""
+"GNOME Boxes could not start. Check that its Flatpak is installed.\n"
+"%s"
+msgstr ""
+
+#: src/pirwa-boxes-dialog.c:103
+msgid "After GNOME Boxes opens, choose Refresh Library."
+msgstr ""
+
+#: src/pirwa-boxes-dialog.c:125
+msgid ""
+"No local GNOME Boxes machines were found. Install GNOME Boxes or create a "
+"machine there, then try Import from GNOME Boxes again."
+msgstr ""
+
+#: src/pirwa-boxes-dialog.c:128
+msgid ""
+"These machines belong to the GNOME Boxes Flatpak library. Keep Boxes running "
+"so Pirwa can connect. Open Boxes if needed, then refresh this library."
+msgstr ""
+
+#: src/pirwa-boxes-dialog.c:130
+msgid ""
+"GNOME Boxes and Pirwa share the Session library. Use these existing machines "
+"directly, without copying disks or changing their configuration."
+msgstr ""
+
+#: src/pirwa-boxes-dialog.c:178
+msgid "Not Now"
+msgstr ""
+
+#: src/pirwa-boxes-dialog.c:195
+#, c-format
+msgid "%s · %u machine"
+msgid_plural "%s · %u machines"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/pirwa-boxes-dialog.c:201
+msgid "GNOME Boxes library"
+msgstr ""
+
+#: src/pirwa-boxes-dialog.c:221
+msgid ""
+"Both apps control the same machines. Disks stay in their existing location. "
+"Import does not grant Pirwa permission to delete Boxes disks."
+msgstr ""
+
+#: src/pirwa-boxes-dialog.c:231
+msgid "Open GNOME Boxes"
+msgstr ""
+
+#: src/pirwa-boxes-dialog.c:234
+msgid "Refresh Library"
+msgstr ""
+
+#: src/pirwa-boxes-dialog.c:248
+msgid "Use Machines"
 msgstr ""
 
 #: src/pirwa-inventory.c:16

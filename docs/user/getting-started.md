@@ -4,6 +4,35 @@ Build and launch with the README commands. The header selects your per-user
 Session or the System libvirt connection. These show different inventories.
 Normal libvirt/polkit authorization applies; never run Pirwa as root.
 
+## Bring your GNOME Boxes machines
+
+On the first eligible launch, Pirwa checks whether GNOME Boxes is installed and
+its local libraries contain machines. It opens **Import from GNOME Boxes** with
+the detected machines and the library they belong to. Choose **Use Machines**
+to connect and select a machine, or **Not Now** to continue. Dismissing the guide
+is remembered. The folder button in the header (**Import from GNOME Boxes**)
+opens it again whenever needed.
+
+The regular GNOME Boxes package shares your per-user libvirt Session library
+with Pirwa. Its machines are already accessible there. Import uses the existing
+VMs directly: it does not duplicate disks, redefine devices, move files, or
+transfer ownership. Both applications control the same machines. Boxes disks
+remain protected by Pirwa's existing ownership checks when removing a VM.
+
+For **Boxes Flatpak**, choose that library in the guide. If it is offline, choose
+**Open GNOME Boxes**, then **Refresh Library**. Keep Boxes running so its private
+libvirt service remains available. **Use Machines** adds the Boxes Flatpak
+connection to the header and remembers it for the next launch. If that service
+is unavailable later, open Boxes and refresh/reconnect, or choose Session.
+Stable `org.gnome.Boxes` is supported; nightly app IDs and remote/custom Boxes
+connections are outside this workflow. Flatpak VM definitions are inspected
+read-only; disks are never scanned or copied during discovery.
+
+This workflow gives Pirwa access to the existing libraries. Creating an
+independent VM from an exported standalone qcow2 image uses Create/Import below.
+
+## Control machines
+
 Select a VM to see its state, allocated CPUs/RAM, and controls. Search filters
 names. Start, Shut Down, Restart, Pause, and Resume ask libvirt to perform the
 operation. Shut Down depends on guest cooperation. Pirwa never automatically

@@ -2,6 +2,7 @@
 #include "pirwa-window.h"
 #include "config.h"
 #include "pirwa-backend.h"
+#include "pirwa-boxes-dialog.h"
 #include "pirwa-model.h"
 #include <glib/gi18n.h>
 
@@ -38,6 +39,15 @@ struct _PirwaWindow
   guint64 snapshot_serial;
   guint64 detail_serial;
   guint64 foreground_request;
+  PirwaBoxesPaths *boxes_paths;
+  PirwaBoxesScan *boxes_pending;
+  gboolean boxes_loading;
+  gboolean boxes_manual;
+  gboolean boxes_remembering;
+  gboolean connection_touched;
+  char *boxes_uri;
+  char *boxes_selection_uuid;
+  guint boxes_choice;
 };
 
 G_DEFINE_FINAL_TYPE (PirwaWindow, pirwa_window, ADW_TYPE_APPLICATION_WINDOW)
@@ -46,6 +56,9 @@ static void show_form (PirwaWindow *self, gboolean edit);
 static void submit (PirwaWindow *self, const PirwaRequest *request, AdwDialog *dialog);
 static void load_details (PirwaWindow *self);
 static void request_details (PirwaWindow *self, gboolean edit_after);
+static void open_connection (PirwaWindow *self, const char *uri);
+static void start_boxes_scan (PirwaWindow *self, gboolean automatic);
+static void offer_boxes (PirwaWindow *self);
 
 static gboolean
 window_is_open (PirwaWindow *self)
@@ -80,7 +93,7 @@ update_actions (PirwaWindow *self)
     return;
   PirwaMachine *machine = selected (self);
   int state = machine ? pirwa_machine_get_state_code (machine) : 0;
-  gboolean ready = machine && !self->busy && self->connected;
+  gboolean ready = machine && !self->busy && self->connected && !self->boxes_loading;
   gboolean stopped = state == 5 || state == 6;
   set_action (self, "start", ready && stopped);
   set_action (self, "shutdown", ready && state == 1);
@@ -91,7 +104,10 @@ update_actions (PirwaWindow *self)
   set_action (self, "console", ready && (state == 1 || state == 3));
   set_action (self, "edit", ready && stopped && self->details != NULL);
   set_action (self, "remove", ready && stopped && self->details != NULL);
-  set_action (self, "new", !self->busy && self->connected);
+  set_action (self, "new", !self->busy && self->connected && !self->boxes_loading);
+  set_action (self, "import-boxes",
+              !self->busy && !self->boxes_loading && !self->boxes_remembering
+                  && !adw_application_window_get_visible_dialog (ADW_APPLICATION_WINDOW (self)));
   set_action (self, "search",
               self->connected && g_list_model_get_n_items (G_LIST_MODEL (self->machines)) > 0);
   set_action (self, "refresh", !self->busy);
@@ -235,6 +251,20 @@ apply_inventory (PirwaWindow *self, PirwaReply *reply)
   if (!selected (self))
     g_clear_pointer (&self->details, pirwa_details_free);
   update_actions (self);
+  if (self->boxes_selection_uuid)
+    {
+      GListModel *model = gtk_single_selection_get_model (self->selection);
+      for (guint i = 0; i < g_list_model_get_n_items (model); i++)
+        {
+          g_autoptr (PirwaMachine) machine = g_list_model_get_item (model, i);
+          if (g_str_equal (pirwa_machine_get_uuid (machine), self->boxes_selection_uuid))
+            {
+              gtk_single_selection_set_selected (self->selection, i);
+              break;
+            }
+        }
+      g_clear_pointer (&self->boxes_selection_uuid, g_free);
+    }
 }
 
 static void
@@ -412,6 +442,7 @@ request_done (GObject *source, GAsyncResult *result, gpointer data)
     }
   update_actions (self);
   context_free (context);
+  offer_boxes (self);
 }
 
 static void
@@ -549,6 +580,11 @@ action_activated (GSimpleAction *action, GVariant *parameter, gpointer data)
   (void)parameter;
   PirwaWindow *self = data;
   const char *name = g_action_get_name (G_ACTION (action));
+  if (g_str_equal (name, "import-boxes"))
+    {
+      start_boxes_scan (self, FALSE);
+      return;
+    }
   if (g_str_equal (name, "search"))
     {
       gtk_widget_grab_focus (GTK_WIDGET (self->search));
@@ -829,6 +865,174 @@ show_form (PirwaWindow *self, gboolean edit)
 }
 
 static void
+boxes_scan_done (GObject *source, GAsyncResult *result, gpointer data)
+{
+  (void)source;
+  g_autoptr (PirwaWindow) self = data;
+  g_autoptr (GError) error = NULL;
+  g_autoptr (PirwaBoxesScan) scan = pirwa_boxes_scan_finish (result, &error);
+  if (!window_is_open (self))
+    return;
+  self->boxes_loading = FALSE;
+  g_clear_pointer (&self->boxes_pending, pirwa_boxes_scan_free);
+  if (scan)
+    self->boxes_pending = g_steal_pointer (&scan);
+  else if (self->boxes_manual && !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+    toast (self, error->message);
+  update_actions (self);
+  offer_boxes (self);
+}
+
+static void
+start_boxes_scan (PirwaWindow *self, gboolean automatic)
+{
+  if (!window_is_open (self) || self->boxes_loading || self->boxes_remembering)
+    return;
+  self->boxes_manual = !automatic;
+  self->boxes_loading = TRUE;
+  pirwa_boxes_scan_async (self->boxes_paths, automatic, self->lifetime, boxes_scan_done,
+                          g_object_ref (self));
+  update_actions (self);
+}
+
+static void
+ensure_boxes_connection (PirwaWindow *self, const char *uri)
+{
+  if (self->boxes_choice == GTK_INVALID_LIST_POSITION)
+    {
+      GtkStringList *model
+          = GTK_STRING_LIST (gtk_drop_down_get_model (GTK_DROP_DOWN (self->connections)));
+      self->boxes_choice = g_list_model_get_n_items (G_LIST_MODEL (model));
+      gtk_string_list_append (model, _ ("Boxes Flatpak"));
+    }
+  g_free (self->boxes_uri);
+  self->boxes_uri = g_strdup (uri);
+}
+
+static void
+use_boxes_connection (PirwaWindow *self, const char *uri, const char *uuid, gboolean flatpak)
+{
+  if (flatpak)
+    ensure_boxes_connection (self, uri);
+  self->updating = TRUE;
+  guint choice = flatpak ? self->boxes_choice : g_str_has_prefix (uri, "test:///") ? 2 : 0;
+  gtk_drop_down_set_selected (GTK_DROP_DOWN (self->connections), choice);
+  self->updating = FALSE;
+  g_clear_pointer (&self->boxes_selection_uuid, g_free);
+  self->boxes_selection_uuid = g_strdup (uuid);
+  g_free (self->search_text);
+  self->search_text = g_strdup ("");
+  gtk_editable_set_text (GTK_EDITABLE (self->search), "");
+  gtk_filter_changed (GTK_FILTER (self->filter), GTK_FILTER_CHANGE_DIFFERENT);
+  if (!self->connected || g_strcmp0 (pirwa_backend_get_uri (self->backend), uri) != 0)
+    open_connection (self, uri);
+  else if (uuid)
+    {
+      GListModel *model = gtk_single_selection_get_model (self->selection);
+      for (guint i = 0; i < g_list_model_get_n_items (model); i++)
+        {
+          g_autoptr (PirwaMachine) machine = g_list_model_get_item (model, i);
+          if (g_str_equal (pirwa_machine_get_uuid (machine), uuid))
+            {
+              gtk_single_selection_set_selected (self->selection, i);
+              break;
+            }
+        }
+      g_clear_pointer (&self->boxes_selection_uuid, g_free);
+    }
+}
+
+typedef struct
+{
+  PirwaWindow *window;
+  GApplication *application;
+} RememberContext;
+
+static void
+boxes_remember_done (GObject *source, GAsyncResult *result, gpointer data)
+{
+  (void)source;
+  RememberContext *context = data;
+  g_autoptr (GError) error = NULL;
+  if (!pirwa_boxes_remember_finish (result, &error))
+    toast (context->window, error->message);
+  context->window->boxes_remembering = FALSE;
+  update_actions (context->window);
+  g_application_release (context->application);
+  g_object_unref (context->application);
+  g_object_unref (context->window);
+  g_free (context);
+}
+
+static void
+boxes_response (GtkWindow *window, PirwaBoxesResponse response, const char *uri, const char *uuid,
+                gboolean flatpak)
+{
+  PirwaWindow *self = PIRWA_WINDOW (window);
+  if (!window_is_open (self))
+    return;
+  if (response == PIRWA_BOXES_RESCAN)
+    {
+      start_boxes_scan (self, FALSE);
+      return;
+    }
+  if (response == PIRWA_BOXES_USE && uri)
+    {
+      self->connection_touched = TRUE;
+      use_boxes_connection (self, uri, uuid, flatpak);
+      toast (self, _ ("GNOME Boxes library selected. Existing disks remain in place."));
+    }
+  RememberContext *context = g_new0 (RememberContext, 1);
+  self->boxes_remembering = TRUE;
+  update_actions (self);
+  context->window = g_object_ref (self);
+  context->application = g_object_ref (G_APPLICATION (gtk_window_get_application (window)));
+  g_application_hold (context->application);
+  pirwa_boxes_remember_async (self->boxes_paths, flatpak, boxes_remember_done, context);
+}
+
+static void
+offer_boxes (PirwaWindow *self)
+{
+  if (!window_is_open (self) || !self->boxes_pending || self->busy || self->boxes_loading
+      || !gtk_widget_get_mapped (GTK_WIDGET (self))
+      || adw_application_window_get_visible_dialog (ADW_APPLICATION_WINDOW (self)))
+    return;
+  g_autoptr (PirwaBoxesScan) scan = g_steal_pointer (&self->boxes_pending);
+  if (!self->boxes_manual && scan->already_seen)
+    {
+      if (scan->preferred_uri)
+        {
+          ensure_boxes_connection (self, scan->preferred_uri);
+          if (!self->connection_touched
+              && g_strcmp0 (pirwa_backend_get_uri (self->backend), self->boxes_paths->native_uri)
+                     == 0)
+            use_boxes_connection (self, scan->preferred_uri, NULL, TRUE);
+        }
+      return;
+    }
+  if (scan->libraries->len || self->boxes_manual)
+    pirwa_boxes_dialog_present (GTK_WINDOW (self), g_steal_pointer (&scan), boxes_response);
+}
+
+static void
+dialog_changed (GObject *object, GParamSpec *spec, gpointer data)
+{
+  (void)spec;
+  (void)data;
+  PirwaWindow *self = PIRWA_WINDOW (object);
+  update_actions (self);
+  offer_boxes (self);
+}
+
+static void
+window_mapped (GtkWidget *widget, gpointer data)
+{
+  (void)data;
+  offer_boxes (PIRWA_WINDOW (widget));
+}
+
+static void
 open_connection (PirwaWindow *self, const char *uri)
 {
   self->connected = FALSE;
@@ -858,17 +1062,17 @@ connection_changed (GtkDropDown *dropdown, GParamSpec *spec, PirwaWindow *self)
   (void)spec;
   if (self->updating || self->busy)
     return;
+  self->connection_touched = TRUE;
   guint choice = gtk_drop_down_get_selected (dropdown);
-  open_connection (self, choice == 2   ? "test:///default"
-                         : choice == 1 ? "qemu:///system"
-                                       : "qemu:///session");
+  open_connection (self, choice == self->boxes_choice ? self->boxes_uri
+                         : choice == 2                ? "test:///default"
+                         : choice == 1                ? "qemu:///system"
+                                                      : "qemu:///session");
 }
 
-static gboolean
-window_close_requested (GtkWindow *window, gpointer data)
+static void
+cancel_window_work (PirwaWindow *self)
 {
-  (void)data;
-  PirwaWindow *self = PIRWA_WINDOW (window);
   if (self->operation_cancel)
     g_cancellable_cancel (self->operation_cancel);
   if (self->detail_cancel)
@@ -877,6 +1081,20 @@ window_close_requested (GtkWindow *window, gpointer data)
     g_cancellable_cancel (self->lifetime);
   if (self->backend)
     pirwa_backend_stop (self->backend);
+}
+
+static gboolean
+window_close_requested (GtkWindow *window, gpointer data)
+{
+  (void)data;
+  PirwaWindow *self = PIRWA_WINDOW (window);
+  AdwDialog *dialog = adw_application_window_get_visible_dialog (ADW_APPLICATION_WINDOW (self));
+  if (dialog)
+    {
+      adw_dialog_close (dialog);
+      return TRUE;
+    }
+  cancel_window_work (self);
   return FALSE;
 }
 
@@ -884,7 +1102,7 @@ static void
 pirwa_window_dispose (GObject *object)
 {
   PirwaWindow *self = PIRWA_WINDOW (object);
-  window_close_requested (GTK_WINDOW (self), NULL);
+  cancel_window_work (self);
   g_clear_object (&self->backend);
   g_clear_object (&self->lifetime);
   g_clear_object (&self->operation_cancel);
@@ -901,6 +1119,10 @@ pirwa_window_finalize (GObject *object)
   g_free (self->search_text);
   g_strfreev (self->pools);
   pirwa_details_free (self->details);
+  pirwa_boxes_paths_free (self->boxes_paths);
+  pirwa_boxes_scan_free (self->boxes_pending);
+  g_free (self->boxes_uri);
+  g_free (self->boxes_selection_uuid);
   G_OBJECT_CLASS (pirwa_window_parent_class)->finalize (object);
 }
 
@@ -922,10 +1144,12 @@ action_button (const char *label, const char *action)
 static void
 pirwa_window_init (PirwaWindow *self)
 {
+  self->boxes_choice = GTK_INVALID_LIST_POSITION;
   self->lifetime = g_cancellable_new ();
   self->machines = g_list_store_new (PIRWA_TYPE_MACHINE);
-  const char *actions[] = { "new",    "refresh",    "start",   "shutdown", "reboot", "pause",
-                            "resume", "force-stop", "console", "edit",     "remove", "search" };
+  const char *actions[]
+      = { "new",        "refresh", "start", "shutdown", "reboot", "pause",       "resume",
+          "force-stop", "console", "edit",  "remove",   "search", "import-boxes" };
   for (guint i = 0; i < G_N_ELEMENTS (actions); i++)
     {
       GSimpleAction *action = g_simple_action_new (actions[i], NULL);
@@ -957,6 +1181,12 @@ pirwa_window_init (PirwaWindow *self)
   gtk_accessible_update_property (GTK_ACCESSIBLE (refresh), GTK_ACCESSIBLE_PROPERTY_LABEL,
                                   _ ("Refresh and reconnect"), -1);
   adw_header_bar_pack_end (ADW_HEADER_BAR (header), refresh);
+  GtkWidget *import_boxes = gtk_button_new_from_icon_name ("document-open-symbolic");
+  gtk_actionable_set_action_name (GTK_ACTIONABLE (import_boxes), "win.import-boxes");
+  gtk_widget_set_tooltip_text (import_boxes, _ ("Import from GNOME Boxes"));
+  gtk_accessible_update_property (GTK_ACCESSIBLE (import_boxes), GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                  _ ("Import from GNOME Boxes"), -1);
+  adw_header_bar_pack_start (ADW_HEADER_BAR (header), import_boxes);
   adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), header);
   self->toasts = ADW_TOAST_OVERLAY (adw_toast_overlay_new ());
   self->stack = GTK_STACK (gtk_stack_new ());
@@ -1087,6 +1317,8 @@ pirwa_window_init (PirwaWindow *self)
   gtk_window_set_title (GTK_WINDOW (self), "Pirwa");
   gtk_window_set_default_size (GTK_WINDOW (self), 1040, 680);
   g_signal_connect (self, "close-request", G_CALLBACK (window_close_requested), NULL);
+  g_signal_connect (self, "map", G_CALLBACK (window_mapped), NULL);
+  g_signal_connect (self, "notify::visible-dialog", G_CALLBACK (dialog_changed), NULL);
   g_signal_connect_object (self->stack, "notify::visible-child", G_CALLBACK (loading_page_changed),
                            self, 0);
   loading_page_changed (G_OBJECT (self->stack), NULL, self);
@@ -1096,7 +1328,17 @@ pirwa_window_init (PirwaWindow *self)
 GtkWindow *
 pirwa_window_new (GtkApplication *application, const char *uri)
 {
+  return pirwa_window_new_with_boxes (application, uri, NULL);
+}
+
+GtkWindow *
+pirwa_window_new_with_boxes (GtkApplication *application, const char *uri,
+                             const PirwaBoxesPaths *paths)
+{
   PirwaWindow *self = g_object_new (PIRWA_TYPE_WINDOW, "application", application, NULL);
+  self->boxes_paths = paths
+                          ? pirwa_boxes_paths_copy (paths)
+                          : pirwa_boxes_paths_new (g_str_has_prefix (uri, "test:///") ? uri : NULL);
   self->updating = TRUE;
   if (g_str_has_prefix (uri, "test:///"))
     gtk_string_list_append (
@@ -1108,6 +1350,8 @@ pirwa_window_new (GtkApplication *application, const char *uri)
                                                                     : 0);
   self->updating = FALSE;
   open_connection (self, uri);
+  if (paths || !g_str_has_prefix (uri, "test:///"))
+    start_boxes_scan (self, TRUE);
   const char *new_accels[] = { "<Primary>n", NULL };
   const char *refresh_accels[] = { "<Primary>r", "F5", NULL };
   const char *search_accels[] = { "<Primary>f", NULL };

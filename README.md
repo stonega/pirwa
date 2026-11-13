@@ -12,6 +12,10 @@ the complete performance contract.
 
 - Persistent session/system connections, lifecycle events, bounded reconnect,
   search, stable VM identities, and virtualized rows.
+- A one-time GNOME Boxes guide when an installed Boxes library contains machines;
+  reuse the shared Session library or connect to the Boxes Flatpak library.
+  Existing VM definitions and disks stay in place. The Import header action
+  reopens the guide later.
 - Start, shutdown, restart, pause/resume, and confirmed force stop.
 - Local bootable ISO creation and standalone qcow2 import, with progress,
   cancellation, allocation rollback, and source-image preservation.
@@ -76,7 +80,7 @@ For an isolated virtual GNOME desktop with a 1280×800, 60 Hz monitor:
     ./scripts/test-gnome.py --output build/qa/gnome
 
 This requires GNOME Shell with headless support and dbus-run-session. It runs
-the light, large-text/dark, and empty-collection cases, saves screenshots/logs,
+the light, large-text/dark, empty-collection, and Boxes onboarding cases, saves screenshots/logs,
 and tears down its private compositor and settings directories.
 
 The desktop tool also measures startup, idle CPU/PSS, and scrolling. See the
