@@ -1,0 +1,22 @@
+name: Native checks
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container: fedora:45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build dependencies
+        run: >
+          dnf install -y gcc meson ninja-build gettext pkgconf-pkg-config
+          glib2-devel gtk4-devel libadwaita-devel libvirt-devel libvirt-glib-devel
+          libxml2-devel libosinfo-devel clang-tools-extra desktop-file-utils appstream
+          libasan libubsan
+      - run: meson setup build
+      - run: meson compile -C build
+      - run: meson test -C build --print-errorlogs
+      - run: clang-format --dry-run --Werror src/*.[ch] tests/*.c
+      - name: Address and undefined behavior checks
+        run: |
+          meson setup build-sanitize -Db_sanitize=address,undefined -Db_lundef=false
+          ASAN_OPTIONS=detect_leaks=0 meson test -C build-sanitize --print-errorlogs

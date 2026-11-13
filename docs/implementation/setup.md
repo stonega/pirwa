@@ -3,7 +3,7 @@
 ## Requirements
 
 Meson ≥ 1.3, a C17 compiler, Ninja, pkg-config, GLib/GIO ≥ 2.76, GTK ≥ 4.12,
-libadwaita ≥ 1.4, and libvirt ≥ 9.0. Development headers are required, not just
+libadwaita ≥ 1.5, libvirt ≥ 9.0, libvirt-glib ≥ 4.0, libxml2 ≥ 2.9, and libosinfo ≥ 1.10. Development headers are required, not just
 runtime libraries. Build checks use clang-format and optionally desktop-file-validate.
 
 Fedora development packages and normal commands are in the root README. Runtime
@@ -68,3 +68,25 @@ runtime library. No system package installation was performed.
 That temporary build environment is not a project dependency or a durable SDK.
 Install `libvirt-devel` normally before creating a new build on this host; remove
 the old build directory or reconfigure after the temporary files disappear.
+
+
+## Implementation host and packaging
+
+The implementation also extracts matching libvirt-glib-devel and libosinfo-devel
+RPMs into the same temporary prefix. GCC libasan/libubsan runtime RPMs were
+extracted to run address/undefined checks without changing system packages.
+For those local sanitizer builds, pass the temporary library directory as a
+linker search path and LD_LIBRARY_PATH. ASAN_OPTIONS=detect_leaks=0 separates
+address/undefined checks from the known dependency leak findings.
+
+Install headers normally on a durable development host. On this host, the
+already-configured build directory can be compiled directly while the temporary
+prefix exists.
+
+The Fedora RPM recipe is packaging/pirwa.spec. Create a source tarball from the
+committed tree with meson dist -C build --no-tests, place its xz archive in the
+RPM SOURCES directory, then run rpmbuild -ba packaging/pirwa.spec after installing
+its BuildRequires. The native Meson install path also works without RPM.
+
+The development AppStream check overrides only the missing-homepage warning.
+A real homepage and controlled application ID are required before publication.

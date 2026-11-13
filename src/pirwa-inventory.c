@@ -1,5 +1,8 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 #include "pirwa-inventory.h"
+#include "config.h"
+#include "pirwa-libvirt.h"
+#include <glib/gi18n.h>
 
 #include <libvirt/libvirt.h>
 #include <libvirt/virterror.h>
@@ -10,26 +13,26 @@ state_label (int state)
   switch (state)
     {
     case VIR_DOMAIN_RUNNING:
-      return "Running";
+      return _ ("Running");
     case VIR_DOMAIN_BLOCKED:
-      return "Blocked";
+      return _ ("Blocked");
     case VIR_DOMAIN_PAUSED:
-      return "Paused";
+      return _ ("Paused");
     case VIR_DOMAIN_SHUTDOWN:
-      return "Shutting down";
+      return _ ("Shutting down");
     case VIR_DOMAIN_SHUTOFF:
-      return "Powered off";
+      return _ ("Powered off");
     case VIR_DOMAIN_CRASHED:
-      return "Crashed";
+      return _ ("Crashed");
     case VIR_DOMAIN_PMSUSPENDED:
-      return "Suspended";
+      return _ ("Suspended");
     default:
-      return "Unknown";
+      return _ ("Unknown");
     }
 }
 
-static void
-set_libvirt_error (GError **error, const char *operation)
+void
+pirwa_libvirt_error (GError **error, const char *operation)
 {
   const virError *detail = virGetLastError ();
   g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED, "%s: %s", operation,
@@ -45,32 +48,21 @@ compare_machines (gconstpointer a, gconstpointer b)
   return order ? order : g_strcmp0 (pirwa_machine_get_uuid (left), pirwa_machine_get_uuid (right));
 }
 
-static GPtrArray *
-load_inventory (const char *uri, GCancellable *cancellable, GError **error)
+GPtrArray *
+pirwa_inventory_read (virConnectPtr connection, GCancellable *cancellable, GError **error)
 {
-  virConnectPtr connection = NULL;
   virDomainStatsRecordPtr *records = NULL;
   g_autoptr (GPtrArray) machines = g_ptr_array_new_with_free_func (g_object_unref);
 
   if (g_cancellable_set_error_if_cancelled (cancellable, error))
     return NULL;
 
-  connection = virConnectOpenReadOnly (uri);
-  if (connection == NULL)
-    {
-      set_libvirt_error (error, "Cannot connect to libvirt");
-      return NULL;
-    }
-
-  if (g_cancellable_set_error_if_cancelled (cancellable, error))
-    goto cleanup;
-
   /* One bulk state query, rather than a round trip for every guest. Name and
    * UUID getters read metadata already held by the returned domain handles. */
   int count = virConnectGetAllDomainStats (connection, VIR_DOMAIN_STATS_STATE, &records, 0);
   if (count < 0)
     {
-      set_libvirt_error (error, "Cannot list virtual machines");
+      pirwa_libvirt_error (error, "Cannot list virtual machines");
       goto cleanup;
     }
 
@@ -86,17 +78,17 @@ load_inventory (const char *uri, GCancellable *cancellable, GError **error)
       name = virDomainGetName (records[i]->dom);
       if (name == NULL || virDomainGetUUIDString (records[i]->dom, uuid) < 0)
         {
-          set_libvirt_error (error, "Cannot read virtual machine identity");
+          pirwa_libvirt_error (error, "Cannot read virtual machine identity");
           goto cleanup;
         }
 
       if (virTypedParamsGetInt (records[i]->params, records[i]->nparams, "state.state", &state) < 0)
         {
-          set_libvirt_error (error, "Cannot read virtual machine state");
+          pirwa_libvirt_error (error, "Cannot read virtual machine state");
           goto cleanup;
         }
 
-      g_ptr_array_add (machines, pirwa_machine_new (uuid, name, state_label (state)));
+      g_ptr_array_add (machines, pirwa_machine_new_full (uuid, name, state_label (state), state));
     }
 
   g_ptr_array_sort (machines, compare_machines);
@@ -104,7 +96,6 @@ load_inventory (const char *uri, GCancellable *cancellable, GError **error)
 cleanup:
   if (records != NULL)
     virDomainStatsRecordListFree (records);
-  virConnectClose (connection);
   return *error ? NULL : g_steal_pointer (&machines);
 }
 
@@ -113,7 +104,18 @@ load_worker (GTask *task, gpointer source_object, gpointer task_data, GCancellab
 {
   (void)source_object;
   g_autoptr (GError) error = NULL;
-  GPtrArray *machines = load_inventory (task_data, cancellable, &error);
+  GPtrArray *machines = NULL;
+  if (!g_cancellable_set_error_if_cancelled (cancellable, &error))
+    {
+      virConnectPtr connection = virConnectOpenReadOnly (task_data);
+      if (connection == NULL)
+        pirwa_libvirt_error (&error, "Cannot connect to libvirt");
+      else
+        {
+          machines = pirwa_inventory_read (connection, cancellable, &error);
+          virConnectClose (connection);
+        }
+    }
 
   if (machines != NULL)
     g_task_return_pointer (task, machines, (GDestroyNotify)g_ptr_array_unref);

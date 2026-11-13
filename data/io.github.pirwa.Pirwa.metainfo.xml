@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.pirwa.Pirwa</id>
+  <name>Pirwa</name>
+  <summary>Manage local virtual machines</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <developer id="io.github.pirwa">
+    <name>Pirwa Contributors</name>
+  </developer>
+  <description>
+    <p>Create Linux virtual machines from local installation media, import
+    standalone qcow2 images, and manage their power and basic resources.</p>
+    <p>Pirwa uses libvirt and a native GNOME interface. Graphical consoles open
+    with virt-viewer in a separate window.</p>
+  </description>
+  <launchable type="desktop-id">io.github.pirwa.Pirwa.desktop</launchable>
+  <provides><binary>pirwa</binary></provides>
+  <content_rating type="oars-1.1"/>
+  <supports><control>pointing</control><control>keyboard</control></supports>
+</component>

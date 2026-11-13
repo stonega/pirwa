@@ -5,6 +5,13 @@ not establish that Pirwa is faster than Boxes. M0 must record a named reference
 machine, distribution, kernel, display server, renderer, dependency versions,
 power profile, and the exact release build before accepting or revising them.
 
+## Implementation measurements
+
+See [recorded results](../research/benchmarks.jsonl) for the release-build
+0/100/1,000-domain synthetic bulk-read samples. The 1,000-domain run measured
+p95 12.898 ms. This is not a real-daemon, first-frame, or guest benchmark.
+The complete release budgets below remain provisional and unverified.
+
 ## Provisional release budgets
 
 | Measure | Target | Conditions |

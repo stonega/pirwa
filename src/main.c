@@ -2,6 +2,8 @@
 #include "config.h"
 #include "pirwa-inventory.h"
 #include "pirwa-window.h"
+#include <glib/gi18n.h>
+#include <locale.h>
 
 static void
 activate (GtkApplication *application, gpointer user_data)
@@ -32,12 +34,16 @@ handle_local_options (GApplication *application, GVariantDict *options, gpointer
 int
 main (int argc, char **argv)
 {
+  setlocale (LC_ALL, "");
+  bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
+  bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+  textdomain (GETTEXT_PACKAGE);
   g_set_application_name ("Pirwa");
   g_set_prgname ("pirwa");
   g_autoptr (AdwApplication) application
       = adw_application_new (PIRWA_APPLICATION_ID, G_APPLICATION_DEFAULT_FLAGS);
   g_application_add_main_option (G_APPLICATION (application), "version", 0, G_OPTION_FLAG_NONE,
-                                 G_OPTION_ARG_NONE, "Show the application version", NULL);
+                                 G_OPTION_ARG_NONE, _ ("Show the application version"), NULL);
   g_signal_connect (application, "handle-local-options", G_CALLBACK (handle_local_options), NULL);
   g_signal_connect (application, "activate", G_CALLBACK (activate), NULL);
   return g_application_run (G_APPLICATION (application), argc, argv);

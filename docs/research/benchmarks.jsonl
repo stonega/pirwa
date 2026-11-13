@@ -1,0 +1,4 @@
+{"driver":"test:///default","domains":1,"warm_samples":25,"first_request_ms":3.557,"warm_p50_ms":0.590,"warm_p95_ms":0.686}
+{"driver":"test:///default","method":"persistent_bulk","domains":0,"p50_ms":0.000,"p95_ms":0.001,"raw_us":[12,0,1,0,0,1,0,0,0,1,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1]}
+{"driver":"test:///default","method":"persistent_bulk","domains":100,"p50_ms":0.594,"p95_ms":0.692,"raw_us":[649,562,585,594,588,588,596,635,600,592,580,591,609,599,584,602,573,621,608,597,585,882,576,692,570]}
+{"driver":"test:///default","method":"persistent_bulk","domains":1000,"p50_ms":7.348,"p95_ms":12.898,"raw_us":[12898,10431,7348,7177,7201,7156,7178,7428,9097,11551,12658,11115,10976,9320,7288,7130,7133,7221,7168,7386,7277,7294,21308,12869,7309]}

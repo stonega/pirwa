@@ -1,12 +1,12 @@
 core = static_library('pirwa-core',
-  ['pirwa-machine.c', 'pirwa-inventory.c'],
-  dependencies: [glib_dep, gio_dep, libvirt_dep],
+  ['pirwa-machine.c', 'pirwa-inventory.c', 'pirwa-config.c', 'pirwa-provision.c', 'pirwa-backend.c'],
+  dependencies: [glib_dep, gio_dep, libvirt_dep, libvirt_glib_dep, xml_dep, osinfo_dep],
   include_directories: project_includes,
 )
 
 core_dep = declare_dependency(
   link_with: core,
-  dependencies: [glib_dep, gio_dep, libvirt_dep],
+  dependencies: [glib_dep, gio_dep, libvirt_dep, libvirt_glib_dep, xml_dep, osinfo_dep],
   include_directories: project_includes,
 )
 

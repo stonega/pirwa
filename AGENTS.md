@@ -1,14 +1,17 @@
 # Pirwa agent instructions
 
 Pirwa is a native GNOME virtual machine manager. Performance and responsiveness
-are product requirements. Use C17, GTK 4, libadwaita, Meson, and the libvirt C API.
-The initial project setup and v0.1 plan are authorized by the user.
+are product requirements. Use C17, GTK 4, libadwaita, Meson, and the libvirt C API with libvirt-glib event integration, libxml2, and libosinfo.
+The project setup, v0.1 plan, and its implementation are authorized by the user.
 
 ## Layout
 
 - `src/`: application, GTK UI, immutable VM snapshots, and libvirt backend.
 - `tests/`: deterministic GLib tests using libvirt's `test:///default` driver.
-- `data/`: desktop integration and application icon.
+- `data/`: desktop/AppStream integration and application icon.
+- `packaging/`: native Fedora RPM recipe.
+- `po/`: gettext catalogs and translation setup.
+- `.github/workflows/`: automated native and sanitizer checks.
 - `docs/design/`: architecture and first-version scope.
 - `docs/implementation/`: setup and technical workflow.
 - `docs/research/`: source-backed investigations and reference review.
@@ -34,13 +37,13 @@ clang-format --dry-run --Werror src/*.[ch] tests/*.c
 
 Use `meson setup build --reconfigure` for an existing build directory. Tests must
 not require KVM, root, a display server, a running daemon, or real guest changes.
-Run applicable checks before finishing. Use `git` for version control.
+Use the opt-in test-kvm executable only with PIRWA_RUN_KVM_TESTS=1. It creates uniquely named disposable resources. Run applicable checks before finishing. Use `git` for version control.
 
 ## Code and performance
 
 - Keep all GTK work on the main thread. Blocking libvirt and filesystem calls
   belong on workers. Never shell out to `virsh` to implement application logic.
-- Keep libvirt handles in the backend. Transfer owned immutable data to the UI.
+- Keep libvirt handles in the backend. Transfer owned snapshots to the UI; update canonical model objects only on the main thread.
 - Prefer bulk queries and virtualized GTK list models. Do not add per-VM polling
   or screenshot timers to the collection screen.
 - Bound concurrent work and make pending work cancellable. Synchronous libvirt

@@ -8,10 +8,15 @@ G_BEGIN_DECLS
 #define PIRWA_TYPE_MACHINE (pirwa_machine_get_type ())
 G_DECLARE_FINAL_TYPE (PirwaMachine, pirwa_machine, PIRWA, MACHINE, GObject)
 
-/* Immutable snapshots: no libvirt handles cross into the GTK layer. */
+/* Workers return snapshots. GTK may update canonical copies on the main thread.
+ * No libvirt handles cross into this model. */
 PirwaMachine *pirwa_machine_new (const char *uuid, const char *name, const char *state);
 const char *pirwa_machine_get_uuid (PirwaMachine *self);
 const char *pirwa_machine_get_name (PirwaMachine *self);
 const char *pirwa_machine_get_state (PirwaMachine *self);
+PirwaMachine *pirwa_machine_new_full (const char *uuid, const char *name, const char *state,
+                                      int state_code);
+int pirwa_machine_get_state_code (PirwaMachine *self);
+void pirwa_machine_update (PirwaMachine *self, PirwaMachine *snapshot);
 
 G_END_DECLS

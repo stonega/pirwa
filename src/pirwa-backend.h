@@ -1,0 +1,53 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+#pragma once
+#include "pirwa-config.h"
+#include "pirwa-machine.h"
+
+#define PIRWA_TYPE_BACKEND (pirwa_backend_get_type ())
+G_DECLARE_FINAL_TYPE (PirwaBackend, pirwa_backend, PIRWA, BACKEND, GObject)
+
+typedef enum
+{
+  PIRWA_REFRESH,
+  PIRWA_RECONNECT,
+  PIRWA_START,
+  PIRWA_SHUTDOWN,
+  PIRWA_REBOOT,
+  PIRWA_PAUSE,
+  PIRWA_RESUME,
+  PIRWA_FORCE_STOP,
+  PIRWA_DETAILS,
+  PIRWA_EDIT,
+  PIRWA_CREATE,
+  PIRWA_REMOVE,
+  PIRWA_CONSOLE
+} PirwaOperation;
+
+typedef struct
+{
+  PirwaOperation operation;
+  const char *uuid;
+  PirwaCreate options;
+  gboolean eject;
+  gboolean delete_disk;
+} PirwaRequest;
+
+typedef struct
+{
+  GPtrArray *machines;
+  GStrv pools;
+  PirwaDetails *details;
+  char *uuid;
+  char *host;
+  GSubprocess *viewer;
+} PirwaReply;
+
+PirwaBackend *pirwa_backend_new (const char *uri);
+const char *pirwa_backend_get_uri (PirwaBackend *self);
+void pirwa_backend_stop (PirwaBackend *self);
+void pirwa_backend_request_async (PirwaBackend *self, const PirwaRequest *request,
+                                  GCancellable *cancellable, GAsyncReadyCallback callback,
+                                  gpointer user_data);
+PirwaReply *pirwa_backend_request_finish (PirwaBackend *self, GAsyncResult *result, GError **error);
+void pirwa_reply_free (PirwaReply *reply);
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (PirwaReply, pirwa_reply_free)
