@@ -56,22 +56,46 @@ It requires neither a running libvirt daemon nor KVM. It must remain the default
 for automated tests. `PIRWA_RUN_KVM_TESTS=1 ./build/tests/test-kvm` is a separate,
 explicitly opt-in workflow using disposable resources; see the README.
 
-Nine default checks cover inventory, configuration, stable model reconciliation,
+Default checks cover inventory, configuration, stable model reconciliation,
 backend behavior, storage rollback/reference protection, 1,000-domain scale, and
-desktop/AppStream metadata, plus Boxes discovery/preferences/cancellation.
+desktop/AppStream metadata, plus Boxes Flatpak installation detection, discovery,
+preferences, import and cancellation.
 None requires a display. `gio-unix-2.0` is an explicit GLib component dependency
 for desktop-entry detection; Fedora's existing glib2-devel package supplies it.
+The usage check covers CPU counter units, idle and multi-core values, network
+byte rates, multi-interface totals, missing samples, counter resets, interface
+changes, and overflow. Backend tests verify read-only bulk telemetry,
+stopped machines, cancellation, and that telemetry does not refresh inventory.
 
 `./build/tests/test-ui --exercise` requires a real desktop display and uses only
 the libvirt test driver. It runs the production window, checks lifecycle actions,
-settings, cancellation of the destructive dialog, accessible header labels,
+settings, cancellation of the destructive dialogs, row-menu selection and UUID
+targeting, accessible header labels,
 search focus, stable selection, creation-button visibility, and closing with a
 detail request pending. Add `--large-text --dark --width 720` for the narrow,
 200% font variant. This is a programmed action test, not physical input or a
 screen-reader certification. `--snapshot FILE.png` captures only Pirwa's window.
 This executable is deliberately excluded from the headless Meson test command.
 
-`./scripts/test-gnome.py --output build/qa/gnome` runs the five UI variants in
+`./build/tests/test-console-ui --output build/qa/viewer` requires a desktop and
+uses two synthetic SPICE definitions with the libvirt test driver. It checks
+automatic embedding, title-bar controls, pop-out/return identity, fullscreen,
+selection changes, popup closure, and collection closure with a surviving popup.
+It also checks that host information and selected VM usage stay in the right
+pane's header, with no bottom bar. The header uses one row, with controls on the
+left and host information, usage, and state grouped on the right. Hidden or
+suspended windows retain their last reading or initial sampling status without polling.
+No real SPICE server or guest is needed; display connection errors are expected.
+Run it inside the isolated desktop with:
+
+```sh
+./scripts/test-gnome.py --output build/qa/viewer-desktop -- \
+  ./build/tests/test-console-ui --output build/qa/viewer
+```
+
+Add `--dark --large-text --width 720` to exercise the narrow 200% text layout.
+
+`./scripts/test-gnome.py --output build/qa/gnome` runs the seven UI variants in
 one disposable GNOME Shell Wayland desktop (1280×800 at 60 Hz). Install
 gnome-shell and dbus-run-session first. Runtime, configuration, data, cache,
 D-Bus, state, and GSettings are isolated; no settings are written to your desktop.
@@ -85,11 +109,21 @@ of the default matrix. For a longer interactive installation check, increase
 command deadline; it does not provision a VM or add audio services. Custom
 commands receive `PIRWA_QA_ISOLATED=1` and must report their own acceptance results.
 
-The matrix includes Boxes onboarding at normal size and at 200% text/dark/720 px.
-Its fixtures verify dismissal, one-time behavior across windows, manual reopening,
-offline Flatpak guidance/rescan, selecting the existing VM without duplication,
-and closing a modal through the window close request while keeping the backend
-alive. The synthetic fixtures do not connect to your real guests.
+The matrix includes Boxes Flatpak onboarding and viewer pop-out/return at normal
+size and at 200% text/dark/720 px. Its fixtures check Flatpak-only rows, offline
+instructions, refresh, dismissal, one-time behavior across windows, manual
+reopening, import connection errors and retry, and first-run suppression after
+uninstalling despite residual definitions. Native domains remain available without
+any import. The synthetic
+fixtures do not connect to your real guests.
+
+The headless `boxes-import` test exercises real libvirt test-driver definitions
+and storage metadata, with temporary files and a small emulation of the upload
+transport that this driver lacks. It checks an independent stopped copy,
+configuration/OS preservation, ownership, source immutability, rejection of
+running/unsupported guests, cancellation/rollback and firmware file protection.
+Actual QEMU boot and a real installed Boxes Flatpak remain integration acceptance
+items; the synthetic driver cannot certify guest boot or deployment compatibility.
 
 This is GNOME Shell and its compositor with a virtual monitor, not a complete
 logged-in hardware session. Missing authentication/camera/PipeWire services and
@@ -97,7 +131,7 @@ the host's AT-SPI activation failure can appear in session logs. The UI exercise
 uses GTK's test accessibility backend; it does not certify screen-reader access.
 The [Linux installation record](../research/linux-install/README.md) describes
 the separate real-guest run, including the private audio services needed by the
-viewer. The five-case matrix above continues to use synthetic VMs only.
+viewer. The seven-case matrix above continues to use synthetic VMs only.
 
 The same tool supports profiling without `--exercise`; the Python standard-library
 wrapper `scripts/profile-ui.py` creates isolated 0–1,000-domain fixtures and saves
@@ -117,6 +151,13 @@ is intended only for test-resource cleanup.
 
 `scripts/benchmark.sh [build-directory]` runs the headless inventory benchmark.
 It uses the built-in test driver and does not touch real guests.
+
+`scripts/profile-console.py` is an opt-in real-guest display profiler. It needs
+`genisoimage`, a local session libvirt socket, a Fedora Workstation Live 43 ISO,
+and the existing virtual GNOME/Python GI tools. Build `benchmark-console` and
+`qa-vm` in release mode first. The runner creates and cleans its own disposable
+VM, volume and pool; it is excluded from default tests. Commands and measurement
+limits are in the [active console record](../research/active-console-performance/README.md).
 
 ## Bootstrap host note
 

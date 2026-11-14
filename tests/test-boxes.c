@@ -48,6 +48,11 @@ setup (Fixture *f, gconstpointer data)
   f->paths->state_file = g_build_filename (f->root, "state", "boxes.ini", NULL);
   f->paths->flatpak_root = g_build_filename (f->root, "flatpak", NULL);
   f->paths->runtime_root = g_build_filename (f->root, "runtime", NULL);
+  f->paths->flatpak_program = g_build_filename (f->root, "flatpak-info", NULL);
+  g_assert_true (
+      g_file_set_contents (f->paths->flatpak_program, "#!/bin/sh\nexit 0\n", -1, &error));
+  g_assert_no_error (error);
+  g_assert_cmpint (g_chmod (f->paths->flatpak_program, 0700), ==, 0);
 }
 
 static void
@@ -77,13 +82,8 @@ test_native (Fixture *f, gconstpointer data)
   g_autoptr (PirwaBoxesScan) scan = pirwa_boxes_scan (f->paths, TRUE, NULL, &error);
   g_assert_no_error (error);
   g_assert_false (scan->already_seen);
-  g_assert_cmpuint (scan->libraries->len, ==, 1);
-  PirwaBoxesLibrary *library = g_ptr_array_index (scan->libraries, 0);
-  g_assert_false (library->flatpak);
-  g_assert_true (library->available);
-  g_assert_cmpstr (library->uri, ==, "test:///default");
-  g_assert_cmpuint (library->machines->len, ==, 1);
-  g_assert_cmpstr (pirwa_machine_get_name (g_ptr_array_index (library->machines, 0)), ==, "test");
+  g_assert_true (scan->installed);
+  g_assert_cmpuint (scan->libraries->len, ==, 0); /* Native domains are already in Session. */
   g_assert_false (g_file_test (f->paths->state_file, G_FILE_TEST_EXISTS));
   /* Discovery does not create definitions, volumes, or an ownership ledger. */
   virConnectPtr connection = virConnectOpenReadOnly ("test:///default");
@@ -92,6 +92,23 @@ test_native (Fixture *f, gconstpointer data)
   virDomainFree (domains[0]);
   free (domains);
   virConnectClose (connection);
+}
+
+static void
+test_not_installed (Fixture *f, gconstpointer data)
+{
+  (void)data;
+  write_file (f->paths->flatpak_program, "#!/bin/sh\nexit 1\n");
+  g_autofree char *file
+      = g_build_filename (f->paths->flatpak_root, "config", "libvirt", "qemu", "old.xml", NULL);
+  write_file (file, "<domain><name>Uninstalled "
+                    "Flatpak</name><uuid>11111111-1111-4111-8111-111111111111</uuid></domain>");
+  g_autoptr (GError) error = NULL;
+  g_autoptr (PirwaBoxesScan) scan = pirwa_boxes_scan (f->paths, TRUE, NULL, &error);
+  g_assert_no_error (error);
+  g_assert_false (scan->installed);
+  g_assert_cmpuint (scan->libraries->len, ==, 0);
+  g_assert_false (g_file_test (f->paths->state_file, G_FILE_TEST_EXISTS));
 }
 
 static void
@@ -149,9 +166,8 @@ test_flatpak (Fixture *f, gconstpointer data)
   g_autoptr (GError) error = NULL;
   g_autoptr (PirwaBoxesScan) scan = pirwa_boxes_scan (f->paths, FALSE, NULL, &error);
   g_assert_no_error (error);
-  g_assert_cmpuint (scan->libraries->len, ==, 2);
-  PirwaBoxesLibrary *library = g_ptr_array_index (scan->libraries, 1);
-  g_assert_true (library->flatpak);
+  g_assert_cmpuint (scan->libraries->len, ==, 1);
+  PirwaBoxesLibrary *library = g_ptr_array_index (scan->libraries, 0);
   g_assert_false (library->available);
   g_assert_null (library->uri);
   g_assert_cmpuint (library->machines->len, ==, 1);
@@ -161,7 +177,7 @@ test_flatpak (Fixture *f, gconstpointer data)
   g_clear_pointer (&scan, pirwa_boxes_scan_free);
   scan = pirwa_boxes_scan (f->paths, FALSE, NULL, &error);
   g_assert_no_error (error);
-  library = g_ptr_array_index (scan->libraries, 1);
+  library = g_ptr_array_index (scan->libraries, 0);
   g_assert_true (library->available);
   g_assert_true (g_str_has_prefix (library->uri, "qemu+unix:///session?socket="));
   close (fd);
@@ -176,7 +192,7 @@ test_remember (Fixture *f, gconstpointer data)
   (void)data;
   g_autoptr (GError) error = NULL;
   int fd = make_socket (f);
-  g_assert_true (pirwa_boxes_remember (f->paths, TRUE, NULL, &error));
+  g_assert_true (pirwa_boxes_remember (f->paths, NULL, &error));
   g_assert_no_error (error);
   struct stat st;
   g_assert_cmpint (g_stat (f->paths->state_file, &st), ==, 0);
@@ -188,15 +204,13 @@ test_remember (Fixture *f, gconstpointer data)
   g_assert_no_error (error);
   g_assert_true (scan->already_seen);
   g_assert_cmpuint (scan->libraries->len, ==, 0);
-  g_assert_nonnull (scan->preferred_uri);
   g_assert_null (scan->warning);
   close (fd);
-  g_assert_true (pirwa_boxes_remember (f->paths, FALSE, NULL, &error));
+  g_assert_true (pirwa_boxes_remember (f->paths, NULL, &error));
   g_assert_no_error (error);
   g_clear_pointer (&scan, pirwa_boxes_scan_free);
   scan = pirwa_boxes_scan (f->paths, TRUE, NULL, &error);
   g_assert_true (scan->already_seen);
-  g_assert_null (scan->preferred_uri);
 }
 
 static void
@@ -209,14 +223,13 @@ test_offline_socket_preference (Fixture *f, gconstpointer data)
       = g_build_filename (f->paths->runtime_root, "libvirt", "virtqemud-sock", NULL);
   g_assert_cmpint (g_rename (old, modular), ==, 0);
   g_autoptr (GError) error = NULL;
-  g_assert_true (pirwa_boxes_remember (f->paths, TRUE, NULL, &error));
+  g_assert_true (pirwa_boxes_remember (f->paths, NULL, &error));
   g_assert_no_error (error);
   close (fd);
   g_assert_cmpint (g_unlink (modular), ==, 0);
   g_autoptr (PirwaBoxesScan) scan = pirwa_boxes_scan (f->paths, TRUE, NULL, &error);
   g_assert_no_error (error);
   g_assert_true (scan->already_seen);
-  g_assert_true (g_str_has_suffix (scan->preferred_uri, "/virtqemud-sock"));
 }
 
 static void
@@ -230,7 +243,7 @@ test_cancel (Fixture *f, gconstpointer data)
   g_assert_null (scan);
   g_assert_error (error, G_IO_ERROR, G_IO_ERROR_CANCELLED);
   g_clear_error (&error);
-  g_assert_false (pirwa_boxes_remember (f->paths, FALSE, cancel, &error));
+  g_assert_false (pirwa_boxes_remember (f->paths, cancel, &error));
   g_assert_error (error, G_IO_ERROR, G_IO_ERROR_CANCELLED);
   g_assert_false (g_file_test (f->paths->state_file, G_FILE_TEST_EXISTS));
 }
@@ -262,7 +275,7 @@ test_async (Fixture *f, gconstpointer data)
   pirwa_boxes_scan_async (f->paths, TRUE, NULL, loaded, &test);
   g_clear_pointer (&f->paths, pirwa_boxes_paths_free);
   g_main_loop_run (loop);
-  g_assert_cmpuint (test.scan->libraries->len, ==, 1);
+  g_assert_cmpuint (test.scan->libraries->len, ==, 0);
   pirwa_boxes_scan_free (test.scan);
 }
 
@@ -271,6 +284,8 @@ main (int argc, char **argv)
 {
   g_test_init (&argc, &argv, NULL);
   g_test_add ("/boxes/native-library", Fixture, NULL, setup, test_native, teardown);
+  g_test_add ("/boxes/not-installed-with-leftover-data", Fixture, NULL, setup, test_not_installed,
+              teardown);
   g_test_add ("/boxes/empty-library", Fixture, NULL, setup, test_empty, teardown);
   g_test_add ("/boxes/flatpak-read-only-discovery", Fixture, NULL, setup, test_flatpak, teardown);
   g_test_add ("/boxes/one-time-preference", Fixture, NULL, setup, test_remember, teardown);

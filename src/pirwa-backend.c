@@ -20,10 +20,12 @@ typedef struct
   GCancellable *shutdown;
   char *uri;
   virConnectPtr connection;
+  PirwaInventoryCache *inventory_cache;
   int event_id;
   gboolean close_registered;
   gint stopping;
   gint refresh_pending;
+  gint metadata_dirty;
   guint retries;
   gint64 last_progress;
   guint64 serial;
@@ -60,6 +62,7 @@ job_free (gpointer data)
   Job *job = data;
   g_clear_object (&job->task);
   g_free ((char *)job->request.uuid);
+  g_free ((char *)job->request.source_uri);
   g_free (job->request.options.name);
   g_free (job->request.options.source);
   g_free (job->request.options.pool);
@@ -177,8 +180,9 @@ lifecycle (virConnectPtr connection, virDomainPtr domain, int event, int detail,
 {
   (void)connection;
   (void)domain;
-  (void)event;
   (void)detail;
+  if (event == VIR_DOMAIN_EVENT_DEFINED)
+    g_atomic_int_set (&((BackendState *)opaque)->metadata_dirty, 1);
   queue_event (opaque, PIRWA_REFRESH);
   return 0;
 }
@@ -319,9 +323,13 @@ execute (BackendState *state, const PirwaRequest *request, GCancellable *cancell
     close_connection (state);
   if (!connect_backend (state, error))
     return NULL;
+  gboolean metadata_dirty = g_atomic_int_compare_and_exchange (&state->metadata_dirty, 1, 0);
+  if (request->operation == PIRWA_RECONNECT || describe_host || metadata_dirty)
+    pirwa_inventory_cache_clear (state->inventory_cache);
   PirwaReply *reply = g_new0 (PirwaReply, 1);
   virDomainPtr domain = NULL;
-  if (request->operation >= PIRWA_START && request->operation != PIRWA_CREATE)
+  if (request->operation >= PIRWA_START && request->operation != PIRWA_CREATE
+      && request->operation != PIRWA_IMPORT_BOXES)
     {
       if (!request->uuid || !g_uuid_string_is_valid (request->uuid))
         {
@@ -358,6 +366,11 @@ execute (BackendState *state, const PirwaRequest *request, GCancellable *cancell
       break;
     case PIRWA_FORCE_STOP:
       status = virDomainDestroy (domain);
+      break;
+    case PIRWA_USAGE:
+      if (!pirwa_usage_read (domain, &reply->usage, error)
+          || g_cancellable_set_error_if_cancelled (cancellable, error))
+        goto fail;
       break;
     case PIRWA_DETAILS:
       {
@@ -440,6 +453,13 @@ execute (BackendState *state, const PirwaRequest *request, GCancellable *cancell
       if (!reply->uuid)
         goto fail;
       break;
+    case PIRWA_IMPORT_BOXES:
+      reply->uuid
+          = pirwa_provision_import_boxes (state->connection, request->source_uri, request->uuid,
+                                          cancellable, progress, state, error);
+      if (!reply->uuid)
+        goto fail;
+      break;
     default:
       break;
     }
@@ -454,12 +474,14 @@ execute (BackendState *state, const PirwaRequest *request, GCancellable *cancell
       domain = NULL;
     }
   if (request->operation != PIRWA_DETAILS && request->operation != PIRWA_CONSOLE
-      && request->operation != PIRWA_GRAPHICS_FD)
+      && request->operation != PIRWA_GRAPHICS_FD && request->operation != PIRWA_USAGE)
     {
       /* A completed mutation stays successful even if the follow-up read fails.
        * Its lifecycle event or manual refresh will reconcile the collection. */
       g_autoptr (GError) read_error = NULL;
-      reply->machines = pirwa_inventory_read (state->connection, NULL, &read_error);
+      reply->machines = pirwa_inventory_read_cached (
+          state->connection, state->inventory_cache,
+          request->operation <= PIRWA_RECONNECT ? cancellable : NULL, &read_error);
       if (!reply->machines && request->operation <= PIRWA_RECONNECT)
         {
           g_propagate_error (error, g_steal_pointer (&read_error));
@@ -493,6 +515,7 @@ static gpointer
 worker (gpointer data)
 {
   BackendState *state = data;
+  state->inventory_cache = pirwa_inventory_cache_new ();
   while (TRUE)
     {
       Job *job;
@@ -557,6 +580,7 @@ worker (gpointer data)
       job_free (job);
     }
   close_connection (state);
+  pirwa_inventory_cache_free (state->inventory_cache);
   state_unref (state);
   return NULL;
 }
@@ -644,6 +668,7 @@ pirwa_backend_request_async (PirwaBackend *self, const PirwaRequest *request,
   g_task_set_check_cancellable (job->task, FALSE);
   job->request = *request;
   job->request.uuid = g_strdup (request->uuid);
+  job->request.source_uri = g_strdup (request->source_uri);
   job->request.options.name = g_strdup (request->options.name);
   job->request.options.source = g_strdup (request->options.source);
   job->request.options.pool = g_strdup (request->options.pool);

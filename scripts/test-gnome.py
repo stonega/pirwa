@@ -3,6 +3,7 @@
 import argparse
 import json
 import os
+import re
 from pathlib import Path
 import runpy
 import shutil
@@ -89,7 +90,7 @@ def session(args):
     runtime = Path(args.session_root) / "runtime"
     socket = runtime / "pirwa-qa-wayland"
     shell_args = ["gnome-shell", "--headless", "--wayland", "--no-x11",
-                  "--virtual-monitor", "1280x800@60",
+                  "--virtual-monitor", args.monitor,
                   "--wayland-display", socket.name]
     report = {
         "source_commit": subprocess.check_output(
@@ -109,18 +110,34 @@ def session(args):
     env = dict(os.environ, WAYLAND_DISPLAY=socket.name, GDK_BACKEND="wayland")
 
     def execute(name, command):
-        result = subprocess.run(command, cwd=ROOT, env=env, capture_output=True,
-                                text=True, timeout=args.command_timeout)
-        (output / f"{name}.stdout.log").write_text(result.stdout)
-        (output / f"{name}.stderr.log").write_text(result.stderr)
-        case = {"name": name, "command": command, "returncode": result.returncode}
+        child = subprocess.Popen(command, cwd=ROOT, env=env, stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE, text=True)
+        timed_out = False
         try:
-            case["metrics"] = json.loads(result.stdout)
+            stdout, stderr = child.communicate(timeout=args.command_timeout)
+        except subprocess.TimeoutExpired:
+            # Real-guest commands own resources beyond this process. Let their
+            # SIGTERM/finally cleanup run before forcing an unresponsive child.
+            timed_out = True
+            child.terminate()
+            try:
+                stdout, stderr = child.communicate(timeout=30)
+            except subprocess.TimeoutExpired:
+                child.kill()
+                stdout, stderr = child.communicate()
+        (output / f"{name}.stdout.log").write_text(stdout)
+        (output / f"{name}.stderr.log").write_text(stderr)
+        case = {"name": name, "command": command, "returncode": child.returncode}
+        try:
+            case["metrics"] = json.loads(stdout)
         except json.JSONDecodeError:
             pass
         report["cases"].append(case)
-        if result.returncode:
-            raise RuntimeError(f"{name} failed ({result.returncode}); see {output}")
+        if timed_out:
+            case["timed_out"] = True
+            raise RuntimeError(f"{name} timed out after {args.command_timeout}s; see {output}")
+        if child.returncode:
+            raise RuntimeError(f"{name} failed ({child.returncode}); see {output}")
         print(f"PASS {name}", flush=True)
 
     with (output / "gnome-shell.log").open("w") as log:
@@ -152,6 +169,10 @@ def session(args):
                 execute("boxes", [binary, "--boxes-exercise", "--snapshot", str(output / "boxes.png")])
                 execute("boxes-large-dark", [binary, "--boxes-exercise", "--large-text", "--dark",
                                              "--width", "720", "--snapshot", str(output / "boxes-large-dark.png")])
+                viewer = str((ROOT / args.build / "tests/test-console-ui").resolve())
+                execute("viewer", [viewer, "--output", str(output / "viewer")])
+                execute("viewer-large-dark", [viewer, "--large-text", "--dark", "--width", "720",
+                                               "--output", str(output / "viewer-large-dark")])
             report["passed"] = True
         except Exception as error:
             report["error"] = str(error)
@@ -171,6 +192,8 @@ def session(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--build", default="build")
+    parser.add_argument("--monitor", default="1280x800@60",
+                        help="Virtual monitor WxH@Hz (default: 1280x800@60)")
     parser.add_argument("--output", type=Path, default=ROOT / "build/qa/gnome")
     parser.add_argument("--session-root", help=argparse.SUPPRESS)
     parser.add_argument("--command-timeout", type=int, default=600,
@@ -178,6 +201,10 @@ def main():
     parser.add_argument("command", nargs=argparse.REMAINDER,
                         help="Optional command after --, run instead of the default UI matrix")
     args = parser.parse_args()
+    monitor = re.fullmatch(r"(\d+)x(\d+)@(\d+)", args.monitor)
+    if not monitor or not (640 <= int(monitor[1]) <= 3840
+                           and 480 <= int(monitor[2]) <= 2160 and 20 <= int(monitor[3]) <= 120):
+        parser.error("Use a monitor from 640x480 to 3840x2160 at 20–120 Hz")
     if not 1 <= args.command_timeout <= 7200:
         parser.error("Use a command timeout between 1 and 7200 seconds")
     if args.command[:1] == ["--"]:
@@ -203,7 +230,7 @@ def main():
                    XDG_SESSION_TYPE="wayland", GVFS_DISABLE_FUSE="1", LC_ALL="C")
         env["PIRWA_QA_ISOLATED"] = "1"
         command = ["dbus-run-session", "--", sys.executable, str(Path(__file__).resolve()),
-                   "--build", args.build, "--output", str(args.output),
+                   "--build", args.build, "--monitor", args.monitor, "--output", str(args.output),
                    "--session-root", directory]
         command += ["--command-timeout", str(args.command_timeout)]
         if args.command:

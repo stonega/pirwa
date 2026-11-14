@@ -3,17 +3,38 @@
 #include <linux/input-event-codes.h>
 #include <string.h>
 
+gboolean
+pirwa_frame_valid (const SpiceDisplayPrimary *p)
+{
+  if (!p->data || p->width < 1 || p->height < 1 || p->width > 8192 || p->height > 8192)
+    return FALSE;
+  gboolean rgb32 = p->format == SPICE_SURFACE_FMT_32_xRGB || p->format == SPICE_SURFACE_FMT_32_ARGB;
+  if (!rgb32 && p->format != SPICE_SURFACE_FMT_16_555 && p->format != SPICE_SURFACE_FMT_16_565)
+    return FALSE;
+  return p->stride >= p->width * (rgb32 ? 4 : 2);
+}
+
+GdkTexture *
+pirwa_frame_texture_rect (const SpiceDisplayPrimary *p, const cairo_rectangle_int_t *rect)
+{
+  if (!pirwa_frame_valid (p) || rect->x < 0 || rect->y < 0 || rect->width < 1 || rect->height < 1
+      || (gint64)rect->x + rect->width > p->width || (gint64)rect->y + rect->height > p->height)
+    return NULL;
+  int pixel_size
+      = p->format == SPICE_SURFACE_FMT_32_xRGB || p->format == SPICE_SURFACE_FMT_32_ARGB ? 4 : 2;
+  SpiceDisplayPrimary crop = *p;
+  crop.width = rect->width;
+  crop.height = rect->height;
+  crop.data += (gsize)rect->y * p->stride + (gsize)rect->x * pixel_size;
+  return pirwa_frame_texture (&crop, NULL, NULL);
+}
+
 GdkTexture *
 pirwa_frame_texture (const SpiceDisplayPrimary *p, GdkTexture *previous, cairo_region_t *damage)
 {
-  if (!p->data || p->width < 1 || p->height < 1 || p->width > 8192 || p->height > 8192)
+  if (!pirwa_frame_valid (p))
     return NULL;
   gboolean rgb32 = p->format == SPICE_SURFACE_FMT_32_xRGB || p->format == SPICE_SURFACE_FMT_32_ARGB;
-  if (!rgb32 && p->format != SPICE_SURFACE_FMT_16_555 && p->format != SPICE_SURFACE_FMT_16_565)
-    return NULL;
-  int pixel_size = rgb32 ? 4 : 2;
-  if (p->stride < p->width * pixel_size)
-    return NULL;
   gsize stride = (gsize)p->width * 4;
   guint8 *copy = g_malloc_n (stride, p->height);
   for (int y = 0; y < p->height; y++)

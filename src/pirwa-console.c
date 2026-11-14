@@ -2,22 +2,15 @@
 #include "pirwa-console.h"
 #include "config.h"
 #include "pirwa-backend.h"
+#include "pirwa-display.h"
 #include "pirwa-frame.h"
 #include <glib/gi18n.h>
 #include <math.h>
 #include <unistd.h>
 
-typedef struct
-{
-  GtkWidget parent_instance;
-  PirwaConsole *console; /* Owned by the containing window. */
-} PirwaDisplay;
-typedef GtkWidgetClass PirwaDisplayClass;
-G_DEFINE_TYPE (PirwaDisplay, pirwa_display, GTK_TYPE_WIDGET)
-
 struct _PirwaConsole
 {
-  AdwWindow parent_instance;
+  GtkBox parent_instance;
   PirwaBackend *backend;
   GCancellable *pending;
   SpiceSession *session;
@@ -25,13 +18,16 @@ struct _PirwaConsole
   SpiceInputsChannel *inputs;
   SpiceChannel *display_channel;
   SpiceDisplayPrimary primary;
-  GdkTexture *texture;
-  cairo_region_t *damage;
   GtkWidget *display;
   GtkWidget *release;
+  AdwToolbarView *toolbar;
+  GtkWidget *header;
   GtkStack *stack;
   AdwStatusPage *status;
-  GtkLabel *hint;
+  GtkWindow *host;  /* Borrowed from the widget root. */
+  GtkWindow *popup; /* Owns this widget while detached. */
+  GdkTexture *preview;
+  char *name;
   char *uuid;
   guint generation;
   guint reconnect_source;
@@ -48,7 +44,7 @@ struct _PirwaConsole
   double pointer_y;
   double scroll_y;
 };
-G_DEFINE_FINAL_TYPE (PirwaConsole, pirwa_console, ADW_TYPE_WINDOW)
+G_DEFINE_FINAL_TYPE (PirwaConsole, pirwa_console, GTK_TYPE_BOX)
 
 static void start_session (PirwaConsole *self);
 static void disconnect_session (PirwaConsole *self);
@@ -65,7 +61,7 @@ show_status (PirwaConsole *self, const char *title, const char *description)
 static GdkToplevel *
 toplevel (PirwaConsole *self)
 {
-  GdkSurface *surface = gtk_native_get_surface (GTK_NATIVE (self));
+  GdkSurface *surface = self->host ? gtk_native_get_surface (GTK_NATIVE (self->host)) : NULL;
   return surface && GDK_IS_TOPLEVEL (surface) ? GDK_TOPLEVEL (surface) : NULL;
 }
 
@@ -92,7 +88,6 @@ release_input (PirwaConsole *self)
   GdkToplevel *surface = toplevel (self);
   if (surface)
     gdk_toplevel_restore_system_shortcuts (surface);
-  gtk_label_set_text (self->hint, _ ("Click the display to send input to the machine"));
 }
 
 static void
@@ -100,7 +95,9 @@ release_clicked (GtkButton *button, PirwaConsole *self)
 {
   (void)button;
   release_input (self);
-  gtk_widget_grab_focus (self->release);
+  if (self->popup)
+    adw_toolbar_view_set_reveal_top_bars (self->toolbar, TRUE);
+  gtk_widget_grab_focus (self->popup ? self->release : self->display);
 }
 
 static gboolean
@@ -131,79 +128,20 @@ schedule_resize (PirwaConsole *self)
 }
 
 static void
-pirwa_display_size_allocate (GtkWidget *widget, int width, int height, int baseline)
+display_resized (PirwaDisplay *display, int width, int height, PirwaConsole *self)
 {
+  (void)display;
   (void)width;
   (void)height;
-  (void)baseline;
-  PirwaConsole *self = ((PirwaDisplay *)widget)->console;
-  if (self && !self->closed)
+  if (!self->closed)
     schedule_resize (self);
-}
-
-static void
-pirwa_display_snapshot (GtkWidget *widget, GtkSnapshot *snapshot)
-{
-  PirwaConsole *self = ((PirwaDisplay *)widget)->console;
-  if (!self || self->closed)
-    return;
-  graphene_rect_t bounds
-      = GRAPHENE_RECT_INIT (0, 0, gtk_widget_get_width (widget), gtk_widget_get_height (widget));
-  const GdkRGBA black = { 0, 0, 0, 1 };
-  gtk_snapshot_append_color (snapshot, &black, &bounds);
-  if (self->primary.data && self->damage && !cairo_region_is_empty (self->damage))
-    {
-      GdkTexture *frame = pirwa_frame_texture (&self->primary, self->texture, self->damage);
-      if (frame)
-        g_set_object (&self->texture, frame);
-      g_clear_object (&frame);
-      g_clear_pointer (&self->damage, cairo_region_destroy);
-    }
-  if (!self->texture)
-    return;
-  int width = gdk_texture_get_width (self->texture);
-  int height = gdk_texture_get_height (self->texture);
-  double scale = MIN (bounds.size.width / width, bounds.size.height / height);
-  graphene_rect_t rect = GRAPHENE_RECT_INIT ((bounds.size.width - width * scale) / 2,
-                                             (bounds.size.height - height * scale) / 2,
-                                             width * scale, height * scale);
-  gtk_snapshot_append_texture (snapshot, self->texture, &rect);
-}
-
-static void
-pirwa_display_class_init (PirwaDisplayClass *klass)
-{
-  klass->snapshot = pirwa_display_snapshot;
-  klass->size_allocate = pirwa_display_size_allocate;
-  gtk_widget_class_set_accessible_role (klass, GTK_ACCESSIBLE_ROLE_IMG);
-}
-
-static void
-pirwa_display_init (PirwaDisplay *self)
-{
-  gtk_widget_set_focusable (GTK_WIDGET (self), TRUE);
-  gtk_widget_set_hexpand (GTK_WIDGET (self), TRUE);
-  gtk_widget_set_vexpand (GTK_WIDGET (self), TRUE);
-  gtk_accessible_update_property (GTK_ACCESSIBLE (self), GTK_ACCESSIBLE_PROPERTY_LABEL,
-                                  _ ("Virtual machine display"), -1);
 }
 
 static void
 invalidate (SpiceChannel *channel, int x, int y, int width, int height, PirwaConsole *self)
 {
-  if (channel != self->display_channel || !self->primary.data || width <= 0 || height <= 0)
-    return;
-  cairo_rectangle_int_t rect = { MAX (0, x), MAX (0, y), 0, 0 };
-  rect.width = MIN ((gint64)self->primary.width, (gint64)x + width) - rect.x;
-  rect.height = MIN ((gint64)self->primary.height, (gint64)y + height) - rect.y;
-  if (rect.width <= 0 || rect.height <= 0)
-    return;
-  if (!self->damage)
-    self->damage = cairo_region_create ();
-  cairo_region_union_rectangle (self->damage, &rect);
-  /* GTK coalesces invalidations. No continuous tick, screenshot timer, or redraw
-   * runs while the guest is idle or this window is hidden. */
-  gtk_widget_queue_draw (self->display);
+  if (channel == self->display_channel)
+    pirwa_display_invalidate (PIRWA_DISPLAY (self->display), x, y, width, height);
 }
 
 static void
@@ -212,9 +150,7 @@ primary_destroy (SpiceChannel *channel, PirwaConsole *self)
   if (channel != self->display_channel)
     return;
   memset (&self->primary, 0, sizeof self->primary);
-  g_clear_object (&self->texture);
-  g_clear_pointer (&self->damage, cairo_region_destroy);
-  gtk_widget_queue_draw (self->display);
+  pirwa_display_clear (PIRWA_DISPLAY (self->display));
 }
 
 static void
@@ -230,8 +166,7 @@ primary_create (SpiceChannel *channel, int format, int width, int height, int st
                                          .data = data };
   /* Validate before exposing the display; malformed/unimplemented formats are
    * reported rather than leaving a permanently blank window. */
-  self->texture = pirwa_frame_texture (&self->primary, NULL, NULL);
-  if (!self->texture)
+  if (!pirwa_display_set_primary (PIRWA_DISPLAY (self->display), &self->primary))
     {
       show_status (self, _ ("Unsupported display"),
                    _ ("This console supports RGB displays up to 8192 × 8192 pixels."));
@@ -239,7 +174,6 @@ primary_create (SpiceChannel *channel, int format, int width, int height, int st
     }
   self->retries = 0;
   gtk_stack_set_visible_child_name (self->stack, "display");
-  invalidate (channel, 0, 0, width, height, self);
   schedule_resize (self);
 }
 
@@ -609,7 +543,6 @@ pointer_pressed (GtkGestureClick *gesture, int count, double x, double y, PirwaC
     return;
   self->captured = TRUE;
   gtk_widget_grab_focus (self->display);
-  gtk_label_set_text (self->hint, _ ("Press Ctrl+Alt to release input"));
   GdkToplevel *surface = toplevel (self);
   if (surface)
     gdk_toplevel_inhibit_system_shortcuts (
@@ -666,11 +599,10 @@ focus_left (GtkEventControllerFocus *controller, PirwaConsole *self)
 }
 
 static void
-active_changed (PirwaConsole *self, GParamSpec *spec, gpointer data)
+active_changed (GtkWindow *window, GParamSpec *spec, PirwaConsole *self)
 {
   (void)spec;
-  (void)data;
-  if (!gtk_window_is_active (GTK_WINDOW (self)))
+  if (!gtk_window_is_active (window))
     release_input (self);
 }
 
@@ -678,10 +610,71 @@ static void
 fullscreen_clicked (GtkButton *button, PirwaConsole *self)
 {
   (void)button;
-  if (gtk_window_is_fullscreen (GTK_WINDOW (self)))
-    gtk_window_unfullscreen (GTK_WINDOW (self));
+  if (!self->popup)
+    return;
+  if (gtk_window_is_fullscreen (self->popup))
+    gtk_window_unfullscreen (self->popup);
   else
-    gtk_window_fullscreen (GTK_WINDOW (self));
+    gtk_window_fullscreen (self->popup);
+}
+
+static void
+fullscreen_changed (GtkWindow *window, GParamSpec *spec, PirwaConsole *self)
+{
+  (void)spec;
+  gboolean fullscreen = self->popup && gtk_window_is_fullscreen (window);
+  adw_toolbar_view_set_top_bar_style (self->toolbar,
+                                      fullscreen ? ADW_TOOLBAR_RAISED : ADW_TOOLBAR_FLAT);
+  adw_toolbar_view_set_extend_content_to_top_edge (self->toolbar, !self->popup || fullscreen);
+  adw_toolbar_view_set_reveal_top_bars (self->toolbar, self->popup && !fullscreen);
+}
+
+static void
+pirwa_console_root (GtkWidget *widget)
+{
+  PirwaConsole *self = PIRWA_CONSOLE_VIEW (widget);
+  GTK_WIDGET_CLASS (pirwa_console_parent_class)->root (widget);
+  GtkRoot *root = gtk_widget_get_root (widget);
+  if (GTK_IS_WINDOW (root))
+    {
+      self->host = GTK_WINDOW (root);
+      g_signal_connect_object (root, "notify::is-active", G_CALLBACK (active_changed), self, 0);
+      g_signal_connect_object (root, "notify::fullscreened", G_CALLBACK (fullscreen_changed), self,
+                               0);
+      fullscreen_changed (self->host, NULL, self);
+    }
+}
+
+static void
+pirwa_console_unroot (GtkWidget *widget)
+{
+  PirwaConsole *self = PIRWA_CONSOLE_VIEW (widget);
+  release_input (self);
+  if (self->host)
+    g_signal_handlers_disconnect_by_data (self->host, self);
+  self->host = NULL;
+  GTK_WIDGET_CLASS (pirwa_console_parent_class)->unroot (widget);
+}
+
+static void
+toolbar_motion (GtkEventControllerMotion *controller, double x, double y, PirwaConsole *self)
+{
+  (void)controller;
+  (void)x;
+  if (!self->popup || !gtk_window_is_fullscreen (self->popup))
+    return;
+  if (y <= 3)
+    adw_toolbar_view_set_reveal_top_bars (self->toolbar, TRUE);
+  else if (y > gtk_widget_get_height (self->header))
+    adw_toolbar_view_set_reveal_top_bars (self->toolbar, FALSE);
+}
+
+static void
+toolbar_left (GtkEventControllerMotion *controller, PirwaConsole *self)
+{
+  (void)controller;
+  if (self->popup && gtk_window_is_fullscreen (self->popup))
+    adw_toolbar_view_set_reveal_top_bars (self->toolbar, FALSE);
 }
 
 static void
@@ -698,28 +691,32 @@ stop_console (PirwaConsole *self)
 }
 
 static gboolean
-close_requested (GtkWindow *window, gpointer data)
+close_requested (GtkWindow *window, PirwaConsole *self)
 {
-  (void)data;
-  stop_console (PIRWA_CONSOLE_WINDOW (window));
+  (void)window;
+  g_signal_emit_by_name (self, "return-requested");
+  if (!self->popup)
+    return TRUE;
+  self->popup = NULL;
+  stop_console (self);
   return FALSE;
 }
 
 static void
 pirwa_console_dispose (GObject *object)
 {
-  PirwaConsole *self = PIRWA_CONSOLE_WINDOW (object);
+  PirwaConsole *self = PIRWA_CONSOLE_VIEW (object);
   stop_console (self);
   g_clear_object (&self->backend);
-  g_clear_object (&self->texture);
-  g_clear_pointer (&self->damage, cairo_region_destroy);
+  g_clear_object (&self->preview);
   G_OBJECT_CLASS (pirwa_console_parent_class)->dispose (object);
 }
 
 static void
 pirwa_console_finalize (GObject *object)
 {
-  g_free (PIRWA_CONSOLE_WINDOW (object)->uuid);
+  g_free (PIRWA_CONSOLE_VIEW (object)->uuid);
+  g_free (PIRWA_CONSOLE_VIEW (object)->name);
   G_OBJECT_CLASS (pirwa_console_parent_class)->finalize (object);
 }
 
@@ -728,31 +725,32 @@ pirwa_console_class_init (PirwaConsoleClass *klass)
 {
   G_OBJECT_CLASS (klass)->dispose = pirwa_console_dispose;
   G_OBJECT_CLASS (klass)->finalize = pirwa_console_finalize;
+  GTK_WIDGET_CLASS (klass)->root = pirwa_console_root;
+  GTK_WIDGET_CLASS (klass)->unroot = pirwa_console_unroot;
+  g_signal_new ("return-requested", G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST, 0, NULL, NULL,
+                NULL, G_TYPE_NONE, 0);
 }
 
 static void
 pirwa_console_init (PirwaConsole *self)
 {
-  gtk_window_set_default_size (GTK_WINDOW (self), 1024, 768);
-  GtkWidget *toolbar = adw_toolbar_view_new ();
-  GtkWidget *header = adw_header_bar_new ();
+  gtk_orientable_set_orientation (GTK_ORIENTABLE (self), GTK_ORIENTATION_VERTICAL);
+  gtk_widget_set_hexpand (GTK_WIDGET (self), TRUE);
+  gtk_widget_set_vexpand (GTK_WIDGET (self), TRUE);
+  self->toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
+  self->header = adw_header_bar_new ();
   self->release = gtk_button_new_with_label (_ ("Release Input"));
   gtk_widget_set_tooltip_text (self->release, _ ("Release keyboard and pointer (Ctrl+Alt)"));
   g_signal_connect (self->release, "clicked", G_CALLBACK (release_clicked), self);
-  adw_header_bar_pack_start (ADW_HEADER_BAR (header), self->release);
+  adw_header_bar_pack_start (ADW_HEADER_BAR (self->header), self->release);
   GtkWidget *fullscreen = gtk_button_new_from_icon_name ("view-fullscreen-symbolic");
   gtk_widget_set_tooltip_text (fullscreen, _ ("Toggle Fullscreen"));
   g_signal_connect (fullscreen, "clicked", G_CALLBACK (fullscreen_clicked), self);
-  adw_header_bar_pack_end (ADW_HEADER_BAR (header), fullscreen);
-  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), header);
-  self->hint = GTK_LABEL (gtk_label_new (_ ("Click the display to send input to the machine")));
-  gtk_widget_add_css_class (GTK_WIDGET (self->hint), "dim-label");
-  gtk_widget_set_margin_top (GTK_WIDGET (self->hint), 6);
-  gtk_widget_set_margin_bottom (GTK_WIDGET (self->hint), 6);
-  adw_toolbar_view_add_bottom_bar (ADW_TOOLBAR_VIEW (toolbar), GTK_WIDGET (self->hint));
+  adw_header_bar_pack_end (ADW_HEADER_BAR (self->header), fullscreen);
+  adw_toolbar_view_add_top_bar (self->toolbar, self->header);
   self->stack = GTK_STACK (gtk_stack_new ());
-  self->display = g_object_new (pirwa_display_get_type (), NULL);
-  ((PirwaDisplay *)self->display)->console = self;
+  self->display = pirwa_display_new ();
+  g_signal_connect_object (self->display, "resize", G_CALLBACK (display_resized), self, 0);
   gtk_stack_add_named (self->stack, self->display, "display");
   self->status = ADW_STATUS_PAGE (adw_status_page_new ());
   adw_status_page_set_icon_name (self->status, "video-display-symbolic");
@@ -761,8 +759,18 @@ pirwa_console_init (PirwaConsole *self)
   g_signal_connect (reconnect, "clicked", G_CALLBACK (reconnect_clicked), self);
   adw_status_page_set_child (self->status, reconnect);
   gtk_stack_add_named (self->stack, GTK_WIDGET (self->status), "status");
-  adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar), GTK_WIDGET (self->stack));
-  adw_window_set_content (ADW_WINDOW (self), toolbar);
+  adw_toolbar_view_set_content (self->toolbar, GTK_WIDGET (self->stack));
+  gtk_widget_set_vexpand (GTK_WIDGET (self->toolbar), TRUE);
+  gtk_box_append (GTK_BOX (self), GTK_WIDGET (self->toolbar));
+  adw_toolbar_view_set_extend_content_to_top_edge (self->toolbar, TRUE);
+  adw_toolbar_view_set_reveal_top_bars (self->toolbar, FALSE);
+
+  GtkEventController *toolbar_pointer = gtk_event_controller_motion_new ();
+  gtk_event_controller_set_propagation_phase (toolbar_pointer, GTK_PHASE_CAPTURE);
+  g_signal_connect (toolbar_pointer, "enter", G_CALLBACK (toolbar_motion), self);
+  g_signal_connect (toolbar_pointer, "motion", G_CALLBACK (toolbar_motion), self);
+  g_signal_connect (toolbar_pointer, "leave", G_CALLBACK (toolbar_left), self);
+  gtk_widget_add_controller (GTK_WIDGET (self->toolbar), toolbar_pointer);
 
   GtkEventController *key = gtk_event_controller_key_new ();
   g_signal_connect (key, "key-pressed", G_CALLBACK (key_pressed), self);
@@ -783,31 +791,88 @@ pirwa_console_init (PirwaConsole *self)
   GtkEventController *focus = gtk_event_controller_focus_new ();
   g_signal_connect (focus, "leave", G_CALLBACK (focus_left), self);
   gtk_widget_add_controller (self->display, focus);
-  g_signal_connect (self, "close-request", G_CALLBACK (close_requested), NULL);
-  g_signal_connect (self, "notify::is-active", G_CALLBACK (active_changed), NULL);
 }
 
-void
-pirwa_console_present (GtkApplication *application, const char *uri, const char *uuid,
-                       const char *name)
+PirwaConsole *
+pirwa_console_new (const char *uri, const char *uuid, const char *name)
 {
-  for (GList *item = gtk_application_get_windows (application); item; item = item->next)
-    if (PIRWA_IS_CONSOLE_WINDOW (item->data))
-      {
-        PirwaConsole *other = item->data;
-        if (!other->closed && g_strcmp0 (other->uuid, uuid) == 0
-            && g_str_equal (pirwa_backend_get_uri (other->backend), uri))
-          {
-            gtk_window_present (GTK_WINDOW (other));
-            return;
-          }
-      }
-  PirwaConsole *self
-      = g_object_new (PIRWA_TYPE_CONSOLE, "application", application, "title", name, NULL);
+  PirwaConsole *self = g_object_new (PIRWA_TYPE_CONSOLE, NULL);
   self->uuid = g_strdup (uuid);
+  self->name = g_strdup (name);
   self->running = TRUE;
   self->backend = pirwa_backend_new (uri);
   g_signal_connect_object (self->backend, "inventory", G_CALLBACK (inventory_changed), self, 0);
-  gtk_window_present (GTK_WINDOW (self));
   start_session (self);
+  return self;
+}
+
+gboolean
+pirwa_console_matches (PirwaConsole *self, const char *uri, const char *uuid)
+{
+  return !self->closed && g_strcmp0 (self->uuid, uuid) == 0
+         && g_str_equal (pirwa_backend_get_uri (self->backend), uri);
+}
+
+PirwaConsole *
+pirwa_console_find_detached (GtkApplication *application, const char *uri, const char *uuid)
+{
+  for (GList *item = gtk_application_get_windows (application); item; item = item->next)
+    {
+      PirwaConsole *console = g_object_get_data (G_OBJECT (item->data), "pirwa-console");
+      if (console && pirwa_console_matches (console, uri, uuid))
+        return console;
+    }
+  return NULL;
+}
+
+gboolean
+pirwa_console_is_detached (PirwaConsole *self)
+{
+  return self->popup != NULL;
+}
+
+GdkPaintable *
+pirwa_console_get_preview (PirwaConsole *self)
+{
+  return self->preview ? GDK_PAINTABLE (self->preview) : NULL;
+}
+
+void
+pirwa_console_release_input (PirwaConsole *self)
+{
+  release_clicked (NULL, self);
+}
+
+void
+pirwa_console_pop_out (PirwaConsole *self, GtkApplication *application)
+{
+  g_return_if_fail (gtk_widget_get_parent (GTK_WIDGET (self)) == NULL);
+  g_return_if_fail (self->popup == NULL);
+  release_input (self);
+  g_clear_object (&self->preview);
+  if (self->primary.data)
+    self->preview = pirwa_frame_texture (&self->primary, NULL, NULL);
+  self->popup = GTK_WINDOW (adw_window_new ());
+  gtk_window_set_application (self->popup, application);
+  gtk_window_set_title (self->popup, self->name);
+  gtk_window_set_default_size (self->popup, 1024, 768);
+  g_object_set_data (G_OBJECT (self->popup), "pirwa-console", self);
+  g_signal_connect_object (self->popup, "close-request", G_CALLBACK (close_requested), self, 0);
+  adw_window_set_content (ADW_WINDOW (self->popup), GTK_WIDGET (self));
+  gtk_window_present (self->popup);
+}
+
+void
+pirwa_console_return (PirwaConsole *self)
+{
+  g_return_if_fail (self->popup != NULL);
+  release_input (self);
+  GtkWindow *popup = self->popup;
+  self->popup = NULL;
+  adw_window_set_content (ADW_WINDOW (popup), NULL);
+  g_object_set_data (G_OBJECT (popup), "pirwa-console", NULL);
+  gtk_window_destroy (popup);
+  adw_toolbar_view_set_reveal_top_bars (self->toolbar, FALSE);
+  adw_toolbar_view_set_extend_content_to_top_edge (self->toolbar, TRUE);
+  adw_toolbar_view_set_top_bar_style (self->toolbar, ADW_TOOLBAR_FLAT);
 }

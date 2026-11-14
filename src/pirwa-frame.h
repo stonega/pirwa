@@ -3,6 +3,9 @@
 #include <gdk/gdk.h>
 #include <spice-client.h>
 
+gboolean pirwa_frame_valid (const SpiceDisplayPrimary *primary);
+GdkTexture *pirwa_frame_texture_rect (const SpiceDisplayPrimary *primary,
+                                      const cairo_rectangle_int_t *rect);
 GdkTexture *pirwa_frame_texture (const SpiceDisplayPrimary *primary, GdkTexture *previous,
                                  cairo_region_t *damage);
 gboolean pirwa_frame_position (int width, int height, int guest_width, int guest_height, double x,

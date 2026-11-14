@@ -1,0 +1,276 @@
+{
+  "recorded_at_utc": "2026-11-14T12:27:57.774874+00:00",
+  "default_checks": 11,
+  "asan_ubsan_checks": 11,
+  "asan_detect_leaks": false,
+  "asan_leak_limit": "Existing libvirt initialization leak; leak detection remains a separate gate.",
+  "maximum_channel_error_allowed": 1,
+  "cases": {
+    "vulkan_fractional": {
+      "width": 1232,
+      "height": 776,
+      "mode": "burst",
+      "renderer": "GskVulkanRenderer",
+      "scale": 1,
+      "view_width": 960,
+      "view_height": 601,
+      "correctness_passed": true,
+      "max_channel_error": 1,
+      "command": [
+        "env",
+        "GTK_A11Y=test",
+        "./build/tests/benchmark-display",
+        "--width",
+        "1232",
+        "--height",
+        "776",
+        "--frames",
+        "30",
+        "--mode",
+        "burst"
+      ],
+      "monitor": "1280x800@60",
+      "artifact": "build/qa/display-fractional-aligned/report.json",
+      "private_process_cleanup": {
+        "signalled": [],
+        "remaining": {}
+      }
+    },
+    "vulkan_near_8k_aligned": {
+      "width": 7680,
+      "height": 4320,
+      "mode": "burst",
+      "renderer": "GskVulkanRenderer",
+      "scale": 1,
+      "view_width": 960,
+      "view_height": 601,
+      "correctness_passed": true,
+      "max_channel_error": 1,
+      "command": [
+        "env",
+        "GTK_A11Y=test",
+        "./build/tests/benchmark-display",
+        "--width",
+        "7680",
+        "--height",
+        "4320",
+        "--frames",
+        "30",
+        "--mode",
+        "burst"
+      ],
+      "monitor": "1280x800@60",
+      "artifact": "build/qa/display-large-aligned/report.json",
+      "private_process_cleanup": {
+        "signalled": [],
+        "remaining": {}
+      }
+    },
+    "vulkan_near_8k_odd_fallback": {
+      "width": 7679,
+      "height": 4319,
+      "mode": "burst",
+      "renderer": "GskVulkanRenderer",
+      "scale": 1,
+      "view_width": 960,
+      "view_height": 601,
+      "correctness_passed": true,
+      "max_channel_error": 0,
+      "command": [
+        "env",
+        "GTK_A11Y=test",
+        "./build/tests/benchmark-display",
+        "--width",
+        "7679",
+        "--height",
+        "4319",
+        "--frames",
+        "30",
+        "--mode",
+        "burst"
+      ],
+      "monitor": "1280x800@60",
+      "artifact": "build/qa/display-large-fallback/report.json",
+      "private_process_cleanup": {
+        "signalled": [],
+        "remaining": {}
+      }
+    },
+    "cairo": {
+      "width": 1232,
+      "height": 776,
+      "mode": "burst",
+      "renderer": "GskCairoRenderer",
+      "scale": 1,
+      "view_width": 960,
+      "view_height": 601,
+      "correctness_passed": true,
+      "max_channel_error": 0,
+      "command": [
+        "env",
+        "GTK_A11Y=test",
+        "GSK_RENDERER=cairo",
+        "./build/tests/benchmark-display",
+        "--width",
+        "1232",
+        "--height",
+        "776",
+        "--frames",
+        "30",
+        "--mode",
+        "burst"
+      ],
+      "monitor": "1280x800@60",
+      "artifact": "build/qa/display-final-cairo/report.json",
+      "private_process_cleanup": {
+        "signalled": [],
+        "remaining": {}
+      }
+    },
+    "opengl_hidpi_asan_ubsan": {
+      "width": 1234,
+      "height": 777,
+      "mode": "burst",
+      "renderer": "GskGLRenderer",
+      "scale": 2,
+      "view_width": 960,
+      "view_height": 601,
+      "correctness_passed": true,
+      "max_channel_error": 1,
+      "command": [
+        "python3",
+        "scripts/qa-display-scale.py",
+        "--scale",
+        "2",
+        "--",
+        "env",
+        "GTK_A11Y=test",
+        "GSK_RENDERER=gl",
+        "ASAN_OPTIONS=detect_leaks=0",
+        "./build-sanitize/tests/benchmark-display",
+        "--expect-scale",
+        "2",
+        "--width",
+        "1234",
+        "--height",
+        "777",
+        "--frames",
+        "30",
+        "--mode",
+        "burst"
+      ],
+      "monitor": "2560x1600@60",
+      "artifact": "build/qa/display-gl-hidpi/report.json",
+      "private_process_cleanup": {
+        "signalled": [],
+        "remaining": {}
+      }
+    },
+    "vulkan_hidpi_asan_ubsan": {
+      "width": 1234,
+      "height": 777,
+      "mode": "burst",
+      "renderer": "GskVulkanRenderer",
+      "scale": 2,
+      "view_width": 960,
+      "view_height": 601,
+      "correctness_passed": true,
+      "max_channel_error": 1,
+      "command": [
+        "python3",
+        "scripts/qa-display-scale.py",
+        "--scale",
+        "2",
+        "--",
+        "env",
+        "GTK_A11Y=test",
+        "ASAN_OPTIONS=detect_leaks=0",
+        "./build-sanitize/tests/benchmark-display",
+        "--expect-scale",
+        "2",
+        "--width",
+        "1234",
+        "--height",
+        "777",
+        "--frames",
+        "30",
+        "--mode",
+        "burst"
+      ],
+      "monitor": "2560x1600@60",
+      "artifact": "build/qa/display-final-vulkan-hidpi/report.json",
+      "private_process_cleanup": {
+        "signalled": [],
+        "remaining": {}
+      }
+    }
+  },
+  "manager_ui": {
+    "passed": true,
+    "cases": [
+      "light",
+      "large-dark",
+      "empty",
+      "boxes",
+      "boxes-large-dark",
+      "viewer",
+      "viewer-large-dark"
+    ],
+    "artifact": "build/qa/display-integrated-ui/report.json",
+    "private_process_cleanup": {
+      "signalled": [],
+      "remaining": {}
+    }
+  },
+  "profiling": {
+    "runs": 72,
+    "measured_frames": 4320,
+    "current_trials_with_full_image_comparison": 36,
+    "artifact": "build/qa/display-final-profile/results.json",
+    "private_process_cleanup": {
+      "signalled": [],
+      "remaining": {}
+    }
+  },
+  "argument_guards": [
+    {
+      "command": [
+        "python3",
+        "scripts/qa-display-scale.py",
+        "--scale",
+        "2",
+        "--",
+        "true"
+      ],
+      "exit_code": 2
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test-gnome.py",
+        "--monitor",
+        "broken"
+      ],
+      "exit_code": 2
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/profile-display.py",
+        "--frames",
+        "0",
+        "--output",
+        "build/qa/invalid.json"
+      ],
+      "exit_code": 2
+    }
+  ],
+  "source_sha256": {
+    "src/pirwa-display.c": "45e9c71db46f89016f25a5445119eaeaeac108ceb701ca574e8da6088ab5971a",
+    "src/pirwa-display.h": "3665b0622c62de2d7cad19f063d5b3e7aabb51fd7689ffdf6ab3108801bfa897",
+    "src/pirwa-frame.c": "c496be6f3b17744558c857959b9fe5d236d15769b11c5fa108ecb1b45494fe76",
+    "src/pirwa-frame.h": "cfa5c1f641a14d9397cd3a3c4c98b459b2a60c442498788d46bcf6791b16d7e3",
+    "tests/benchmark-display.c": "bed2be83e3337caa6bf562ad8816ae7edc828caf5f86ec20528af6092fee9851"
+  },
+  "binary_sha256": "37e28a96463f29243b94da2a892bad3674d72d7402d9667545f3aa7588e749f7"
+}

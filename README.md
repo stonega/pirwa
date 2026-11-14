@@ -17,8 +17,9 @@ covers the GTK 4 replacement and its current limits.
 
 - Persistent session/system connections, lifecycle events, bounded reconnect,
   search, stable VM identities, and virtualized rows.
-- A one-time GNOME Boxes guide when an installed Boxes library contains machines;
-  reuse the shared Session library or connect to the Boxes Flatpak library.
+- Native Boxes machines appear automatically in Session. An installed Boxes
+  Flatpak gets a one-time import guide: copy a supported stopped VM into Session,
+  including its disk and UEFI state, with progress/cancellation and the original kept.
   Existing VM definitions and disks stay in place. The Import header action
   reopens the guide later.
 - Start, shutdown, restart, pause/resume, and confirmed force stop.

@@ -76,6 +76,42 @@ test_alpha (void)
 }
 
 static void
+test_cropped_frame (void)
+{
+  guint8 pixels[]
+      = { 9, 9, 9, 0, 1, 2, 3, 0, 99, 99, 99, 99, 8, 8, 8, 0, 4, 5, 6, 0, 99, 99, 99, 99 };
+  SpiceDisplayPrimary primary = {
+    .format = SPICE_SURFACE_FMT_32_xRGB, .width = 2, .height = 2, .stride = 12, .data = pixels
+  };
+  cairo_rectangle_int_t rect = { 1, 0, 1, 2 };
+  g_autoptr (GdkTexture) cropped = pirwa_frame_texture_rect (&primary, &rect);
+  g_assert_nonnull (cropped);
+  memset (pixels, 0, sizeof pixels);
+  guint8 actual[8];
+  gdk_texture_download (cropped, actual, 4);
+  const guint8 expected[] = { 1, 2, 3, 255, 4, 5, 6, 255 };
+  g_assert_cmpmem (actual, sizeof actual, expected, sizeof expected);
+  rect.x = -1;
+  g_assert_null (pirwa_frame_texture_rect (&primary, &rect));
+  rect.x = G_MAXINT;
+  rect.width = G_MAXINT;
+  g_assert_null (pirwa_frame_texture_rect (&primary, &rect));
+  rect = (cairo_rectangle_int_t){ 0, 0, 0, 1 };
+  g_assert_null (pirwa_frame_texture_rect (&primary, &rect));
+  guint16 rgb565[] = { 0xf800, 0x07e0, 0x001f };
+  primary = (SpiceDisplayPrimary){ .format = SPICE_SURFACE_FMT_16_565,
+                                   .width = 3,
+                                   .height = 1,
+                                   .stride = 6,
+                                   .data = (guint8 *)rgb565 };
+  rect = (cairo_rectangle_int_t){ 1, 0, 1, 1 };
+  g_autoptr (GdkTexture) converted = pirwa_frame_texture_rect (&primary, &rect);
+  gdk_texture_download (converted, actual, 4);
+  const guint8 green[] = { 0, 255, 0, 255 };
+  g_assert_cmpmem (actual, 4, green, 4);
+}
+
+static void
 test_input_coordinates (void)
 {
   int x, y;
@@ -104,5 +140,6 @@ main (int argc, char **argv)
   g_test_add_func ("/console/formats-and-bounds", test_rgb16_and_validation);
   g_test_add_func ("/console/input-mapping", test_input_coordinates);
   g_test_add_func ("/console/alpha", test_alpha);
+  g_test_add_func ("/console/crop-and-ownership", test_cropped_frame);
   return g_test_run ();
 }

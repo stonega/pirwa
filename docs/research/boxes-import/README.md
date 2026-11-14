@@ -1,5 +1,8 @@
 # GNOME Boxes onboarding validation
 
+This records the earlier connection-only guide. The current Flatpak-only import
+behavior and its validation are described in [direct import](migration.md).
+
 Date: 2026-11-13. This adds access to existing libraries, with no data migration
 or disk copying. Native Boxes and Pirwa share persistent Session domains. The
 guide does not grant disk ownership, redefine machines, or change their devices.

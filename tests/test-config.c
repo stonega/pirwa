@@ -91,6 +91,26 @@ test_qcow2 (void)
 }
 
 static void
+test_os_metadata (void)
+{
+  const char *metadata = "<info:libosinfo xmlns:info='" PIRWA_OSINFO_NS "'>"
+                         "<info:os id='http://pirwa.example/os/1'/></info:libosinfo>";
+  g_autofree char *domain = g_strdup_printf ("<domain><metadata>%s</metadata></domain>", metadata);
+  g_autofree char *fragment_id = pirwa_config_os_id (metadata);
+  g_autofree char *domain_id = pirwa_config_os_id (domain);
+  g_assert_cmpstr (fragment_id, ==, "http://pirwa.example/os/1");
+  g_assert_cmpstr (domain_id, ==, fragment_id);
+  g_assert_null (pirwa_config_os_id ("<domain/>"));
+  g_assert_null (
+      pirwa_config_os_id ("<libosinfo xmlns='urn:wrong'><os id='wrong-namespace'/></libosinfo>"));
+  g_autofree char *stripped_id
+      = pirwa_config_os_id ("<libosinfo><os id='http://pirwa.example/os/1'/></libosinfo>");
+  g_assert_cmpstr (stripped_id, ==, fragment_id);
+  g_assert_null (pirwa_config_os_id (
+      "<!DOCTYPE libosinfo [<!ENTITY x 'test'>]><libosinfo xmlns='" PIRWA_OSINFO_NS "'/>"));
+}
+
+static void
 test_graphics_index (void)
 {
   g_assert_cmpint (
@@ -108,11 +128,28 @@ test_graphics_index (void)
                    ==, -1);
 }
 
+static void
+test_embedded_graphics (void)
+{
+  const char *devices[]
+      = { "<graphics type='spice'/>", "<graphics type='spice'><gl enable='no'/></graphics>",
+          "<graphics type='spice'><gl enable='yes'/></graphics>", "<graphics type='vnc'/>", "" };
+  for (guint i = 0; i < G_N_ELEMENTS (devices); i++)
+    {
+      g_autofree char *xml = g_strdup_printf ("<domain><devices>%s</devices></domain>", devices[i]);
+      g_autoptr (PirwaDetails) details = pirwa_config_parse (xml, NULL);
+      g_assert_nonnull (details);
+      g_assert_cmpint (details->native_console, ==, i < 2);
+    }
+}
+
 int
 main (int argc, char **argv)
 {
   g_test_init (&argc, &argv, NULL);
+  g_test_add_func ("/config/os-metadata", test_os_metadata);
   g_test_add_func ("/config/graphics-index", test_graphics_index);
+  g_test_add_func ("/config/embedded-graphics", test_embedded_graphics);
   g_test_add_func ("/config/roundtrip-and-eject", test_roundtrip);
   g_test_add_func ("/config/validation", test_validation);
   g_test_add_func ("/config/qcow2", test_qcow2);

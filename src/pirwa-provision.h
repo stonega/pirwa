@@ -7,6 +7,9 @@ typedef void (*PirwaProgress) (double fraction, const char *stage, gpointer user
 char *pirwa_provision_create (virConnectPtr connection, const PirwaCreate *options,
                               GCancellable *cancellable, PirwaProgress progress, gpointer user_data,
                               GError **error);
+char *pirwa_provision_import_boxes (virConnectPtr connection, const char *source_uri,
+                                    const char *source_uuid, GCancellable *cancellable,
+                                    PirwaProgress progress, gpointer user_data, GError **error);
 gboolean pirwa_provision_owned (virConnectPtr connection, const char *uuid, PirwaDetails *details);
 gboolean pirwa_provision_remove (virConnectPtr connection, virDomainPtr domain, const char *uuid,
                                  gboolean delete_disk, GCancellable *cancellable, GError **error);

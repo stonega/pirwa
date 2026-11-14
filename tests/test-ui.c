@@ -5,7 +5,10 @@
 #include <glib/gstdio.h>
 #include <locale.h>
 #include <sys/resource.h>
+#include <sys/socket.h>
+#include <sys/un.h>
 #include <time.h>
+#include <unistd.h>
 
 typedef struct
 {
@@ -47,7 +50,7 @@ typedef struct
   gboolean boxes_exercise;
   PirwaBoxesPaths *boxes_paths;
   char *boxes_root;
-  char *boxes_uuid;
+  int boxes_socket;
 } Run;
 
 static gint64
@@ -109,7 +112,9 @@ find_machine_list (GtkWidget *root)
 static GtkWidget *
 find_button (GtkWidget *root, const char *label)
 {
-  if (GTK_IS_BUTTON (root) && g_strcmp0 (gtk_button_get_label (GTK_BUTTON (root)), label) == 0)
+  if (GTK_IS_BUTTON (root)
+      && (g_strcmp0 (gtk_button_get_label (GTK_BUTTON (root)), label) == 0
+          || g_strcmp0 (gtk_widget_get_tooltip_text (root), label) == 0))
     return root;
   for (GtkWidget *child = gtk_widget_get_first_child (root); child;
        child = gtk_widget_get_next_sibling (child))
@@ -148,6 +153,55 @@ has_label (GtkWidget *root, const char *text)
     if (has_label (child, text))
       return TRUE;
   return FALSE;
+}
+
+static GtkMenuButton *
+find_machine_menu (GtkWidget *root, const char *uuid)
+{
+  if (GTK_IS_MENU_BUTTON (root))
+    {
+      GMenuModel *model = gtk_menu_button_get_menu_model (GTK_MENU_BUTTON (root));
+      if (model && g_menu_model_get_n_items (model) > 0)
+        {
+          g_autoptr (GVariant) target = g_menu_model_get_item_attribute_value (
+              model, 0, G_MENU_ATTRIBUTE_TARGET, G_VARIANT_TYPE_STRING);
+          if (target && g_str_equal (g_variant_get_string (target, NULL), uuid))
+            return GTK_MENU_BUTTON (root);
+        }
+    }
+  for (GtkWidget *child = gtk_widget_get_first_child (root); child;
+       child = gtk_widget_get_next_sibling (child))
+    {
+      GtkMenuButton *found = find_machine_menu (child, uuid);
+      if (found)
+        return found;
+    }
+  return NULL;
+}
+
+static void
+activate_machine_menu (Run *run, const char *action)
+{
+  const char *uuid = pirwa_machine_get_uuid (run->original);
+  GtkMenuButton *button = find_machine_menu (GTK_WIDGET (run->window), uuid);
+  g_assert_nonnull (button);
+  gtk_menu_button_popup (button);
+  GMenuModel *model = gtk_menu_button_get_menu_model (button);
+  for (int i = 0; i < g_menu_model_get_n_items (model); i++)
+    {
+      g_autofree char *name = NULL;
+      g_menu_model_get_item_attribute (model, i, G_MENU_ATTRIBUTE_ACTION, "s", &name);
+      if (g_strcmp0 (name, action) != 0)
+        continue;
+      g_autoptr (GVariant) target = g_menu_model_get_item_attribute_value (
+          model, i, G_MENU_ATTRIBUTE_TARGET, G_VARIANT_TYPE_STRING);
+      g_assert_cmpstr (g_variant_get_string (target, NULL), ==, uuid);
+      g_assert_true (g_action_group_get_action_enabled (G_ACTION_GROUP (run->window), name + 4));
+      gtk_menu_button_popdown (button);
+      g_assert_true (gtk_widget_activate_action_variant (GTK_WIDGET (button), name, target));
+      return;
+    }
+  g_error ("Machine menu action was not found: %s", action);
 }
 
 static gboolean
@@ -306,50 +360,41 @@ watch_boxes (gpointer data)
   Run *run = data;
   AdwDialog *dialog
       = adw_application_window_get_visible_dialog (ADW_APPLICATION_WINDOW (run->window));
-  GtkWidget *use = dialog ? find_button (GTK_WIDGET (dialog), "Use Machines") : NULL;
+  GtkWidget *import = dialog ? find_button (GTK_WIDGET (dialog), "Import Machine") : NULL;
   switch (run->step)
     {
     case 0:
-      if (!dialog || !use || !gtk_widget_get_mapped (use) || !run->first_paint)
+      if (!dialog || !import || !gtk_widget_get_mapped (import) || !run->first_paint)
         break;
       run->ready = g_get_monotonic_time ();
-      g_assert_cmpstr (adw_dialog_get_title (dialog), ==, "Import from GNOME Boxes");
-      assert_visible_button (GTK_WIDGET (dialog), use);
-      g_assert_true (gtk_widget_get_sensitive (use));
+      g_assert_cmpstr (adw_dialog_get_title (dialog), ==, "Import from Boxes Flatpak");
+      assert_visible_button (GTK_WIDGET (dialog), import);
+      g_assert_false (gtk_widget_get_sensitive (import));
       GtkWidget *view = find_machine_list (GTK_WIDGET (dialog));
       GtkSingleSelection *selection
           = GTK_SINGLE_SELECTION (gtk_list_view_get_model (GTK_LIST_VIEW (view)));
       g_assert_cmpuint (g_list_model_get_n_items (G_LIST_MODEL (selection)), ==, 1);
       PirwaMachine *machine = gtk_single_selection_get_selected_item (selection);
-      g_assert_nonnull (machine);
-      run->boxes_uuid = g_strdup (pirwa_machine_get_uuid (machine));
+      g_assert_cmpstr (pirwa_machine_get_name (machine), ==, "Flatpak Example");
+      g_assert_null (find_type (GTK_WIDGET (dialog), GTK_TYPE_DROP_DOWN));
       run->domains = 1;
       save_snapshot (run);
-      GtkWidget *source = find_type (GTK_WIDGET (dialog), GTK_TYPE_DROP_DOWN);
-      g_assert_cmpuint (g_list_model_get_n_items (gtk_drop_down_get_model (GTK_DROP_DOWN (source))),
-                        ==, 2);
-      gtk_drop_down_set_selected (GTK_DROP_DOWN (source), 1);
-      run->step++;
-      break;
-    case 1:
-      if (!dialog || !use)
-        break;
-      g_assert_false (gtk_widget_get_sensitive (use));
       g_assert_true (
           gtk_widget_get_visible (find_button (GTK_WIDGET (dialog), "Open GNOME Boxes")));
       g_signal_emit_by_name (find_button (GTK_WIDGET (dialog), "Refresh Library"), "clicked");
       run->step++;
       break;
-    case 2:
-      if (!dialog || !use || !gtk_widget_get_mapped (use) || !gtk_widget_get_sensitive (use))
+    case 1:
+      if (!dialog || !import || !gtk_widget_get_mapped (import))
         break;
+      g_assert_false (gtk_widget_get_sensitive (import));
       if (run->requested_width == 720)
-        gtk_window_close (run->window); /* Close the dialog while keeping its backend alive. */
+        gtk_window_close (run->window);
       else
         g_signal_emit_by_name (find_button (GTK_WIDGET (dialog), "Not Now"), "clicked");
       run->step++;
       break;
-    case 3:
+    case 2:
       if (dialog || !enabled (run, "import-boxes"))
         break;
       g_assert_true (g_file_test (run->boxes_paths->state_file, G_FILE_TEST_EXISTS));
@@ -361,29 +406,78 @@ watch_boxes (gpointer data)
       gtk_window_close (previous);
       run->step++;
       break;
-    case 4:
-      if (!enabled (run, "new") || !enabled (run, "import-boxes"))
+    case 3:
+      {
+        if (!enabled (run, "new") || !enabled (run, "import-boxes"))
+          break;
+        g_assert_null (dialog);
+        g_autofree char *directory
+            = g_build_filename (run->boxes_paths->runtime_root, "libvirt", NULL);
+        g_assert_cmpint (g_mkdir_with_parents (directory, 0700), ==, 0);
+        g_autofree char *socket_path = g_build_filename (directory, "libvirt-sock", NULL);
+        struct sockaddr_un address = { .sun_family = AF_UNIX };
+        g_assert_cmpuint (g_strlcpy (address.sun_path, socket_path, sizeof address.sun_path), <,
+                          sizeof address.sun_path);
+        run->boxes_socket = socket (AF_UNIX, SOCK_STREAM | SOCK_CLOEXEC, 0);
+        g_assert_cmpint (run->boxes_socket, >=, 0);
+        /* An owned but non-listening socket makes discovery available; connection
+         * then fails immediately, exercising error/retry without any real service. */
+        g_assert_cmpint (bind (run->boxes_socket, (struct sockaddr *)&address, sizeof address), ==,
+                         0);
+        activate (run, "import-boxes");
+        run->step++;
         break;
-      g_assert_null (dialog); /* The automatic introduction is shown once. */
-      activate (run, "import-boxes");
+      }
+    case 4:
+      if (!dialog || !import || !gtk_widget_get_mapped (import))
+        break;
+      g_assert_true (gtk_widget_get_sensitive (import));
+      g_signal_emit_by_name (import, "clicked");
       run->step++;
       break;
     case 5:
-      if (!dialog || !use || !gtk_widget_get_mapped (use))
+      if (!dialog || !adw_dialog_get_can_close (dialog) || !gtk_widget_get_sensitive (import))
         break;
-      g_assert_true (gtk_widget_get_sensitive (use));
-      g_signal_emit_by_name (use, "clicked");
+      GtkLabel *message = g_object_get_data (G_OBJECT (dialog), "error");
+      if (!*gtk_label_get_text (message))
+        break;
+      g_assert_true (gtk_widget_get_visible (GTK_WIDGET (message)));
+      g_assert_nonnull (find_button (GTK_WIDGET (dialog), "Not Now"));
+      g_signal_emit_by_name (find_button (GTK_WIDGET (dialog), "Not Now"), "clicked");
       run->step++;
       break;
     case 6:
-      if (dialog || !enabled (run, "import-boxes") || !enabled (run, "pause"))
+      if (dialog || !enabled (run, "import-boxes"))
         break;
+      /* The native VM was available throughout, without importing anything. */
       GtkWidget *list = find_machine_list (GTK_WIDGET (run->window));
       GtkSingleSelection *model
           = GTK_SINGLE_SELECTION (gtk_list_view_get_model (GTK_LIST_VIEW (list)));
       g_assert_cmpuint (g_list_model_get_n_items (G_LIST_MODEL (model)), ==, 1);
-      g_assert_cmpstr (pirwa_machine_get_uuid (gtk_single_selection_get_selected_item (model)), ==,
-                       run->boxes_uuid);
+      gtk_single_selection_set_selected (model, 0);
+      run->step++;
+      break;
+    case 7:
+      if (!enabled (run, "pause"))
+        break;
+      /* A fresh first-run state plus residual definitions must remain quiet
+       * after the Flatpak has been uninstalled. */
+      g_assert_true (
+          g_file_set_contents (run->boxes_paths->flatpak_program, "#!/bin/sh\nexit 1\n", -1, NULL));
+      g_assert_cmpint (g_chmod (run->boxes_paths->flatpak_program, 0700), ==, 0);
+      g_assert_cmpint (g_unlink (run->boxes_paths->state_file), ==, 0);
+      GtkWindow *old = run->window;
+      run->window = pirwa_window_new_with_boxes (run->application, run->boxes_paths->native_uri,
+                                                 run->boxes_paths);
+      gtk_window_present (run->window);
+      gtk_window_close (old);
+      run->step++;
+      break;
+    case 8:
+      if (!enabled (run, "new") || !enabled (run, "import-boxes"))
+        break;
+      g_assert_null (dialog);
+      g_assert_false (g_file_test (run->boxes_paths->state_file, G_FILE_TEST_EXISTS));
       run->watch = 0;
       finish (run);
       return G_SOURCE_REMOVE;
@@ -437,22 +531,45 @@ watch (gpointer data)
     case 0:
       gtk_test_accessible_assert_property (find_action (GTK_WIDGET (run->window), "win.new"),
                                            GTK_ACCESSIBLE_PROPERTY_LABEL, "New Virtual Machine");
-      gtk_test_accessible_assert_property (find_action (GTK_WIDGET (run->window), "win.refresh"),
-                                           GTK_ACCESSIBLE_PROPERTY_LABEL, "Refresh and reconnect");
+      GtkWidget *search_button = find_button (GTK_WIDGET (run->window), "Search Virtual Machines");
+      g_assert_nonnull (search_button);
+      gtk_test_accessible_assert_property (search_button, GTK_ACCESSIBLE_PROPERTY_LABEL,
+                                           "Search Virtual Machines");
+      GtkSearchBar *search_bar
+          = GTK_SEARCH_BAR (find_type (GTK_WIDGET (run->window), GTK_TYPE_SEARCH_BAR));
+      g_assert_nonnull (search_bar);
+      g_assert_false (gtk_search_bar_get_search_mode (search_bar));
+      g_assert_false (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (search_button)));
       if (run->domains == 0)
         {
           activate (run, "new");
-          run->step = 9;
+          run->step = 11;
           break;
         }
       g_assert_cmpuint (g_list_model_get_n_items (G_LIST_MODEL (selection)), >, 0);
       g_assert_true (gtk_widget_is_ancestor (gtk_root_get_focus (GTK_ROOT (run->window)), view));
-      activate (run, "search");
+      g_signal_emit_by_name (search_button, "clicked");
+      g_assert_true (gtk_search_bar_get_search_mode (search_bar));
       GtkWidget *search = find_type (GTK_WIDGET (run->window), GTK_TYPE_SEARCH_ENTRY);
       g_assert_true (gtk_widget_is_ancestor (gtk_root_get_focus (GTK_ROOT (run->window)), search));
+      g_signal_emit_by_name (search_button, "clicked");
+      g_assert_false (gtk_search_bar_get_search_mode (search_bar));
+      activate (run, "search");
+      g_assert_true (gtk_search_bar_get_search_mode (search_bar));
+      g_assert_true (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (search_button)));
+      g_assert_true (gtk_widget_is_ancestor (gtk_root_get_focus (GTK_ROOT (run->window)), search));
+      g_signal_emit_by_name (search, "stop-search");
+      g_assert_false (gtk_search_bar_get_search_mode (search_bar));
+      g_assert_false (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (search_button)));
       gtk_widget_grab_focus (view);
-      gtk_single_selection_set_selected (selection, 0);
-      run->original = g_object_ref (gtk_single_selection_get_selected_item (selection));
+      run->original = g_list_model_get_item (G_LIST_MODEL (selection), 0);
+      gtk_single_selection_set_selected (selection, GTK_INVALID_LIST_POSITION);
+      GtkMenuButton *options
+          = find_machine_menu (GTK_WIDGET (run->window), pirwa_machine_get_uuid (run->original));
+      g_assert_nonnull (options);
+      gtk_menu_button_popup (options);
+      g_assert_true (run->original == gtk_single_selection_get_selected_item (selection));
+      gtk_menu_button_popdown (options);
       run->step++;
       break;
     case 1:
@@ -475,7 +592,13 @@ watch (gpointer data)
     case 3:
       if (!enabled (run, "pause"))
         break;
-      activate (run, "force-stop");
+      /* A stale menu target must never operate on the newly selected VM. */
+      g_action_group_activate_action (
+          G_ACTION_GROUP (run->window), "machine-force-stop",
+          g_variant_new_string ("11111111-1111-4111-8111-111111111111"));
+      g_assert_null (
+          adw_application_window_get_visible_dialog (ADW_APPLICATION_WINDOW (run->window)));
+      activate_machine_menu (run, "win.machine-force-stop");
       run->step++;
       break;
     case 4:
@@ -496,7 +619,7 @@ watch (gpointer data)
     case 6:
       if (!enabled (run, "edit"))
         break;
-      activate (run, "edit");
+      activate_machine_menu (run, "win.machine-edit");
       run->step++;
       break;
     case 7:
@@ -521,10 +644,25 @@ watch (gpointer data)
         break;
       g_assert_true (run->original == gtk_single_selection_get_selected_item (selection));
       g_assert_true (has_label (GTK_WIDGET (run->window), "Edited <test> & VM"));
-      activate (run, "new");
+      activate_machine_menu (run, "win.machine-remove");
       run->step++;
       break;
     case 9:
+      if (!dialog || !gtk_widget_get_mapped (GTK_WIDGET (dialog)))
+        break;
+      g_assert_true (ADW_IS_ALERT_DIALOG (dialog));
+      g_assert_cmpstr (adw_alert_dialog_get_heading (ADW_ALERT_DIALOG (dialog)), ==,
+                       "Remove Virtual Machine?");
+      adw_dialog_close (dialog);
+      run->step++;
+      break;
+    case 10:
+      if (dialog)
+        break;
+      activate (run, "new");
+      run->step++;
+      break;
+    case 11:
       if (!dialog || !gtk_widget_get_mapped (GTK_WIDGET (dialog)))
         break;
       if (!gtk_widget_get_mapped (find_button (GTK_WIDGET (dialog), "Create")))
@@ -535,7 +673,7 @@ watch (gpointer data)
       g_signal_emit_by_name (find_button (GTK_WIDGET (dialog), "Cancel"), "clicked");
       run->step++;
       break;
-    case 10:
+    case 12:
       if (dialog)
         break;
       /* Close with a selected VM and a details request in flight. */
@@ -619,6 +757,7 @@ main (int argc, char **argv)
     g_setenv ("GTK_A11Y", "test", TRUE);
   if (run.boxes_exercise)
     {
+      run.boxes_socket = -1;
       run.boxes_root = g_dir_make_tmp ("pirwa-boxes-ui-XXXXXX", &error);
       g_assert_no_error (error);
       run.boxes_paths = g_new0 (PirwaBoxesPaths, 1);
@@ -638,8 +777,9 @@ main (int argc, char **argv)
       g_assert_no_error (error);
       g_autofree char *bin = g_build_filename (run.boxes_root, "bin", NULL);
       g_assert_cmpint (g_mkdir (bin, 0700), ==, 0);
-      g_autofree char *program = g_build_filename (bin, "gnome-boxes", NULL);
-      g_assert_true (g_file_set_contents (program, "#!/bin/sh\nexit 99\n", -1, &error));
+      g_autofree char *program = g_build_filename (bin, "flatpak", NULL);
+      run.boxes_paths->flatpak_program = g_strdup (program);
+      g_assert_true (g_file_set_contents (program, "#!/bin/sh\nexit 0\n", -1, &error));
       g_assert_no_error (error);
       g_assert_cmpint (g_chmod (program, 0700), ==, 0);
       g_autofree char *path = g_strconcat (bin, ":", g_getenv ("PATH"), NULL);
@@ -720,8 +860,12 @@ main (int argc, char **argv)
   g_free (snapshot);
   if (run.boxes_root)
     {
-      const char *files[] = { "state.ini", "bin/gnome-boxes", "config/libvirt/qemu/boxes.xml" };
-      const char *dirs[] = { "bin", "config/libvirt/qemu", "config/libvirt", "config" };
+      if (run.boxes_socket >= 0)
+        close (run.boxes_socket);
+      const char *files[] = { "state.ini", "bin/flatpak", "config/libvirt/qemu/boxes.xml",
+                              "runtime/libvirt/libvirt-sock" };
+      const char *dirs[] = { "bin",    "config/libvirt/qemu", "config/libvirt",
+                             "config", "runtime/libvirt",     "runtime" };
       for (guint i = 0; i < G_N_ELEMENTS (files); i++)
         {
           g_autofree char *file = g_build_filename (run.boxes_root, files[i], NULL);
@@ -736,6 +880,5 @@ main (int argc, char **argv)
     }
   pirwa_boxes_paths_free (run.boxes_paths);
   g_free (run.boxes_root);
-  g_free (run.boxes_uuid);
   return result;
 }

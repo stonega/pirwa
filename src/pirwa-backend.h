@@ -2,6 +2,7 @@
 #pragma once
 #include "pirwa-config.h"
 #include "pirwa-machine.h"
+#include "pirwa-usage.h"
 
 #define PIRWA_TYPE_BACKEND (pirwa_backend_get_type ())
 G_DECLARE_FINAL_TYPE (PirwaBackend, pirwa_backend, PIRWA, BACKEND, GObject)
@@ -21,7 +22,9 @@ typedef enum
   PIRWA_CREATE,
   PIRWA_REMOVE,
   PIRWA_CONSOLE,
-  PIRWA_GRAPHICS_FD
+  PIRWA_GRAPHICS_FD,
+  PIRWA_USAGE,
+  PIRWA_IMPORT_BOXES
 } PirwaOperation;
 
 typedef struct
@@ -29,6 +32,7 @@ typedef struct
   PirwaOperation operation;
   guint64 request_id; /* Correlates progress; zero is valid for non-UI callers. */
   const char *uuid;
+  const char *source_uri;
   PirwaCreate options;
   gboolean eject;
   gboolean delete_disk;
@@ -46,6 +50,7 @@ typedef struct
   gboolean native_console;
   char *console_name;
   GUnixFDList *graphics_fds; /* Owns authenticated sockets, including discarded replies. */
+  PirwaUsage usage;
 } PirwaReply;
 
 PirwaBackend *pirwa_backend_new (const char *uri);

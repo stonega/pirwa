@@ -71,6 +71,49 @@ find_test (PirwaReply *reply)
 }
 
 static void
+test_usage (void)
+{
+  g_autoptr (PirwaBackend) backend = pirwa_backend_new ("test:///default");
+  g_autoptr (GError) error = NULL;
+  PirwaRequest request = { .operation = PIRWA_REFRESH };
+  g_autoptr (PirwaReply) inventory = run (backend, &request, NULL, &error);
+  g_assert_no_error (error);
+  request.uuid = pirwa_machine_get_uuid (find_test (inventory));
+  request.operation = PIRWA_USAGE;
+  g_autoptr (PirwaReply) first = run (backend, &request, NULL, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (first);
+  g_assert_true (first->usage.running);
+  /* Drivers may omit optional fields; do not substitute configured resources. */
+  if (!first->usage.has_cpu_time)
+    g_assert_cmpuint (first->usage.cpu_time_ns, ==, 0);
+  if (!first->usage.has_memory_rss)
+    g_assert_cmpuint (first->usage.memory_rss_kib, ==, 0);
+  if (!first->usage.has_network)
+    {
+      g_assert_cmpuint (first->usage.network_rx_bytes, ==, 0);
+      g_assert_cmpuint (first->usage.network_tx_bytes, ==, 0);
+    }
+  g_assert_cmpint (first->usage.sampled_at_us, >, 0);
+  g_assert_null (first->machines); /* Sampling must not refresh the collection. */
+  g_assert_null (first->details);
+  request.operation = PIRWA_SHUTDOWN;
+  g_autoptr (PirwaReply) stopped = run (backend, &request, NULL, &error);
+  g_assert_no_error (error);
+  request.operation = PIRWA_USAGE;
+  g_autoptr (PirwaReply) inactive = run (backend, &request, NULL, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (inactive);
+  g_assert_false (inactive->usage.running);
+  g_autoptr (GCancellable) cancel = g_cancellable_new ();
+  g_cancellable_cancel (cancel);
+  g_autoptr (PirwaReply) cancelled = run (backend, &request, cancel, &error);
+  g_assert_null (cancelled);
+  g_assert_error (error, G_IO_ERROR, G_IO_ERROR_CANCELLED);
+  pirwa_backend_stop (backend);
+}
+
+static void
 test_controls (void)
 {
   g_autoptr (PirwaBackend) backend = pirwa_backend_new ("test:///default");
@@ -361,6 +404,7 @@ int
 main (int argc, char **argv)
 {
   g_test_init (&argc, &argv, NULL);
+  g_test_add_func ("/backend/usage", test_usage);
   g_test_add_func ("/backend/socket-ownership", test_socket_ownership);
   g_test_add_func ("/backend/native-console", test_native_console);
   g_test_add_func ("/backend/controls-and-ownership", test_controls);

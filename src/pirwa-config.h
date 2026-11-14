@@ -4,6 +4,7 @@ int pirwa_config_spice_index (const char *xml);
 #include <gio/gio.h>
 
 #define PIRWA_METADATA_NS "urn:pirwa:domain:1"
+#define PIRWA_OSINFO_NS "http://libosinfo.org/xmlns/libvirt/domain/1.0"
 
 typedef struct
 {
@@ -26,6 +27,7 @@ typedef struct
   char *volume_name;
   guint cpus;
   guint memory_mb;
+  gboolean native_console;
   gboolean has_cdrom;
   gboolean has_nvram;
   gboolean managed;
@@ -37,6 +39,7 @@ char *pirwa_config_domain (const PirwaCreate *options, const char *uuid, const c
                            gboolean passt, const char *os_id);
 char *pirwa_config_volume (const char *uuid, guint64 capacity);
 char *pirwa_config_pool (const char *path);
+char *pirwa_config_os_id (const char *xml);
 PirwaDetails *pirwa_config_parse (const char *xml, GError **error);
 char *pirwa_config_edit (const char *xml, const char *name, guint cpus, guint memory_mb,
                          gboolean eject, GError **error);

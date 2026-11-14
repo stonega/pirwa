@@ -13,6 +13,8 @@ G_DECLARE_FINAL_TYPE (PirwaMachine, pirwa_machine, PIRWA, MACHINE, GObject)
 PirwaMachine *pirwa_machine_new (const char *uuid, const char *name, const char *state);
 const char *pirwa_machine_get_uuid (PirwaMachine *self);
 const char *pirwa_machine_get_name (PirwaMachine *self);
+const char *pirwa_machine_get_title (PirwaMachine *self);
+void pirwa_machine_set_os_name (PirwaMachine *self, const char *os_name);
 const char *pirwa_machine_get_state (PirwaMachine *self);
 PirwaMachine *pirwa_machine_new_full (const char *uuid, const char *name, const char *state,
                                       int state_code);

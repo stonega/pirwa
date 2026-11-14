@@ -53,6 +53,7 @@ query (xmlDoc *doc, const char *expression)
 {
   xmlXPathContext *context = xmlXPathNewContext (doc);
   xmlXPathRegisterNs (context, BAD_CAST "p", BAD_CAST PIRWA_METADATA_NS);
+  xmlXPathRegisterNs (context, BAD_CAST "o", BAD_CAST PIRWA_OSINFO_NS);
   xmlXPathObject *result = xmlXPathEvalExpression (BAD_CAST expression, context);
   xmlXPathFreeContext (context);
   return result;
@@ -82,6 +83,19 @@ pirwa_config_supports (const char *xml, const char *expression)
     xmlXPathFreeObject (result);
   xmlFreeDoc (doc);
   return supported;
+}
+
+char *
+pirwa_config_os_id (const char *xml)
+{
+  xmlDoc *doc = parse (xml, NULL);
+  if (!doc)
+    return NULL;
+  /* virDomainGetMetadata strips namespace prefixes from the returned fragment. */
+  char *id = value (doc, "/domain/metadata/o:libosinfo/o:os/@id | /o:libosinfo/o:os/@id"
+                         " | /libosinfo/os/@id");
+  xmlFreeDoc (doc);
+  return id;
 }
 
 int
@@ -193,8 +207,7 @@ pirwa_config_domain (const PirwaCreate *o, const char *uuid, const char *disk_pa
   if (os_id)
     {
       xmlNode *info = element (metadata, "libosinfo", NULL);
-      xmlNs *osns = xmlNewNs (info, BAD_CAST "http://libosinfo.org/xmlns/libvirt/domain/1.0",
-                              BAD_CAST "libosinfo");
+      xmlNs *osns = xmlNewNs (info, BAD_CAST PIRWA_OSINFO_NS, BAD_CAST "libosinfo");
       xmlSetNs (info, osns);
       attribute (xmlNewChild (info, osns, BAD_CAST "os", NULL), "id", os_id);
     }
@@ -295,6 +308,12 @@ pirwa_config_parse (const char *xml, GError **error)
     details->memory_mb = ram / (1024 * 1024);
   else
     details->memory_mb = ram / 1024;
+  xmlXPathObject *spice
+      = query (doc, "/domain/devices/graphics[@type='spice'] and "
+                    "not(/domain/devices/graphics[@type='spice']/gl[@enable='yes'])");
+  details->native_console = spice && xmlXPathCastToBoolean (spice);
+  if (spice)
+    xmlXPathFreeObject (spice);
   details->has_cdrom = cdrom != NULL;
   xmlXPathObject *nvram = query (doc, "/domain/os/nvram");
   details->has_nvram = nvram && xmlXPathCastToBoolean (nvram);

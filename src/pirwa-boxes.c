@@ -1,10 +1,8 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 #define _GNU_SOURCE
 #include "pirwa-boxes.h"
-#include "pirwa-libvirt.h"
 #include <errno.h>
 #include <fcntl.h>
-#include <gio/gdesktopappinfo.h>
 #include <glib/gstdio.h>
 #include <libxml/parser.h>
 #include <sys/stat.h>
@@ -20,6 +18,7 @@ pirwa_boxes_paths_new (const char *native_uri)
       = g_build_filename (g_get_home_dir (), ".var", "app", "org.gnome.Boxes", NULL);
   paths->runtime_root
       = g_build_filename (g_get_user_runtime_dir (), "app", "org.gnome.Boxes", NULL);
+  paths->flatpak_program = g_strdup ("flatpak");
   return paths;
 }
 
@@ -31,6 +30,7 @@ pirwa_boxes_paths_copy (const PirwaBoxesPaths *paths)
   copy->state_file = g_strdup (paths->state_file);
   copy->flatpak_root = g_strdup (paths->flatpak_root);
   copy->runtime_root = g_strdup (paths->runtime_root);
+  copy->flatpak_program = g_strdup (paths->flatpak_program);
   return copy;
 }
 
@@ -43,6 +43,7 @@ pirwa_boxes_paths_free (PirwaBoxesPaths *paths)
   g_free (paths->state_file);
   g_free (paths->flatpak_root);
   g_free (paths->runtime_root);
+  g_free (paths->flatpak_program);
   g_free (paths);
 }
 
@@ -61,17 +62,15 @@ pirwa_boxes_scan_free (PirwaBoxesScan *scan)
   if (!scan)
     return;
   g_ptr_array_unref (scan->libraries);
-  g_free (scan->preferred_uri);
   g_free (scan->warning);
   g_free (scan);
 }
 
 static PirwaBoxesLibrary *
-library_new (const char *uri, gboolean flatpak)
+library_new (const char *uri)
 {
   PirwaBoxesLibrary *library = g_new0 (PirwaBoxesLibrary, 1);
   library->uri = g_strdup (uri);
-  library->flatpak = flatpak;
   library->machines = g_ptr_array_new_with_free_func (g_object_unref);
   return library;
 }
@@ -100,40 +99,6 @@ compare_machines (gconstpointer a, gconstpointer b)
 {
   return g_utf8_collate (pirwa_machine_get_name (*(PirwaMachine *const *)a),
                          pirwa_machine_get_name (*(PirwaMachine *const *)b));
-}
-
-static gboolean
-scan_native (PirwaBoxesLibrary *library, GCancellable *cancellable, GError **error)
-{
-  if (g_cancellable_set_error_if_cancelled (cancellable, error))
-    return FALSE;
-  virConnectPtr connection = virConnectOpenReadOnly (library->uri);
-  if (!connection)
-    {
-      pirwa_libvirt_error (error, "Cannot read the GNOME Boxes session library");
-      return FALSE;
-    }
-  virDomainPtr *domains = NULL;
-  int count = virConnectListAllDomains (connection, &domains, VIR_CONNECT_LIST_DOMAINS_PERSISTENT);
-  if (count < 0)
-    pirwa_libvirt_error (error, "Cannot list GNOME Boxes machines");
-  gboolean success = count >= 0;
-  for (int i = 0; i < count; i++)
-    {
-      if (success && g_cancellable_set_error_if_cancelled (cancellable, error))
-        success = FALSE;
-      const char *name = virDomainGetName (domains[i]);
-      char uuid[VIR_UUID_STRING_BUFLEN];
-      if (success && name && !g_str_has_prefix (name, "guestfs-")
-          && virDomainGetUUIDString (domains[i], uuid) == 0)
-        g_ptr_array_add (library->machines, pirwa_machine_new (uuid, name, ""));
-      virDomainFree (domains[i]);
-    }
-  free (domains);
-  virConnectClose (connection);
-  library->available = success;
-  g_ptr_array_sort (library->machines, compare_machines);
-  return success;
 }
 
 /* Flatpak configuration is read only. No symlinks, pipes, external entities,
@@ -209,52 +174,24 @@ pirwa_boxes_scan (const PirwaBoxesPaths *paths, gboolean automatic, GCancellable
   g_autoptr (GKeyFile) state = g_key_file_new ();
   if (g_key_file_load_from_file (state, paths->state_file, G_KEY_FILE_NONE, NULL))
     scan->already_seen = g_key_file_get_boolean (state, "Boxes", "IntroductionSeen", NULL);
-  if (scan->already_seen)
-    {
-      if (g_key_file_get_boolean (state, "Boxes", "Flatpak", NULL))
-        {
-          gboolean available;
-          scan->preferred_uri = flatpak_uri (paths, &available);
-          if (!scan->preferred_uri)
-            {
-              g_autofree char *saved_socket
-                  = g_key_file_get_string (state, "Boxes", "Socket", NULL);
-              const char *socket_name = g_strcmp0 (saved_socket, "virtqemud-sock") == 0
-                                            ? "virtqemud-sock"
-                                            : "libvirt-sock";
-              g_autofree char *socket
-                  = g_build_filename (paths->runtime_root, "libvirt", socket_name, NULL);
-              g_autofree char *escaped = g_uri_escape_string (socket, "/", FALSE);
-              scan->preferred_uri = g_strdup_printf ("qemu+unix:///session?socket=%s", escaped);
-            }
-        }
-      if (automatic)
-        return g_steal_pointer (&scan);
-    }
-  if (g_cancellable_set_error_if_cancelled (cancellable, error))
-    return NULL;
-  g_autofree char *program = g_find_program_in_path ("gnome-boxes");
-  g_autoptr (GDesktopAppInfo) desktop = g_desktop_app_info_new ("org.gnome.Boxes.desktop");
-  if (!program && !desktop)
+  if (scan->already_seen && automatic)
     return g_steal_pointer (&scan);
-
-  PirwaBoxesLibrary *native = library_new (paths->native_uri, FALSE);
-  g_autoptr (GError) native_error = NULL;
-  scan_native (native, cancellable, &native_error);
-  if (native_error && g_error_matches (native_error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+  /* Check the installed ref, not a native desktop entry or leftover data. */
+  g_autoptr (GSubprocess) info
+      = g_subprocess_new (G_SUBPROCESS_FLAGS_STDOUT_SILENCE | G_SUBPROCESS_FLAGS_STDERR_SILENCE,
+                          NULL, paths->flatpak_program ? paths->flatpak_program : "flatpak", "info",
+                          "--show-ref", "org.gnome.Boxes", NULL);
+  scan->installed = info && g_subprocess_wait_check (info, cancellable, NULL);
+  if (g_cancellable_set_error_if_cancelled (cancellable, error))
     {
-      library_free (native);
-      g_propagate_error (error, g_steal_pointer (&native_error));
+      if (info)
+        g_subprocess_force_exit (info);
       return NULL;
     }
-  if (native_error)
-    scan->warning = g_strdup (native_error->message);
-  if (native->machines->len)
-    g_ptr_array_add (scan->libraries, native);
-  else
-    library_free (native);
+  if (!scan->installed)
+    return g_steal_pointer (&scan);
 
-  PirwaBoxesLibrary *flatpak = library_new (NULL, TRUE);
+  PirwaBoxesLibrary *flatpak = library_new (NULL);
   flatpak->uri = flatpak_uri (paths, &flatpak->available);
   g_autofree char *directory
       = g_build_filename (paths->flatpak_root, "config", "libvirt", "qemu", NULL);
@@ -284,8 +221,7 @@ pirwa_boxes_scan (const PirwaBoxesPaths *paths, gboolean automatic, GCancellable
 }
 
 gboolean
-pirwa_boxes_remember (const PirwaBoxesPaths *paths, gboolean flatpak, GCancellable *cancellable,
-                      GError **error)
+pirwa_boxes_remember (const PirwaBoxesPaths *paths, GCancellable *cancellable, GError **error)
 {
   if (g_cancellable_set_error_if_cancelled (cancellable, error))
     return FALSE;
@@ -299,16 +235,8 @@ pirwa_boxes_remember (const PirwaBoxesPaths *paths, gboolean flatpak, GCancellab
   g_autoptr (GKeyFile) state = g_key_file_new ();
   g_key_file_load_from_file (state, paths->state_file, G_KEY_FILE_NONE, NULL);
   g_key_file_set_boolean (state, "Boxes", "IntroductionSeen", TRUE);
-  g_key_file_set_boolean (state, "Boxes", "Flatpak", flatpak);
-  if (flatpak)
-    {
-      gboolean available;
-      g_autofree char *uri = flatpak_uri (paths, &available);
-      if (uri)
-        g_key_file_set_string (state, "Boxes", "Socket",
-                               g_str_has_suffix (uri, "/virtqemud-sock") ? "virtqemud-sock"
-                                                                         : "libvirt-sock");
-    }
+  g_key_file_remove_key (state, "Boxes", "Flatpak", NULL);
+  g_key_file_remove_key (state, "Boxes", "Socket", NULL);
   gsize size;
   g_autofree char *contents = g_key_file_to_data (state, &size, NULL);
   return g_file_set_contents_full (paths->state_file, contents, size,
@@ -321,7 +249,6 @@ typedef struct
   PirwaBoxesPaths *paths;
   gboolean automatic;
   gboolean remember;
-  gboolean flatpak;
 } Work;
 
 static void
@@ -340,7 +267,7 @@ work_run (GTask *task, gpointer source, gpointer data, GCancellable *cancellable
   g_autoptr (GError) error = NULL;
   if (work->remember)
     {
-      if (pirwa_boxes_remember (work->paths, work->flatpak, cancellable, &error))
+      if (pirwa_boxes_remember (work->paths, cancellable, &error))
         g_task_return_boolean (task, TRUE);
       else
         g_task_return_error (task, g_steal_pointer (&error));
@@ -356,14 +283,13 @@ work_run (GTask *task, gpointer source, gpointer data, GCancellable *cancellable
 }
 
 static void
-start_work (const PirwaBoxesPaths *paths, gboolean automatic, gboolean remember, gboolean flatpak,
+start_work (const PirwaBoxesPaths *paths, gboolean automatic, gboolean remember,
             GCancellable *cancellable, GAsyncReadyCallback callback, gpointer data)
 {
   Work *work = g_new0 (Work, 1);
   work->paths = pirwa_boxes_paths_copy (paths);
   work->automatic = automatic;
   work->remember = remember;
-  work->flatpak = flatpak;
   g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, data);
   g_task_set_task_data (task, work, work_free);
   g_task_run_in_thread (task, work_run);
@@ -373,7 +299,7 @@ void
 pirwa_boxes_scan_async (const PirwaBoxesPaths *paths, gboolean automatic, GCancellable *cancellable,
                         GAsyncReadyCallback callback, gpointer data)
 {
-  start_work (paths, automatic, FALSE, FALSE, cancellable, callback, data);
+  start_work (paths, automatic, FALSE, cancellable, callback, data);
 }
 PirwaBoxesScan *
 pirwa_boxes_scan_finish (GAsyncResult *result, GError **error)
@@ -381,10 +307,10 @@ pirwa_boxes_scan_finish (GAsyncResult *result, GError **error)
   return g_task_propagate_pointer (G_TASK (result), error);
 }
 void
-pirwa_boxes_remember_async (const PirwaBoxesPaths *paths, gboolean flatpak,
-                            GAsyncReadyCallback callback, gpointer data)
+pirwa_boxes_remember_async (const PirwaBoxesPaths *paths, GAsyncReadyCallback callback,
+                            gpointer data)
 {
-  start_work (paths, FALSE, TRUE, flatpak, NULL, callback, data);
+  start_work (paths, FALSE, TRUE, NULL, callback, data);
 }
 gboolean
 pirwa_boxes_remember_finish (GAsyncResult *result, GError **error)

@@ -69,7 +69,12 @@ the disposable VM, destroy its empty pool, and send `exit` before finishing.
 
 Accelerated SPICE GL configurations retain virt-viewer. Native DMABUF/GL,
 multiple monitors, clipboard, locked relative pointer input, microphone, physical
-input/audio, presentation frame times, active-frame CPU profiles, and a broader
-host matrix remain open. CPU framebuffer copies are bounded and damage-driven,
-but are still full-surface copies for each rendered update. No performance
-improvement over virt-viewer is claimed.
+input/audio, presentation frame times, broader active-application CPU profiles, and a broader
+host matrix remain open. This validation revision used full-surface copies for
+each rendered update. The later [renderer profiling and sparse-update work](../display-performance/README.md)
+records the bounded tile cache and synthetic before/after results. It does not
+establish a performance improvement over virt-viewer or real-guest performance.
+
+The later [active guest profile](../active-console-performance/README.md) adds
+controlled 1080p and 4K GNOME drawing, real SPICE invalidation/copy measurements,
+and an explicit dense-frame tail-cost follow-up.

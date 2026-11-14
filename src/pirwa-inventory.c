@@ -1,11 +1,67 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 #include "pirwa-inventory.h"
 #include "config.h"
+#include "pirwa-config.h"
 #include "pirwa-libvirt.h"
 #include <glib/gi18n.h>
+#include <osinfo/osinfo.h>
 
 #include <libvirt/libvirt.h>
 #include <libvirt/virterror.h>
+
+struct _PirwaInventoryCache
+{
+  GHashTable *os_names;
+  OsinfoLoader *loader;
+};
+
+PirwaInventoryCache *
+pirwa_inventory_cache_new (void)
+{
+  PirwaInventoryCache *cache = g_new0 (PirwaInventoryCache, 1);
+  cache->os_names = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+  return cache;
+}
+
+void
+pirwa_inventory_cache_free (PirwaInventoryCache *cache)
+{
+  g_hash_table_unref (cache->os_names);
+  g_clear_object (&cache->loader);
+  g_free (cache);
+}
+
+void
+pirwa_inventory_cache_clear (PirwaInventoryCache *cache)
+{
+  g_hash_table_remove_all (cache->os_names);
+}
+
+static const char *
+os_name (PirwaInventoryCache *cache, virDomainPtr domain, const char *uuid)
+{
+  const char *name = g_hash_table_lookup (cache->os_names, uuid);
+  if (name)
+    return name;
+  g_autofree char *xml
+      = virDomainGetMetadata (domain, VIR_DOMAIN_METADATA_ELEMENT, PIRWA_OSINFO_NS, 0);
+  g_autofree char *id = xml ? pirwa_config_os_id (xml) : NULL;
+  if (id)
+    {
+      if (!cache->loader)
+        {
+          cache->loader = osinfo_loader_new ();
+          osinfo_loader_process_default_path (cache->loader, NULL);
+        }
+      OsinfoOs *os = osinfo_db_get_os (osinfo_loader_get_db (cache->loader), id);
+      if (os)
+        name = osinfo_product_get_name (OSINFO_PRODUCT (os));
+    }
+  /* Cache missing/unknown metadata too, so state refreshes stay bulk queries. */
+  char *copy = g_strdup (name ? name : "");
+  g_hash_table_insert (cache->os_names, g_strdup (uuid), copy);
+  return copy;
+}
 
 static const char *
 state_label (int state)
@@ -51,8 +107,17 @@ compare_machines (gconstpointer a, gconstpointer b)
 GPtrArray *
 pirwa_inventory_read (virConnectPtr connection, GCancellable *cancellable, GError **error)
 {
+  return pirwa_inventory_read_cached (connection, NULL, cancellable, error);
+}
+
+GPtrArray *
+pirwa_inventory_read_cached (virConnectPtr connection, PirwaInventoryCache *cache,
+                             GCancellable *cancellable, GError **error)
+{
   virDomainStatsRecordPtr *records = NULL;
   g_autoptr (GPtrArray) machines = g_ptr_array_new_with_free_func (g_object_unref);
+  g_autoptr (GHashTable) seen
+      = cache ? g_hash_table_new_full (g_str_hash, g_str_equal, g_free, NULL) : NULL;
 
   if (g_cancellable_set_error_if_cancelled (cancellable, error))
     return NULL;
@@ -88,7 +153,23 @@ pirwa_inventory_read (virConnectPtr connection, GCancellable *cancellable, GErro
           goto cleanup;
         }
 
-      g_ptr_array_add (machines, pirwa_machine_new_full (uuid, name, state_label (state), state));
+      PirwaMachine *machine = pirwa_machine_new_full (uuid, name, state_label (state), state);
+      if (cache)
+        {
+          pirwa_machine_set_os_name (machine, os_name (cache, records[i]->dom, uuid));
+          g_hash_table_add (seen, g_strdup (uuid));
+        }
+      g_ptr_array_add (machines, machine);
+    }
+
+  if (cache)
+    {
+      GHashTableIter iter;
+      gpointer key;
+      g_hash_table_iter_init (&iter, cache->os_names);
+      while (g_hash_table_iter_next (&iter, &key, NULL))
+        if (!g_hash_table_contains (seen, key))
+          g_hash_table_iter_remove (&iter);
     }
 
   g_ptr_array_sort (machines, compare_machines);

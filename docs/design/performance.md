@@ -33,7 +33,7 @@ inconclusive: substantial variation also occurred with the manager closed.
 | Idle process CPU | Average < 0.5% of one core over 60 s | No console, no active job, stable collection; record baseline system noise |
 | Idle process PSS | ≤ 100 MiB | 100 domains, one connection; excludes daemon, viewer, and QEMU processes |
 | Hidden collection work | No periodic stats or screenshot work | Confirm with trace and wakeup counts |
-| Selected VM telemetry | At most one bulk sample per 2 s | Only while resource details are visible; none when hidden |
+| Selected VM telemetry | At most one bulk sample per 2 s; one request in flight | Only the selected running VM, while the main window is mapped and not suspended, without a modal dialog or foreground operation |
 | Start-command overhead | p95 ≤ 250 ms over equivalent direct libvirt start | Same domain; excludes guest boot and display connection |
 | Guest CPU/disk regression | ≤ 3% CPU, ≤ 5% storage against same XML through virsh | Repeated paired runs, same guest image/cache state, manager idle |
 
@@ -99,3 +99,22 @@ work, and no collection thumbnails are the starting choices. Measure them. The
 persistent connection is reused for incremental updates; only an explicit
 reconnect or a lost connection reopens it. Optimizing GTK startup cannot speed
 up the guest's boot process.
+
+## Native console frames
+
+The shared display widget has an explicit synthetic-frame profiler. It needs no
+libvirt daemon or VM. See [console renderer measurements](../research/display-performance/README.md)
+for workloads, commands, before/after comparison, correctness coverage and limits.
+
+`./scripts/profile-display.py --output build/qa/display/results.json` runs on an
+existing desktop with `build-perf/tests/benchmark-display`. Prefer the isolated
+GNOME wrapper shown in that record for repeatable virtual-display conditions.
+Keep frame source size, actual viewport, device scale and renderer with results.
+Frame-clock spans include the synthetic producer's Update phase; they do not
+measure compositor presentation or GPU completion. Sparse-update improvements
+must not be presented as full-motion or real-guest performance gains.
+
+For active guest work, the [real-console profiling workflow](../research/active-console-performance/README.md)
+boots a disposable Fedora live guest and pairs normal tile rendering with a
+forced full-frame control. It records actual SPICE regions, copied bytes,
+process CPU and passive GTK spans. Its test-only wrappers do not enter the app.

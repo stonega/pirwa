@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 #define _GNU_SOURCE
 #include "pirwa-provision.h"
+#include "pirwa-import.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <glib/gstdio.h>
@@ -347,6 +348,349 @@ out:
   if (pool)
     virStoragePoolFree (pool);
   close (fd);
+  return result;
+}
+
+/* Flatpak's /app and /usr belong to its deployments, not the host. Copy any
+ * referenced firmware so the imported guest survives uninstalling Boxes. */
+static char *
+flatpak_info (const char *option, const char *ref, GCancellable *cancellable, GError **error)
+{
+  g_autoptr (GSubprocess) process
+      = g_subprocess_new (G_SUBPROCESS_FLAGS_STDOUT_PIPE | G_SUBPROCESS_FLAGS_STDERR_SILENCE, error,
+                          "flatpak", "info", option, ref, NULL);
+  char *output = NULL;
+  if (!process)
+    return NULL;
+  if (!g_subprocess_communicate_utf8 (process, NULL, cancellable, &output, NULL, error))
+    {
+      g_subprocess_force_exit (process);
+      g_free (output);
+      return NULL;
+    }
+  if (!g_subprocess_get_successful (process) || !output || !*g_strstrip (output))
+    {
+      g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND,
+                           "Cannot locate the installed Boxes Flatpak or its runtime");
+      g_free (output);
+      return NULL;
+    }
+  return output;
+}
+
+static char *
+boxes_file (const char *path, GCancellable *cancellable, GError **error)
+{
+  if (g_str_has_prefix (path, "/app/") || g_str_has_prefix (path, "/usr/"))
+    {
+      g_autofree char *runtime = NULL;
+      if (g_str_has_prefix (path, "/usr/"))
+        {
+          runtime = flatpak_info ("--show-runtime", "org.gnome.Boxes", cancellable, error);
+          if (!runtime)
+            return NULL;
+        }
+      g_autofree char *location = flatpak_info (
+          "--show-location", runtime ? runtime : "org.gnome.Boxes", cancellable, error);
+      if (!location)
+        return NULL;
+      g_autofree char *file = g_build_filename (location, "files", path + 5, NULL);
+      char *canonical = realpath (file, NULL);
+      if (!canonical)
+        g_set_error (error, G_IO_ERROR, g_io_error_from_errno (errno),
+                     "Cannot locate Boxes firmware: %s", g_strerror (errno));
+      return canonical;
+    }
+  const char *suffix = NULL;
+  const char *directory = NULL;
+  if (g_str_has_prefix (path, "/var/data/"))
+    {
+      directory = "data";
+      suffix = path + strlen ("/var/data/");
+    }
+  else if (g_str_has_prefix (path, "/var/config/"))
+    {
+      directory = "config";
+      suffix = path + strlen ("/var/config/");
+    }
+  return directory ? g_build_filename (g_get_home_dir (), ".var", "app", "org.gnome.Boxes",
+                                       directory, suffix, NULL)
+                   : g_strdup (path);
+}
+
+static gboolean
+boxes_stopped (virDomainPtr domain, GError **error)
+{
+  int state, reason;
+  if (virDomainGetState (domain, &state, &reason, 0) < 0)
+    {
+      pirwa_libvirt_error (error, "Cannot check the source machine's state");
+      return FALSE;
+    }
+  if (state != VIR_DOMAIN_SHUTOFF || virDomainIsPersistent (domain) != 1)
+    {
+      g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_BUSY,
+                           "Shut down this machine in Boxes before importing. Leave Boxes open "
+                           "and do not start the machine until import finishes.");
+      return FALSE;
+    }
+  return TRUE;
+}
+
+static gboolean
+same_file (const char *path, const struct stat *before)
+{
+  struct stat after;
+  return lstat (path, &after) == 0 && S_ISREG (after.st_mode) && before->st_dev == after.st_dev
+         && before->st_ino == after.st_ino && before->st_size == after.st_size
+         && before->st_mtim.tv_sec == after.st_mtim.tv_sec
+         && before->st_mtim.tv_nsec == after.st_mtim.tv_nsec
+         && before->st_ctim.tv_sec == after.st_ctim.tv_sec
+         && before->st_ctim.tv_nsec == after.st_ctim.tv_nsec;
+}
+
+char *
+pirwa_provision_import_boxes (virConnectPtr connection, const char *source_uri,
+                              const char *source_uuid, GCancellable *cancellable,
+                              PirwaProgress progress, gpointer data, GError **error)
+{
+  if (g_cancellable_set_error_if_cancelled (cancellable, error))
+    return NULL;
+  g_autofree char *destination_uri = virConnectGetURI (connection);
+  if (!source_uri || !source_uuid || !g_uuid_string_is_valid (source_uuid)
+      || (!g_str_has_prefix (source_uri, "qemu+unix:///session?socket=")
+          && !g_str_has_prefix (source_uri, "test:///"))
+      || (!g_str_equal (destination_uri, "qemu:///session")
+          && !g_str_has_prefix (destination_uri, "test:///")))
+    {
+      g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT,
+                           "Boxes import requires a local source and the Session destination");
+      return NULL;
+    }
+  virConnectPtr source = virConnectOpenReadOnly (source_uri);
+  if (!source)
+    {
+      pirwa_libvirt_error (error,
+                           "Open Boxes Flatpak, shut down the guest, then refresh the library");
+      return NULL;
+    }
+  virDomainPtr original = virDomainLookupByUUIDString (source, source_uuid);
+  virStoragePoolPtr pool = NULL;
+  virStorageVolPtr volume = NULL;
+  virDomainPtr domain = NULL;
+  g_autoptr (PirwaImport) plan = NULL;
+  g_autofree char *source_xml = NULL;
+  g_autofree char *disk = NULL;
+  g_autofree char *loader = NULL;
+  g_autofree char *nvram = NULL;
+  g_autofree char *firmware_directory = NULL;
+  g_autofree char *loader_target = NULL;
+  g_autofree char *nvram_target = NULL;
+  g_autofree char *volume_xml = NULL;
+  g_autofree char *path = NULL;
+  g_autofree char *xml = NULL;
+  g_autofree char *after_xml = NULL;
+  int fd = -1;
+  char *result = NULL;
+  struct stat before, loader_before, nvram_before;
+  guint64 capacity;
+  char pool_uuid[VIR_UUID_STRING_BUFLEN];
+  if (!original)
+    {
+      pirwa_libvirt_error (error, "The source machine no longer exists; refresh the library");
+      goto out;
+    }
+  if (!boxes_stopped (original, error))
+    goto out;
+  int snapshots = virDomainSnapshotNum (original, 0);
+  if (snapshots < 0)
+    {
+      pirwa_libvirt_error (error, "Cannot inspect source snapshots");
+      goto out;
+    }
+  int saved = virDomainHasManagedSaveImage (original, 0);
+  if (saved < 0)
+    {
+      pirwa_libvirt_error (error, "Cannot inspect source snapshots and saved state");
+      goto out;
+    }
+  if (snapshots || saved)
+    {
+      g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+                           "Machines with snapshots or saved memory state cannot be imported. "
+                           "Shut down the guest fully and use a standalone disk copy.");
+      goto out;
+    }
+  source_xml = virDomainGetXMLDesc (original, VIR_DOMAIN_XML_INACTIVE);
+  if (!source_xml)
+    {
+      pirwa_libvirt_error (error, "Cannot read the source definition");
+      goto out;
+    }
+  plan = pirwa_import_prepare (source_xml, error);
+  if (!plan)
+    goto out;
+  disk = boxes_file (plan->disk, cancellable, error);
+  if (!disk)
+    goto out;
+  fd = open (disk, O_RDONLY | O_CLOEXEC | O_NOFOLLOW | O_NONBLOCK);
+  if (fd < 0 || fstat (fd, &before) < 0 || !S_ISREG (before.st_mode))
+    {
+      g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_INVALID_DATA,
+                           "The source disk must be a readable regular file, not a symbolic link");
+      goto out;
+    }
+  struct flock lock = { .l_type = F_RDLCK, .l_whence = SEEK_SET };
+  if (fcntl (fd, F_SETLK, &lock) < 0)
+    {
+      g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_BUSY,
+                           "The source disk is in use; shut down its machine before importing");
+      goto out;
+    }
+  if (!pirwa_qcow2_inspect (fd, &capacity, error))
+    goto out;
+  guint32 internal_snapshots;
+  if (pread (fd, &internal_snapshots, sizeof internal_snapshots, 60) != sizeof internal_snapshots
+      || internal_snapshots)
+    {
+      g_set_error_literal (
+          error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+          "The disk contains internal snapshots. Import a standalone copy instead.");
+      goto out;
+    }
+  if (progress)
+    progress (0.02, "Checking the stopped Boxes machine", data);
+  if (plan->loader)
+    {
+      loader = boxes_file (plan->loader, cancellable, error);
+      if (!loader)
+        goto out;
+      nvram = boxes_file (plan->nvram, cancellable, error);
+      if (!nvram)
+        goto out;
+      if (lstat (loader, &loader_before) < 0 || lstat (nvram, &nvram_before) < 0)
+        {
+          g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND,
+                               "Cannot read the source firmware or NVRAM file");
+          goto out;
+        }
+      g_autofree char *parent
+          = g_build_filename (g_get_user_data_dir (), "pirwa", "firmware", NULL);
+      if (g_mkdir_with_parents (parent, 0700) < 0)
+        {
+          g_set_error (error, G_IO_ERROR, g_io_error_from_errno (errno),
+                       "Cannot create firmware directory: %s", g_strerror (errno));
+          goto out;
+        }
+      firmware_directory = g_build_filename (parent, "import-XXXXXX", NULL);
+      if (!g_mkdtemp (firmware_directory))
+        {
+          g_set_error (error, G_IO_ERROR, g_io_error_from_errno (errno),
+                       "Cannot allocate firmware directory: %s", g_strerror (errno));
+          g_clear_pointer (&firmware_directory, g_free);
+          goto out;
+        }
+      loader_target = g_build_filename (firmware_directory, "loader.fd", NULL);
+      nvram_target = g_build_filename (firmware_directory, "nvram.fd", NULL);
+      if (!pirwa_import_copy_firmware (loader, loader_target, cancellable, error)
+          || !pirwa_import_copy_firmware (nvram, nvram_target, cancellable, error))
+        goto out;
+    }
+  pool = get_pool (connection, "pirwa", error);
+  if (!pool)
+    goto out;
+  if (virStoragePoolGetUUIDString (pool, pool_uuid) < 0)
+    {
+      pirwa_libvirt_error (error, "Cannot identify the destination pool");
+      goto out;
+    }
+  if (g_cancellable_set_error_if_cancelled (cancellable, error))
+    goto out;
+  volume_xml = pirwa_config_volume (plan->uuid, capacity);
+  volume = virStorageVolCreateXML (pool, volume_xml, 0);
+  if (!volume)
+    {
+      pirwa_libvirt_error (error, "Cannot allocate the imported disk");
+      goto out;
+    }
+  if (!upload (connection, volume, fd, before.st_size, cancellable, progress, data, error))
+    goto out;
+  after_xml = virDomainGetXMLDesc (original, VIR_DOMAIN_XML_INACTIVE);
+  if (!after_xml)
+    {
+      pirwa_libvirt_error (error, "Cannot recheck the source definition");
+      goto out;
+    }
+  if (!boxes_stopped (original, error))
+    goto out;
+  if (g_strcmp0 (source_xml, after_xml) || !same_file (disk, &before)
+      || (loader && (!same_file (loader, &loader_before) || !same_file (nvram, &nvram_before))))
+    {
+      g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_BUSY,
+                           "The source changed during import; its original files were kept");
+      goto out;
+    }
+  path = virStorageVolGetPath (volume);
+  const char *key = virStorageVolGetKey (volume);
+  if (!path || !key)
+    {
+      pirwa_libvirt_error (error, "Cannot identify the imported disk");
+      goto out;
+    }
+  xml = pirwa_import_domain (plan, path, loader_target, nvram_target, pool_uuid, key);
+  if (g_cancellable_set_error_if_cancelled (cancellable, error))
+    goto out;
+  if (progress)
+    progress (0.9, "Registering the imported machine in Session", data);
+  domain = virDomainDefineXML (connection, xml);
+  if (!domain)
+    {
+      pirwa_libvirt_error (error, "The host cannot use this machine's configuration");
+      goto out;
+    }
+  if (!write_ledger (connection, plan->uuid, pool_uuid, key, path, error)
+      || g_cancellable_set_error_if_cancelled (cancellable, error))
+    goto out;
+  /* Leave the copy stopped for review. Booting a copied guest can have network
+   * effects; starting it is the user's next explicit operation. */
+  result = g_strdup (plan->uuid);
+  if (progress)
+    progress (1.0, "Import complete. Select Start to check the copied machine.", data);
+out:
+  if (!result)
+    {
+      g_autoptr (GError) rollback_error = NULL;
+      if (pirwa_provision_rollback (connection, domain, volume, &rollback_error))
+        {
+          if (plan)
+            {
+              g_autofree char *file = ledger_path (connection, plan->uuid);
+              g_unlink (file);
+            }
+          if (firmware_directory)
+            {
+              if (loader_target)
+                g_unlink (loader_target);
+              if (nvram_target)
+                g_unlink (nvram_target);
+              g_rmdir (firmware_directory);
+            }
+        }
+      else
+        g_prefix_error (error, "Import cleanup incomplete; copied resources were kept (%s). ",
+                        rollback_error->message);
+    }
+  if (fd >= 0)
+    close (fd);
+  if (domain)
+    virDomainFree (domain);
+  if (volume)
+    virStorageVolFree (volume);
+  if (pool)
+    virStoragePoolFree (pool);
+  if (original)
+    virDomainFree (original);
+  virConnectClose (source);
   return result;
 }
 

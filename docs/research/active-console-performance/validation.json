@@ -1,0 +1,148 @@
+{
+  "default_checks": 12,
+  "asan_ubsan_checks": 12,
+  "asan_detect_leaks": false,
+  "guards": [
+    {
+      "command": [
+        "./build/tests/benchmark-console"
+      ],
+      "exit_code": 77
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/profile-console.py",
+        "--uri",
+        "invalid",
+        "--iso",
+        "/nonexistent.iso",
+        "--output",
+        "/tmp/pirwa-profiler-guard-must-not-create",
+        "--expect-size",
+        "1280x800"
+      ],
+      "exit_code": 2
+    },
+    {
+      "command": [
+        "python3",
+        "tests/fixtures/qa-display-workload.py",
+        "--mode",
+        "idle",
+        "--status",
+        "/tmp/pirwa-display-guard.json"
+      ],
+      "exit_code": 2
+    }
+  ],
+  "datasets": {
+    "active-console-1080": {
+      "trials": 18,
+      "cleanup": {
+        "stop": {
+          "code": 0,
+          "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n"
+        },
+        "remove": {
+          "code": 0,
+          "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n"
+        },
+        "pool_destroy": 0,
+        "pool_undefine": 0,
+        "remaining_pool_files": [],
+        "domain_absent": true,
+        "pool_absent": true,
+        "baseline_unchanged": true
+      },
+      "private_process_cleanup": {
+        "signalled": [
+          {
+            "pid": 2494877,
+            "name": "evolution-sourc",
+            "signal": "SIGTERM"
+          }
+        ],
+        "remaining": {}
+      },
+      "source_sha256": {
+        "src/pirwa-console.c": "ee75bc41701e5a52a8c621d590df1cc0adea9f04be6208db1505b01941621362",
+        "src/pirwa-display.c": "45e9c71db46f89016f25a5445119eaeaeac108ceb701ca574e8da6088ab5971a",
+        "src/pirwa-frame.c": "c496be6f3b17744558c857959b9fe5d236d15769b11c5fa108ecb1b45494fe76",
+        "tests/benchmark-console.c": "8f55916c27a297358b6ac1248465ca966fdfc626f0951456022d120c770e86ac",
+        "tests/fixtures/qa-display-workload.py": "cfd314fda7b3d254fb1b79fb05c91991556ad6b1009e58923664309b9b19621a",
+        "scripts/profile-console.py": "914d5477b70b787eb3bf5b606363b5a19b37aee1b63aa566a2d5121886d6b0da"
+      },
+      "binary_sha256": "f8158121995b007f59bba118ff4923c8cbfd5044e807ea2dc10b4df6ad6033ef"
+    },
+    "active-console-4k": {
+      "trials": 18,
+      "cleanup": {
+        "stop": {
+          "code": 0,
+          "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n"
+        },
+        "remove": {
+          "code": 0,
+          "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n"
+        },
+        "pool_destroy": 0,
+        "pool_undefine": 0,
+        "remaining_pool_files": [],
+        "domain_absent": true,
+        "pool_absent": true,
+        "baseline_unchanged": true
+      },
+      "private_process_cleanup": {
+        "signalled": [
+          {
+            "pid": 2514917,
+            "name": "evolution-sourc",
+            "signal": "SIGTERM"
+          }
+        ],
+        "remaining": {}
+      },
+      "source_sha256": {
+        "src/pirwa-console.c": "ee75bc41701e5a52a8c621d590df1cc0adea9f04be6208db1505b01941621362",
+        "src/pirwa-display.c": "45e9c71db46f89016f25a5445119eaeaeac108ceb701ca574e8da6088ab5971a",
+        "src/pirwa-frame.c": "c496be6f3b17744558c857959b9fe5d236d15769b11c5fa108ecb1b45494fe76",
+        "tests/benchmark-console.c": "8f55916c27a297358b6ac1248465ca966fdfc626f0951456022d120c770e86ac",
+        "tests/fixtures/qa-display-workload.py": "cfd314fda7b3d254fb1b79fb05c91991556ad6b1009e58923664309b9b19621a",
+        "scripts/profile-console.py": "914d5477b70b787eb3bf5b606363b5a19b37aee1b63aa566a2d5121886d6b0da"
+      },
+      "binary_sha256": "f8158121995b007f59bba118ff4923c8cbfd5044e807ea2dc10b4df6ad6033ef"
+    }
+  },
+  "manager_ui": {
+    "passed": true,
+    "cases": [
+      "light",
+      "large-dark",
+      "empty",
+      "boxes",
+      "boxes-large-dark",
+      "viewer",
+      "viewer-large-dark"
+    ],
+    "artifact": "build/qa/active-console-final-manager-ui/report.json",
+    "private_process_cleanup": {
+      "signalled": [],
+      "remaining": {}
+    }
+  },
+  "graceful_timeout": {
+    "expected_timeout_reported": true,
+    "child_cleanup_exit_code": 0,
+    "cleanup_sentinel_verified": true,
+    "private_process_cleanup": {
+      "signalled": [],
+      "remaining": {}
+    }
+  },
+  "final_resource_audit": {
+    "recorded_fixtures": 9,
+    "remaining_recorded_domains": [],
+    "remaining_recorded_pools": []
+  }
+}

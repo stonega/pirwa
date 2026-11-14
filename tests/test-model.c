@@ -24,6 +24,29 @@ changed (GListModel *model, guint position, guint removed, guint added, gpointer
 }
 
 static void
+test_os_title (void)
+{
+  g_autoptr (GListStore) store = g_list_store_new (PIRWA_TYPE_MACHINE);
+  guint64 serial = 0;
+  g_autoptr (GPtrArray) initial = snapshot ("boxes-unknown", NULL, 1);
+  g_assert_true (pirwa_model_apply (store, &serial, 1, initial));
+  g_autoptr (PirwaMachine) machine = g_list_model_get_item (G_LIST_MODEL (store), 0);
+  g_assert_cmpstr (pirwa_machine_get_title (machine), ==, "boxes-unknown");
+  g_autoptr (GPtrArray) with_os = snapshot ("boxes-unknown", NULL, 1);
+  pirwa_machine_set_os_name (g_ptr_array_index (with_os, 0), "Example Linux 1");
+  g_assert_true (pirwa_model_apply (store, &serial, 2, with_os));
+  g_autoptr (PirwaMachine) same = g_list_model_get_item (G_LIST_MODEL (store), 0);
+  g_assert_true (machine == same);
+  g_assert_cmpstr (pirwa_machine_get_title (machine), ==, "Example Linux 1");
+  g_assert_cmpstr (pirwa_machine_get_name (machine), ==, "boxes-unknown");
+  g_assert_false (pirwa_model_apply (store, &serial, 1, initial));
+  g_assert_cmpstr (pirwa_machine_get_title (machine), ==, "Example Linux 1");
+  g_autoptr (GPtrArray) without_os = snapshot ("boxes-unknown", NULL, 1);
+  g_assert_true (pirwa_model_apply (store, &serial, 3, without_os));
+  g_assert_cmpstr (pirwa_machine_get_title (machine), ==, "boxes-unknown");
+}
+
+static void
 test_order_and_identity (void)
 {
   g_autoptr (GListStore) store = g_list_store_new (PIRWA_TYPE_MACHINE);
@@ -64,6 +87,7 @@ int
 main (int argc, char **argv)
 {
   g_test_init (&argc, &argv, NULL);
+  g_test_add_func ("/model/os-title-and-fallback", test_os_title);
   g_test_add_func ("/model/late-delivery-and-stable-identity", test_order_and_identity);
   return g_test_run ();
 }

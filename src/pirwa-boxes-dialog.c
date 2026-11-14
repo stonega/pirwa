@@ -7,11 +7,10 @@ typedef struct
 {
   AdwDialog *dialog;
   PirwaBoxesScan *scan;
-  GtkDropDown *source;
   GtkLabel *explanation;
   GtkLabel *error;
   GtkSingleSelection *selection;
-  GtkWidget *use;
+  GtkWidget *apply;
   GtkWidget *open;
   GtkWidget *rescan;
   GWeakRef parent;
@@ -34,9 +33,7 @@ guide_free (gpointer data)
 static PirwaBoxesLibrary *
 selected_library (Guide *guide)
 {
-  guint index = gtk_drop_down_get_selected (guide->source);
-  return index < guide->scan->libraries->len ? g_ptr_array_index (guide->scan->libraries, index)
-                                             : NULL;
+  return guide->scan->libraries->len ? g_ptr_array_index (guide->scan->libraries, 0) : NULL;
 }
 
 static void
@@ -44,16 +41,16 @@ respond (Guide *guide, PirwaBoxesResponse response)
 {
   if (guide->responded)
     return;
-  guide->responded = TRUE;
+  if (response == PIRWA_BOXES_SKIP || response == PIRWA_BOXES_RESCAN)
+    guide->responded = TRUE;
   g_autoptr (GtkWindow) parent = g_weak_ref_get (&guide->parent);
   PirwaBoxesLibrary *library = selected_library (guide);
   PirwaMachine *machine = gtk_single_selection_get_selected_item (guide->selection);
   if (parent)
-    guide->response (parent, response, response == PIRWA_BOXES_USE && library ? library->uri : NULL,
-                     response == PIRWA_BOXES_USE && machine ? pirwa_machine_get_uuid (machine)
-                                                            : NULL,
-                     response == PIRWA_BOXES_USE && library ? library->flatpak
-                                                            : guide->scan->preferred_uri != NULL);
+    guide->response (parent, guide->dialog, response,
+                     response == PIRWA_BOXES_IMPORT && library ? library->uri : NULL,
+                     response == PIRWA_BOXES_IMPORT && machine ? pirwa_machine_get_uuid (machine)
+                                                               : NULL);
 }
 
 static void
@@ -68,8 +65,14 @@ static void
 button_clicked (GtkButton *button, Guide *guide)
 {
   PirwaBoxesResponse response = GPOINTER_TO_INT (g_object_get_data (G_OBJECT (button), "response"));
+  if (response == PIRWA_BOXES_SKIP && !adw_dialog_get_can_close (guide->dialog))
+    {
+      respond (guide, PIRWA_BOXES_CANCEL);
+      return;
+    }
   respond (guide, response);
-  adw_dialog_close (guide->dialog);
+  if (response != PIRWA_BOXES_IMPORT)
+    adw_dialog_close (guide->dialog);
 }
 
 static void
@@ -86,6 +89,7 @@ boxes_started (GObject *source, GAsyncResult *result, gpointer data)
           _ ("GNOME Boxes could not start. Check that its Flatpak is installed.\n%s"),
           error->message);
       gtk_label_set_text (guide->error, message);
+      gtk_widget_set_visible (GTK_WIDGET (guide->error), TRUE);
     }
 }
 
@@ -96,6 +100,7 @@ open_boxes (GtkButton *button, Guide *guide)
   g_autoptr (GError) error = NULL;
   g_autoptr (GSubprocess) process = g_subprocess_new (G_SUBPROCESS_FLAGS_NONE, &error, "flatpak",
                                                       "run", "org.gnome.Boxes", NULL);
+  gtk_widget_set_visible (GTK_WIDGET (guide->error), TRUE);
   if (!process)
     gtk_label_set_text (guide->error, error->message);
   else
@@ -107,28 +112,30 @@ open_boxes (GtkButton *button, Guide *guide)
 }
 
 static void
-source_changed (GObject *object, GParamSpec *spec, Guide *guide)
+populate_guide (Guide *guide)
 {
-  (void)object;
-  (void)spec;
   PirwaBoxesLibrary *library = selected_library (guide);
   g_autoptr (GListStore) store = g_list_store_new (PIRWA_TYPE_MACHINE);
   if (library)
     for (guint i = 0; i < library->machines->len; i++)
       g_list_store_append (store, g_ptr_array_index (library->machines, i));
   gtk_single_selection_set_model (guide->selection, G_LIST_MODEL (store));
-  gtk_widget_set_sensitive (guide->use, library && library->available);
-  gtk_widget_set_visible (guide->open, library && library->flatpak && !library->available);
-  gtk_widget_set_visible (guide->rescan, library && library->flatpak);
+  gtk_widget_set_sensitive (guide->apply, library && library->available && library->machines->len);
+  gtk_widget_set_visible (guide->open, guide->scan->installed && (!library || !library->available));
+  gtk_widget_set_visible (guide->rescan, guide->scan->installed);
   gtk_label_set_text (
       guide->explanation,
-      !library ? _ ("No local GNOME Boxes machines were found. Install GNOME Boxes or create a "
-                    "machine there, then try Import from GNOME Boxes again.")
-      : library->flatpak
-          ? _ ("These machines belong to the GNOME Boxes Flatpak library. Keep Boxes running so "
-               "Pirwa can connect. Open Boxes if needed, then refresh this library.")
-          : _ ("GNOME Boxes and Pirwa share the Session library. Use these existing machines "
-               "directly, without copying disks or changing their configuration."));
+      !guide->scan->installed
+          ? _ ("GNOME Boxes Flatpak is not installed. Install org.gnome.Boxes to import its "
+               "machines. Native Boxes machines already appear in Session.")
+      : !library
+          ? _ ("No machines were found in Boxes Flatpak. Create a machine in Boxes, then choose "
+               "Refresh Library. Native Boxes machines already appear in Session.")
+      : !library->available
+          ? _ ("Open Boxes Flatpak so Pirwa can read its library. Shut down the machine you want "
+               "to import, leave Boxes open, then choose Refresh Library.")
+          : _ ("Choose a machine to copy into your Session library. Shut it down in Boxes first, "
+               "and leave Boxes open without starting the guest until import finishes."));
 }
 
 static void
@@ -167,7 +174,7 @@ pirwa_boxes_dialog_present (GtkWindow *parent, PirwaBoxesScan *scan,
   guide->launch_cancel = g_cancellable_new ();
   g_weak_ref_init (&guide->parent, parent);
   guide->dialog = adw_dialog_new ();
-  adw_dialog_set_title (guide->dialog, _ ("Import from GNOME Boxes"));
+  adw_dialog_set_title (guide->dialog, _ ("Import from Boxes Flatpak"));
   adw_dialog_set_content_width (guide->dialog, 620);
   adw_dialog_set_content_height (guide->dialog, 560);
   g_object_set_data_full (G_OBJECT (guide->dialog), "boxes-guide", guide, guide_free);
@@ -176,6 +183,7 @@ pirwa_boxes_dialog_present (GtkWindow *parent, PirwaBoxesScan *scan,
   GtkWidget *header = adw_header_bar_new ();
   adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), header);
   GtkWidget *cancel = gtk_button_new_with_label (_ ("Not Now"));
+  g_object_set_data (G_OBJECT (guide->dialog), "cancel", cancel);
   g_signal_connect (cancel, "clicked", G_CALLBACK (button_clicked), guide);
   adw_header_bar_pack_start (ADW_HEADER_BAR (header), cancel);
   GtkWidget *content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 16);
@@ -187,43 +195,8 @@ pirwa_boxes_dialog_present (GtkWindow *parent, PirwaBoxesScan *scan,
   gtk_label_set_wrap (guide->explanation, TRUE);
   gtk_label_set_xalign (guide->explanation, 0);
   gtk_box_append (GTK_BOX (content), GTK_WIDGET (guide->explanation));
-  GtkStringList *sources = gtk_string_list_new (NULL);
-  for (guint i = 0; i < scan->libraries->len; i++)
-    {
-      PirwaBoxesLibrary *library = g_ptr_array_index (scan->libraries, i);
-      g_autofree char *label = g_strdup_printf (
-          ngettext ("%s · %u machine", "%s · %u machines", library->machines->len),
-          library->flatpak ? _ ("Boxes Flatpak") : _ ("Session"), library->machines->len);
-      gtk_string_list_append (sources, label);
-    }
-  guide->source = GTK_DROP_DOWN (gtk_drop_down_new (G_LIST_MODEL (sources), NULL));
-  gtk_accessible_update_property (GTK_ACCESSIBLE (guide->source), GTK_ACCESSIBLE_PROPERTY_LABEL,
-                                  _ ("GNOME Boxes library"), -1);
-  gtk_widget_set_visible (GTK_WIDGET (guide->source), scan->libraries->len > 0);
-  gtk_box_append (GTK_BOX (content), GTK_WIDGET (guide->source));
-  guide->selection = gtk_single_selection_new (NULL);
-  GtkListItemFactory *factory = gtk_signal_list_item_factory_new ();
-  g_signal_connect (factory, "setup", G_CALLBACK (row_setup), NULL);
-  g_signal_connect (factory, "bind", G_CALLBACK (row_bind), NULL);
-  GtkWidget *list
-      = gtk_list_view_new (GTK_SELECTION_MODEL (g_object_ref (guide->selection)), factory);
-  gtk_widget_add_css_class (list, "boxed-list");
-  GtkWidget *list_scroll = gtk_scrolled_window_new ();
-  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (list_scroll), GTK_POLICY_NEVER,
-                                  GTK_POLICY_AUTOMATIC);
-  gtk_scrolled_window_set_min_content_height (GTK_SCROLLED_WINDOW (list_scroll), 120);
-  gtk_scrolled_window_set_max_content_height (GTK_SCROLLED_WINDOW (list_scroll), 200);
-  gtk_scrolled_window_set_propagate_natural_height (GTK_SCROLLED_WINDOW (list_scroll), TRUE);
-  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (list_scroll), list);
-  gtk_widget_set_visible (list_scroll, scan->libraries->len > 0);
-  gtk_box_append (GTK_BOX (content), list_scroll);
-  GtkWidget *note = gtk_label_new (
-      _ ("Both apps control the same machines. Disks stay in their existing location. Import does "
-         "not grant Pirwa permission to delete Boxes disks."));
-  gtk_label_set_wrap (GTK_LABEL (note), TRUE);
-  gtk_label_set_xalign (GTK_LABEL (note), 0);
-  gtk_box_append (GTK_BOX (content), note);
   guide->error = GTK_LABEL (gtk_label_new (scan->warning));
+  gtk_widget_set_visible (GTK_WIDGET (guide->error), scan->warning != NULL);
   gtk_label_set_wrap (guide->error, TRUE);
   gtk_label_set_wrap_mode (guide->error, PANGO_WRAP_WORD_CHAR);
   gtk_label_set_xalign (guide->error, 0);
@@ -235,24 +208,62 @@ pirwa_boxes_dialog_present (GtkWindow *parent, PirwaBoxesScan *scan,
   g_object_set_data (G_OBJECT (guide->rescan), "response", GINT_TO_POINTER (PIRWA_BOXES_RESCAN));
   g_signal_connect (guide->rescan, "clicked", G_CALLBACK (button_clicked), guide);
   gtk_box_append (GTK_BOX (content), guide->rescan);
+  g_object_set_data (G_OBJECT (guide->dialog), "rescan", guide->rescan);
+  GtkWidget *progress = gtk_progress_bar_new ();
+  gtk_progress_bar_set_show_text (GTK_PROGRESS_BAR (progress), TRUE);
+  gtk_widget_set_visible (progress, FALSE);
+  g_object_set_data (G_OBJECT (guide->dialog), "progress", progress);
+  guide->selection = gtk_single_selection_new (NULL);
+  GtkListItemFactory *factory = gtk_signal_list_item_factory_new ();
+  g_signal_connect (factory, "setup", G_CALLBACK (row_setup), NULL);
+  g_signal_connect (factory, "bind", G_CALLBACK (row_bind), NULL);
+  GtkWidget *list
+      = gtk_list_view_new (GTK_SELECTION_MODEL (g_object_ref (guide->selection)), factory);
+  gtk_widget_add_css_class (list, "boxed-list");
+  g_object_set_data (G_OBJECT (guide->dialog), "machines", list);
+  GtkWidget *list_scroll = gtk_scrolled_window_new ();
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (list_scroll), GTK_POLICY_NEVER,
+                                  GTK_POLICY_AUTOMATIC);
+  PirwaBoxesLibrary *library = selected_library (guide);
+  gtk_scrolled_window_set_min_content_height (
+      GTK_SCROLLED_WINDOW (list_scroll),
+      library ? MIN (200, MAX (48, library->machines->len * 48)) : 48);
+  gtk_scrolled_window_set_max_content_height (GTK_SCROLLED_WINDOW (list_scroll), 200);
+  gtk_scrolled_window_set_propagate_natural_height (GTK_SCROLLED_WINDOW (list_scroll), TRUE);
+  gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (list_scroll), list);
+  gtk_widget_set_visible (list_scroll, scan->libraries->len > 0);
+  gtk_box_append (GTK_BOX (content), list_scroll);
+  GtkWidget *note = gtk_label_new (_ (
+      "Pirwa copies the disk and UEFI firmware state into its own storage. Allow enough free "
+      "space for a separate disk copy; large disks can take a while. You can cancel the copy.\n\n"
+      "The imported machine appears stopped in Session and works without Boxes. Select Start "
+      "to check it. The original machine and its files stay in Boxes; remove them there only "
+      "after checking the imported copy. Installation media is ejected from the copy.\n\n"
+      "Import currently supports one standalone qcow2 disk. Machines with snapshots, saved "
+      "memory, backing chains, TPM, shared folders or passthrough devices are not supported."));
+  gtk_label_set_wrap (GTK_LABEL (note), TRUE);
+  gtk_label_set_xalign (GTK_LABEL (note), 0);
+  gtk_box_append (GTK_BOX (content), note);
   GtkWidget *scrolled = gtk_scrolled_window_new ();
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled), GTK_POLICY_NEVER,
                                   GTK_POLICY_AUTOMATIC);
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scrolled), content);
   adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar), scrolled);
-  GtkWidget *footer = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+  GtkWidget *footer = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
   gtk_widget_set_margin_start (footer, 18);
   gtk_widget_set_margin_end (footer, 18);
   gtk_widget_set_margin_top (footer, 12);
   gtk_widget_set_margin_bottom (footer, 12);
-  guide->use = gtk_button_new_with_label (_ ("Use Machines"));
-  gtk_widget_add_css_class (guide->use, "suggested-action");
-  g_object_set_data (G_OBJECT (guide->use), "response", GINT_TO_POINTER (PIRWA_BOXES_USE));
-  g_signal_connect (guide->use, "clicked", G_CALLBACK (button_clicked), guide);
-  gtk_box_append (GTK_BOX (footer), guide->use);
+  gtk_box_append (GTK_BOX (footer), progress);
+  guide->apply = gtk_button_new_with_label (_ ("Import Machine"));
+  g_object_set_data (G_OBJECT (guide->dialog), "apply", guide->apply);
+  g_object_set_data (G_OBJECT (guide->dialog), "error", guide->error);
+  gtk_widget_add_css_class (guide->apply, "suggested-action");
+  g_object_set_data (G_OBJECT (guide->apply), "response", GINT_TO_POINTER (PIRWA_BOXES_IMPORT));
+  g_signal_connect (guide->apply, "clicked", G_CALLBACK (button_clicked), guide);
+  gtk_box_append (GTK_BOX (footer), guide->apply);
   adw_toolbar_view_add_bottom_bar (ADW_TOOLBAR_VIEW (toolbar), footer);
-  g_signal_connect (guide->source, "notify::selected", G_CALLBACK (source_changed), guide);
-  source_changed (NULL, NULL, guide);
+  populate_guide (guide);
   adw_dialog_set_child (guide->dialog, toolbar);
   adw_dialog_present (guide->dialog, GTK_WIDGET (parent));
 }
