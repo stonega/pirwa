@@ -86,6 +86,12 @@ test_controls (void)
   g_assert_nonnull (console->viewer);
   g_assert_true (g_subprocess_wait_check (console->viewer, NULL, &error));
   g_assert_no_error (error);
+  g_assert_false (console->native_console);
+  request.operation = PIRWA_GRAPHICS_FD;
+  g_autoptr (PirwaReply) unsupported = run (backend, &request, NULL, &error);
+  g_assert_null (unsupported);
+  g_assert_error (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED);
+  g_clear_error (&error);
   const PirwaOperation ops[]
       = { PIRWA_PAUSE, PIRWA_RESUME, PIRWA_REBOOT, PIRWA_SHUTDOWN, PIRWA_START, PIRWA_FORCE_STOP };
   const int states[] = { 3, 1, 1, 5, 1, 5 };
@@ -301,10 +307,62 @@ test_result_order_and_progress (void)
   g_unlink (path);
 }
 
+static void
+test_native_console (void)
+{
+  g_autofree char *path = NULL;
+  g_autoptr (GError) error = NULL;
+  int fd = g_file_open_tmp ("pirwa-spice-XXXXXX", &path, &error);
+  g_assert_no_error (error);
+  close (fd);
+  const char *xml = "<node><domain type='test'><name>test</name>"
+                    "<uuid>22222222-2222-4222-8222-222222222222</uuid>"
+                    "<memory unit='KiB'>262144</memory><vcpu>1</vcpu>"
+                    "<os><type>hvm</type></os><devices>"
+                    "<graphics type='spice'/></devices></domain></node>";
+  g_assert_true (g_file_set_contents (path, xml, -1, &error));
+  g_autofree char *uri = g_strconcat ("test://", path, NULL);
+  g_autoptr (PirwaBackend) backend = pirwa_backend_new (uri);
+  PirwaRequest request
+      = { .operation = PIRWA_CONSOLE, .uuid = "22222222-2222-4222-8222-222222222222" };
+  g_autoptr (PirwaReply) reply = run (backend, &request, NULL, &error);
+  g_assert_no_error (error);
+  g_assert_nonnull (reply);
+  g_assert_true (reply->native_console);
+  g_assert_cmpstr (reply->console_name, ==, "test");
+  g_assert_null (reply->viewer);
+  g_assert_null (reply->uuid);
+  g_assert_null (reply->machines);
+  request.operation = PIRWA_GRAPHICS_FD;
+  g_autoptr (PirwaReply) socket = run (backend, &request, NULL, &error);
+  g_assert_null (socket); /* The synthetic driver cannot supply graphics sockets. */
+  g_assert_error (error, G_IO_ERROR, G_IO_ERROR_FAILED);
+  pirwa_backend_stop (backend);
+  g_unlink (path);
+}
+
+static void
+test_socket_ownership (void)
+{
+  int sockets[2];
+  g_assert_cmpint (pipe (sockets), ==, 0);
+  PirwaReply *reply = g_new0 (PirwaReply, 1);
+  reply->graphics_fds = g_unix_fd_list_new_from_array (sockets, 2);
+  pirwa_reply_free (reply);
+  errno = 0;
+  g_assert_cmpint (fcntl (sockets[0], F_GETFD), ==, -1);
+  g_assert_cmpint (errno, ==, EBADF);
+  errno = 0;
+  g_assert_cmpint (fcntl (sockets[1], F_GETFD), ==, -1);
+  g_assert_cmpint (errno, ==, EBADF);
+}
+
 int
 main (int argc, char **argv)
 {
   g_test_init (&argc, &argv, NULL);
+  g_test_add_func ("/backend/socket-ownership", test_socket_ownership);
+  g_test_add_func ("/backend/native-console", test_native_console);
   g_test_add_func ("/backend/controls-and-ownership", test_controls);
   g_test_add_func ("/backend/cancellation-and-stop", test_cancellation_and_stop);
   g_test_add_func ("/backend/reconnect-and-missing", test_reconnect_and_missing);

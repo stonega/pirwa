@@ -2,8 +2,8 @@
 
 ## Requirements
 
-Meson ≥ 1.3, a C17 compiler, Ninja, pkg-config, GLib/GIO ≥ 2.76, GTK ≥ 4.12,
-libadwaita ≥ 1.5, libvirt ≥ 9.0, libvirt-glib ≥ 4.0, libxml2 ≥ 2.9, and libosinfo ≥ 1.10. Development headers are required, not just
+Meson ≥ 1.3, a C17 compiler, Ninja, pkg-config, GLib/GIO ≥ 2.76, GTK ≥ 4.16,
+libadwaita ≥ 1.5, libvirt ≥ 9.0, libvirt-glib ≥ 4.0, libxml2 ≥ 2.9, libosinfo ≥ 1.10, and spice-client-glib ≥ 0.42. Development headers are required, not just
 runtime libraries. Build checks use clang-format and optionally desktop-file-validate.
 
 Fedora development packages and normal commands are in the root README. Runtime
@@ -30,7 +30,8 @@ dependency installations or compiler settings, use a fresh build directory.
 
 Once `build` is configured, `./scripts/run-dev.sh` rebuilds and launches Pirwa.
 It resolves the project directory automatically, forwards application arguments,
-and uses an installed virt-viewer or the temporary development viewer recorded
+and opens SPICE in the native GTK 4 window. VNC and SPICE GL use an installed virt-viewer
+or the temporary development viewer recorded
 in `/tmp/pirwa-build-deps-path`. Run it as your regular desktop user.
 
 For a sanitizer run:
@@ -151,3 +152,21 @@ its BuildRequires. The native Meson install path also works without RPM.
 
 The development AppStream check overrides only the missing-homepage warning.
 A real homepage and controlled application ID are required before publication.
+
+## Native SPICE development headers on this host
+
+The console adds `spice-glib-devel` and `spice-protocol`, with GTK 4.16 required
+for memory textures with damage hints. GTK 3 headers are not used. On this host,
+the signed matching Fedora `spice-glib-devel-0.43-5.fc45.x86_64` and
+`spice-protocol-0.14.5-5.fc45.noarch` RPMs were extracted into the existing temporary
+SDK prefix. The local SPICE `.pc` omits `Requires.private` (only the shared library
+is linked; its runtime dependencies are installed) and its linker symlink points
+to the installed runtime. This is a local SDK workaround, not a repository build
+requirement. Normal `dnf install spice-glib-devel` supplies all development dependencies.
+
+For the extracted SDK, both pkg-config directories are needed:
+
+```sh
+pirwa_sdk=$(cat /tmp/pirwa-build-deps-path)
+meson setup build --reconfigure -Dpkg_config_path="$pirwa_sdk/usr/lib64/pkgconfig,$pirwa_sdk/usr/share/pkgconfig"
+```

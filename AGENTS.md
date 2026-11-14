@@ -2,6 +2,7 @@
 
 Pirwa is a native GNOME virtual machine manager. Performance and responsiveness
 are product requirements. Use C17, GTK 4, libadwaita, Meson, and the libvirt C API with libvirt-glib event integration, libxml2, and libosinfo.
+SPICE consoles use spice-client-glib without linking GTK 3.
 The project setup, v0.1 plan, and its implementation are authorized by the user.
 
 ## Layout

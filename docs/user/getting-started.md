@@ -38,12 +38,16 @@ names. Start, Shut Down, Restart, Pause, and Resume ask libvirt to perform the
 operation. Shut Down depends on guest cooperation. Pirwa never automatically
 turns a slow shutdown into Force Stop. Force Stop has a separate confirmation.
 
-Open Console launches virt-viewer in another window. Install virt-viewer first.
-Console input, fullscreen, and guest resize are handled by the viewer. Guest
-agents may be needed for the best resize/integration experience.
-The viewer's default release shortcut is Ctrl+Alt. To capture input again, move
-outside the guest display, move back, and click it. GNOME may ask whether to
-allow the viewer to inhibit desktop shortcuts.
+Open Console opens Pirwa's native GTK 4 window for SPICE machines, including
+Boxes machines. Click the display to send input; press Ctrl+Alt or Release Input
+to return to the host. Click the display again to recapture. GNOME may ask to
+allow shortcut inhibition. The header button toggles fullscreen. A SPICE guest
+agent enables automatic resize; otherwise the display scales to fit. Audio
+playback is enabled. Closing the console leaves the VM running. The window
+reconnects when a stopped VM starts again, and offers Reconnect after an error.
+VNC and SPICE GL machines use virt-viewer, which must be installed separately.
+Only the first guest display is supported. Accelerated GL scanout, clipboard,
+microphone and locked relative pointer input are follow-up work.
 
 ## Create or import
 

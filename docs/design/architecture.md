@@ -16,8 +16,14 @@ they do not make blocking libvirt calls.
                  └─ pirwa-model.c: ordered, stable snapshot reconciliation
 
 Libvirt manages QEMU/KVM. Pirwa does not launch QEMU itself or call virsh in
-application logic. The console launches virt-viewer with an argument array,
-connection URI, and domain UUID.
+application logic. SPICE consoles use `pirwa-console.c` (GTK 4/libadwaita and
+SPICE GLib) and `pirwa-frame.c` (immutable textures and input coordinate mapping).
+Each open console owns a backend worker scoped to its connection URI and UUID;
+its authenticated per-channel sockets come from `virDomainOpenGraphicsFD` on
+that worker. Reply-owned FD lists close discarded results. Generation fences
+reject sockets from previous sessions. Console backends survive closing the
+collection window and stop when their console closes. VNC and SPICE GL use virt-viewer with
+an argument array, connection URI, and domain UUID.
 
 ## Model and work queue
 
@@ -129,5 +135,6 @@ parsing. Libosinfo identifies media. No database, web runtime, extra daemon,
 embedded GTK 3 widgets, or Flatpak runtime is introduced.
 
 The development build targets local x86_64 Linux guests and native packaging.
-Embedded display, remote management, snapshots, passthrough, unattended installs,
+Multiple guest monitors, accelerated display scanout, remote management,
+snapshots, passthrough, unattended installs,
 and Flatpak distribution remain deferred.

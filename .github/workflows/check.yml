@@ -10,7 +10,7 @@ jobs:
         run: >
           dnf install -y gcc meson ninja-build gettext pkgconf-pkg-config
           glib2-devel gtk4-devel libadwaita-devel libvirt-devel libvirt-glib-devel
-          libxml2-devel libosinfo-devel clang-tools-extra desktop-file-utils appstream
+          libxml2-devel libosinfo-devel spice-glib-devel clang-tools-extra desktop-file-utils appstream
           libasan libubsan
       - run: meson setup build
       - run: meson compile -C build

@@ -20,7 +20,8 @@ typedef enum
   PIRWA_EDIT,
   PIRWA_CREATE,
   PIRWA_REMOVE,
-  PIRWA_CONSOLE
+  PIRWA_CONSOLE,
+  PIRWA_GRAPHICS_FD
 } PirwaOperation;
 
 typedef struct
@@ -42,6 +43,9 @@ typedef struct
   char *uuid;
   char *host;
   GSubprocess *viewer;
+  gboolean native_console;
+  char *console_name;
+  GUnixFDList *graphics_fds; /* Owns authenticated sockets, including discarded replies. */
 } PirwaReply;
 
 PirwaBackend *pirwa_backend_new (const char *uri);

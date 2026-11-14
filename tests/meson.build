@@ -28,3 +28,7 @@ test('model', model_test)
 
 boxes_test = executable('test-boxes', 'test-boxes.c', dependencies: core_dep)
 test('boxes', boxes_test, timeout: 30, env: backend_environment)
+
+frame_test = executable('test-frame', 'test-frame.c', '../src/pirwa-frame.c',
+  dependencies: [gtk_dep, spice_dep], include_directories: project_includes)
+test('console-frame', frame_test)

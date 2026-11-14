@@ -2,7 +2,7 @@
 
 A native GNOME virtual machine manager built around libvirt. Performance and
 responsiveness come first. Inspired by GNOME Boxes, built with C17, GTK 4,
-libadwaita, libvirt/libvirt-glib, libxml2, libosinfo, and Meson.
+libadwaita, libvirt/libvirt-glib, SPICE GLib, libxml2, libosinfo, and Meson.
 
 **Status: functional v0.1 development build.** A full Fedora installation,
 ISO eject, and installed-disk boot passed in virtual GNOME. Release acceptance
@@ -10,7 +10,8 @@ remains open for the broader console/audio/accessibility matrix and the complete
 performance contract. See the [installation evidence](docs/research/linux-install/README.md).
 The [console/performance follow-up](docs/research/console-performance/README.md)
 records resize, input, digital audio, reconnect, startup/idle measurements, and
-the remaining storage measurement uncertainty.
+the remaining storage measurement uncertainty. The [native console record](docs/research/native-console/README.md)
+covers the GTK 4 replacement and its current limits.
 
 ## Features
 
@@ -25,7 +26,8 @@ the remaining storage measurement uncertainty.
   cancellation, allocation rollback, and source-image preservation.
 - Capability-checked KVM/host CPU, virtio devices, UEFI or legacy BIOS,
   userspace networking, SPICE graphics/audio, and OS identification.
-- Console via a separate virt-viewer window.
+- Native GTK 4/libadwaita SPICE console with input release, fullscreen, resize,
+  audio playback, and lifecycle reconnect. VNC and SPICE GL use an external virt-viewer fallback.
 - Rename, CPU/RAM edits, and ISO eject while powered off.
 - Confirmed removal; optional disk deletion requires an ownership record,
   matching domain/volume metadata, and checks for references from other VMs.
@@ -38,13 +40,14 @@ Fedora development dependencies:
 
     sudo dnf install gcc meson ninja-build pkgconf-pkg-config gettext \
       glib2-devel gtk4-devel libadwaita-devel libvirt-devel libvirt-glib-devel \
-      libxml2-devel libosinfo-devel clang-tools-extra desktop-file-utils appstream
+      libxml2-devel libosinfo-devel spice-glib-devel clang-tools-extra desktop-file-utils appstream
 
 Runtime dependencies for real VMs include the distribution's QEMU/KVM libvirt
-stack, osinfo-db, and virt-viewer. Configure the appropriate libvirt daemon
+stack, osinfo-db, and spice-glib. Install virt-viewer for the VNC/SPICE GL fallback.
+Configure the appropriate libvirt daemon
 sockets for your distribution.
 
-    sudo dnf install virt-viewer qemu-kvm libvirt-daemon-driver-qemu osinfo-db
+    sudo dnf install spice-glib virt-viewer qemu-kvm libvirt-daemon-driver-qemu osinfo-db
     meson setup build
     meson compile -C build
     ./build/src/pirwa
@@ -57,8 +60,8 @@ For subsequent development runs, rebuild and launch with:
     ./scripts/run-dev.sh
 
 The launcher works from any directory and forwards application arguments, such
-as `--version`. It prefers an installed virt-viewer and falls back to the local
-temporary dependency prefix when available.
+as `--version`. SPICE opens inside Pirwa. For the VNC/SPICE GL fallback, the launcher prefers an installed
+virt-viewer and falls back to the local temporary dependency prefix when available.
 
 For a safe synthetic demonstration without KVM:
 

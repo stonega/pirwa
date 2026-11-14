@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 #pragma once
+int pirwa_config_spice_index (const char *xml);
 #include <gio/gio.h>
 
 #define PIRWA_METADATA_NS "urn:pirwa:domain:1"

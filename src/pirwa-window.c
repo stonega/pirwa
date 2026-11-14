@@ -3,6 +3,7 @@
 #include "config.h"
 #include "pirwa-backend.h"
 #include "pirwa-boxes-dialog.h"
+#include "pirwa-console.h"
 #include "pirwa-model.h"
 #include <glib/gi18n.h>
 
@@ -418,6 +419,10 @@ request_done (GObject *source, GAsyncResult *result, gpointer data)
       if (context->operation == PIRWA_REBOOT)
         toast (self, _ ("Restart requested. Waiting for the guest."));
       apply_inventory (self, reply);
+      if (reply->native_console)
+        pirwa_console_present (GTK_APPLICATION (context->application),
+                               pirwa_backend_get_uri (self->backend), context->uuid,
+                               reply->console_name);
       if (reply->viewer)
         g_subprocess_wait_check_async (reply->viewer, self->lifetime, viewer_done,
                                        g_object_ref (self));

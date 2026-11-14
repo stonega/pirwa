@@ -90,10 +90,29 @@ test_qcow2 (void)
   g_unlink (path);
 }
 
+static void
+test_graphics_index (void)
+{
+  g_assert_cmpint (
+      pirwa_config_spice_index ("<domain><devices><graphics type='spice'/></devices></domain>"), ==,
+      0);
+  g_assert_cmpint (
+      pirwa_config_spice_index (
+          "<domain><devices><graphics type='vnc'/><graphics type='spice'/></devices></domain>"),
+      ==, 1);
+  g_assert_cmpint (
+      pirwa_config_spice_index ("<domain><devices><graphics type='vnc'/></devices></domain>"), ==,
+      -1);
+  g_assert_cmpint (pirwa_config_spice_index ("<domain/>"), ==, -1);
+  g_assert_cmpint (pirwa_config_spice_index ("<!DOCTYPE domain [<!ENTITY x 'spice'>]><domain/>"),
+                   ==, -1);
+}
+
 int
 main (int argc, char **argv)
 {
   g_test_init (&argc, &argv, NULL);
+  g_test_add_func ("/config/graphics-index", test_graphics_index);
   g_test_add_func ("/config/roundtrip-and-eject", test_roundtrip);
   g_test_add_func ("/config/validation", test_validation);
   g_test_add_func ("/config/qcow2", test_qcow2);

@@ -13,20 +13,21 @@ BuildRequires:  desktop-file-utils
 BuildRequires:  pkgconfig(glib-2.0)
 BuildRequires:  pkgconfig(gio-2.0)
 BuildRequires:  pkgconfig(gio-unix-2.0)
-BuildRequires:  pkgconfig(gtk4)
+BuildRequires:  pkgconfig(gtk4) >= 4.16
+BuildRequires:  pkgconfig(spice-client-glib-2.0) >= 0.42
 BuildRequires:  pkgconfig(libadwaita-1)
 BuildRequires:  pkgconfig(libvirt)
 BuildRequires:  pkgconfig(libvirt-glib-1.0)
 BuildRequires:  pkgconfig(libxml-2.0)
 BuildRequires:  pkgconfig(libosinfo-1.0)
-Requires:       virt-viewer
+Recommends:     virt-viewer
 Requires:       qemu-kvm
 Requires:       libvirt-daemon-driver-qemu
 Requires:       osinfo-db
 
 %description
 Pirwa manages local libvirt virtual machines with a native GTK 4 and libadwaita
-interface. Graphical consoles open in virt-viewer.
+interface and a native SPICE console. VNC and SPICE GL consoles open in virt-viewer.
 
 %prep
 %autosetup -n %{name}-%{version}-dev

@@ -10,13 +10,13 @@ core_dep = declare_dependency(
   include_directories: project_includes,
 )
 
-ui = static_library('pirwa-ui', ['pirwa-window.c', 'pirwa-boxes-dialog.c'],
-  dependencies: [core_dep, gtk_dep, adwaita_dep],
+ui = static_library('pirwa-ui', ['pirwa-window.c', 'pirwa-boxes-dialog.c', 'pirwa-console.c', 'pirwa-frame.c'],
+  dependencies: [core_dep, gtk_dep, adwaita_dep, spice_dep],
   include_directories: project_includes,
 )
 ui_dep = declare_dependency(
   link_with: ui,
-  dependencies: [core_dep, gtk_dep, adwaita_dep],
+  dependencies: [core_dep, gtk_dep, adwaita_dep, spice_dep],
   include_directories: project_includes,
 )
 executable('pirwa', 'main.c', dependencies: ui_dep, install: true)

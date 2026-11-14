@@ -84,6 +84,32 @@ pirwa_config_supports (const char *xml, const char *expression)
   return supported;
 }
 
+int
+pirwa_config_spice_index (const char *xml)
+{
+  xmlDoc *doc = parse (xml, NULL);
+  if (!doc)
+    return -1;
+  xmlXPathObject *result = query (doc, "/domain/devices/graphics");
+  int index = -1;
+  if (result && result->nodesetval)
+    for (int i = 0; i < result->nodesetval->nodeNr; i++)
+      {
+        xmlChar *type = xmlGetProp (result->nodesetval->nodeTab[i], BAD_CAST "type");
+        gboolean spice = xmlStrEqual (type, BAD_CAST "spice");
+        xmlFree (type);
+        if (spice)
+          {
+            index = i;
+            break;
+          }
+      }
+  if (result)
+    xmlXPathFreeObject (result);
+  xmlFreeDoc (doc);
+  return index;
+}
+
 gboolean
 pirwa_config_validate (const PirwaCreate *options, GError **error)
 {

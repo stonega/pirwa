@@ -12,7 +12,7 @@
     <p>Create Linux virtual machines from local installation media, import
     standalone qcow2 images, and manage their power and basic resources.</p>
     <p>Pirwa uses libvirt and a native GNOME interface. Graphical consoles open
-    with virt-viewer in a separate window.</p>
+    in a native GTK 4 SPICE window, with virt-viewer as a fallback for VNC and SPICE GL.</p>
   </description>
   <launchable type="desktop-id">io.github.pirwa.Pirwa.desktop</launchable>
   <provides><binary>pirwa</binary></provides>

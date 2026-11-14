@@ -9,7 +9,13 @@ static void
 activate (GtkApplication *application, gpointer user_data)
 {
   (void)user_data;
-  GtkWindow *window = gtk_application_get_active_window (application);
+  GtkWindow *window = NULL;
+  for (GList *item = gtk_application_get_windows (application); item; item = item->next)
+    if (PIRWA_IS_WINDOW (item->data))
+      {
+        window = GTK_WINDOW (item->data);
+        break;
+      }
   if (window == NULL)
     {
       const char *uri = g_getenv ("PIRWA_LIBVIRT_URI");

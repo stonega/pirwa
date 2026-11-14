@@ -2,6 +2,7 @@
 #include "pirwa-backend.h"
 #include "pirwa-provision.h"
 #include <libvirt-glib/libvirt-glib.h>
+#include <unistd.h>
 
 typedef struct
 {
@@ -46,6 +47,8 @@ pirwa_reply_free (PirwaReply *reply)
   g_strfreev (reply->pools);
   pirwa_details_free (reply->details);
   g_clear_object (&reply->viewer);
+  g_clear_object (&reply->graphics_fds);
+  g_free (reply->console_name);
   g_free (reply->uuid);
   g_free (reply->host);
   g_free (reply);
@@ -382,6 +385,46 @@ execute (BackendState *state, const PirwaRequest *request, GCancellable *cancell
         goto fail;
       break;
     case PIRWA_CONSOLE:
+    case PIRWA_GRAPHICS_FD:
+      {
+        g_autofree char *xml = virDomainGetXMLDesc (domain, 0);
+        if (!xml)
+          {
+            pirwa_libvirt_error (error, "Cannot read the graphics configuration");
+            goto fail;
+          }
+        int index = pirwa_config_spice_index (xml);
+        if (request->operation == PIRWA_GRAPHICS_FD)
+          {
+            if (index < 0)
+              {
+                g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+                                     "This machine does not have a SPICE display");
+                goto fail;
+              }
+            int fd = virDomainOpenGraphicsFD (domain, index, VIR_DOMAIN_OPEN_GRAPHICS_SKIPAUTH);
+            if (fd < 0)
+              {
+                pirwa_libvirt_error (error, "Cannot connect to the machine’s display");
+                goto fail;
+              }
+            if (g_cancellable_set_error_if_cancelled (cancellable, error))
+              {
+                close (fd);
+                goto fail;
+              }
+            reply->graphics_fds = g_unix_fd_list_new_from_array (&fd, 1);
+            break;
+          }
+        if (index >= 0
+            && !pirwa_config_supports (xml,
+                                       "/domain/devices/graphics[@type='spice']/gl[@enable='yes']"))
+          {
+            reply->native_console = TRUE;
+            reply->console_name = g_strdup (virDomainGetName (domain));
+            break;
+          }
+      }
       reply->viewer
           = g_subprocess_new (G_SUBPROCESS_FLAGS_NONE, error, "virt-viewer", "--connect",
                               state->uri, "--attach", "--reconnect", "--wait", request->uuid, NULL);
@@ -410,7 +453,8 @@ execute (BackendState *state, const PirwaRequest *request, GCancellable *cancell
       virDomainFree (domain);
       domain = NULL;
     }
-  if (request->operation != PIRWA_DETAILS && request->operation != PIRWA_CONSOLE)
+  if (request->operation != PIRWA_DETAILS && request->operation != PIRWA_CONSOLE
+      && request->operation != PIRWA_GRAPHICS_FD)
     {
       /* A completed mutation stays successful even if the follow-up read fails.
        * Its lifecycle event or manual refresh will reconcile the collection. */
