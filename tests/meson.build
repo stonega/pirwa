@@ -113,7 +113,8 @@ executable('test-console-connect', 'test-console-connect.c', dependencies: ui_de
     '-Wl,--wrap=pirwa_backend_request_finish', '-Wl,--wrap=g_timeout_add_seconds',
     '-Wl,--wrap=spice_main_channel_update_display_enabled',
     '-Wl,--wrap=spice_main_channel_update_display',
-    '-Wl,--wrap=spice_inputs_channel_position', '-Wl,--wrap=pirwa_display_set_primary'])
+    '-Wl,--wrap=spice_inputs_channel_position', '-Wl,--wrap=pirwa_display_set_primary',
+    '-Wl,--wrap=gtk_window_is_active', '-Wl,--wrap=gtk_window_is_suspended'])
 
 # Explicit real-guest profiler. Wrappers and input controls never enter Pirwa.
 executable('benchmark-console', 'benchmark-console.c', 'qa-frame-feedback.c', dependencies: ui_dep,

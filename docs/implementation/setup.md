@@ -360,6 +360,13 @@ builds and installed under `share/glib-2.0/schemas`. Its default is false; a
 headless memory-backend check verifies defaults and shared setting values. An idle-QXL fixture withholds the first
 frame until two adjacent pointer positions arrive; healthy connections send no
 activation, and disposal cancels a pending activation. Its linker wrappers
+also inject active/suspended window state and exercise the production GTK
+notification handlers. Pixel checks cover repeated return from inactivity,
+compositor suspension, and remapping with no new SPICE damage event. Repeated
+surface loss checks verify no background pointer activation, foreground wake-up
+without reconnecting or resizing, and timeout recovery when input is unavailable.
+These synthetic checks do not reproduce a real guest's idle policy or certify
+physical desktop focus handling. The timer wrappers
 shorten reconnect/watchdog timers only in this executable; production delays
 remain unchanged. Run it with:
 

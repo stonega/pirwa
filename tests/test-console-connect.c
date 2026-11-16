@@ -25,6 +25,24 @@ static guint monitor_updates;
 static int requested_width, requested_height;
 static GtkStack *bootstrap_stack;
 static SpiceDisplayPrimary visible_frame;
+static GtkWindow *host_window;
+static gboolean host_active = TRUE;
+static gboolean host_suspended;
+
+gboolean __real_gtk_window_is_active (GtkWindow *window);
+gboolean __real_gtk_window_is_suspended (GtkWindow *window);
+
+gboolean
+__wrap_gtk_window_is_active (GtkWindow *window)
+{
+  return window == host_window ? host_active : __real_gtk_window_is_active (window);
+}
+
+gboolean
+__wrap_gtk_window_is_suspended (GtkWindow *window)
+{
+  return window == host_window ? host_suspended : __real_gtk_window_is_suspended (window);
+}
 
 gboolean __real_pirwa_display_set_primary (PirwaDisplay *self, const SpiceDisplayPrimary *primary);
 
@@ -79,6 +97,7 @@ static gboolean
 send_frame (gpointer data)
 {
   static guint32 pixels[16];
+  memset (pixels, 0, sizeof pixels);
   g_signal_emit_by_name (data, "display-primary-create", SPICE_SURFACE_FMT_32_xRGB, 4, 4, 16, 0,
                          pixels);
   return G_SOURCE_REMOVE;
@@ -135,8 +154,7 @@ __wrap_spice_inputs_channel_position (SpiceInputsChannel *channel, int x, int y,
   g_assert_cmpuint (monitor_updates, >=, 1);
   g_assert_cmpint (display_id, ==, 0);
   g_assert_cmpint (button_state, ==, 0);
-  g_assert_cmpuint (pointer_positions, <, 2);
-  if (pointer_positions++ == 0)
+  if (pointer_positions++ % 2 == 0)
     {
       pointer_x = x;
       pointer_y = y;
@@ -254,6 +272,109 @@ assert_display_corner (GtkWidget *guest, gboolean rounded)
 }
 
 static void
+assert_display_color (GtkWidget *guest, guint32 color)
+{
+  int width = gtk_widget_get_width (guest), height = gtk_widget_get_height (guest);
+  GtkSnapshot *snapshot = gtk_snapshot_new ();
+  GTK_WIDGET_GET_CLASS (guest)->snapshot (guest, snapshot);
+  g_autoptr (GskRenderNode) node = gtk_snapshot_free_to_node (snapshot);
+  g_assert_nonnull (node);
+  graphene_rect_t bounds = GRAPHENE_RECT_INIT (0, 0, width, height);
+  GskRenderer *renderer = gtk_native_get_renderer (gtk_widget_get_native (guest));
+  g_autoptr (GdkTexture) texture = gsk_renderer_render_texture (renderer, node, &bounds);
+  g_autofree guchar *pixels = g_malloc_n ((gsize)width * height, 4);
+  gdk_texture_download (texture, pixels, (gsize)width * 4);
+  guchar *center = pixels + ((gsize)(height / 2) * width + width / 2) * 4;
+  g_assert_cmpuint (center[0], ==, color & 255);
+  g_assert_cmpuint (center[1], ==, (color >> 8) & 255);
+  g_assert_cmpuint (center[2], ==, (color >> 16) & 255);
+  g_assert_cmpuint (center[3], ==, 255);
+}
+
+static void
+check_reactivation (PirwaConsole *console, GtkWindow *window)
+{
+  GtkWidget *guest = find_type (GTK_WIDGET (console), PIRWA_TYPE_DISPLAY);
+  guint connections = attempts, updates = monitor_updates, positions = pointer_positions;
+  assert_display_color (guest, 0);
+
+  const guint32 colors[] = { 0x0020c060, 0x00e04080, 0x003060e0, 0x00b08030 };
+  for (guint cycle = 0; cycle < G_N_ELEMENTS (colors); cycle++)
+    {
+      /* Inject window-manager state so the private desktop's focus policy
+       * cannot make this signal-path and pixel regression nondeterministic. */
+      host_active = FALSE;
+      g_object_notify (G_OBJECT (window), "is-active");
+      if (cycle == 2)
+        {
+          host_suspended = TRUE;
+          g_object_notify (G_OBJECT (window), "suspended");
+        }
+      if (cycle == 3)
+        gtk_widget_set_visible (GTK_WIDGET (console), FALSE);
+      /* Model a stale cached frame after inactivity, with no new damage event
+       * on return. Refresh must copy the current primary, not just queue GTK. */
+      guint32 color = colors[cycle];
+      for (int y = 0; y < visible_frame.height; y++)
+        for (int x = 0; x < visible_frame.width; x++)
+          ((guint32 *)(visible_frame.data + y * visible_frame.stride))[x] = color;
+      host_active = TRUE;
+      if (cycle < 2)
+        g_object_notify (G_OBJECT (window), "is-active");
+      else if (cycle == 2)
+        {
+          host_suspended = FALSE;
+          g_object_notify (G_OBJECT (window), "suspended");
+        }
+      else
+        gtk_widget_set_visible (GTK_WIDGET (console), TRUE);
+      assert_display_color (guest, color);
+    }
+  g_assert_cmpuint (attempts, ==, connections);
+  g_assert_cmpuint (monitor_updates, ==, updates);
+  g_assert_cmpuint (pointer_positions, ==, positions);
+
+  gboolean was_activation = needs_activation;
+  needs_activation = TRUE;
+  for (guint cycle = 0; cycle < 2; cycle++)
+    {
+      if (cycle == 0)
+        {
+          host_active = FALSE;
+          g_object_notify (G_OBJECT (window), "is-active");
+        }
+      else
+        {
+          host_suspended = TRUE;
+          g_object_notify (G_OBJECT (window), "suspended");
+        }
+      g_signal_emit_by_name (display, "display-primary-destroy");
+      g_assert_cmpstr (gtk_stack_get_visible_child_name (bootstrap_stack), ==, "status");
+      iterate_for (600);
+      g_assert_cmpuint (pointer_positions, ==, positions);
+      if (cycle == 0)
+        {
+          host_active = TRUE;
+          g_object_notify (G_OBJECT (window), "is-active");
+        }
+      else
+        {
+          host_suspended = FALSE;
+          g_object_notify (G_OBJECT (window), "suspended");
+        }
+      wait_for_display (bootstrap_stack);
+      positions += 2;
+      g_assert_cmpuint (pointer_positions, ==, positions);
+      assert_display_color (guest, 0);
+      iterate_for (600);
+      g_assert_cmpuint (pointer_positions, ==, positions);
+      g_assert_cmpuint (attempts, ==, connections);
+      g_assert_cmpuint (monitor_updates, ==, updates);
+    }
+  needs_activation = was_activation;
+}
+
+static void
 check_popup_fit (PirwaConsole *console, GtkWindow *embedded)
 {
   g_autoptr (GArray) monitors = NULL;
@@ -343,6 +464,7 @@ check_monitor_bootstrap (gboolean activate, gboolean close_pending)
   iterate_for (300); /* Wait for the host monitor before selecting an initial mode. */
   g_assert_cmpuint (monitor_updates, ==, 0);
   GtkWindow *window = GTK_WINDOW (adw_window_new ());
+  host_window = window;
   gtk_window_set_default_size (window, 800, 600);
   adw_window_set_content (ADW_WINDOW (window), GTK_WIDGET (console));
   gtk_window_present (window);
@@ -402,11 +524,13 @@ check_monitor_bootstrap (gboolean activate, gboolean close_pending)
   gtk_window_set_default_size (window, 800, 600);
   iterate_for (400);
   g_assert_cmpuint (monitor_updates, ==, updates);
+  check_reactivation (console, window);
   if (!activate)
     check_popup_fit (console, window);
   gtk_window_destroy (window);
   g_clear_object (&console);
 cleanup:
+  host_window = NULL;
   g_clear_object (&display);
   g_clear_object (&main_channel);
   g_clear_object (&inputs_channel);
@@ -455,13 +579,21 @@ main (void)
   wait_for_display (stack);
   g_assert_cmpuint (attempts, ==, 9);
 
+  /* Losing an established surface also needs a watchdog, even without a
+   * usable input channel to wake the guest. Previously it stayed empty. */
+  g_signal_emit_by_name (display, "display-primary-destroy");
+  g_assert_cmpstr (gtk_stack_get_visible_child_name (stack), ==, "status");
+  wait_for_display (stack);
+  g_assert_cmpuint (attempts, ==, 10);
+  g_assert_cmpuint (retry_delays[n_delays - 1], ==, 1);
+
   /* Dispose with a retry pending, then again with the first-frame watchdog pending. */
   fail_connections = TRUE;
   g_signal_emit_by_name (display, "channel-event", SPICE_CHANNEL_CLOSED);
   g_clear_object (&display);
   g_clear_object (&console);
   iterate_for (300);
-  g_assert_cmpuint (attempts, ==, 9);
+  g_assert_cmpuint (attempts, ==, 10);
   fail_connections = FALSE;
   attempts = 1; /* The next fixture intentionally stalls at attempt two. */
   console = g_object_ref_sink (pirwa_console_new ("test:///default", uuid, "Closing connection"));
@@ -474,7 +606,8 @@ main (void)
   check_monitor_bootstrap (TRUE, TRUE);
   g_print ("PASS: automatic connection, socket/start/channel errors, first-frame timeout, "
            "bounded backoff, monitor bootstrap and activation before the first frame, recovery, "
-           "popup display fitting, lifecycle and "
+           "reactivation pixels, repeated surface loss and wake-up, popup display fitting, "
+           "lifecycle and "
            "disposal\n");
   return 0;
 }

@@ -50,6 +50,11 @@ for small opaque RGB changes. Dense/ARGB updates, Cairo and minified sources
 with incompatible mipmap dimensions use full snapshots. This is not a zero-copy
 path. See the [renderer performance record](../research/display-performance/README.md).
 RGB32, ARGB32, RGB555 and RGB565 surfaces are bounded to 8192 × 8192 pixels.
+When the host window becomes active, resumes from compositor suspension, or the
+console maps again, the viewer invalidates its whole visible framebuffer. This
+copies the current SPICE pixels and rebuilds the cached GTK rendering even when
+an idle guest sends no new damage on return. Healthy sessions keep their existing
+transport and guest resolution; recovery adds no polling.
 
 ## Interaction
 
@@ -102,8 +107,11 @@ If the console is mapped and its input channel is ready but no primary surface
 arrives within 500 ms, it sends two adjacent pointer positions near the guest
 monitor's center. This one-pixel movement wakes idle QXL displays without clicks
 or keys.
-It runs once per connection; a primary surface or disconnection cancels the
-pending activation. Hidden consoles do not send this activation.
+It runs once per missing surface; a primary surface or disconnection cancels the
+pending activation. Only mapped consoles in an active, non-suspended host window
+send this activation. Losing an established primary surface shows connection
+status, permits another activation, and rearms the 15-second frame timeout.
+Returning to the foreground lets a viewer with a missing surface try this wake-up.
 Lifecycle events reconnect a stopped/restarted guest. Socket failures and main/display-channel
 disconnects retry automatically after 1/2/4/8/16 seconds, capped at 16 seconds
 while the guest is running. A 15-second first-frame timeout also schedules a

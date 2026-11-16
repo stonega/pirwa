@@ -63,6 +63,8 @@ struct _PirwaConsole
 G_DEFINE_FINAL_TYPE (PirwaConsole, pirwa_console, GTK_TYPE_BOX)
 
 static void start_session (PirwaConsole *self);
+static gboolean first_frame_timeout (gpointer data);
+static void schedule_display_activation (PirwaConsole *self);
 static void disconnect_session (PirwaConsole *self);
 
 static gboolean
@@ -297,13 +299,29 @@ invalidate (SpiceChannel *channel, int x, int y, int width, int height, PirwaCon
 }
 
 static void
+clear_primary (PirwaConsole *self)
+{
+  memset (&self->primary, 0, sizeof self->primary);
+  self->monitor_area = (cairo_rectangle_int_t){ 0 };
+  pirwa_display_clear (PIRWA_DISPLAY (self->display));
+}
+
+static void
 primary_destroy (SpiceChannel *channel, PirwaConsole *self)
 {
   if (channel != self->display_channel)
     return;
-  memset (&self->primary, 0, sizeof self->primary);
-  self->monitor_area = (cairo_rectangle_int_t){ 0 };
-  pirwa_display_clear (PIRWA_DISPLAY (self->display));
+  clear_primary (self);
+  if (self->closed || !self->running || self->reconnect_source)
+    return;
+  /* A guest may withdraw its surface after it goes idle. Treat the next
+   * surface like the first one, including wake-up and bounded recovery. */
+  self->display_activated = FALSE;
+  show_status (self, _ ("Connecting to display"), _ ("Waiting for the machine’s first frame…"),
+               TRUE);
+  if (!self->connect_source)
+    self->connect_source = g_timeout_add_seconds (15, first_frame_timeout, self);
+  schedule_display_activation (self);
 }
 
 static gboolean
@@ -373,10 +391,12 @@ static void
 primary_create (SpiceChannel *channel, int format, int width, int height, int stride, int shmid,
                 gpointer data, PirwaConsole *self)
 {
+  if (channel != self->display_channel)
+    return;
   g_clear_handle_id (&self->connect_source, g_source_remove);
   g_clear_handle_id (&self->activate_source, g_source_remove);
   g_clear_handle_id (&self->reconnect_source, g_source_remove);
-  primary_destroy (channel, self);
+  clear_primary (self);
   self->primary = (SpiceDisplayPrimary){ .format = format,
                                          .width = width,
                                          .height = height,
@@ -463,12 +483,19 @@ first_frame_timeout (gpointer data)
 }
 
 static gboolean
+can_activate_display (PirwaConsole *self)
+{
+  return !self->closed && !self->primary.data && self->input_ready && self->inputs && self->host
+         && gtk_widget_get_mapped (GTK_WIDGET (self)) && gtk_window_is_active (self->host)
+         && !gtk_window_is_suspended (self->host);
+}
+
+static gboolean
 activate_display (gpointer data)
 {
   PirwaConsole *self = data;
   self->activate_source = 0;
-  if (self->closed || self->primary.data || !self->input_ready || !self->inputs
-      || !gtk_widget_get_mapped (GTK_WIDGET (self)))
+  if (!can_activate_display (self))
     return G_SOURCE_REMOVE;
   int width = gtk_widget_get_width (GTK_WIDGET (self->stack));
   int height = gtk_widget_get_height (GTK_WIDGET (self->stack));
@@ -476,7 +503,7 @@ activate_display (gpointer data)
     return G_SOURCE_REMOVE;
   /* Some idle QXL guests send no primary surface until pointer activity.
    * Two adjacent positions guarantee motion without clicking or pressing keys.
-   * Do this once per connection, only when its first frame is still missing. */
+   * Do this once per missing surface, while its viewer is in the foreground. */
   int x = self->guest_width / 2;
   int y = self->guest_height / 2;
   self->display_activated = TRUE;
@@ -488,8 +515,7 @@ activate_display (gpointer data)
 static void
 schedule_display_activation (PirwaConsole *self)
 {
-  if (!self->closed && !self->primary.data && self->input_ready && !self->display_activated
-      && !self->activate_source && gtk_widget_get_mapped (GTK_WIDGET (self)))
+  if (can_activate_display (self) && !self->display_activated && !self->activate_source)
     self->activate_source = g_timeout_add (500, activate_display, self);
 }
 
@@ -658,8 +684,7 @@ disconnect_session (PirwaConsole *self)
   if (self->pending)
     g_cancellable_cancel (self->pending);
   g_clear_object (&self->pending);
-  if (self->display_channel)
-    primary_destroy (self->display_channel, self);
+  clear_primary (self);
   self->display_channel = NULL;
   self->main = NULL;
   self->inputs = NULL;
@@ -879,11 +904,37 @@ focus_left (GtkEventControllerFocus *controller, PirwaConsole *self)
 }
 
 static void
+refresh_display (PirwaConsole *self)
+{
+  if (self->closed || !gtk_widget_get_mapped (GTK_WIDGET (self))
+      || (self->host && gtk_window_is_suspended (self->host)))
+    return;
+  /* The guest may be idle and send no damage when this window returns. Copy
+   * its current surface and rebuild GTK's cached rendering on that event. */
+  pirwa_display_invalidate (PIRWA_DISPLAY (self->display), 0, 0, self->monitor_area.width,
+                            self->monitor_area.height);
+  schedule_display_configuration (self);
+  schedule_display_activation (self);
+}
+
+static void
 active_changed (GtkWindow *window, GParamSpec *spec, PirwaConsole *self)
 {
   (void)spec;
   if (!gtk_window_is_active (window))
     release_input (self);
+  else
+    refresh_display (self);
+}
+
+static void
+suspended_changed (GtkWindow *window, GParamSpec *spec, PirwaConsole *self)
+{
+  (void)spec;
+  if (gtk_window_is_suspended (window))
+    release_input (self);
+  else
+    refresh_display (self);
 }
 
 static void
@@ -918,8 +969,7 @@ pirwa_console_map (GtkWidget *widget)
   GTK_WIDGET_CLASS (pirwa_console_parent_class)->map (widget);
   /* Agent/channel events can precede the first usable viewport allocation. */
   PirwaConsole *self = PIRWA_CONSOLE_VIEW (widget);
-  schedule_display_configuration (self);
-  schedule_display_activation (self);
+  refresh_display (self);
 }
 
 static void
@@ -932,6 +982,7 @@ pirwa_console_root (GtkWidget *widget)
     {
       self->host = GTK_WINDOW (root);
       g_signal_connect_object (root, "notify::is-active", G_CALLBACK (active_changed), self, 0);
+      g_signal_connect_object (root, "notify::suspended", G_CALLBACK (suspended_changed), self, 0);
       g_signal_connect_object (root, "notify::fullscreened", G_CALLBACK (fullscreen_changed), self,
                                0);
       g_signal_connect_object (root, "notify::maximized", G_CALLBACK (fullscreen_changed), self, 0);
