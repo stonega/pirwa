@@ -1,0 +1,2189 @@
+{
+  "recorded_utc": "2026-11-16",
+  "release_gate": "open; warm startup exceeds 500 ms and virtual 60 Hz scrolling exceeds 16.7 ms; default Vulkan idle PSS exceeds 100 MiB",
+  "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+  "source_dirty": true,
+  "display": {
+    "source": "org.gnome.Mutter.DisplayConfig.GetCurrentState",
+    "monitors": [
+      {
+        "connector": "eDP-1",
+        "vendor": "SDC",
+        "product": "ATNA60DL01-0 ",
+        "current_modes": [
+          {
+            "width": 2560,
+            "height": 1600,
+            "refresh_hz": 240.00030517578125
+          }
+        ]
+      }
+    ],
+    "logical_monitors": [
+      {
+        "x": 0,
+        "y": 0,
+        "scale": 1.0,
+        "transform": 0,
+        "primary": true,
+        "connectors": [
+          "eDP-1"
+        ]
+      }
+    ]
+  },
+  "summary": [
+    {
+      "run": "virtual-100",
+      "completed": true,
+      "display_kind": "virtual",
+      "domains": 100,
+      "production_executable": false,
+      "binary_sha256": "a658efac308b4b3ca2139be28fc62f92747034ecdf8072974bdf091866dc8403",
+      "schema_sha256": "3cfb9e4956d8cfbc7872fbd31003617783e4a367712efec50c8de6ac73622174",
+      "observer_sha256": null,
+      "launch_count": 30,
+      "after_paint_ms": {
+        "p50": 528.9545,
+        "p95": 569.175,
+        "samples": 30
+      },
+      "first_presentation_ms": {
+        "p50": 575.934,
+        "p95": 617.762,
+        "samples": 30
+      },
+      "renderer": "GskVulkanRenderer",
+      "refresh_millihz": 60000,
+      "cleanup_remaining": {},
+      "idle": {
+        "sample_wall_ms": 60030.274,
+        "sample_cpu_percent": 0.003,
+        "sample_frames": 0,
+        "pss_kib": 104289
+      }
+    },
+    {
+      "run": "virtual-1000",
+      "completed": true,
+      "display_kind": "virtual",
+      "domains": 1000,
+      "production_executable": false,
+      "binary_sha256": "a658efac308b4b3ca2139be28fc62f92747034ecdf8072974bdf091866dc8403",
+      "schema_sha256": "3cfb9e4956d8cfbc7872fbd31003617783e4a367712efec50c8de6ac73622174",
+      "observer_sha256": null,
+      "launch_count": 30,
+      "after_paint_ms": {
+        "p50": 434.194,
+        "p95": 619.108,
+        "samples": 30
+      },
+      "first_presentation_ms": {
+        "p50": 480.42499999999995,
+        "p95": 669.561,
+        "samples": 30
+      },
+      "renderer": "GskVulkanRenderer",
+      "refresh_millihz": 60000,
+      "cleanup_remaining": {},
+      "scroll": {
+        "sample_wall_ms": 5005.89,
+        "sample_cpu_percent": 61.6559,
+        "sample_frames": 286,
+        "compositor": {
+          "scope": "Complete presented GDK feedback during the sampling window; display type/refresh remain separate conditions.",
+          "feedback_results": {
+            "presented": 285,
+            "outstanding": 1
+          },
+          "accepted_presentations": 285,
+          "before_paint_to_presentation_p95_ms": 19.385,
+          "presentation_interval_p95_ms": 19.506,
+          "duplicate_presentation_timestamps": 0,
+          "intervals_over_16_7ms": 123
+        },
+        "historical_paint_wall_p95_ms": 17.939
+      }
+    },
+    {
+      "run": "startup-stages",
+      "completed": true,
+      "display_kind": "virtual",
+      "domains": 100,
+      "production_executable": false,
+      "binary_sha256": "86bf68c824ab044f945918a7b94899f88e8ef034e5013dca2445f76a29f587e8",
+      "schema_sha256": "3cfb9e4956d8cfbc7872fbd31003617783e4a367712efec50c8de6ac73622174",
+      "observer_sha256": null,
+      "launch_count": 5,
+      "after_paint_ms": {
+        "p50": 515.067,
+        "p95": 560.893,
+        "samples": 5
+      },
+      "first_presentation_ms": {
+        "p50": 558.463,
+        "p95": 605.876,
+        "samples": 5
+      },
+      "renderer": "GskVulkanRenderer",
+      "refresh_millihz": 60000,
+      "cleanup_remaining": {}
+    },
+    {
+      "run": "scroll-cpu",
+      "completed": true,
+      "display_kind": "virtual",
+      "domains": 1000,
+      "production_executable": false,
+      "binary_sha256": "86bf68c824ab044f945918a7b94899f88e8ef034e5013dca2445f76a29f587e8",
+      "schema_sha256": "3cfb9e4956d8cfbc7872fbd31003617783e4a367712efec50c8de6ac73622174",
+      "observer_sha256": null,
+      "launch_count": 1,
+      "after_paint_ms": {
+        "p50": 563.929,
+        "p95": 563.929,
+        "samples": 1
+      },
+      "first_presentation_ms": {
+        "p50": 601.835,
+        "p95": 601.835,
+        "samples": 1
+      },
+      "renderer": "GskVulkanRenderer",
+      "refresh_millihz": 60000,
+      "cleanup_remaining": {},
+      "scroll": {
+        "sample_wall_ms": 5006.149,
+        "sample_cpu_percent": 58.7172,
+        "sample_frames": 287,
+        "paint_wall_p95_ms": 16.514,
+        "paint_thread_cpu_p95_ms": 16.362,
+        "compositor": {
+          "scope": "Complete presented GDK feedback during the sampling window; display type/refresh remain separate conditions.",
+          "feedback_results": {
+            "presented": 286,
+            "outstanding": 1
+          },
+          "accepted_presentations": 286,
+          "before_paint_to_presentation_p95_ms": 17.704,
+          "presentation_interval_p95_ms": 17.474,
+          "duplicate_presentation_timestamps": 0,
+          "intervals_over_16_7ms": 120
+        }
+      }
+    },
+    {
+      "run": "gl-control-100",
+      "completed": true,
+      "display_kind": "virtual",
+      "domains": 100,
+      "production_executable": false,
+      "binary_sha256": "86bf68c824ab044f945918a7b94899f88e8ef034e5013dca2445f76a29f587e8",
+      "schema_sha256": "3cfb9e4956d8cfbc7872fbd31003617783e4a367712efec50c8de6ac73622174",
+      "observer_sha256": null,
+      "launch_count": 30,
+      "after_paint_ms": {
+        "p50": 428.3145,
+        "p95": 497.765,
+        "samples": 30
+      },
+      "first_presentation_ms": {
+        "p50": 471.9975,
+        "p95": 537.644,
+        "samples": 30
+      },
+      "renderer": "GskGLRenderer",
+      "refresh_millihz": 60000,
+      "cleanup_remaining": {},
+      "idle": {
+        "sample_wall_ms": 60027.901,
+        "sample_cpu_percent": 0.0021,
+        "sample_frames": 0,
+        "pss_kib": 91360
+      }
+    },
+    {
+      "run": "application-100",
+      "completed": true,
+      "display_kind": "virtual",
+      "domains": 100,
+      "production_executable": true,
+      "binary_sha256": "7483d17860706c99a1209eca5f21c37b5a257ec9304ad1c9d9e4780135069c6a",
+      "schema_sha256": "3cfb9e4956d8cfbc7872fbd31003617783e4a367712efec50c8de6ac73622174",
+      "observer_sha256": "52d36b246f2b5d861af7846dcc9a399b9a2889230411ab20f7f04dbfe232458f",
+      "launch_count": 30,
+      "after_paint_ms": {
+        "p50": 506.938,
+        "p95": 551.132,
+        "samples": 30
+      },
+      "first_presentation_ms": {
+        "p50": 554.817,
+        "p95": 591.957,
+        "samples": 30
+      },
+      "renderer": "GskVulkanRenderer",
+      "refresh_millihz": 60000,
+      "cleanup_remaining": {}
+    },
+    {
+      "run": "physical-application-100",
+      "completed": true,
+      "display_kind": "physical",
+      "domains": 100,
+      "production_executable": true,
+      "binary_sha256": "7483d17860706c99a1209eca5f21c37b5a257ec9304ad1c9d9e4780135069c6a",
+      "schema_sha256": "3cfb9e4956d8cfbc7872fbd31003617783e4a367712efec50c8de6ac73622174",
+      "observer_sha256": "52d36b246f2b5d861af7846dcc9a399b9a2889230411ab20f7f04dbfe232458f",
+      "launch_count": 30,
+      "after_paint_ms": {
+        "p50": 526.4335000000001,
+        "p95": 586.293,
+        "samples": 30
+      },
+      "first_presentation_ms": {
+        "p50": 542.327,
+        "p95": 640.49,
+        "samples": 30
+      },
+      "renderer": "GskVulkanRenderer",
+      "refresh_millihz": 240000,
+      "cleanup_remaining": {}
+    },
+    {
+      "run": "physical-1000",
+      "completed": false,
+      "display_kind": "physical",
+      "domains": 1000,
+      "production_executable": false,
+      "binary_sha256": "86bf68c824ab044f945918a7b94899f88e8ef034e5013dca2445f76a29f587e8",
+      "schema_sha256": "3cfb9e4956d8cfbc7872fbd31003617783e4a367712efec50c8de6ac73622174",
+      "observer_sha256": null,
+      "launch_count": 25,
+      "after_paint_ms": null,
+      "first_presentation_ms": null,
+      "renderer": "GskVulkanRenderer",
+      "refresh_millihz": 240000,
+      "cleanup_remaining": {},
+      "invalid_reason": "Only 25 measured launches completed. The next window was inactive and supplied discarded/skipped feedback only; timeout preserved, cause unestablished. No 30-launch percentile or scroll measurement accepted."
+    }
+  ],
+  "known_invalid_attempts": [
+    {
+      "run": "physical-smoke",
+      "reason": "ScreenSaver active; mapped window had no presented feedback; no physical timing accepted."
+    },
+    {
+      "run": "virtual-smoke",
+      "reason": "Private AT-SPI service activation denied; rerun explicitly used GTK_A11Y=test. This does not certify accessibility."
+    },
+    {
+      "run": "physical-1000",
+      "reason": "Incomplete run retained in raw results; no scrolling/idle hardware conclusion."
+    }
+  ],
+  "artifacts": {
+    "raw-results.json.gz": "9a78e4a87b3c5bfc370f496d8ab971a3d21a042725a75690cf8212a193f25f26",
+    "provenance.json": "4de4f4f6f2db0236b363f6944274fa5136a4d5addadb814275f19c3899f8e1a6",
+    "baseline-source.tar.gz": "bc80706ab64ab39d585402edbde78e4b6fa00c3751f199c198fbded6f44000eb",
+    "instrumentation-source.tar.gz": "2b45458c230efef32dacd3b257bb628ec8af4d4214a4ef9ade0a23cb3db996da",
+    "candidate-build-source.tar.gz": "fce36ae089ed31f4060c9df5ab7d97ef0f161b175563d43a3cf84c0e790e0786"
+  },
+  "regressions": {
+    "sanitizer_environment": {
+      "ASAN_OPTIONS": "detect_leaks=0:halt_on_error=1",
+      "UBSAN_OPTIONS": "halt_on_error=1",
+      "LD_LIBRARY_PATH": "/tmp/pirwa-build-deps.ihjR8B/usr/lib64"
+    },
+    "headless": {
+      "normal": [
+        {
+          "name": "pirwa:desktop-file",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.07954001426696777
+        },
+        {
+          "name": "pirwa:appstream",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.07522892951965332
+        },
+        {
+          "name": "pirwa:usage",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.059113264083862305
+        },
+        {
+          "name": "pirwa:config",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.05599498748779297
+        },
+        {
+          "name": "pirwa:model",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.04533028602600098
+        },
+        {
+          "name": "pirwa:boxes",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.04186439514160156
+        },
+        {
+          "name": "pirwa:preferences",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.028795957565307617
+        },
+        {
+          "name": "pirwa:proxy-settings",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.025391578674316406
+        },
+        {
+          "name": "pirwa:backend",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.06861591339111328
+        },
+        {
+          "name": "pirwa:provision",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.05109715461730957
+        },
+        {
+          "name": "pirwa:console-frame",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.03819894790649414
+        },
+        {
+          "name": "pirwa:network-definition",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.02725076675415039
+        },
+        {
+          "name": "pirwa:boxes-import",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.04046750068664551
+        },
+        {
+          "name": "pirwa:network-start",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.04214668273925781
+        },
+        {
+          "name": "pirwa:ui-profile-guards",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.11084866523742676
+        },
+        {
+          "name": "pirwa:backend-faults",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.19432377815246582
+        },
+        {
+          "name": "pirwa:inventory",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.23391342163085938
+        },
+        {
+          "name": "pirwa:scale-1000",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.30129456520080566
+        },
+        {
+          "name": "pirwa:network-gateway",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 2.5377118587493896
+        }
+      ],
+      "sanitizer": [
+        {
+          "name": "pirwa:desktop-file",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.09107446670532227
+        },
+        {
+          "name": "pirwa:appstream",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.08653521537780762
+        },
+        {
+          "name": "pirwa:usage",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.06721711158752441
+        },
+        {
+          "name": "pirwa:config",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.06259727478027344
+        },
+        {
+          "name": "pirwa:model",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.04868435859680176
+        },
+        {
+          "name": "pirwa:preferences",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.027094364166259766
+        },
+        {
+          "name": "pirwa:proxy-settings",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.023612260818481445
+        },
+        {
+          "name": "pirwa:console-frame",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.061385393142700195
+        },
+        {
+          "name": "pirwa:network-definition",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.08500289916992188
+        },
+        {
+          "name": "pirwa:boxes",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.10838055610656738
+        },
+        {
+          "name": "pirwa:provision",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.14889025688171387
+        },
+        {
+          "name": "pirwa:backend",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.19695401191711426
+        },
+        {
+          "name": "pirwa:ui-profile-guards",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.13536739349365234
+        },
+        {
+          "name": "pirwa:network-start",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.17755842208862305
+        },
+        {
+          "name": "pirwa:boxes-import",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.216416597366333
+        },
+        {
+          "name": "pirwa:backend-faults",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.4214332103729248
+        },
+        {
+          "name": "pirwa:inventory",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.6899707317352295
+        },
+        {
+          "name": "pirwa:scale-1000",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 1.548614263534546
+        },
+        {
+          "name": "pirwa:network-gateway",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 2.696772336959839
+        }
+      ]
+    },
+    "ui": {
+      "normal": {
+        "report": {
+          "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+          "source_dirty": true,
+          "gnome_shell": "GNOME Shell 51.1",
+          "shell_command": [
+            "gnome-shell",
+            "--headless",
+            "--wayland",
+            "--no-x11",
+            "--virtual-monitor",
+            "1280x800@60",
+            "--wayland-display",
+            "pirwa-qa-wayland"
+          ],
+          "display_kind": "virtual",
+          "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
+          "scope": "Programmed GTK actions and focus traversal; not physical input, screen reader, or guest console certification",
+          "repetitions": 2,
+          "cases": [
+            {
+              "name": "run-01-light",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate/tests/test-ui",
+                "--exercise",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-normal/run-01/light.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 1.625,
+              "metrics": {
+                "main_monotonic_us": 437165490087,
+                "first_paint_monotonic_us": 437166308679,
+                "ready_monotonic_us": 437166308704,
+                "main_to_first_paint_ms": 818.592,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 12,
+                "domains": 1,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 1,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 1,
+                "chooser_reached": true,
+                "reverse_focus": true,
+                "windows_observed": 1,
+                "windows_painted": 1,
+                "scans_finished": 0,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 18234,
+                  "adw_init": 56847,
+                  "application_register": 8027,
+                  "window_new": 8109,
+                  "window_present": 248275
+                }
+              }
+            },
+            {
+              "name": "run-01-large-dark",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate/tests/test-ui",
+                "--exercise",
+                "--large-text",
+                "--dark",
+                "--width",
+                "720",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-normal/run-01/large-dark.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 1.269,
+              "metrics": {
+                "main_monotonic_us": 437167149909,
+                "first_paint_monotonic_us": 437167623039,
+                "ready_monotonic_us": 437167623060,
+                "main_to_first_paint_ms": 473.13,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 12,
+                "domains": 1,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 2,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 1,
+                "chooser_reached": true,
+                "reverse_focus": true,
+                "windows_observed": 1,
+                "windows_painted": 1,
+                "scans_finished": 0,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 12993,
+                  "adw_init": 57166,
+                  "application_register": 8459,
+                  "window_new": 7770,
+                  "window_present": 277095
+                }
+              }
+            },
+            {
+              "name": "run-01-empty",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate/tests/test-ui",
+                "--exercise",
+                "--uri",
+                "test:///tmp/pirwa-gnome-i87m5km6/node.xml",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-normal/run-01/empty.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 0.677,
+              "metrics": {
+                "main_monotonic_us": 437168404525,
+                "first_paint_monotonic_us": 437168769357,
+                "ready_monotonic_us": 437168769378,
+                "main_to_first_paint_ms": 364.832,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 12,
+                "domains": 0,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 1,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 1,
+                "chooser_reached": true,
+                "reverse_focus": true,
+                "windows_observed": 1,
+                "windows_painted": 1,
+                "scans_finished": 0,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 15334,
+                  "adw_init": 66329,
+                  "application_register": 9061,
+                  "window_new": 8547,
+                  "window_present": 215353
+                }
+              }
+            },
+            {
+              "name": "run-01-boxes",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate/tests/test-ui",
+                "--boxes-exercise",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-normal/run-01/boxes.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 1.637,
+              "metrics": {
+                "main_monotonic_us": 437169080223,
+                "first_paint_monotonic_us": 437169449935,
+                "ready_monotonic_us": 437169586647,
+                "main_to_first_paint_ms": 369.712,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 8,
+                "domains": 1,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 1,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 0,
+                "chooser_reached": false,
+                "reverse_focus": false,
+                "windows_observed": 3,
+                "windows_painted": 3,
+                "scans_finished": 5,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 14127,
+                  "adw_init": 67223,
+                  "application_register": 10480,
+                  "window_new": 12096,
+                  "window_present": 217768
+                }
+              }
+            },
+            {
+              "name": "run-01-boxes-large-dark",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate/tests/test-ui",
+                "--boxes-exercise",
+                "--large-text",
+                "--dark",
+                "--width",
+                "720",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-normal/run-01/boxes-large-dark.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 1.026,
+              "metrics": {
+                "main_monotonic_us": 437170708777,
+                "first_paint_monotonic_us": 437171131132,
+                "ready_monotonic_us": 437171330877,
+                "main_to_first_paint_ms": 422.355,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 8,
+                "domains": 1,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 2,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 0,
+                "chooser_reached": false,
+                "reverse_focus": false,
+                "windows_observed": 3,
+                "windows_painted": 3,
+                "scans_finished": 5,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 16027,
+                  "adw_init": 58300,
+                  "application_register": 13504,
+                  "window_new": 10967,
+                  "window_present": 223700
+                }
+              }
+            },
+            {
+              "name": "run-01-boxes-deferred",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate/tests/test-ui",
+                "--boxes-deferred-exercise",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-normal/run-01/boxes-deferred.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 0.675,
+              "metrics": {
+                "main_monotonic_us": 437171743288,
+                "first_paint_monotonic_us": 437172123584,
+                "ready_monotonic_us": 437172123634,
+                "main_to_first_paint_ms": 380.296,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 6,
+                "domains": 1,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 1,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 0,
+                "chooser_reached": false,
+                "reverse_focus": false,
+                "windows_observed": 1,
+                "windows_painted": 1,
+                "scans_finished": 1,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 15757,
+                  "adw_init": 52140,
+                  "application_register": 7910,
+                  "window_new": 9198,
+                  "window_present": 243090
+                }
+              }
+            },
+            {
+              "name": "run-01-boxes-deferred-large-dark",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate/tests/test-ui",
+                "--boxes-deferred-exercise",
+                "--large-text",
+                "--dark",
+                "--width",
+                "720",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-normal/run-01/boxes-deferred-large-dark.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 0.897,
+              "metrics": {
+                "main_monotonic_us": 437172444939,
+                "first_paint_monotonic_us": 437172970257,
+                "ready_monotonic_us": 437172970298,
+                "main_to_first_paint_ms": 525.318,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 6,
+                "domains": 1,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 2,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 0,
+                "chooser_reached": false,
+                "reverse_focus": false,
+                "windows_observed": 1,
+                "windows_painted": 1,
+                "scans_finished": 1,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 19183,
+                  "adw_init": 66267,
+                  "application_register": 13180,
+                  "window_new": 11749,
+                  "window_present": 328851
+                }
+              }
+            },
+            {
+              "name": "run-01-viewer",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate/tests/test-console-ui",
+                "--output",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-normal/run-01/viewer"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 4.43
+            },
+            {
+              "name": "run-01-viewer-large-dark",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate/tests/test-console-ui",
+                "--large-text",
+                "--dark",
+                "--width",
+                "720",
+                "--output",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-normal/run-01/viewer-large-dark"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 4.555
+            },
+            {
+              "name": "run-02-light",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate/tests/test-ui",
+                "--exercise",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-normal/run-02/light.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 0.85,
+              "metrics": {
+                "main_monotonic_us": 437182319874,
+                "first_paint_monotonic_us": 437182729934,
+                "ready_monotonic_us": 437182729956,
+                "main_to_first_paint_ms": 410.06,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 12,
+                "domains": 1,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 1,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 1,
+                "chooser_reached": true,
+                "reverse_focus": true,
+                "windows_observed": 1,
+                "windows_painted": 1,
+                "scans_finished": 0,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 16422,
+                  "adw_init": 59170,
+                  "application_register": 8480,
+                  "window_new": 8142,
+                  "window_present": 256418
+                }
+              }
+            },
+            {
+              "name": "run-02-large-dark",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate/tests/test-ui",
+                "--exercise",
+                "--large-text",
+                "--dark",
+                "--width",
+                "720",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-normal/run-02/large-dark.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 0.863,
+              "metrics": {
+                "main_monotonic_us": 437183145010,
+                "first_paint_monotonic_us": 437183545881,
+                "ready_monotonic_us": 437183545974,
+                "main_to_first_paint_ms": 400.871,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 12,
+                "domains": 1,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 2,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 1,
+                "chooser_reached": true,
+                "reverse_focus": true,
+                "windows_observed": 1,
+                "windows_painted": 1,
+                "scans_finished": 0,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 17305,
+                  "adw_init": 59942,
+                  "application_register": 7736,
+                  "window_new": 7786,
+                  "window_present": 216802
+                }
+              }
+            },
+            {
+              "name": "run-02-empty",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate/tests/test-ui",
+                "--exercise",
+                "--uri",
+                "test:///tmp/pirwa-gnome-i87m5km6/node.xml",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-normal/run-02/empty.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 0.61,
+              "metrics": {
+                "main_monotonic_us": 437184013995,
+                "first_paint_monotonic_us": 437184357026,
+                "ready_monotonic_us": 437184357046,
+                "main_to_first_paint_ms": 343.031,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 12,
+                "domains": 0,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 1,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 1,
+                "chooser_reached": true,
+                "reverse_focus": true,
+                "windows_observed": 1,
+                "windows_painted": 1,
+                "scans_finished": 0,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 14721,
+                  "adw_init": 53576,
+                  "application_register": 10048,
+                  "window_new": 7635,
+                  "window_present": 209696
+                }
+              }
+            },
+            {
+              "name": "run-02-boxes",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate/tests/test-ui",
+                "--boxes-exercise",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-normal/run-02/boxes.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 1.573,
+              "metrics": {
+                "main_monotonic_us": 437184621891,
+                "first_paint_monotonic_us": 437185030178,
+                "ready_monotonic_us": 437185050345,
+                "main_to_first_paint_ms": 408.287,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 8,
+                "domains": 1,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 1,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 0,
+                "chooser_reached": false,
+                "reverse_focus": false,
+                "windows_observed": 3,
+                "windows_painted": 3,
+                "scans_finished": 5,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 16133,
+                  "adw_init": 67162,
+                  "application_register": 10686,
+                  "window_new": 9649,
+                  "window_present": 239284
+                }
+              }
+            },
+            {
+              "name": "run-02-boxes-large-dark",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate/tests/test-ui",
+                "--boxes-exercise",
+                "--large-text",
+                "--dark",
+                "--width",
+                "720",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-normal/run-02/boxes-large-dark.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 0.812,
+              "metrics": {
+                "main_monotonic_us": 437186195166,
+                "first_paint_monotonic_us": 437186594673,
+                "ready_monotonic_us": 437186624326,
+                "main_to_first_paint_ms": 399.507,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 8,
+                "domains": 1,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 2,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 0,
+                "chooser_reached": false,
+                "reverse_focus": false,
+                "windows_observed": 3,
+                "windows_painted": 3,
+                "scans_finished": 5,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 11463,
+                  "adw_init": 49554,
+                  "application_register": 9921,
+                  "window_new": 9309,
+                  "window_present": 224562
+                }
+              }
+            },
+            {
+              "name": "run-02-boxes-deferred",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate/tests/test-ui",
+                "--boxes-deferred-exercise",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-normal/run-02/boxes-deferred.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 0.705,
+              "metrics": {
+                "main_monotonic_us": 437187025695,
+                "first_paint_monotonic_us": 437187429359,
+                "ready_monotonic_us": 437187429411,
+                "main_to_first_paint_ms": 403.664,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 6,
+                "domains": 1,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 1,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 0,
+                "chooser_reached": false,
+                "reverse_focus": false,
+                "windows_observed": 1,
+                "windows_painted": 1,
+                "scans_finished": 1,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 15029,
+                  "adw_init": 56752,
+                  "application_register": 10276,
+                  "window_new": 10790,
+                  "window_present": 255646
+                }
+              }
+            },
+            {
+              "name": "run-02-boxes-deferred-large-dark",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate/tests/test-ui",
+                "--boxes-deferred-exercise",
+                "--large-text",
+                "--dark",
+                "--width",
+                "720",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-normal/run-02/boxes-deferred-large-dark.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 0.776,
+              "metrics": {
+                "main_monotonic_us": 437187717829,
+                "first_paint_monotonic_us": 437188165251,
+                "ready_monotonic_us": 437188165319,
+                "main_to_first_paint_ms": 447.422,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 6,
+                "domains": 1,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 2,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 0,
+                "chooser_reached": false,
+                "reverse_focus": false,
+                "windows_observed": 1,
+                "windows_painted": 1,
+                "scans_finished": 1,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 12849,
+                  "adw_init": 66296,
+                  "application_register": 12708,
+                  "window_new": 14313,
+                  "window_present": 253330
+                }
+              }
+            },
+            {
+              "name": "run-02-viewer",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate/tests/test-console-ui",
+                "--output",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-normal/run-02/viewer"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 4.455
+            },
+            {
+              "name": "run-02-viewer-large-dark",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate/tests/test-console-ui",
+                "--large-text",
+                "--dark",
+                "--width",
+                "720",
+                "--output",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-normal/run-02/viewer-large-dark"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 4.571
+            }
+          ],
+          "passed": true,
+          "shell_exitcode": 0
+        },
+        "cleanup": {
+          "signalled": [],
+          "remaining": {}
+        },
+        "binary_sha256": {
+          "test-ui": "86bf68c824ab044f945918a7b94899f88e8ef034e5013dca2445f76a29f587e8",
+          "test-console-ui": "42f4bf7742eb1ec5971d685e7760f855f97215850e06f9b4ef360c61167b0072"
+        },
+        "schema_sha256": "3cfb9e4956d8cfbc7872fbd31003617783e4a367712efec50c8de6ac73622174"
+      },
+      "sanitizer": {
+        "report": {
+          "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+          "source_dirty": true,
+          "gnome_shell": "GNOME Shell 51.1",
+          "shell_command": [
+            "gnome-shell",
+            "--headless",
+            "--wayland",
+            "--no-x11",
+            "--virtual-monitor",
+            "1280x800@60",
+            "--wayland-display",
+            "pirwa-qa-wayland"
+          ],
+          "display_kind": "virtual",
+          "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
+          "scope": "Programmed GTK actions and focus traversal; not physical input, screen reader, or guest console certification",
+          "repetitions": 2,
+          "cases": [
+            {
+              "name": "run-01-light",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate-sanitize/tests/test-ui",
+                "--exercise",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-sanitizer/run-01/light.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 11.136,
+              "metrics": {
+                "main_monotonic_us": 437238965060,
+                "first_paint_monotonic_us": 437248595905,
+                "ready_monotonic_us": 437248595929,
+                "main_to_first_paint_ms": 9630.845,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 12,
+                "domains": 1,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 1,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 1,
+                "chooser_reached": true,
+                "reverse_focus": true,
+                "windows_observed": 1,
+                "windows_painted": 1,
+                "scans_finished": 0,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 29274,
+                  "adw_init": 192558,
+                  "application_register": 24128,
+                  "window_new": 30518,
+                  "window_present": 8404376
+                }
+              }
+            },
+            {
+              "name": "run-01-large-dark",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate-sanitize/tests/test-ui",
+                "--exercise",
+                "--large-text",
+                "--dark",
+                "--width",
+                "720",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-sanitizer/run-01/large-dark.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 10.084,
+              "metrics": {
+                "main_monotonic_us": 437250147246,
+                "first_paint_monotonic_us": 437258708318,
+                "ready_monotonic_us": 437258708343,
+                "main_to_first_paint_ms": 8561.072,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 12,
+                "domains": 1,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 2,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 1,
+                "chooser_reached": true,
+                "reverse_focus": true,
+                "windows_observed": 1,
+                "windows_painted": 1,
+                "scans_finished": 0,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 32278,
+                  "adw_init": 200608,
+                  "application_register": 26703,
+                  "window_new": 27443,
+                  "window_present": 8053323
+                }
+              }
+            },
+            {
+              "name": "run-01-empty",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate-sanitize/tests/test-ui",
+                "--exercise",
+                "--uri",
+                "test:///tmp/pirwa-gnome-pmj80x27/node.xml",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-sanitizer/run-01/empty.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 8.877,
+              "metrics": {
+                "main_monotonic_us": 437260212838,
+                "first_paint_monotonic_us": 437268620185,
+                "ready_monotonic_us": 437268620213,
+                "main_to_first_paint_ms": 8407.347,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 12,
+                "domains": 0,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 1,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 1,
+                "chooser_reached": true,
+                "reverse_focus": true,
+                "windows_observed": 1,
+                "windows_painted": 1,
+                "scans_finished": 0,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 35163,
+                  "adw_init": 200837,
+                  "application_register": 20153,
+                  "window_new": 29814,
+                  "window_present": 8027218
+                }
+              }
+            },
+            {
+              "name": "run-01-boxes",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate-sanitize/tests/test-ui",
+                "--boxes-exercise",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-sanitizer/run-01/boxes.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 10.09,
+              "metrics": {
+                "main_monotonic_us": 437269092132,
+                "first_paint_monotonic_us": 437277566195,
+                "ready_monotonic_us": 437277815507,
+                "main_to_first_paint_ms": 8474.063,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 8,
+                "domains": 1,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 1,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 0,
+                "chooser_reached": false,
+                "reverse_focus": false,
+                "windows_observed": 3,
+                "windows_painted": 3,
+                "scans_finished": 5,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 26850,
+                  "adw_init": 166908,
+                  "application_register": 27704,
+                  "window_new": 45920,
+                  "window_present": 8088282
+                }
+              }
+            },
+            {
+              "name": "run-01-boxes-large-dark",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate-sanitize/tests/test-ui",
+                "--boxes-exercise",
+                "--large-text",
+                "--dark",
+                "--width",
+                "720",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-sanitizer/run-01/boxes-large-dark.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 10.568,
+              "metrics": {
+                "main_monotonic_us": 437279197619,
+                "first_paint_monotonic_us": 437288075598,
+                "ready_monotonic_us": 437288437879,
+                "main_to_first_paint_ms": 8877.979,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 8,
+                "domains": 1,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 2,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 0,
+                "chooser_reached": false,
+                "reverse_focus": false,
+                "windows_observed": 3,
+                "windows_painted": 3,
+                "scans_finished": 5,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 32606,
+                  "adw_init": 191393,
+                  "application_register": 19687,
+                  "window_new": 28870,
+                  "window_present": 8393778
+                }
+              }
+            },
+            {
+              "name": "run-01-boxes-deferred",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate-sanitize/tests/test-ui",
+                "--boxes-deferred-exercise",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-sanitizer/run-01/boxes-deferred.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 8.923,
+              "metrics": {
+                "main_monotonic_us": 437289773908,
+                "first_paint_monotonic_us": 437298168442,
+                "ready_monotonic_us": 437298168522,
+                "main_to_first_paint_ms": 8394.534,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 6,
+                "domains": 1,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 1,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 0,
+                "chooser_reached": false,
+                "reverse_focus": false,
+                "windows_observed": 1,
+                "windows_painted": 1,
+                "scans_finished": 1,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 30815,
+                  "adw_init": 173006,
+                  "application_register": 24402,
+                  "window_new": 36586,
+                  "window_present": 8001685
+                }
+              }
+            },
+            {
+              "name": "run-01-boxes-deferred-large-dark",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate-sanitize/tests/test-ui",
+                "--boxes-deferred-exercise",
+                "--large-text",
+                "--dark",
+                "--width",
+                "720",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-sanitizer/run-01/boxes-deferred-large-dark.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 9.397,
+              "metrics": {
+                "main_monotonic_us": 437298671322,
+                "first_paint_monotonic_us": 437307328777,
+                "ready_monotonic_us": 437307328833,
+                "main_to_first_paint_ms": 8657.455,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 6,
+                "domains": 1,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 2,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 0,
+                "chooser_reached": false,
+                "reverse_focus": false,
+                "windows_observed": 1,
+                "windows_painted": 1,
+                "scans_finished": 1,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 27349,
+                  "adw_init": 175027,
+                  "application_register": 19764,
+                  "window_new": 28022,
+                  "window_present": 8186493
+                }
+              }
+            },
+            {
+              "name": "run-01-viewer",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate-sanitize/tests/test-console-ui",
+                "--output",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-sanitizer/run-01/viewer"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 12.755
+            },
+            {
+              "name": "run-01-viewer-large-dark",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate-sanitize/tests/test-console-ui",
+                "--large-text",
+                "--dark",
+                "--width",
+                "720",
+                "--output",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-sanitizer/run-01/viewer-large-dark"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 12.871
+            },
+            {
+              "name": "run-02-light",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate-sanitize/tests/test-ui",
+                "--exercise",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-sanitizer/run-02/light.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 9.535,
+              "metrics": {
+                "main_monotonic_us": 437333720301,
+                "first_paint_monotonic_us": 437342501334,
+                "ready_monotonic_us": 437342501361,
+                "main_to_first_paint_ms": 8781.033,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 12,
+                "domains": 1,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 1,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 1,
+                "chooser_reached": true,
+                "reverse_focus": true,
+                "windows_observed": 1,
+                "windows_painted": 1,
+                "scans_finished": 0,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 34829,
+                  "adw_init": 179006,
+                  "application_register": 28027,
+                  "window_new": 27248,
+                  "window_present": 8402831
+                }
+              }
+            },
+            {
+              "name": "run-02-large-dark",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate-sanitize/tests/test-ui",
+                "--exercise",
+                "--large-text",
+                "--dark",
+                "--width",
+                "720",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-sanitizer/run-02/large-dark.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 9.732,
+              "metrics": {
+                "main_monotonic_us": 437343244262,
+                "first_paint_monotonic_us": 437352126916,
+                "ready_monotonic_us": 437352126943,
+                "main_to_first_paint_ms": 8882.654,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 12,
+                "domains": 1,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 2,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 1,
+                "chooser_reached": true,
+                "reverse_focus": true,
+                "windows_observed": 1,
+                "windows_painted": 1,
+                "scans_finished": 0,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 32954,
+                  "adw_init": 202829,
+                  "application_register": 22712,
+                  "window_new": 28417,
+                  "window_present": 8345812
+                }
+              }
+            },
+            {
+              "name": "run-02-empty",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate-sanitize/tests/test-ui",
+                "--exercise",
+                "--uri",
+                "test:///tmp/pirwa-gnome-pmj80x27/node.xml",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-sanitizer/run-02/empty.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 8.836,
+              "metrics": {
+                "main_monotonic_us": 437352972984,
+                "first_paint_monotonic_us": 437361370936,
+                "ready_monotonic_us": 437361370961,
+                "main_to_first_paint_ms": 8397.952,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 12,
+                "domains": 0,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 1,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 1,
+                "chooser_reached": true,
+                "reverse_focus": true,
+                "windows_observed": 1,
+                "windows_painted": 1,
+                "scans_finished": 0,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 32273,
+                  "adw_init": 192690,
+                  "application_register": 22416,
+                  "window_new": 27801,
+                  "window_present": 8036758
+                }
+              }
+            },
+            {
+              "name": "run-02-boxes",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate-sanitize/tests/test-ui",
+                "--boxes-exercise",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-sanitizer/run-02/boxes.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 10.194,
+              "metrics": {
+                "main_monotonic_us": 437361820979,
+                "first_paint_monotonic_us": 437370590856,
+                "ready_monotonic_us": 437370618555,
+                "main_to_first_paint_ms": 8769.877,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 8,
+                "domains": 1,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 1,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 0,
+                "chooser_reached": false,
+                "reverse_focus": false,
+                "windows_observed": 3,
+                "windows_painted": 3,
+                "scans_finished": 5,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 26199,
+                  "adw_init": 218057,
+                  "application_register": 23178,
+                  "window_new": 25381,
+                  "window_present": 8360786
+                }
+              }
+            },
+            {
+              "name": "run-02-boxes-large-dark",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate-sanitize/tests/test-ui",
+                "--boxes-exercise",
+                "--large-text",
+                "--dark",
+                "--width",
+                "720",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-sanitizer/run-02/boxes-large-dark.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 10.213,
+              "metrics": {
+                "main_monotonic_us": 437372025043,
+                "first_paint_monotonic_us": 437380794640,
+                "ready_monotonic_us": 437380851308,
+                "main_to_first_paint_ms": 8769.597,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 8,
+                "domains": 1,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 2,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 0,
+                "chooser_reached": false,
+                "reverse_focus": false,
+                "windows_observed": 3,
+                "windows_painted": 3,
+                "scans_finished": 5,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 34882,
+                  "adw_init": 175532,
+                  "application_register": 19591,
+                  "window_new": 27475,
+                  "window_present": 8269106
+                }
+              }
+            },
+            {
+              "name": "run-02-boxes-deferred",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate-sanitize/tests/test-ui",
+                "--boxes-deferred-exercise",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-sanitizer/run-02/boxes-deferred.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 8.778,
+              "metrics": {
+                "main_monotonic_us": 437382248359,
+                "first_paint_monotonic_us": 437390528406,
+                "ready_monotonic_us": 437390528462,
+                "main_to_first_paint_ms": 8280.047,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 6,
+                "domains": 1,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 1,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 0,
+                "chooser_reached": false,
+                "reverse_focus": false,
+                "windows_observed": 1,
+                "windows_painted": 1,
+                "scans_finished": 1,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 37849,
+                  "adw_init": 194721,
+                  "application_register": 20370,
+                  "window_new": 27461,
+                  "window_present": 7920225
+                }
+              }
+            },
+            {
+              "name": "run-02-boxes-deferred-large-dark",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate-sanitize/tests/test-ui",
+                "--boxes-deferred-exercise",
+                "--large-text",
+                "--dark",
+                "--width",
+                "720",
+                "--snapshot",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-sanitizer/run-02/boxes-deferred-large-dark.png"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 9.478,
+              "metrics": {
+                "main_monotonic_us": 437391002264,
+                "first_paint_monotonic_us": 437399911615,
+                "ready_monotonic_us": 437399911667,
+                "main_to_first_paint_ms": 8909.351,
+                "sample_wall_ms": 0.0,
+                "sample_cpu_percent": 0.0,
+                "sample_frames": 0,
+                "pss_kib": -1,
+                "exercise_steps": 6,
+                "domains": 1,
+                "renderer": "GskVulkanRenderer",
+                "sample_start_monotonic_us": 0,
+                "sample_end_monotonic_us": 0,
+                "text_scale": 2,
+                "scroll": false,
+                "focus_kind": "not-sampled",
+                "initial_focus_kind": "not-sampled",
+                "active": false,
+                "refresh_millihz": 60000,
+                "surface_scale": 1,
+                "frame_work_us": [],
+                "frame_cpu_us": [],
+                "form_focus_steps": 0,
+                "chooser_reached": false,
+                "reverse_focus": false,
+                "windows_observed": 1,
+                "windows_painted": 1,
+                "scans_finished": 1,
+                "first_presentation_monotonic_us": 0,
+                "feedback_dropped": 0,
+                "presentation_feedback": null,
+                "startup_stage_us": {
+                  "gtk_init": 36371,
+                  "adw_init": 203820,
+                  "application_register": 21011,
+                  "window_new": 28154,
+                  "window_present": 8408476
+                }
+              }
+            },
+            {
+              "name": "run-02-viewer",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate-sanitize/tests/test-console-ui",
+                "--output",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-sanitizer/run-02/viewer"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 12.673
+            },
+            {
+              "name": "run-02-viewer-large-dark",
+              "command": [
+                "/home/stone/Gnome/pirwa/build-performance-gate-sanitize/tests/test-console-ui",
+                "--large-text",
+                "--dark",
+                "--width",
+                "720",
+                "--output",
+                "/home/stone/Gnome/pirwa/build/qa/performance-gate/ui-regression-sanitizer/run-02/viewer-large-dark"
+              ],
+              "returncode": 0,
+              "elapsed_seconds": 12.752
+            }
+          ],
+          "passed": true,
+          "shell_exitcode": 0
+        },
+        "cleanup": {
+          "signalled": [
+            {
+              "pid": 4187586,
+              "name": "evolution-sourc",
+              "signal": "SIGTERM"
+            }
+          ],
+          "remaining": {}
+        },
+        "binary_sha256": {
+          "test-ui": "a5f11416d8605835278948d92647b2fec4a5ddf774f593555381ae78c4b19ab4",
+          "test-console-ui": "fdf53572755f70baa78be8b66def6e4c3929e47bea1d89616088683f852051ff"
+        },
+        "schema_sha256": "3cfb9e4956d8cfbc7872fbd31003617783e4a367712efec50c8de6ac73622174"
+      }
+    }
+  }
+}

@@ -1,0 +1,1078 @@
+{
+  "recorded_utc": "2026-11-15T02:32:37.250701+00:00",
+  "scope": "Programmed GTK actions and focus traversal only; no accepted compositor/physical input coverage",
+  "source_manifest": {
+    "head": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+    "dirty": true,
+    "files": {
+      "data/io.github.pirwa.Pirwa-v2-symbolic.svg": "57b5b9eb43191e414821bb4013dc14871d912aa987a40c371e232dd25b479334",
+      "data/io.github.pirwa.Pirwa-v2.png": "f3b7ec62227ca8ae201dd6de01519e34b4bf7eb8bc51b2914535f81eaae08029",
+      "data/io.github.pirwa.Pirwa-v2.svg": "701a485223e1c7fd19a5b9903cb0ac908fba3db3216c102fdbf8541f95cb50c5",
+      "data/io.github.pirwa.Pirwa.gschema.xml": "4d0589c9bb44dd12f29ee5fa5cb451dc354b4cd51f798c23c2915c0c61372daf",
+      "docs/design/app-icon.md": "dfcfe20d84fe0d3c7fe67ac52a504f07c63cfe79547f6f9256f9120585c9874e",
+      "docs/design/pirwa-icon-concept.png": "e71982a9265a8b439e8794c85b124a63b684300fd0c51a3d7106f3f8c54da470",
+      "docs/design/pirwa-icon-preview.png": "2f50176cab354349a8783eda173fe1172d1c159be5a72ee44402b3c8f7d07a3c",
+      "docs/design/pirwa-icon-preview.svg": "a046b7af884a126aa174f9f2e846b0d44b1a99417451b8b78afb24caea27a0ad",
+      "docs/design/pirwa-icon-prompt.txt": "c169d85130603368eb9ed98c6e293f9b3545a6f4fbc7d594290d2527c71112eb",
+      "docs/research/dense-console-performance/README.md": "588766855e2ecbc8d1f4b54fb2cb698e1406a846245c9e569babf23b14f0dfff",
+      "docs/research/dense-console-performance/baseline-instrumentation.patch": "2fc3ed8f5ae62f25ce90895ae136a7dd0b9686a0c5a6eda3854698543762a18e",
+      "docs/research/dense-console-performance/baseline-manifest.json": "3ed6706c5da3a60363218ec1c6e0796da8182fd9b29d523b29eb7baa4acd2b7e",
+      "docs/research/dense-console-performance/packed-copy.jsonl": "5e54c5ab4da3b406d9380b3b5c10883cab5af836bb1b9f826f6785f1bec2802d",
+      "docs/research/dense-console-performance/real-console-attempt.json": "f2ffd97f7471b5939befc1108693e909b99ee60b83e1d310e9cb54d5c49010d4",
+      "docs/research/dense-console-performance/real-console-summary.json": "f75d68a1a01734f811901d9cfa386dfd02243234ff238239fa71bcfd344d02ba",
+      "docs/research/dense-console-performance/real-console.jsonl": "b7af1b78fbf086f5bbabbe6ad50874e953abc6b2fcac83b24b71bdb78c6dd762",
+      "docs/research/dense-console-performance/rejected-buffer-cache.jsonl": "5667f1edd289bdf30b500d1896df50813299ed7231fb056fe1586330e173eda7",
+      "docs/research/dense-console-performance/rejected-compaction-hints.jsonl": "24821813a2a050770ecd833a0053eb733399d6e3b7d3f802deb12d5208d05360",
+      "docs/research/dense-console-performance/rejected-frame-change.jsonl": "f2c700abdf6a2abbd4e4f2e6145fb0aebf44618c318a2288632fba711c9694a1",
+      "docs/research/dense-console-performance/rejected-small-cache.jsonl": "88c2dc1f6755f27186ede92754520b6c5e7dd576e60965df5e05b03b9cd09f70",
+      "docs/research/dense-console-performance/setup-pressure-attempt.json": "cc352f073535ab7ba96d237cf119ff001a9b954ff93034fde11fca0c90853a13",
+      "docs/research/dense-console-performance/validation.json": "1656f2a44b9b62169269b0f5366f4db1fab890cebd130c8d4794c9b9c1a5e81b",
+      "docs/research/keyboard-navigation/README.md": "86a879a42fd4f467f2cf8ab890fdf053e2795cf0ab1ee28675a45306cc515a0e",
+      "docs/research/keyboard-navigation/experimental-input-sources.tar.gz": "abe185a2a2aba970a6a08114266a8c75cc38e41f8de519f65a4460a3cb265ad3",
+      "docs/research/renderer-memory/README.md": "17fa8d247fa175372e0803aa45e75e0bae54b4cc31657939cab7c66bb0eb1c46",
+      "docs/research/renderer-memory/diagnostic-sources.tar.gz": "0e1d0e9ff4037694623bd14a96b14e3ca3c05f7ce8514688c2bb201660e5d8c6",
+      "docs/research/renderer-memory/direct-clip-manifest.json": "d10231f317515f93612e7ec412e598f27eae59cfc4ad5939188ff7bcb16bf98f",
+      "docs/research/renderer-memory/direct-clip.jsonl": "36356afc29bbb8e5311921dc8df63b1351a2fb05775e11282a91036ff426745a",
+      "docs/research/renderer-memory/mask-control.jsonl": "64c2bcc02099851976f8cfc24f0940a0866e9653b7d05a12b3ac0e6e233655ec",
+      "docs/research/renderer-memory/memory-manifest.json": "fb757601991a83fba36695e0f5747fc9cdbac47037189260dcbc044d603561df",
+      "docs/research/renderer-memory/memory.jsonl": "53784d530e297cf0a411726d37ae6d901ce43cc87fb11b365e468dac7245436c",
+      "docs/research/renderer-memory/presentation-manifest.json": "e31d1fe8aa2855a4fcfdab9becec5ecdbeed70fc09e3a2ed62486d40cee5e546",
+      "docs/research/renderer-memory/presentation-protocol.log": "3042b764b1c2c452a4e4cfa4d0c1869ec692a5e654c450e1d45b4f3cb7255e16",
+      "docs/research/renderer-memory/presentation-sources.tar.gz": "00c1268ba9c47d276c511411f7c9ca38d5f7b2ff7173d9b0d7fb4f3fb4029af3",
+      "docs/research/renderer-memory/presentation-summary.json": "33df54c934b2e04b39168ae27202c96266f391d1125000e63e612bcb53001e42",
+      "docs/research/renderer-memory/presentation-validation.json": "a84c70ffe9dcf0540f5c38492e36b612707762b632b729884aed17e20b0d66dc",
+      "docs/research/renderer-memory/presentation.jsonl": "0701a311e1972d02b70a511bd84f8502d72da067d6a149325f9d954e27e93f96",
+      "docs/research/renderer-memory/real-console-preflight.json": "c33c86f51813f9b3506e789797fb9c9803b1404f872ba296991f6ecc555dd208",
+      "docs/research/renderer-memory/summary.json": "a6b43ff608165a1a6a39ef78f4b658d9edc76adf25d8283ee11fdf289f6b5887",
+      "docs/research/renderer-memory/validation.json": "7c3db192047a1ba79232fe3be2709543d883a0dc984cc1313f5828e37574051a",
+      "scripts/__pycache__/test-gnome.cpython-315.pyc": "137b6c07863a46653ebd8ad2bad46d6310361eb9ebd72a513575df645aab5a78",
+      "scripts/profile-renderer-memory.py": "8c7d74e3a2f650820a7707282299b5169ae3c8ff32d9877d1fb933e53fcfa311",
+      "src/pirwa-create-dialog.c": "c28b3e9e955d39744264f5a181432e657ae32bcf37f1405160c88743ddd967a5",
+      "src/pirwa-create-dialog.h": "328f3a338adee425c41087a9abaf91d8d17d28e9e567ceff1326757c7ec80f7e",
+      "src/pirwa-preferences.c": "3f8ad49c6683d00a287726c036b9410cdedd9cb6689053b05e444080ae02f53a",
+      "src/pirwa-preferences.h": "97f7deb707624737ab20941295b54e30ae984a8d81ce876431741ecddc7cf490",
+      "tests/benchmark-display-memory.c": "2709b3c1114664f8f0f5a2722e6abc2d45cbd1a1a22ae62265b53ba75d5da531",
+      "tests/benchmark-frame.c": "14268f5c4911036bcf4cde0ae6b8de03e265cfae30e67c884dabd2c0bab9aba8",
+      "tests/qa-frame-feedback.c": "4e1a472d882dc4e380f266a2fe00fae223e44021ebc7ab5d5073afb2747b2463",
+      "tests/qa-frame-feedback.h": "9c40c0fc9ae030d353f13f391986455ebd1eaa5840249299da5b9667912728cd",
+      "tests/test-console-connect.c": "3052084af1f8be47185cc4687e5fb503719595a1ea76d1db028440ee6a7de6c0",
+      "tests/test-console-profile.py": "465ee9e9b0fad6b406be2c8b1aca4076a33308374daf555009cc9a9e62389121",
+      "tests/test-create-ui.c": "a4028538b1586ba25a7f43cbddcf34c39bc7febc944495f6eb24002e4c5a4493",
+      "tests/test-preferences.c": "20d21b75ee88053d9df7b37fc7b2b7e9eae319557ed700db48b3f31bbc430584",
+      ".clang-format": "5dbf64889919577a7bbe047ebac70f0b1df1c329ec0b3711ffea7f38db224d13",
+      ".editorconfig": "faf9dd42993b57dd5870dda0deadf47e14ea97529884994a073f8fc58b984d2f",
+      ".github/workflows/check.yml": "0eb115f7ad1c82b36f511f75e157f5bcb0fdfbf2eff64857310830247ab8b138",
+      ".gitignore": "2eec69dd5a2a102c019cb6356c32a63173bc13efca10d4c4e10a95c69ea18fca",
+      "AGENTS.md": "ff7a419e22d9da532bbe9c0f0b9af1a334ed9d84cc6462ef5d12b7e693de3f28",
+      "COPYING": "fb981668c18a279e285fc4d83fba1e836cc84dd4daa73c9697d3cfd2d8aca6e0",
+      "README.md": "19ecb34923c259c89f6271e9389871e3a52530236ce89c6539d193a853df70d1",
+      "data/io.github.pirwa.Pirwa.desktop": "cd20d24fc8c43b40ae5a323467555ead563fee8cb2767cd7daba8393838e86cc",
+      "data/io.github.pirwa.Pirwa.metainfo.xml": "599de2f04e6d5755d05e5a66e9a0cf1bfa7dcf018ec7ad11012d46a07c70d3f6",
+      "data/io.github.pirwa.Pirwa.svg": "0b6e0d30ddc692295d6691076c3d210289953dd22df6ebb8801d0c7984090133",
+      "data/meson.build": "8d0c098cf4f942b26a96fe90cce71084b046b4d2a785b0211c5125d65e5b8107",
+      "data/pirwa.gresource.xml": "4aa02721fd30182df5800aa14e4fe344a2b6ac4b473c8d5779e9a55d2824d21c",
+      "docs/design/architecture.md": "e5aa2c35e44ae74a5c95ade2cca487e31f56bd624d8a19765c4e9bf121092452",
+      "docs/design/console-decision.md": "86c412fea0fd9f386150f68fa3d6dbc66eefe8e0237f1f107fa5532b3d3651fe",
+      "docs/design/performance.md": "0edb6e931042f858cd5eea6ba275f4314e2f2b4d56accee0b109e90f6db99fe3",
+      "docs/design/v0.1-plan.md": "a8935e7d7c474771f7fc2d2f28a5ab859c0da6e0f5a544f54d540532fd350371",
+      "docs/implementation/setup.md": "31193dcc39dff3e97275b18851e1d72502679acd218df3a83522b7d9e1c23ace",
+      "docs/research/active-console-performance/1080p.jsonl": "67831db6ab16a7ee61ca20e9710dbd8656a2192e5ff1c2240b5b4c26d360306a",
+      "docs/research/active-console-performance/4k.jsonl": "53c47efbb4fd07abbf1353d8d6ac2eb50c5ac0780b4349068bcf9fa98b299722",
+      "docs/research/active-console-performance/README.md": "212c5eb35cd7d8f2912f1995c67fc2061e7fa45c98517607b96537037ad45230",
+      "docs/research/active-console-performance/validation.json": "057b8d9878a757602908c1f5bb524472c458bc68ebde6ecc9a081c969e963854",
+      "docs/research/benchmarks.jsonl": "6396e0d3a9ff1e4ed1c79a0bc10eb08efa572c1a68bd16eea8b112a8854a9587",
+      "docs/research/bootstrap-validation.md": "774199473cbb85eb7e3cf815d8d6a2a2bff099f6b94935a540bbf42656d5bf1a",
+      "docs/research/boxes-import/README.md": "3dc02fee6e760dd0d71662ed5cbe1ddd5ce9c382ed3fd2eed71f7d43845ddf65",
+      "docs/research/boxes-import/guide-large-dark.png": "f9af9d56c84dc51a37895f538c88e203ab3aea3db7ac00fbc8d43cf5c80b50aa",
+      "docs/research/boxes-import/guide.png": "28abd5fcabf424c269c0f5c63c11187b93b538a408b5a22fe74325bec7fcaf98",
+      "docs/research/boxes-import/migration.md": "c2004af427233f91551f2f04b2367ad95f3116baed63e9dcbf9bf5e0b82df84c",
+      "docs/research/boxes-import/native-guide.png": "553aaa52a74fc5efec024a7d93063f81e63e58a99332f5f38c595687e0a1b055",
+      "docs/research/boxes-import/native-report.json": "e631643d03b4e5ba74ecfe95a4e4a045dda1e2d567b6f3bdfc604d35502d6cd7",
+      "docs/research/boxes-import/native-unchanged.json": "1c38cb809d179f7551a6701b4c2e48f61c8a26d17e5fad61605b2e32ea5f7c79",
+      "docs/research/boxes-import/report.json": "5122cc81be33e16efd3720b1668454842daf9f47a30d343e33e9f55ae5e658df",
+      "docs/research/boxes-import/sanitized-report.json": "f30b7e96bd498521b1bf41978095e136f9f12c87df4966f30712cc3d981dcf1f",
+      "docs/research/boxes-import/startup-100-report.json": "6b01d87f215f3fecbbf25a56a155bbd5fa9bfa63d99a905e114109eac98e4fab",
+      "docs/research/boxes-import/startup-100.json": "bab43207f2a22b6dbf95dad17738efb98f6300072a72ed8da975e7d8d294142c",
+      "docs/research/console-performance/README.md": "407256e2cbd93a43055259029310a1a6ce0b6efce6000e9a74a0fa756c93b4ac",
+      "docs/research/console-performance/audio.json": "e52030aed977ba91cc2b427356c82ad42135b3c90455c3ed8704c3b082c0cccf",
+      "docs/research/console-performance/cleanup.json": "16d07bf021ea2ca9b60ec4f1c705cfabca4976b9d138bf5f819842e5bbbf0400",
+      "docs/research/console-performance/guest-baseline-control.json": "136b0cda1eaed19b2298504635955d59010187adf9070b5eb58e4d39c9a643e5",
+      "docs/research/console-performance/guest-frame-after.png": "3951c7be422521ffb64c61c5f6c63dc24c90cbe6b7d73b60570beeba885cd9d3",
+      "docs/research/console-performance/guest-frame-before.png": "88e2b526dca9533c03fdb256c58b69a198f8dc42f805cbfca97b3c8c5032a9f3",
+      "docs/research/console-performance/guest-workloads-long.json": "c947574d34f2beaf8f5f6544e8c3119cff35debc6441db43774b040f40ee2372",
+      "docs/research/console-performance/guest-workloads.json": "e71956f785617c51219788885790f49fde66a3847ae692ac6c1130684c8405cd",
+      "docs/research/console-performance/initial-workload.py": "92dd4b131b665a6ca5cee1f6d942e4b24a204a7a53678dc14da0827f664c9767",
+      "docs/research/console-performance/input-recaptured.png": "f0d8aa1e3ba28130b85c062c155366ee6ff4a8949a90d4b464daf4365af80086",
+      "docs/research/console-performance/input-released.png": "4ad493aeedd2c743a1d7119f4144c554447a58f192d2ea4ece4ec318f78ae4a7",
+      "docs/research/console-performance/input.json": "2d289612d52d3e56851adcb4aae207951ae0b815f5f4d0c9aec97b593248c7b4",
+      "docs/research/console-performance/process-cleanup.json": "099f087bd4c0e377703d5367767a818b7f01150be4aef4c8dbb046b2c296db95",
+      "docs/research/console-performance/profile-100.json": "8ebb4f398aba29ef83eebe61a0336189b8a0182656212540b6629274e2bc65fa",
+      "docs/research/console-performance/profile-1000.json": "0f091febd80ef8c204a2a218f57846d23bcd7a68f9144b7a0b574432b0e77a7e",
+      "docs/research/console-performance/reconnect.json": "71d6c73168f4211686ae12425aee33b9363bc34021b99655b22fb3b555d17355",
+      "docs/research/console-performance/report.json": "f1df2e196e299a802814c3428911d5b3f0b2e47d79280468efbcc28a904d1a91",
+      "docs/research/console-performance/rpm-paused.png": "bb763d28a095ad1239e6bd1a6fb2da86cc07a7244feaa1a2e459ad0721e90aa0",
+      "docs/research/console-performance/rpm-resumed.png": "2c1a62b1a8032ed611e566515bbaaa6270d350b79d641945c1300c3e44ad7f50",
+      "docs/research/console-performance/rpm-validation.json": "b57067110fa9c733c751580713d01eda77a9f7d1da197a049d615b67cd477a7b",
+      "docs/research/console-performance/start-samples.jsonl": "cd122daf0dcb45b18aa9328115faed36779a6b8ed71ae2b8e10e5cd1ef5c85d4",
+      "docs/research/console-performance/start-summary.json": "681436ea289834fc15d9e3c3708b2f73cdfee2992950c3e547b84dcd67b1e3e5",
+      "docs/research/console-performance/ui-regression.json": "cbecd12c291c6925102779f218d38060dc12117fec7fb6c159da0b019cbf74bd",
+      "docs/research/display-performance/README.md": "0646517260b068384918192af462190c86f94825c040105cf596fe838a89f433",
+      "docs/research/display-performance/paired-results.jsonl": "f0c2a2e8849da453d1f5d63f776a4f799ddfb65110a83dcd074676a858caf275",
+      "docs/research/display-performance/validation.json": "45fb7a3c17d60f972544913dfa6fa6c7e712dabd9b962487b8feffa79ece8da9",
+      "docs/research/gnome-boxes.md": "3352a5f41cff4255f816832770cff89eb6fcaedc1a5309c3f1943a237b7d1c3a",
+      "docs/research/hardening-review.md": "16664c0e3c54b27098fe490b22f65ace74a3cd477b71f1eee95dba579f7e09c5",
+      "docs/research/linux-install/README.md": "e31de9a414b1a8a9a636c4f5244b781ec864c46c8fe4d2c09980e46eee8375bd",
+      "docs/research/linux-install/create-form.png": "814cf53218e32d254ec4267c2b20901e6d93df0b349f0828c5b176e09bdb84ba",
+      "docs/research/linux-install/disk-desktop.png": "d152cef9e95655d72f7a123459ec2499bdf4c57dfd8a281102e2ace684c324c8",
+      "docs/research/linux-install/eject-iso.png": "a8f3604e2902d12132adb2b89d0477852e8ddd507fcb0a507d66464f2e71b954",
+      "docs/research/linux-install/first-boot.png": "d20519c43ca70f35a235f014cd18f5946a7ae98a7664504e042a6d915b63a31f",
+      "docs/research/linux-install/installed.png": "8e25f58263504c98f08734f5e01df3b7fddaaa03aeedef11fb9a4227ca87137c",
+      "docs/research/linux-install/report.json": "ff44a94764ce87d1b49891ace9bb4e53f260d9a08e78cf655cd50e01f57644bb",
+      "docs/research/linux-install/ui-regression.json": "b45d96bb64160881402270e139f1057905a6b3fb0928ffd8fa64740b63a96646",
+      "docs/research/native-console/README.md": "f897ce2e23127e3057d6f01f5fb66eb8269edb2ab57209b207475a392805d1f2",
+      "docs/research/native-ui-physical-100.json": "e8e64dc458a2e69ee4965f6a213a04a4829303b4671b0cc047a8f95873a04f79",
+      "docs/research/scaffold.png": "8a665d2cbd71b29d4a511346c2c21b8ac9fd538574799b4b996bebbfca438772",
+      "docs/research/v0.1-overview.png": "042b4ceabecf6504271ec890bb471a0f062e92f9227020c8407d7092a7df1661",
+      "docs/research/v0.1-validation.md": "f5e4e134f7f0ac6f9403509d506133b161d2d93aebd6ec65f14a79da995a8ab1",
+      "docs/research/virtual-gnome/empty.png": "6689d126693e2e00931156d8cf473092ff233ab8f2f7108bf1b5de799bc71cf1",
+      "docs/research/virtual-gnome/gnome-shell.log": "58a43bd2f499ac62314a47a689cf302c05c2bed353aff1369453f6723cb9bd21",
+      "docs/research/virtual-gnome/large-dark.png": "0c9ef106219603cdb907119232bf6b25d173a1aa9ae2044bb254340ca6dab38f",
+      "docs/research/virtual-gnome/light.png": "2c6b53e65f1f126c438f8f1beb670f798444c584f7dd93c2dbd8551e9d5bda03",
+      "docs/research/virtual-gnome/native-ui-100.json": "ccb17fcfdcdde1d509d530c2d9aadf510d7a660cb6e811a92f5977b4b1e5efc1",
+      "docs/research/virtual-gnome/profile-report.json": "e49222996cbdc6f55f7746e6a88f3cb5916754f5b48de6296c48911705814fed",
+      "docs/research/virtual-gnome/report.json": "de735b6432f81fcded2a05792edd30aa4a2353f2c932c5c114bbf2ae7d2c70c5",
+      "docs/research/virtual-gnome/sanitized-gnome-shell.log": "97cfe39ad535337a9dceef9d46a8714c42e878b322df5ef95ed877a9e9f8a991",
+      "docs/research/virtual-gnome/sanitized-report.json": "874a8007739be015806abb93eecd6ee626e2080a5acc0257e0764c27c32f8218",
+      "docs/research/virtual-gnome/startup-failure-partial.json": "3b934f8a659bcd310c5614064058aa18a78d7c654c62cafab3c0ca4c1a4e70a3",
+      "docs/research/virtual-gnome/startup-failure-report.json": "5973cd10527838be4f73ff3e73fb119a6f9d1f9de71e662d15d6357a711b4b02",
+      "docs/research/virtual-gnome/startup-failure.log": "5dd8f040155e3baf7d054f27c0d0f0efa905b488a8e8d8a370c7a56b8ef3a313",
+      "docs/user/getting-started.md": "1180475f9463606460a525b4e01978bea2c9b6d344d2ade878642f99898b17ce",
+      "examples/run-test-driver.sh": "5f03ce3a8dedf9c84eaf2a19b6d356e4ae5e872b1ffe49fcab57c2335e6cf52c",
+      "meson.build": "de719b35e7e1bac6e672eed85c14a80995f3c2df5fe7df11fae55f509c723ea8",
+      "packaging/pirwa.spec": "7cce233d44315e03877b6e44b25ecee42d1cf591e1c1a85994cc20249683961c",
+      "po/LINGUAS": "ddeb5b6d9ee9836541a0421310cda30641aab5aae3257c04a472af0186bffded",
+      "po/POTFILES.in": "662d5ec8599a3bfe2dca197887134ca412d18c0f32825f83a8c5e55888e4da2a",
+      "po/README.md": "451e1be443d7151fc760fff1a75553cc9fcddf64f7691c95ffe935ca84711051",
+      "po/meson.build": "8aa419861e006911b355e09defc18f500513487a0dcca0682df5adaa751531f0",
+      "po/pirwa.pot": "323a1b1658878f04cca2e9eb08419c4b3baa425b42a458f003e29ac190dd4d72",
+      "postmortem/2026-11-13-modal-close.md": "087dd96ee10148211c21458acabb69456e53ffa48c7cf2c220aa2e069ba315b7",
+      "postmortem/README.md": "940209c766ef2490401740cfed016600edd9167c6bd555d8cfbd8e40fd7fe2f4",
+      "postmortem/libvirt-event-dispatch.md": "e0504345eecc2921145955069dfc46f18cc15ff343729c7b0266658b6430a261",
+      "scripts/benchmark.sh": "df086197ea91925dce361f5f8fcfb9a86112359d0f18eb04d3f1af0a902444b6",
+      "scripts/console-session.py": "515e1d5fdb25b6753720e05a15115a0aa09645a061fb41787f5c13c3b958aa61",
+      "scripts/profile-console.py": "26c36079b4cb30b4b40b04cf51b7bc747eed82c3423103a4178c0149626aa40a",
+      "scripts/profile-display.py": "04be731cc34e626193e8e66b75e4c4d9ad9f43cc7a4e360a73819bcb4689c3d1",
+      "scripts/profile-guest.py": "f9878660a0d61dfc7edbb14da8f360dadeeb9b9281255c15291776caa2257617",
+      "scripts/profile-ui.py": "09ea1a9501f3a4455c037287f2b42356951ca2044ed778983f91e8dd24acf375",
+      "scripts/qa-display-scale.py": "e38a4d261af7258e72e9be219a222096287df1847181b45333e43a43e5b3ea7d",
+      "scripts/run-dev.sh": "1649246d3d1d93ae707c95123550532c3ce37da09ec969e9ede7f6fdfbafcce9",
+      "scripts/test-gnome.py": "c86b90531c9c799cd8299f81ec570fbd5fbf68aba0aee43a953715eb5226c195",
+      "src/main.c": "3a92167e52b73db67ad8a703a9804a60a07df783ff983bb51b76571448863654",
+      "src/meson.build": "2eb0f81b300cf1601536e366b2945e5ab5c13cb5edd20b1d38729e7b7c22f72f",
+      "src/pirwa-backend.c": "fa95110dcac05a5393fc695d565093a5071600933c4f9fc1f1ca471d046cd787",
+      "src/pirwa-backend.h": "324912bc17e87b272bb0283cda11ae47354fed109433d22244bfb25cf8ccd6a4",
+      "src/pirwa-boxes-dialog.c": "f9bd14d2c88739d4b6b78f54e9e75a4f73ffdec9427f7f3bfbba428d2e463b9b",
+      "src/pirwa-boxes-dialog.h": "36fccca7274066a9289a608fdf6140cabebfdc3a36c4221af4fb0c243aca20a0",
+      "src/pirwa-boxes.c": "85f1fb16574bc57116363386388c41aa57586f03e2249398d51ecb68cb3bb160",
+      "src/pirwa-boxes.h": "e2ec79c2abb0d0f2bf9063fa0f66cde6ffdf235b5d3e00ca3d308647509085f7",
+      "src/pirwa-config.c": "a74c88e4eb91c9457ae3b585de685ac90cd1d70466e08926a6f6aaad503a15fd",
+      "src/pirwa-config.h": "3cc9c1fca29656cd48f500edba9794cf1dfc2d47b3997a0f9aba26e28e803d5a",
+      "src/pirwa-console.c": "8d00691f4c5bc514aacfbd16214654beea635b787a2675220481f8dfa75b9633",
+      "src/pirwa-console.h": "b0470c77756effb734fefc50799611ca698594b118d0b5bfe92c2d991c61f3f4",
+      "src/pirwa-display.c": "2b121efb057bde7fa52dd0066f486c883af12624a151215630e84f2a8cd862f4",
+      "src/pirwa-display.h": "3665b0622c62de2d7cad19f063d5b3e7aabb51fd7689ffdf6ab3108801bfa897",
+      "src/pirwa-frame.c": "83863d6d451cbe76cc00c7a5290fd47cb6cf121c12e96e0a8de9c726ac10f7ea",
+      "src/pirwa-frame.h": "18155860a3a25564fd34d57f4888f12480a4219addf8b777f0d1fea977c20130",
+      "src/pirwa-import.c": "a6eb59558365a28764fce3f42b8e00cb160430ddfafabe366191ba2767be1fcd",
+      "src/pirwa-import.h": "fb30f61bcc10da9f8ac6c52da04024e29cd731533cc95ca37b4b9963ee88b81c",
+      "src/pirwa-inventory.c": "e7c5e88bbd6aab26e98eef025fce6176625bddbae5a8f9bc58903c243106d36c",
+      "src/pirwa-inventory.h": "549ebabd3a04fd381185deab06978055d622e6fd39bbac54b5b2c6caa0a9b804",
+      "src/pirwa-libvirt.h": "6b20112325bc4afcda34654d4cc1c5ac9e2529045a7f1b7c004cac495120f739",
+      "src/pirwa-machine.c": "3874c8c27e9c3fd88dd69731c592a5bc3ed6297b20c9f77d77e76a3028abd902",
+      "src/pirwa-machine.h": "c0dfaa631ef74fb163cab05b6e22cc25dd9792bd8817ddf89d45a7a245ce8411",
+      "src/pirwa-model.c": "2383ab0620a507c297e53ee715f625acd1abeeda932e0bc22db8e6e0ea61f94d",
+      "src/pirwa-model.h": "919dd6fcf72c86780c1c442063e18bc67eef0a8c6009d9cdaa1927bea90888d3",
+      "src/pirwa-provision.c": "e28d48576ccee0135750f3ae0523eec4364507eed3b4cf27a741d0799ce39317",
+      "src/pirwa-provision.h": "d9826cc3f48dcc1926820dfd7b98d9af4edc02353c32821d3cd64ac2975aceb0",
+      "src/pirwa-usage.c": "9199e3dcf56d5f61044d3ddf58a1ee856225128deb6adc9981ca6c93bfbd43d1",
+      "src/pirwa-usage.h": "4d863f2a0820d8867da38f6aff543f1f254fb4042cbd19b425dd22fb342d0550",
+      "src/pirwa-window.c": "e9fb471daecb2db2be96c1cfbb24405970ae5bed174a40a750ae8ee34f3ad11f",
+      "src/pirwa-window.h": "e764cbd1307547c74b4624a36e3a8ade1c9c9b3519faab973704c27dfeb8a496",
+      "tests/benchmark-console.c": "8e720a9c35e4da9d4cb0bcbeb0ea04d1ec02d976bbec69cd253b914674512633",
+      "tests/benchmark-display.c": "d28a82d3a725664a7caba583ca7be8083245e065c836565dcfebcccf07605bff",
+      "tests/benchmark-inventory.c": "187e446c0bd7b184396a60c7830b5b92028ded725091150e1565381ff24c4158",
+      "tests/benchmark-scale.c": "d7345715ef35257b7dd12af6115683500ff30e2b0ec6d765ee216591a54ff174",
+      "tests/fixtures/qa-channel-agent.py": "070ceb62237f72af9844318b4c7ebfefc197b08ee795b8850a236635d38f59c1",
+      "tests/fixtures/qa-display-workload.py": "cfd314fda7b3d254fb1b79fb05c91991556ad6b1009e58923664309b9b19621a",
+      "tests/fixtures/virt-viewer": "606252c798657cfbe4dce233c6025a99baaac79b348f06a30b0a436126e32998",
+      "tests/meson.build": "99acc0cfd257a21589e495af8ec669796d054cdbc4b7d756e7d340628947233d",
+      "tests/qa-vm.c": "6a1bae787822df50eed08f37bcefde1d09a73c43a45755a21b983f8ddbc941e7",
+      "tests/test-backend.c": "a31b65da0f9fcaa464a081265d8d36727106dcf8d6ccf14491249726232cb4f6",
+      "tests/test-boxes.c": "b019b900409e0dce89ddff52b3c3b0efa27149117ee6e01a448ff16c53e432e5",
+      "tests/test-config.c": "3486b2a0fffbc2b5bf44c4e8cc225ca75e09f34ed003ece3ecb825ebdc1923ae",
+      "tests/test-console-ui.c": "2b0fa1b3b24db58c92db2186777fdef63beb9469f56c41917ea4a7c1a301e49c",
+      "tests/test-frame.c": "dca02ed66e4879645c219a2bae0557d35025f76f4d7c22ea461837cdbef78e6d",
+      "tests/test-import.c": "14faaf8c796e65ca21053fc9f93b2e88b09c40d606b6011a4098bf31c948a62c",
+      "tests/test-inventory.c": "8b67c8e326bdaac3ddd68ecbd9f148a8adbf1f42cd6c34534a7857a2447a6bef",
+      "tests/test-kvm.c": "e524138f927e2b42cbf6ed24a4d2e467244d7daca022f03a7fc72b8c80ef6199",
+      "tests/test-model.c": "a8d92778c34ac6745d3146b4495549a47d517fcd4a4b55ce94dd6c5c921f8499",
+      "tests/test-provision.c": "77be4030d3b65c0b83a25e970a666734975a7cb34cf8e81c1720fd9f6c5ca3da",
+      "tests/test-ui.c": "ecad43e867fb02d7e81b720ccc59479270b67b26cd34fe37adad11c9d9bff75a",
+      "tests/test-usage.c": "b685a264cff9aa4f525526352caa2278dd163c0f147f7add16799dfaf96f037d"
+    }
+  },
+  "source_archive_sha256": "bf75a806de320fe6842d46f43c27a8aca920454cda01404abab30c2a06d34d1a",
+  "commands": [
+    "PKG_CONFIG_PATH=<matching extracted SDK pkgconfig paths> meson setup build-normal <frozen-source> --prefix /usr",
+    "meson compile -C build-normal -j 2",
+    "meson test -C build-normal --print-errorlogs",
+    "python3 <frozen-source>/scripts/test-gnome.py --build <absolute build-normal> --output <final-native>",
+    "PKG_CONFIG_PATH=<matching extracted SDK pkgconfig paths> meson setup <frozen-source>/build-asan <frozen-source> -Db_sanitize=address,undefined -Db_lundef=false -Dc_link_args=-L<matching extracted SDK lib64> --prefix /usr",
+    "meson compile -C <frozen-source>/build-asan -j 2",
+    "LD_LIBRARY_PATH=<matching extracted SDK lib64> ASAN_OPTIONS=detect_leaks=0 meson test -C <frozen-source>/build-asan --print-errorlogs",
+    "LD_LIBRARY_PATH=<matching extracted SDK lib64> ASAN_OPTIONS=detect_leaks=0 python3 <frozen-source>/scripts/test-gnome.py --build build-asan --output <final-sanitizer>"
+  ],
+  "results": {
+    "normal": {
+      "build_directory": "/home/stone/Gnome/pirwa/build-normal",
+      "buildtype": "debugoptimized",
+      "sanitize": "none",
+      "leak_detection": null,
+      "headless": [
+        {
+          "name": "pirwa:desktop-file",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.04350924491882324,
+          "starttime": 1794709797.0675788,
+          "command": [
+            "/usr/bin/desktop-file-validate",
+            "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-snapshot/data/io.github.pirwa.Pirwa.desktop"
+          ],
+          "stdout": ""
+        },
+        {
+          "name": "pirwa:appstream",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.03957533836364746,
+          "starttime": 1794709797.0728762,
+          "command": [
+            "/usr/bin/appstreamcli",
+            "validate",
+            "--no-net",
+            "--override",
+            "url-homepage-missing=info",
+            "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-snapshot/data/io.github.pirwa.Pirwa.metainfo.xml"
+          ],
+          "stdout": "I: io.github.pirwa.Pirwa:~: url-homepage-missing\n\n\u2714 Validation was successful: infos: 1, pedantic: 2\n"
+        },
+        {
+          "name": "pirwa:usage",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.03068685531616211,
+          "starttime": 1794709797.0822535,
+          "command": [
+            "/home/stone/Gnome/pirwa/build-normal/tests/test-usage"
+          ],
+          "stdout": "TAP version 14\n# random seed: R02S15949dee8ef1148085aa9e458a0e9d1c\n1..5\n# Start of usage tests\nok 1 /usage/cpu-units\nok 2 /usage/missing-and-reset\nok 3 /usage/network-rates\nok 4 /usage/network-baselines\nok 5 /usage/network-stats\n# End of usage tests\n"
+        },
+        {
+          "name": "pirwa:config",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.028851985931396484,
+          "starttime": 1794709797.084561,
+          "command": [
+            "/home/stone/Gnome/pirwa/build-normal/tests/test-config"
+          ],
+          "stdout": "TAP version 14\n# random seed: R02Sab881e182ae440c4ee3a4fd7c4b79fbe\n1..7\n# Start of config tests\nok 1 /config/os-metadata\nok 2 /config/graphics-index\nok 3 /config/embedded-graphics\nok 4 /config/creation-graphics\nok 5 /config/roundtrip-and-eject\nok 6 /config/validation\nok 7 /config/qcow2\n# End of config tests\n"
+        },
+        {
+          "name": "pirwa:model",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.021675825119018555,
+          "starttime": 1794709797.0923147,
+          "command": [
+            "/home/stone/Gnome/pirwa/build-normal/tests/test-model"
+          ],
+          "stdout": "TAP version 14\n# random seed: R02Sa16e4367e974dedf6a5e1319d7bd6c1e\n1..2\n# Start of model tests\nok 1 /model/os-title-and-fallback\nok 2 /model/late-delivery-and-stable-identity\n# End of model tests\n"
+        },
+        {
+          "name": "pirwa:preferences",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.009720325469970703,
+          "starttime": 1794709797.1052184,
+          "command": [
+            "/home/stone/Gnome/pirwa/build-normal/tests/test-preferences"
+          ],
+          "stdout": "TAP version 14\n# random seed: R02S3bae83fbc7f6b532a0c5aba5463c5626\n# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation memory (GMemorySettingsBackend) for \u2018gsettings-backend\u2019\n"
+        },
+        {
+          "name": "pirwa:provision",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.027158737182617188,
+          "starttime": 1794709797.089517,
+          "command": [
+            "/home/stone/Gnome/pirwa/build-normal/tests/test-provision"
+          ],
+          "stdout": "TAP version 14\n# random seed: R02S8b5bbc94113e0190e4e3ab3d44940bbd\n1..5\n# Start of provision tests\nok 1 /provision/references-and-missing-media\nok 2 /provision/rollback-inactive\nok 3 /provision/rollback-running\nok 4 /provision/rollback-shared\nok 5 /provision/cancel-before-remove\n# End of provision tests\n",
+          "stderr": "libvirt: Test Driver error : Storage volume not found: no storage vol with matching name 'pirwa-11111111-1111-4111-8111-111111111111.qcow2'\nlibvirt: Test Driver error : Storage volume not found: no storage vol with matching name 'pirwa-11111111-1111-4111-8111-111111111111.qcow2'\n"
+        },
+        {
+          "name": "pirwa:backend",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.04542231559753418,
+          "starttime": 1794709797.079808,
+          "command": [
+            "/home/stone/Gnome/pirwa/build-normal/tests/test-backend"
+          ],
+          "stdout": "TAP version 14\n# random seed: R02S98ed3e4f116c55b6183e0468b58432af\n1..9\n# Start of backend tests\n# DEBUG: Add timeout 0x7fee700653f0 -1 0x7fee7ad27b80 0x7fee7005ec10 1\n# \n# DEBUG: Update timeout 0x7fee700653f0 1 0\n# \n# DEBUG: Dispatch timeout 0x7fee700653f0 0x7fee7ad27b80 1 0x7fee7005ec10\n# \n# DEBUG: Update timeout 0x7fee700653f0 1 -1\n# \nok 1 /backend/usage\n# DEBUG: Remove timeout 0x7fee700653f0 1\n# \nok 2 /backend/socket-ownership\n# DEBUG: Add timeout 0x7fee70000da0 -1 0x7fee7ad27b80 0x7fee70072e30 2\n# \nok 3 /backend/native-console\n# DEBUG: Remove timeout 0x7fee70000da0 2\n# \n# DEBUG: Add timeout 0x7fee6c00d010 -1 0x7fee7ad27b80 0x7fee6c001440 3\n# \n# DEBUG: Update timeout 0x7fee6c00d010 3 0\n# \n# DEBUG: Dispatch timeout 0x7fee6c00d010 0x7fee7ad27b80 3 0x7fee6c001440\n# \n# DEBUG: Update timeout 0x7fee6c00d010 3 -1\n# \n# DEBUG: Update timeout 0x7fee6c00d010 3 0\n# \n# DEBUG: Dispatch timeout 0x7fee6c00d010 0x7fee7ad27b80 3 0x7fee6c001440\n# \n# DEBUG: Update timeout 0x7fee6c00d010 3 -1\n# \n# DEBUG: Update timeout 0x7fee6c00d010 3 0\n# \n# DEBUG: Dispatch timeout 0x7fee6c00d010 0x7fee7ad27b80 3 0x7fee6c001440\n# \n# DEBUG: Update timeout 0x7fee6c00d010 3 -1\n# \n# DEBUG: Update timeout 0x7fee6c00d010 3 0\n# \n# DEBUG: Dispatch timeout 0x7fee6c00d010 0x7fee7ad27b80 3 0x7fee6c001440\n# \n# DEBUG: Update timeout 0x7fee6c00d010 3 -1\n# \n# DEBUG: Update timeout 0x7fee6c00d010 3 0\n# \n# DEBUG: Dispatch timeout 0x7fee6c00d010 0x7fee7ad27b80 3 0x7fee6c001440\n# \n# DEBUG: Update timeout 0x7fee6c00d010 3 -1\n# \n# DEBUG: Update timeout 0x7fee6c00d010 3 0\n# \n# DEBUG: Dispatch timeout 0x7fee6c00d010 0x7fee7ad27b80 3 0x7fee6c001440\n# \n# DEBUG: Update timeout 0x7fee6c00d010 3 -1\n# \n# DEBUG: Update timeout 0x7fee6c00d010 3 0\n# \n# DEBUG: Dispatch timeout 0x7fee6c00d010 0x7fee7ad27b80 3 0x7fee6c001440\n# \n# DEBUG: Update timeout 0x7fee6c00d010 3 -1\n# \n# DEBUG: Remove timeout 0x7fee6c00d010 3\n# \nok 4 /backend/controls-and-ownership\nok 5 /backend/cancellation-and-stop\n# DEBUG: Add timeout 0x7fee70060cd0 -1 0x7fee7ad27b80 0x7fee700655b0 4\n# \n# DEBUG: Remove timeout 0x7fee70060cd0 4\n# \n# DEBUG: Add timeout 0x7fee7001d0c0 -1 0x7fee7ad27b80 0x7fee7006d020 5\n# \n# DEBUG: Remove timeout 0x7fee7001d0c0 5\n# \nok 6 /backend/reconnect-and-missing\n# DEBUG: Add timeout 0x7fee70076ef0 -1 0x7fee7ad27b80 0x7fee70065e30 6\n# \n# DEBUG: Update timeout 0x7fee70076ef0 6 0\n# \n# DEBUG: Dispatch timeout 0x7fee70076ef0 0x7fee7ad27b80 6 0x7fee70065e30\n# \n# DEBUG: Update timeout 0x7fee70076ef0 6 -1\n# \nok 7 /backend/lifecycle-events\n# DEBUG: Remove timeout 0x7fee70076ef0 6\n# \n# DEBUG: Add timeout 0x7fee6c006580 -1 0x7fee7ad27b80 0x7fee6c014ce0 7\n# \n# DEBUG: Remove timeout 0x7fee6c006580 7\n# \nok 8 /backend/stop-in-flight\n# DEBUG: Add timeout 0x7fee6c0017a0 -1 0x7fee7ad27b80 0x7fee6c011a40 8\n# \n# DEBUG: Remove timeout 0x7fee6c0017a0 8\n# \nok 9 /backend/result-order-and-progress\n# End of backend tests\n",
+          "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Test Driver error : Domain not found\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n"
+        },
+        {
+          "name": "pirwa:boxes",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.038671255111694336,
+          "starttime": 1794709797.0950198,
+          "command": [
+            "/home/stone/Gnome/pirwa/build-normal/tests/test-boxes"
+          ],
+          "stdout": "TAP version 14\n# random seed: R02Sf85d40bd96134fa7b6d7e5afa7a13e98\n1..8\n# Start of boxes tests\nok 1 /boxes/native-library\nok 2 /boxes/not-installed-with-leftover-data\nok 3 /boxes/empty-library\nok 4 /boxes/flatpak-read-only-discovery\nok 5 /boxes/one-time-preference\nok 6 /boxes/offline-socket-preference\nok 7 /boxes/cancellation\nok 8 /boxes/main-thread-callback\n# End of boxes tests\n"
+        },
+        {
+          "name": "pirwa:console-frame",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.044881582260131836,
+          "starttime": 1794709797.0978818,
+          "command": [
+            "/home/stone/Gnome/pirwa/build-normal/tests/test-frame"
+          ],
+          "stdout": "TAP version 14\n# random seed: R02S879a662300a121777346250e6925a491\n1..7\n# Start of console tests\nok 1 /console/owned-pixels-and-damage\nok 2 /console/formats-and-bounds\nok 3 /console/input-mapping\nok 4 /console/alpha\nok 5 /console/crop-and-ownership\nok 6 /console/contiguous-rgb-and-alpha\nok 7 /console/monitor-padding\n# End of console tests\n"
+        },
+        {
+          "name": "pirwa:boxes-import",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.04399991035461426,
+          "starttime": 1794709797.1002276,
+          "command": [
+            "/home/stone/Gnome/pirwa/build-normal/tests/test-import"
+          ],
+          "stdout": "TAP version 14\n# random seed: R02S15ac68a0535424efe916ba53bf7d6891\n1..8\n# Start of import tests\nok 1 /import/copy-independent-machine\nok 2 /import/reject-running\nok 3 /import/cancel-and-rollback\nok 4 /import/reject-changed-source\nok 5 /import/upload-failure-rolls-back\nok 6 /import/reject-internal-snapshots\nok 7 /import/reject-unsupported-devices\nok 8 /import/firmware-no-overwrite-or-symlink\n# End of import tests\n"
+        },
+        {
+          "name": "pirwa:inventory",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.24515318870544434,
+          "starttime": 1794709797.0769095,
+          "command": [
+            "/home/stone/Gnome/pirwa/build-normal/tests/test-inventory"
+          ],
+          "stdout": "TAP version 14\n# random seed: R02Sa87465278831f1a46de70421e989a356\n1..4\n# Start of inventory tests\n# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation gvfs (GDaemonVfs) for \u2018gio-vfs\u2019\nok 1 /inventory/os-names-and-cache\nok 2 /inventory/discovery\nok 3 /inventory/cancelled\nok 4 /inventory/connection-failure\n# End of inventory tests\n",
+          "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: XML-RPC error : Failed to connect socket to '/var/run/libvirt/virtpirwa-unsupportedd-sock-ro': No such file or directory\n"
+        },
+        {
+          "name": "pirwa:scale-1000",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.31461477279663086,
+          "starttime": 1794709797.0872896,
+          "command": [
+            "/home/stone/Gnome/pirwa/build-normal/tests/benchmark-scale",
+            "1000"
+          ],
+          "stdout": "{\"driver\":\"test:///default\",\"method\":\"persistent_bulk\",\"domains\":1000,\"p50_ms\":7.571,\"p95_ms\":8.992,\"raw_us\":[8992,8992,8036,7562,7660,7681,7513,7407,7571,7496,7729,7251,7807,7722,7191,7576,7426,7972,7597,7308,7548,7904,7476,7097,7310]}\n"
+        }
+      ],
+      "ui": {
+        "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+        "source_dirty": true,
+        "gnome_shell": "GNOME Shell 51.1",
+        "shell_command": [
+          "gnome-shell",
+          "--headless",
+          "--wayland",
+          "--no-x11",
+          "--virtual-monitor",
+          "1280x800@60",
+          "--wayland-display",
+          "pirwa-qa-wayland"
+        ],
+        "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
+        "scope": "Programmed GTK actions and focus traversal; not physical input, screen reader, or guest console certification",
+        "cases": [
+          {
+            "name": "light",
+            "command": [
+              "/home/stone/Gnome/pirwa/build-normal/tests/test-ui",
+              "--exercise",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-native/light.png"
+            ],
+            "returncode": 0,
+            "metrics": {
+              "main_monotonic_us": 355731435980,
+              "first_paint_monotonic_us": 355732437379,
+              "ready_monotonic_us": 355732437404,
+              "main_to_first_paint_ms": 1001.399,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 12,
+              "domains": 1,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 1,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 1,
+              "chooser_reached": true,
+              "reverse_focus": true
+            }
+          },
+          {
+            "name": "large-dark",
+            "command": [
+              "/home/stone/Gnome/pirwa/build-normal/tests/test-ui",
+              "--exercise",
+              "--large-text",
+              "--dark",
+              "--width",
+              "720",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-native/large-dark.png"
+            ],
+            "returncode": 0,
+            "metrics": {
+              "main_monotonic_us": 355733353335,
+              "first_paint_monotonic_us": 355733953796,
+              "ready_monotonic_us": 355733953818,
+              "main_to_first_paint_ms": 600.461,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 12,
+              "domains": 1,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 2,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 1,
+              "chooser_reached": true,
+              "reverse_focus": true
+            }
+          },
+          {
+            "name": "empty",
+            "command": [
+              "/home/stone/Gnome/pirwa/build-normal/tests/test-ui",
+              "--exercise",
+              "--uri",
+              "test:///tmp/pirwa-gnome-_4clc9xd/node.xml",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-native/empty.png"
+            ],
+            "returncode": 0,
+            "metrics": {
+              "main_monotonic_us": 355734842595,
+              "first_paint_monotonic_us": 355735247705,
+              "ready_monotonic_us": 355735247725,
+              "main_to_first_paint_ms": 405.11,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 12,
+              "domains": 0,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 1,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 1,
+              "chooser_reached": true,
+              "reverse_focus": true
+            }
+          },
+          {
+            "name": "boxes",
+            "command": [
+              "/home/stone/Gnome/pirwa/build-normal/tests/test-ui",
+              "--boxes-exercise",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-native/boxes.png"
+            ],
+            "returncode": 0,
+            "metrics": {
+              "main_monotonic_us": 355735512344,
+              "first_paint_monotonic_us": 355735863717,
+              "ready_monotonic_us": 355736015489,
+              "main_to_first_paint_ms": 351.373,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 8,
+              "domains": 1,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 1,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 0,
+              "chooser_reached": false,
+              "reverse_focus": false
+            }
+          },
+          {
+            "name": "boxes-large-dark",
+            "command": [
+              "/home/stone/Gnome/pirwa/build-normal/tests/test-ui",
+              "--boxes-exercise",
+              "--large-text",
+              "--dark",
+              "--width",
+              "720",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-native/boxes-large-dark.png"
+            ],
+            "returncode": 0,
+            "metrics": {
+              "main_monotonic_us": 355736421679,
+              "first_paint_monotonic_us": 355736846489,
+              "ready_monotonic_us": 355737012879,
+              "main_to_first_paint_ms": 424.81,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 8,
+              "domains": 1,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 2,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 0,
+              "chooser_reached": false,
+              "reverse_focus": false
+            }
+          },
+          {
+            "name": "viewer",
+            "command": [
+              "/home/stone/Gnome/pirwa/build-normal/tests/test-console-ui",
+              "--output",
+              "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-native/viewer"
+            ],
+            "returncode": 0
+          },
+          {
+            "name": "viewer-large-dark",
+            "command": [
+              "/home/stone/Gnome/pirwa/build-normal/tests/test-console-ui",
+              "--large-text",
+              "--dark",
+              "--width",
+              "720",
+              "--output",
+              "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-native/viewer-large-dark"
+            ],
+            "returncode": 0
+          }
+        ],
+        "passed": true,
+        "shell_exitcode": 0
+      },
+      "ui_stderr": {
+        "light": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "large-dark": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "empty": "",
+        "boxes": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-boxes-ui-3KPHY3/runtime/libvirt/libvirt-sock': Connection refused\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "boxes-large-dark": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-boxes-ui-MBKIY3/runtime/libvirt/libvirt-sock': Connection refused\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "viewer": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\n\n(test-console-ui:3323015): Gtk-WARNING **: 10:30:07.859: gtk_svg_advance: time went backward: self->current_time=355738725716 current_time=355738725315 delta=401 clock_frame_time=355738725315\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\n",
+        "viewer-large-dark": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\n"
+      },
+      "process_cleanup": {
+        "signalled": [],
+        "remaining": {}
+      },
+      "binary_sha256": {
+        "src/pirwa": "e164e1b3b423b6d9d5eb6443e1e5f1b01385a99d9c2bec598dd58bc867efca2c",
+        "tests/test-ui": "d5f6e936c3df55372e7c419cb2f7d05cc31d19cecab0cc3d51b61bd5191cb2e2",
+        "tests/test-console-ui": "f0180e6ffa6ef3ba1ec30f44cc27e282a3f29dbecd0f162f278288c9c6ae56b0"
+      }
+    },
+    "sanitizer": {
+      "build_directory": "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-snapshot/build-asan",
+      "buildtype": "debugoptimized",
+      "sanitize": "address,undefined",
+      "leak_detection": false,
+      "headless": [
+        {
+          "name": "pirwa:desktop-file",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.04907345771789551,
+          "starttime": 1794709828.1098604,
+          "command": [
+            "/usr/bin/desktop-file-validate",
+            "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-snapshot/data/io.github.pirwa.Pirwa.desktop"
+          ],
+          "stdout": ""
+        },
+        {
+          "name": "pirwa:appstream",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.04752373695373535,
+          "starttime": 1794709828.1142466,
+          "command": [
+            "/usr/bin/appstreamcli",
+            "validate",
+            "--no-net",
+            "--override",
+            "url-homepage-missing=info",
+            "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-snapshot/data/io.github.pirwa.Pirwa.metainfo.xml"
+          ],
+          "stdout": "I: io.github.pirwa.Pirwa:~: url-homepage-missing\n\n\u2714 Validation was successful: infos: 1, pedantic: 2\n"
+        },
+        {
+          "name": "pirwa:usage",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.037795305252075195,
+          "starttime": 1794709828.124817,
+          "command": [
+            "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-snapshot/build-asan/tests/test-usage"
+          ],
+          "stdout": "TAP version 14\n# random seed: R02S04439bcf3644879e8f6488ce65ca7fe2\n1..5\n# Start of usage tests\nok 1 /usage/cpu-units\nok 2 /usage/missing-and-reset\nok 3 /usage/network-rates\nok 4 /usage/network-baselines\nok 5 /usage/network-stats\n# End of usage tests\n"
+        },
+        {
+          "name": "pirwa:config",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.0359499454498291,
+          "starttime": 1794709828.1273918,
+          "command": [
+            "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-snapshot/build-asan/tests/test-config"
+          ],
+          "stdout": "TAP version 14\n# random seed: R02Sfb220160602d9564573f90ace3b1b239\n1..7\n# Start of config tests\nok 1 /config/os-metadata\nok 2 /config/graphics-index\nok 3 /config/embedded-graphics\nok 4 /config/creation-graphics\nok 5 /config/roundtrip-and-eject\nok 6 /config/validation\nok 7 /config/qcow2\n# End of config tests\n"
+        },
+        {
+          "name": "pirwa:model",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.02806258201599121,
+          "starttime": 1794709828.1359193,
+          "command": [
+            "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-snapshot/build-asan/tests/test-model"
+          ],
+          "stdout": "TAP version 14\n# random seed: R02Sc181599f28524491435e4832ce983582\n1..2\n# Start of model tests\nok 1 /model/os-title-and-fallback\nok 2 /model/late-delivery-and-stable-identity\n# End of model tests\n"
+        },
+        {
+          "name": "pirwa:preferences",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.019157886505126953,
+          "starttime": 1794709828.1499636,
+          "command": [
+            "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-snapshot/build-asan/tests/test-preferences"
+          ],
+          "stdout": "TAP version 14\n# random seed: R02Sc62d1bb220c176f8d69da39dd5574fda\n# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation memory (GMemorySettingsBackend) for \u2018gsettings-backend\u2019\n"
+        },
+        {
+          "name": "pirwa:console-frame",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.04972720146179199,
+          "starttime": 1794709828.1430678,
+          "command": [
+            "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-snapshot/build-asan/tests/test-frame"
+          ],
+          "stdout": "TAP version 14\n# random seed: R02S595ac2a32d3dc48e8ed0d63258ba0c00\n1..7\n# Start of console tests\nok 1 /console/owned-pixels-and-damage\nok 2 /console/formats-and-bounds\nok 3 /console/input-mapping\nok 4 /console/alpha\nok 5 /console/crop-and-ownership\nok 6 /console/contiguous-rgb-and-alpha\nok 7 /console/monitor-padding\n# End of console tests\n"
+        },
+        {
+          "name": "pirwa:boxes",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.08564186096191406,
+          "starttime": 1794709828.139247,
+          "command": [
+            "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-snapshot/build-asan/tests/test-boxes"
+          ],
+          "stdout": "TAP version 14\n# random seed: R02S67584d57f11e05529f0c7ea210afd4d1\n1..8\n# Start of boxes tests\nok 1 /boxes/native-library\nok 2 /boxes/not-installed-with-leftover-data\nok 3 /boxes/empty-library\nok 4 /boxes/flatpak-read-only-discovery\nok 5 /boxes/one-time-preference\nok 6 /boxes/offline-socket-preference\nok 7 /boxes/cancellation\nok 8 /boxes/main-thread-callback\n# End of boxes tests\n"
+        },
+        {
+          "name": "pirwa:provision",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.10084152221679688,
+          "starttime": 1794709828.133506,
+          "command": [
+            "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-snapshot/build-asan/tests/test-provision"
+          ],
+          "stdout": "TAP version 14\n# random seed: R02S3e5d976efbc02cf2b9c12d06402b9cd1\n1..5\n# Start of provision tests\nok 1 /provision/references-and-missing-media\nok 2 /provision/rollback-inactive\nok 3 /provision/rollback-running\nok 4 /provision/rollback-shared\nok 5 /provision/cancel-before-remove\n# End of provision tests\n",
+          "stderr": "libvirt: Test Driver error : Storage volume not found: no storage vol with matching name 'pirwa-11111111-1111-4111-8111-111111111111.qcow2'\nlibvirt: Test Driver error : Storage volume not found: no storage vol with matching name 'pirwa-11111111-1111-4111-8111-111111111111.qcow2'\n"
+        },
+        {
+          "name": "pirwa:backend",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.12850546836853027,
+          "starttime": 1794709828.121848,
+          "command": [
+            "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-snapshot/build-asan/tests/test-backend"
+          ],
+          "stdout": "TAP version 14\n# random seed: R02S8ce881c02b483abea753f6d2a6d405bf\n1..9\n# Start of backend tests\n# DEBUG: Add timeout 0x7bb9f57fae10 -1 0x7f79f9127b80 0x7c29f57ede60 1\n# \n# DEBUG: Update timeout 0x7bb9f57fae10 1 0\n# \n# DEBUG: Dispatch timeout 0x7bb9f57fae10 0x7f79f9127b80 1 0x7c29f57ede60\n# \n# DEBUG: Update timeout 0x7bb9f57fae10 1 -1\n# \nok 1 /backend/usage\n# DEBUG: Remove timeout 0x7bb9f57fae10 1\n# \nok 2 /backend/socket-ownership\n# DEBUG: Add timeout 0x7bb9f5800cd0 -1 0x7f79f9127b80 0x7c29f57f3be0 2\n# \n# DEBUG: Remove timeout 0x7bb9f5800cd0 2\n# \nok 3 /backend/native-console\n# DEBUG: Add timeout 0x7bb9f580b250 -1 0x7f79f9127b80 0x7c29f57f6aa0 3\n# \n# DEBUG: Update timeout 0x7bb9f580b250 3 0\n# \n# DEBUG: Dispatch timeout 0x7bb9f580b250 0x7f79f9127b80 3 0x7c29f57f6aa0\n# \n# DEBUG: Update timeout 0x7bb9f580b250 3 -1\n# \n# DEBUG: Update timeout 0x7bb9f580b250 3 0\n# \n# DEBUG: Dispatch timeout 0x7bb9f580b250 0x7f79f9127b80 3 0x7c29f57f6aa0\n# \n# DEBUG: Update timeout 0x7bb9f580b250 3 -1\n# \n# DEBUG: Update timeout 0x7bb9f580b250 3 0\n# \n# DEBUG: Dispatch timeout 0x7bb9f580b250 0x7f79f9127b80 3 0x7c29f57f6aa0\n# \n# DEBUG: Update timeout 0x7bb9f580b250 3 -1\n# \n# DEBUG: Update timeout 0x7bb9f580b250 3 0\n# \n# DEBUG: Dispatch timeout 0x7bb9f580b250 0x7f79f9127b80 3 0x7c29f57f6aa0\n# \n# DEBUG: Update timeout 0x7bb9f580b250 3 -1\n# \n# DEBUG: Update timeout 0x7bb9f580b250 3 0\n# \n# DEBUG: Dispatch timeout 0x7bb9f580b250 0x7f79f9127b80 3 0x7c29f57f6aa0\n# \n# DEBUG: Update timeout 0x7bb9f580b250 3 -1\n# \n# DEBUG: Update timeout 0x7bb9f580b250 3 0\n# \n# DEBUG: Dispatch timeout 0x7bb9f580b250 0x7f79f9127b80 3 0x7c29f57f6aa0\n# \n# DEBUG: Update timeout 0x7bb9f580b250 3 -1\n# \n# DEBUG: Update timeout 0x7bb9f580b250 3 0\n# \n# DEBUG: Dispatch timeout 0x7bb9f580b250 0x7f79f9127b80 3 0x7c29f57f6aa0\n# \n# DEBUG: Update timeout 0x7bb9f580b250 3 -1\n# \n# DEBUG: Remove timeout 0x7bb9f580b250 3\n# \nok 4 /backend/controls-and-ownership\nok 5 /backend/cancellation-and-stop\n# DEBUG: Add timeout 0x7bb9f5825d10 -1 0x7f79f9127b80 0x7c29f580dd30 4\n# \n# DEBUG: Remove timeout 0x7bb9f5825d10 4\n# \n# DEBUG: Add timeout 0x7bb9f582fc90 -1 0x7f79f9127b80 0x7c29f5811bc0 5\n# \n# DEBUG: Remove timeout 0x7bb9f582fc90 5\n# \nok 6 /backend/reconnect-and-missing\n# DEBUG: Add timeout 0x7bb9f5839cd0 -1 0x7f79f9127b80 0x7c29f5815b00 6\n# \n# DEBUG: Update timeout 0x7bb9f5839cd0 6 0\n# \n# DEBUG: Dispatch timeout 0x7bb9f5839cd0 0x7f79f9127b80 6 0x7c29f5815b00\n# \n# DEBUG: Update timeout 0x7bb9f5839cd0 6 -1\n# \n# DEBUG: Remove timeout 0x7bb9f5839cd0 6\n# \nok 7 /backend/lifecycle-events\n# DEBUG: Add timeout 0x7bb9f583a910 -1 0x7f79f9127b80 0x7c29f5819ba0 7\n# \n# DEBUG: Remove timeout 0x7bb9f583a910 7\n# \nok 8 /backend/stop-in-flight\n# DEBUG: Add timeout 0x7bb9f58447d0 -1 0x7f79f9127b80 0x7c29f581a120 8\n# \n# DEBUG: Remove timeout 0x7bb9f58447d0 8\n# \nok 9 /backend/result-order-and-progress\n# End of backend tests\n",
+          "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Test Driver error : Domain not found\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n"
+        },
+        {
+          "name": "pirwa:boxes-import",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.19046950340270996,
+          "starttime": 1794709828.1467595,
+          "command": [
+            "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-snapshot/build-asan/tests/test-import"
+          ],
+          "stdout": "TAP version 14\n# random seed: R02Sed0c229d0e2ba75c70c4b4eae1b42ad0\n1..8\n# Start of import tests\nok 1 /import/copy-independent-machine\nok 2 /import/reject-running\nok 3 /import/cancel-and-rollback\nok 4 /import/reject-changed-source\nok 5 /import/upload-failure-rolls-back\nok 6 /import/reject-internal-snapshots\nok 7 /import/reject-unsupported-devices\nok 8 /import/firmware-no-overwrite-or-symlink\n# End of import tests\n"
+        },
+        {
+          "name": "pirwa:inventory",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.6100428104400635,
+          "starttime": 1794709828.118568,
+          "command": [
+            "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-snapshot/build-asan/tests/test-inventory"
+          ],
+          "stdout": "TAP version 14\n# random seed: R02S2ed1898329f7013d16664673e24c070f\n1..4\n# Start of inventory tests\n# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation gvfs (GDaemonVfs) for \u2018gio-vfs\u2019\nok 1 /inventory/os-names-and-cache\n# slow test /inventory/os-names-and-cache executed in 0.53 secs\nok 2 /inventory/discovery\nok 3 /inventory/cancelled\nok 4 /inventory/connection-failure\n# End of inventory tests\n",
+          "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: XML-RPC error : Failed to connect socket to '/var/run/libvirt/virtpirwa-unsupportedd-sock-ro': No such file or directory\n"
+        },
+        {
+          "name": "pirwa:scale-1000",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 1.5105304718017578,
+          "starttime": 1794709828.1305428,
+          "command": [
+            "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-snapshot/build-asan/tests/benchmark-scale",
+            "1000"
+          ],
+          "stdout": "{\"driver\":\"test:///default\",\"method\":\"persistent_bulk\",\"domains\":1000,\"p50_ms\":25.317,\"p95_ms\":27.331,\"raw_us\":[26676,24763,25846,25326,27253,25555,24842,27331,26953,26639,26286,25317,25112,26193,24284,24738,26188,29119,25208,23997,24855,22346,22602,24415,24854]}\n"
+        }
+      ],
+      "ui": {
+        "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+        "source_dirty": true,
+        "gnome_shell": "GNOME Shell 51.1",
+        "shell_command": [
+          "gnome-shell",
+          "--headless",
+          "--wayland",
+          "--no-x11",
+          "--virtual-monitor",
+          "1280x800@60",
+          "--wayland-display",
+          "pirwa-qa-wayland"
+        ],
+        "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
+        "scope": "Programmed GTK actions and focus traversal; not physical input, screen reader, or guest console certification",
+        "cases": [
+          {
+            "name": "light",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-snapshot/build-asan/tests/test-ui",
+              "--exercise",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-sanitizer/light.png"
+            ],
+            "returncode": 0,
+            "metrics": {
+              "main_monotonic_us": 355762085790,
+              "first_paint_monotonic_us": 355771745125,
+              "ready_monotonic_us": 355771745151,
+              "main_to_first_paint_ms": 9659.335,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 12,
+              "domains": 1,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 1,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 1,
+              "chooser_reached": true,
+              "reverse_focus": true
+            }
+          },
+          {
+            "name": "large-dark",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-snapshot/build-asan/tests/test-ui",
+              "--exercise",
+              "--large-text",
+              "--dark",
+              "--width",
+              "720",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-sanitizer/large-dark.png"
+            ],
+            "returncode": 0,
+            "metrics": {
+              "main_monotonic_us": 355773064480,
+              "first_paint_monotonic_us": 355782295977,
+              "ready_monotonic_us": 355782296005,
+              "main_to_first_paint_ms": 9231.497,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 12,
+              "domains": 1,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 2,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 1,
+              "chooser_reached": true,
+              "reverse_focus": true
+            }
+          },
+          {
+            "name": "empty",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-snapshot/build-asan/tests/test-ui",
+              "--exercise",
+              "--uri",
+              "test:///tmp/pirwa-gnome-dq7sxhzo/node.xml",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-sanitizer/empty.png"
+            ],
+            "returncode": 0,
+            "metrics": {
+              "main_monotonic_us": 355783760785,
+              "first_paint_monotonic_us": 355792293278,
+              "ready_monotonic_us": 355792293318,
+              "main_to_first_paint_ms": 8532.493,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 12,
+              "domains": 0,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 1,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 1,
+              "chooser_reached": true,
+              "reverse_focus": true
+            }
+          },
+          {
+            "name": "boxes",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-snapshot/build-asan/tests/test-ui",
+              "--boxes-exercise",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-sanitizer/boxes.png"
+            ],
+            "returncode": 0,
+            "metrics": {
+              "main_monotonic_us": 355792806757,
+              "first_paint_monotonic_us": 355801280917,
+              "ready_monotonic_us": 355801560352,
+              "main_to_first_paint_ms": 8474.16,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 8,
+              "domains": 1,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 1,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 0,
+              "chooser_reached": false,
+              "reverse_focus": false
+            }
+          },
+          {
+            "name": "boxes-large-dark",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-snapshot/build-asan/tests/test-ui",
+              "--boxes-exercise",
+              "--large-text",
+              "--dark",
+              "--width",
+              "720",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-sanitizer/boxes-large-dark.png"
+            ],
+            "returncode": 0,
+            "metrics": {
+              "main_monotonic_us": 355802934047,
+              "first_paint_monotonic_us": 355811719837,
+              "ready_monotonic_us": 355812041238,
+              "main_to_first_paint_ms": 8785.79,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 8,
+              "domains": 1,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 2,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 0,
+              "chooser_reached": false,
+              "reverse_focus": false
+            }
+          },
+          {
+            "name": "viewer",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-snapshot/build-asan/tests/test-console-ui",
+              "--output",
+              "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-sanitizer/viewer"
+            ],
+            "returncode": 0
+          },
+          {
+            "name": "viewer-large-dark",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-snapshot/build-asan/tests/test-console-ui",
+              "--large-text",
+              "--dark",
+              "--width",
+              "720",
+              "--output",
+              "/home/stone/Gnome/pirwa/build/qa/keyboard-validation/final-sanitizer/viewer-large-dark"
+            ],
+            "returncode": 0
+          }
+        ],
+        "passed": true,
+        "shell_exitcode": 0
+      },
+      "ui_stderr": {
+        "light": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "large-dark": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "empty": "",
+        "boxes": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-boxes-ui-20TQY3/runtime/libvirt/libvirt-sock': Connection refused\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "boxes-large-dark": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-boxes-ui-GVLRY3/runtime/libvirt/libvirt-sock': Connection refused\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "viewer": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\n",
+        "viewer-large-dark": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\n"
+      },
+      "process_cleanup": {
+        "signalled": [
+          {
+            "pid": 3324913,
+            "name": "evolution-sourc",
+            "signal": "SIGTERM"
+          }
+        ],
+        "remaining": {}
+      },
+      "binary_sha256": {
+        "src/pirwa": "96d885e820789ee712e12eac2e5f05e5ee2a06966ff71806001a2d8b9fb24af1",
+        "tests/test-ui": "ed9ff87ca716fa907b29db838e0ba0e424a14ec76649f15db5d2cda46834efd0",
+        "tests/test-console-ui": "7d947556fea2e1383d085f92ce84e8824ef86e5b83d778682dd301005a73612c"
+      }
+    }
+  },
+  "real_guest": {
+    "operated_by_these_tests": false,
+    "inspection": "Read-only qemu:///session domname, domstate and inactive dumpxml of baseline UUIDs",
+    "baseline_matches_final": false,
+    "observed_deltas_during_concurrent_work": {
+      "cc95a3c6-9eb6-4f84-8fa8-dfa54423285f": {
+        "before": {
+          "name": "boxes-unknown-3",
+          "state": "running",
+          "xml_sha256": "620f41b9b0fcb06c347d50c37f1e48c4595c9cb4ce279a3d43e9c708647fd5d9"
+        },
+        "after": {
+          "name": "ubuntu26-04",
+          "state": "shut off",
+          "xml_sha256": "1ad15d047b9c182665f4a85587f196f5b375cc310a1e3146dac9c93298200d00"
+        }
+      }
+    },
+    "delta_note": "No real-domain write command was issued by this QA run; changed state was observed and left as found.",
+    "performance_comparison": "Separate prepared comparison later collected twelve trials but was rejected because its existing-domain baseline changed; see ../renderer-memory/real-console-followup.json.",
+    "host_mem_available_kib": 5145760,
+    "required_available_mib": 4096
+  },
+  "limits": [
+    "Injected-input experimental runs were not repeatable and do not count as acceptance.",
+    "GTK test accessibility does not certify AT-SPI or a screen reader.",
+    "ASan leak detection disabled for existing third-party initialization findings.",
+    "Virtual desktop checks establish no physical presentation, audio or real-guest performance result."
+  ],
+  "environment_recording": "Meson process environments are omitted from saved evidence.",
+  "source_archive_scope": "Source/build inputs in src, tests, scripts, data, po and repository-root files; full snapshot hashes retained in the manifest."
+}

@@ -1,0 +1,24 @@
+Source: pirwa
+Section: admin
+Priority: optional
+Maintainer: Pirwa Contributors <2262007+stonega@users.noreply.github.com>
+Build-Depends: debhelper-compat (= 13), meson (>= 1.3), ninja-build, pkgconf,
+ gettext, python3, git, appstream, desktop-file-utils, gsettings-desktop-schemas,
+ libglib2.0-dev (>= 2.76), libgtk-4-dev (>= 4.16), libadwaita-1-dev (>= 1.5),
+ libspice-client-glib-2.0-dev (>= 0.42), libvirt-dev (>= 9.0),
+ libvirt-glib-1.0-dev (>= 4.0), libxml2-dev (>= 2.9),
+ libosinfo-1.0-dev (>= 1.10), libslirp-dev (>= 4.7)
+Standards-Version: 4.7.2
+Rules-Requires-Root: no
+Homepage: https://github.com/stonega/pirwa
+
+Package: pirwa
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}, qemu-system-x86,
+ libvirt-daemon-system, libvirt-daemon-driver-qemu, libvirt-daemon-driver-storage,
+ osinfo-db, gsettings-desktop-schemas
+Recommends: virt-viewer, ovmf, swtpm, swtpm-tools, gstreamer1.0-pulseaudio
+Description: Native GNOME virtual machine manager
+ Pirwa manages local libvirt virtual machines with a native GTK 4 and
+ libadwaita interface, embedded and detached SPICE consoles, and explicit
+ resource and storage controls.

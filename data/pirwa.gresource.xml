@@ -1,6 +1,27 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version='1.0' encoding='UTF-8'?>
 <gresources>
-  <gresource prefix="/io/github/pirwa/Pirwa/icons/scalable/apps">
-    <file>io.github.pirwa.Pirwa.svg</file>
+  <gresource prefix="/io/github/stonega/Pirwa/icons/scalable/apps">
+    <file>io.github.stonega.Pirwa.svg</file>
+    <file>io.github.stonega.Pirwa-symbolic.svg</file>
+  </gresource>
+  <gresource prefix="/io/github/stonega/Pirwa/avatars/scalable/apps">
+    <file alias="pirwa-avatar-screen-symbolic.svg">avatars/pirwa-avatar-screen-symbolic.svg</file>
+    <file alias="pirwa-avatar-bright-symbolic.svg">avatars/pirwa-avatar-bright-symbolic.svg</file>
+    <file alias="pirwa-avatar-calm-symbolic.svg">avatars/pirwa-avatar-calm-symbolic.svg</file>
+    <file alias="pirwa-avatar-cheerful-symbolic.svg">avatars/pirwa-avatar-cheerful-symbolic.svg</file>
+    <file alias="pirwa-avatar-cool-symbolic.svg">avatars/pirwa-avatar-cool-symbolic.svg</file>
+    <file alias="pirwa-avatar-curious-symbolic.svg">avatars/pirwa-avatar-curious-symbolic.svg</file>
+    <file alias="pirwa-avatar-determined-symbolic.svg">avatars/pirwa-avatar-determined-symbolic.svg</file>
+    <file alias="pirwa-avatar-dreamy-symbolic.svg">avatars/pirwa-avatar-dreamy-symbolic.svg</file>
+    <file alias="pirwa-avatar-focused-symbolic.svg">avatars/pirwa-avatar-focused-symbolic.svg</file>
+    <file alias="pirwa-avatar-frame-symbolic.svg">avatars/pirwa-avatar-frame-symbolic.svg</file>
+    <file alias="pirwa-avatar-generic-symbolic.svg">avatars/pirwa-avatar-generic-symbolic.svg</file>
+    <file alias="pirwa-avatar-mischievous-symbolic.svg">avatars/pirwa-avatar-mischievous-symbolic.svg</file>
+    <file alias="pirwa-avatar-playful-symbolic.svg">avatars/pirwa-avatar-playful-symbolic.svg</file>
+    <file alias="pirwa-avatar-shy-symbolic.svg">avatars/pirwa-avatar-shy-symbolic.svg</file>
+    <file alias="pirwa-avatar-sleepy-symbolic.svg">avatars/pirwa-avatar-sleepy-symbolic.svg</file>
+    <file alias="pirwa-avatar-surprised-symbolic.svg">avatars/pirwa-avatar-surprised-symbolic.svg</file>
+    <file alias="pirwa-avatar-thoughtful-symbolic.svg">avatars/pirwa-avatar-thoughtful-symbolic.svg</file>
+    <file alias="pirwa-avatar-wink-symbolic.svg">avatars/pirwa-avatar-wink-symbolic.svg</file>
   </gresource>
 </gresources>

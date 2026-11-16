@@ -27,8 +27,18 @@ struct _PirwaDisplay
   guint n_patches;
   int allocated_width;
   int allocated_height;
+  gboolean rounded;
 };
 G_DEFINE_FINAL_TYPE (PirwaDisplay, pirwa_display, GTK_TYPE_WIDGET)
+
+void
+pirwa_display_set_rounded (PirwaDisplay *self, gboolean rounded)
+{
+  if (self->rounded == rounded)
+    return;
+  self->rounded = rounded;
+  gtk_widget_queue_draw (GTK_WIDGET (self));
+}
 
 static void
 clear_patches (PirwaDisplay *self)
@@ -209,7 +219,6 @@ snapshot (GtkWidget *widget, GtkSnapshot *snapshot)
   graphene_rect_t bounds
       = GRAPHENE_RECT_INIT (0, 0, gtk_widget_get_width (widget), gtk_widget_get_height (widget));
   const GdkRGBA black = { 0, 0, 0, 1 };
-  gtk_snapshot_append_color (snapshot, &black, &bounds);
   if (self->primary.data && self->damage && !cairo_region_is_empty (self->damage))
     {
       if (!update_patches (self))
@@ -236,6 +245,36 @@ snapshot (GtkWidget *widget, GtkSnapshot *snapshot)
   graphene_rect_t rect = GRAPHENE_RECT_INIT ((bounds.size.width - width * scale) / 2,
                                              (bounds.size.height - height * scale) / 2,
                                              width * scale, height * scale);
+  /* A single opaque texture filling the widget can be rounded directly. It
+   * has no overlapping layers or fractional letterbox edges to composite. */
+  if (self->n_patches == 0 && self->primary.format != SPICE_SURFACE_FMT_32_ARGB
+      && bounds.size.width > 0 && bounds.size.height > 0
+      && (gint64)width * gtk_widget_get_height (widget)
+             == (gint64)height * gtk_widget_get_width (widget))
+    {
+      if (self->rounded)
+        {
+          GskRoundedRect desktop;
+          gsk_rounded_rect_init_from_rect (&desktop, &rect, 12);
+          gtk_snapshot_push_rounded_clip (snapshot, &desktop);
+        }
+      gtk_snapshot_append_texture (snapshot, self->texture, &rect);
+      if (self->rounded)
+        gtk_snapshot_pop (snapshot);
+      gtk_snapshot_restore (snapshot);
+      return;
+    }
+  /* A luminance mask composites the desktop before rounding its edges. An
+   * alpha clip can blend each replacement tile over the old corners again. */
+  GskRoundedRect desktop;
+  const GdkRGBA white = { 1, 1, 1, 1 };
+  gsk_rounded_rect_init_from_rect (&desktop, &rect, self->rounded ? 12 : 0);
+  gtk_snapshot_push_mask (snapshot, GSK_MASK_MODE_LUMINANCE);
+  gtk_snapshot_push_rounded_clip (snapshot, &desktop);
+  gtk_snapshot_append_color (snapshot, &white, &rect);
+  gtk_snapshot_pop (snapshot);
+  gtk_snapshot_pop (snapshot);
+  gtk_snapshot_append_color (snapshot, &black, &bounds);
   graphene_rect_t source = GRAPHENE_RECT_INIT (0, 0, width, height);
   if (self->n_patches == 0)
     gtk_snapshot_append_texture (snapshot, self->texture, &rect);
@@ -282,6 +321,7 @@ snapshot (GtkWidget *widget, GtkSnapshot *snapshot)
                              &sample);
       gtk_snapshot_pop (snapshot);
     }
+  gtk_snapshot_pop (snapshot);
   gtk_snapshot_restore (snapshot);
 }
 
@@ -317,6 +357,7 @@ scale_changed (PirwaDisplay *self, GParamSpec *spec, gpointer data)
 static void
 pirwa_display_init (PirwaDisplay *self)
 {
+  self->rounded = TRUE;
   g_signal_connect (self, "notify::scale-factor", G_CALLBACK (scale_changed), NULL);
   gtk_widget_set_focusable (GTK_WIDGET (self), TRUE);
   gtk_widget_set_hexpand (GTK_WIDGET (self), TRUE);

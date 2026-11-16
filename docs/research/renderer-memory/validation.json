@@ -1,0 +1,1222 @@
+{
+  "scope": "Correctness only for sanitizer/backend/HiDPI runs; performance accepted only from the separate native frozen trials. GUI leak detection disabled. No libvirt connections or VM modifications in this investigation.",
+  "tests": {
+    "build": {
+      "command": [
+        "meson",
+        "test",
+        "-C",
+        "build",
+        "--print-errorlogs"
+      ],
+      "raw_log_sha256": "58551307f4e1c9df13d9eb8472d9c27a14ef44e1fe79001adde9b3f587ac26b0",
+      "cases": [
+        {
+          "name": "pirwa:desktop-file",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.07334113121032715
+        },
+        {
+          "name": "pirwa:appstream",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.05976724624633789
+        },
+        {
+          "name": "pirwa:usage",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.04378032684326172
+        },
+        {
+          "name": "pirwa:config",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.038353919982910156
+        },
+        {
+          "name": "pirwa:model",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.02405095100402832
+        },
+        {
+          "name": "pirwa:provision",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.03008747100830078
+        },
+        {
+          "name": "pirwa:backend",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.05324912071228027
+        },
+        {
+          "name": "pirwa:console-frame",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.03387784957885742
+        },
+        {
+          "name": "pirwa:boxes",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.045404911041259766
+        },
+        {
+          "name": "pirwa:boxes-import",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.0395355224609375
+        },
+        {
+          "name": "pirwa:inventory",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.25504469871520996
+        },
+        {
+          "name": "pirwa:scale-1000",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.335557222366333
+        }
+      ]
+    },
+    "build-sanitize": {
+      "command": [
+        "env",
+        "ASAN_OPTIONS=detect_leaks=0",
+        "meson",
+        "test",
+        "-C",
+        "build-sanitize",
+        "--print-errorlogs"
+      ],
+      "raw_log_sha256": "8b6236946a49606ac5d8f1dbb237fe9c9cd64bd3bcd3f6df736fe919d5a50727",
+      "cases": [
+        {
+          "name": "pirwa:desktop-file",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.06631922721862793
+        },
+        {
+          "name": "pirwa:appstream",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.06287527084350586
+        },
+        {
+          "name": "pirwa:usage",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.0459904670715332
+        },
+        {
+          "name": "pirwa:config",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.0413050651550293
+        },
+        {
+          "name": "pirwa:model",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.026397228240966797
+        },
+        {
+          "name": "pirwa:console-frame",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.041399478912353516
+        },
+        {
+          "name": "pirwa:boxes",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.08195686340332031
+        },
+        {
+          "name": "pirwa:backend",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.11806631088256836
+        },
+        {
+          "name": "pirwa:provision",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.10250592231750488
+        },
+        {
+          "name": "pirwa:boxes-import",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.2060410976409912
+        },
+        {
+          "name": "pirwa:inventory",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.6636087894439697
+        },
+        {
+          "name": "pirwa:scale-1000",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 1.6117005348205566
+        }
+      ]
+    }
+  },
+  "pixel_checks": [
+    {
+      "case": "direct-clip-check",
+      "command": [
+        "env",
+        "GTK_A11Y=test",
+        "build-perf/tests/benchmark-display",
+        "--width",
+        "3840",
+        "--height",
+        "2160",
+        "--frames",
+        "30",
+        "--mode",
+        "full",
+        "--fullscreen"
+      ],
+      "returncode": 0,
+      "metrics": {
+        "width": 3840,
+        "height": 2160,
+        "mode": "full",
+        "warmup_frames": 30,
+        "renderer": "GskVulkanRenderer",
+        "scale": 1,
+        "view_width": 3840,
+        "view_height": 2160,
+        "refresh_millihz": 60000,
+        "pss_start_kib": 189350,
+        "pss_end_kib": 189716,
+        "cpu_percent_one_core": 88.884251,
+        "elapsed_us": 1149954,
+        "correctness_passed": true,
+        "idle_wall_us": 0,
+        "idle_cpu_us": 0,
+        "idle_paints": 0,
+        "max_channel_error": 1
+      }
+    },
+    {
+      "case": "direct-hidpi",
+      "command": [
+        "python3",
+        "scripts/qa-display-scale.py",
+        "--scale",
+        "2",
+        "--",
+        "env",
+        "GTK_A11Y=test",
+        "ASAN_OPTIONS=detect_leaks=0",
+        "build-sanitize/tests/benchmark-display",
+        "--width",
+        "1280",
+        "--height",
+        "800",
+        "--frames",
+        "30",
+        "--mode",
+        "full",
+        "--fullscreen",
+        "--expect-scale",
+        "2"
+      ],
+      "returncode": 0,
+      "metrics": {
+        "width": 1280,
+        "height": 800,
+        "mode": "full",
+        "warmup_frames": 30,
+        "renderer": "GskVulkanRenderer",
+        "scale": 2,
+        "view_width": 1280,
+        "view_height": 800,
+        "refresh_millihz": 60000,
+        "pss_start_kib": 430293,
+        "pss_end_kib": 475581,
+        "cpu_percent_one_core": 84.68573,
+        "elapsed_us": 544786,
+        "correctness_passed": true,
+        "idle_wall_us": 0,
+        "idle_cpu_us": 0,
+        "idle_paints": 0,
+        "max_channel_error": 1
+      }
+    },
+    {
+      "command": [
+        "build-sanitize/tests/benchmark-display",
+        "--width",
+        "1280",
+        "--height",
+        "800",
+        "--frames",
+        "30",
+        "--mode",
+        "full",
+        "--expect-scale",
+        "1",
+        "--fullscreen"
+      ],
+      "requested_renderer": "gl",
+      "metrics": {
+        "width": 1280,
+        "height": 800,
+        "mode": "full",
+        "warmup_frames": 30,
+        "renderer": "GskGLRenderer",
+        "scale": 1,
+        "view_width": 1280,
+        "view_height": 800,
+        "refresh_millihz": 60000,
+        "pss_start_kib": 474164,
+        "pss_end_kib": 480036,
+        "cpu_percent_one_core": 89.248454,
+        "elapsed_us": 515777,
+        "correctness_passed": true,
+        "idle_wall_us": 0,
+        "idle_cpu_us": 0,
+        "idle_paints": 0,
+        "max_channel_error": 0
+      },
+      "stderr": ""
+    },
+    {
+      "command": [
+        "build-sanitize/tests/benchmark-display",
+        "--width",
+        "1280",
+        "--height",
+        "800",
+        "--frames",
+        "30",
+        "--mode",
+        "full",
+        "--expect-scale",
+        "1",
+        "--fullscreen"
+      ],
+      "requested_renderer": "cairo",
+      "metrics": {
+        "width": 1280,
+        "height": 800,
+        "mode": "full",
+        "warmup_frames": 30,
+        "renderer": "GskCairoRenderer",
+        "scale": 1,
+        "view_width": 1280,
+        "view_height": 800,
+        "refresh_millihz": 60000,
+        "pss_start_kib": 349882,
+        "pss_end_kib": 356682,
+        "cpu_percent_one_core": 182.520989,
+        "elapsed_us": 542914,
+        "correctness_passed": true,
+        "idle_wall_us": 0,
+        "idle_cpu_us": 0,
+        "idle_paints": 0,
+        "max_channel_error": 0
+      },
+      "stderr": ""
+    },
+    {
+      "command": [
+        "build-sanitize/tests/benchmark-display",
+        "--width",
+        "1232",
+        "--height",
+        "776",
+        "--frames",
+        "30",
+        "--mode",
+        "burst",
+        "--expect-scale",
+        "1"
+      ],
+      "requested_renderer": "vulkan",
+      "metrics": {
+        "width": 1232,
+        "height": 776,
+        "mode": "burst",
+        "warmup_frames": 30,
+        "renderer": "GskVulkanRenderer",
+        "scale": 1,
+        "view_width": 960,
+        "view_height": 601,
+        "refresh_millihz": 60000,
+        "pss_start_kib": 559118,
+        "pss_end_kib": 569142,
+        "cpu_percent_one_core": 19.6116,
+        "elapsed_us": 500000,
+        "correctness_passed": true,
+        "idle_wall_us": 0,
+        "idle_cpu_us": 0,
+        "idle_paints": 0,
+        "max_channel_error": 1
+      },
+      "stderr": ""
+    }
+  ],
+  "desktops": {
+    "measurement-desktop": {
+      "report": {
+        "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+        "source_dirty": true,
+        "gnome_shell": "GNOME Shell 51.1",
+        "shell_command": [
+          "gnome-shell",
+          "--headless",
+          "--wayland",
+          "--no-x11",
+          "--virtual-monitor",
+          "3840x2160@60",
+          "--wayland-display",
+          "pirwa-qa-wayland"
+        ],
+        "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
+        "scope": "Custom command in an isolated desktop; inspect the command's own results",
+        "passed": true,
+        "shell_exitcode": 0
+      },
+      "commands": [
+        {
+          "name": "command",
+          "command": [
+            "python3",
+            "scripts/profile-renderer-memory.py",
+            "--output",
+            "build/qa/renderer-memory/frozen",
+            "--runs",
+            "2",
+            "--cycles",
+            "3"
+          ],
+          "returncode": 0
+        }
+      ],
+      "process_cleanup": null
+    },
+    "direct-clip-check": {
+      "report": {
+        "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+        "source_dirty": true,
+        "gnome_shell": "GNOME Shell 51.1",
+        "shell_command": [
+          "gnome-shell",
+          "--headless",
+          "--wayland",
+          "--no-x11",
+          "--virtual-monitor",
+          "3840x2160@60",
+          "--wayland-display",
+          "pirwa-qa-wayland"
+        ],
+        "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
+        "scope": "Custom command in an isolated desktop; inspect the command's own results",
+        "passed": true,
+        "shell_exitcode": 0
+      },
+      "commands": [
+        {
+          "name": "command",
+          "command": [
+            "env",
+            "GTK_A11Y=test",
+            "build-perf/tests/benchmark-display",
+            "--width",
+            "3840",
+            "--height",
+            "2160",
+            "--frames",
+            "30",
+            "--mode",
+            "full",
+            "--fullscreen"
+          ],
+          "returncode": 0
+        }
+      ],
+      "process_cleanup": {
+        "signalled": [],
+        "remaining": {}
+      }
+    },
+    "direct-hidpi": {
+      "report": {
+        "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+        "source_dirty": true,
+        "gnome_shell": "GNOME Shell 51.1",
+        "shell_command": [
+          "gnome-shell",
+          "--headless",
+          "--wayland",
+          "--no-x11",
+          "--virtual-monitor",
+          "2560x1600@60",
+          "--wayland-display",
+          "pirwa-qa-wayland"
+        ],
+        "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
+        "scope": "Custom command in an isolated desktop; inspect the command's own results",
+        "passed": true,
+        "shell_exitcode": 0
+      },
+      "commands": [
+        {
+          "name": "command",
+          "command": [
+            "python3",
+            "scripts/qa-display-scale.py",
+            "--scale",
+            "2",
+            "--",
+            "env",
+            "GTK_A11Y=test",
+            "ASAN_OPTIONS=detect_leaks=0",
+            "build-sanitize/tests/benchmark-display",
+            "--width",
+            "1280",
+            "--height",
+            "800",
+            "--frames",
+            "30",
+            "--mode",
+            "full",
+            "--fullscreen",
+            "--expect-scale",
+            "2"
+          ],
+          "returncode": 0
+        }
+      ],
+      "process_cleanup": {
+        "signalled": [],
+        "remaining": {}
+      }
+    },
+    "direct-backends": {
+      "report": {
+        "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+        "source_dirty": true,
+        "gnome_shell": "GNOME Shell 51.1",
+        "shell_command": [
+          "gnome-shell",
+          "--headless",
+          "--wayland",
+          "--no-x11",
+          "--virtual-monitor",
+          "1280x800@60",
+          "--wayland-display",
+          "pirwa-qa-wayland"
+        ],
+        "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
+        "scope": "Custom command in an isolated desktop; inspect the command's own results",
+        "passed": true,
+        "shell_exitcode": 0
+      },
+      "commands": [
+        {
+          "name": "command",
+          "command": [
+            "python3",
+            "build/qa/renderer-memory/validate-direct.py"
+          ],
+          "returncode": 0
+        }
+      ],
+      "process_cleanup": {
+        "signalled": [],
+        "remaining": {}
+      }
+    },
+    "direct-performance-desktop": {
+      "report": {
+        "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+        "source_dirty": true,
+        "gnome_shell": "GNOME Shell 51.1",
+        "shell_command": [
+          "gnome-shell",
+          "--headless",
+          "--wayland",
+          "--no-x11",
+          "--virtual-monitor",
+          "3840x2160@60",
+          "--wayland-display",
+          "pirwa-qa-wayland"
+        ],
+        "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
+        "scope": "Custom command in an isolated desktop; inspect the command's own results",
+        "passed": true,
+        "shell_exitcode": 0
+      },
+      "commands": [
+        {
+          "name": "command",
+          "command": [
+            "env",
+            "GTK_A11Y=test",
+            "python3",
+            "scripts/profile-display.py",
+            "--build",
+            "build/qa/renderer-memory/optimized",
+            "--baseline-binary",
+            "build/qa/renderer-memory/optimized/baseline",
+            "--sizes",
+            "3840x2160",
+            "--modes",
+            "invalidate-full",
+            "--fullscreen",
+            "--frames",
+            "60",
+            "--runs",
+            "3",
+            "--idle-seconds",
+            "0",
+            "--output",
+            "build/qa/renderer-memory/optimized/results.json"
+          ],
+          "returncode": 0
+        }
+      ],
+      "process_cleanup": {
+        "signalled": [
+          {
+            "pid": 2905934,
+            "name": "evolution-sourc",
+            "signal": "SIGTERM"
+          }
+        ],
+        "remaining": {}
+      }
+    },
+    "trace-desktop": {
+      "report": {
+        "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+        "source_dirty": true,
+        "gnome_shell": "GNOME Shell 51.1",
+        "shell_command": [
+          "gnome-shell",
+          "--headless",
+          "--wayland",
+          "--no-x11",
+          "--virtual-monitor",
+          "3840x2160@60",
+          "--wayland-display",
+          "pirwa-qa-wayland"
+        ],
+        "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
+        "scope": "Custom command in an isolated desktop; inspect the command's own results",
+        "passed": true,
+        "shell_exitcode": 0
+      },
+      "commands": [
+        {
+          "name": "command",
+          "command": [
+            "python3",
+            "build/qa/renderer-memory/trace-renderer.py"
+          ],
+          "returncode": 0
+        }
+      ],
+      "process_cleanup": {
+        "signalled": [],
+        "remaining": {}
+      }
+    },
+    "callgrind-desktop": {
+      "report": {
+        "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+        "source_dirty": true,
+        "gnome_shell": "GNOME Shell 51.1",
+        "shell_command": [
+          "gnome-shell",
+          "--headless",
+          "--wayland",
+          "--no-x11",
+          "--virtual-monitor",
+          "3840x2160@60",
+          "--wayland-display",
+          "pirwa-qa-wayland"
+        ],
+        "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
+        "scope": "Custom command in an isolated desktop; inspect the command's own results",
+        "passed": true,
+        "shell_exitcode": 0
+      },
+      "commands": [
+        {
+          "name": "command",
+          "command": [
+            "python3",
+            "build/qa/renderer-memory/callgrind-renderer.py"
+          ],
+          "returncode": 0
+        }
+      ],
+      "process_cleanup": {
+        "signalled": [],
+        "remaining": {}
+      }
+    },
+    "callgrind-renderer-only-desktop": {
+      "report": {
+        "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+        "source_dirty": true,
+        "gnome_shell": "GNOME Shell 51.1",
+        "shell_command": [
+          "gnome-shell",
+          "--headless",
+          "--wayland",
+          "--no-x11",
+          "--virtual-monitor",
+          "3840x2160@60",
+          "--wayland-display",
+          "pirwa-qa-wayland"
+        ],
+        "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
+        "scope": "Custom command in an isolated desktop; inspect the command's own results",
+        "passed": false,
+        "error": "command failed (1); see /home/stone/Gnome/pirwa/build/qa/renderer-memory/callgrind-renderer-only-desktop",
+        "shell_exitcode": 0
+      },
+      "commands": [
+        {
+          "name": "command",
+          "command": [
+            "python3",
+            "build/qa/renderer-memory/callgrind-renderer-only.py"
+          ],
+          "returncode": 1
+        }
+      ],
+      "process_cleanup": {
+        "signalled": [
+          {
+            "pid": 2897478,
+            "name": "callgrind-amd64",
+            "signal": "SIGTERM"
+          },
+          {
+            "pid": 2897862,
+            "name": "vgdb",
+            "signal": "SIGTERM"
+          },
+          {
+            "pid": 2897864,
+            "name": "debuginfod-find",
+            "signal": "SIGTERM"
+          },
+          {
+            "pid": 2897478,
+            "name": "callgrind-amd64",
+            "signal": "SIGKILL"
+          },
+          {
+            "pid": 2897864,
+            "name": "debuginfod-find",
+            "signal": "SIGKILL"
+          }
+        ],
+        "remaining": {}
+      }
+    }
+  },
+  "trace_attempts": [
+    {
+      "file": "traces/flat-packed/perf.log",
+      "lines": [
+        "more perf_event access control information and adjusting the policy.",
+        "Consider adjusting /proc/sys/kernel/perf_event_paranoid setting to open",
+        "perf_event_paranoid setting is 2:",
+        "      Ignore mlock limit after perf_event_mlock_kb without CAP_IPC_LOCK",
+        "To make the adjusted perf_event_paranoid setting permanent preserve it",
+        "in /etc/sysctl.conf (e.g. kernel.perf_event_paranoid = <setting>)"
+      ]
+    },
+    {
+      "file": "traces/rounded-packed/perf.log",
+      "lines": [
+        "more perf_event access control information and adjusting the policy.",
+        "Consider adjusting /proc/sys/kernel/perf_event_paranoid setting to open",
+        "perf_event_paranoid setting is 2:",
+        "      Ignore mlock limit after perf_event_mlock_kb without CAP_IPC_LOCK",
+        "To make the adjusted perf_event_paranoid setting permanent preserve it",
+        "in /etc/sysctl.conf (e.g. kernel.perf_event_paranoid = <setting>)"
+      ]
+    },
+    {
+      "file": "callgrind-renderer-only/flat-packed/valgrind.log",
+      "lines": [
+        "==2897478== brk segment overflow in thread #1: can't grow to 0x48b1000"
+      ]
+    }
+  ],
+  "sanitizer_lifecycle": {
+    "width": 1280,
+    "height": 800,
+    "cycles": 1,
+    "active_seconds": 2,
+    "settle_seconds": 1,
+    "warmup_seconds": 2,
+    "mode": "bands",
+    "renderer": "GskVulkanRenderer",
+    "scale": 1,
+    "view_width": 1280,
+    "view_height": 800,
+    "malloc_trim_result": 0,
+    "samples": [
+      {
+        "cycle": 0,
+        "phase": "baseline",
+        "elapsed_us": 1885,
+        "pss_kib": 25065,
+        "anonymous_pss_kib": 21088,
+        "file_pss_kib": 2176,
+        "shared_pss_kib": 1801,
+        "private_dirty_kib": 22888,
+        "rss_kib": 48076,
+        "live_texture_bytes": 0,
+        "peak_texture_bytes": 0,
+        "live_full_textures": 0,
+        "live_tile_textures": 0,
+        "malloc_arena_bytes": 0,
+        "malloc_in_use_bytes": 0,
+        "malloc_free_bytes": 0,
+        "malloc_mmap_bytes": 0,
+        "heap_dump": false
+      },
+      {
+        "cycle": 1,
+        "phase": "warmup",
+        "elapsed_us": 6226505,
+        "pss_kib": 398037,
+        "anonymous_pss_kib": 342764,
+        "file_pss_kib": 53372,
+        "shared_pss_kib": 1900,
+        "private_dirty_kib": 345112,
+        "rss_kib": 457240,
+        "live_texture_bytes": 0,
+        "peak_texture_bytes": 0,
+        "live_full_textures": 0,
+        "live_tile_textures": 0,
+        "malloc_arena_bytes": 0,
+        "malloc_in_use_bytes": 0,
+        "malloc_free_bytes": 0,
+        "malloc_mmap_bytes": 0,
+        "heap_dump": false
+      },
+      {
+        "cycle": 1,
+        "phase": "warmup",
+        "elapsed_us": 6244631,
+        "pss_kib": 398057,
+        "anonymous_pss_kib": 342784,
+        "file_pss_kib": 53372,
+        "shared_pss_kib": 1900,
+        "private_dirty_kib": 345132,
+        "rss_kib": 457260,
+        "live_texture_bytes": 0,
+        "peak_texture_bytes": 0,
+        "live_full_textures": 0,
+        "live_tile_textures": 0,
+        "malloc_arena_bytes": 0,
+        "malloc_in_use_bytes": 0,
+        "malloc_free_bytes": 0,
+        "malloc_mmap_bytes": 0,
+        "heap_dump": false
+      },
+      {
+        "cycle": 1,
+        "phase": "warmup",
+        "elapsed_us": 7231724,
+        "pss_kib": 408938,
+        "anonymous_pss_kib": 347100,
+        "file_pss_kib": 59937,
+        "shared_pss_kib": 1900,
+        "private_dirty_kib": 349448,
+        "rss_kib": 468496,
+        "live_texture_bytes": 4096000,
+        "peak_texture_bytes": 4096000,
+        "live_full_textures": 1,
+        "live_tile_textures": 0,
+        "malloc_arena_bytes": 0,
+        "malloc_in_use_bytes": 0,
+        "malloc_free_bytes": 0,
+        "malloc_mmap_bytes": 0,
+        "heap_dump": false
+      },
+      {
+        "cycle": 1,
+        "phase": "warmup",
+        "elapsed_us": 8240261,
+        "pss_kib": 408942,
+        "anonymous_pss_kib": 347104,
+        "file_pss_kib": 59937,
+        "shared_pss_kib": 1900,
+        "private_dirty_kib": 349452,
+        "rss_kib": 468500,
+        "live_texture_bytes": 4096000,
+        "peak_texture_bytes": 4096000,
+        "live_full_textures": 1,
+        "live_tile_textures": 0,
+        "malloc_arena_bytes": 0,
+        "malloc_in_use_bytes": 0,
+        "malloc_free_bytes": 0,
+        "malloc_mmap_bytes": 0,
+        "heap_dump": false
+      },
+      {
+        "cycle": 1,
+        "phase": "active",
+        "elapsed_us": 8255983,
+        "pss_kib": 408954,
+        "anonymous_pss_kib": 347116,
+        "file_pss_kib": 59937,
+        "shared_pss_kib": 1900,
+        "private_dirty_kib": 349464,
+        "rss_kib": 468512,
+        "live_texture_bytes": 4096000,
+        "peak_texture_bytes": 4096000,
+        "live_full_textures": 1,
+        "live_tile_textures": 0,
+        "malloc_arena_bytes": 0,
+        "malloc_in_use_bytes": 0,
+        "malloc_free_bytes": 0,
+        "malloc_mmap_bytes": 0,
+        "heap_dump": false
+      },
+      {
+        "cycle": 1,
+        "phase": "active",
+        "elapsed_us": 9235119,
+        "pss_kib": 452958,
+        "anonymous_pss_kib": 391120,
+        "file_pss_kib": 59937,
+        "shared_pss_kib": 1900,
+        "private_dirty_kib": 393468,
+        "rss_kib": 512516,
+        "live_texture_bytes": 4096000,
+        "peak_texture_bytes": 8192000,
+        "live_full_textures": 1,
+        "live_tile_textures": 0,
+        "malloc_arena_bytes": 0,
+        "malloc_in_use_bytes": 0,
+        "malloc_free_bytes": 0,
+        "malloc_mmap_bytes": 0,
+        "heap_dump": false
+      },
+      {
+        "cycle": 1,
+        "phase": "active",
+        "elapsed_us": 10245054,
+        "pss_kib": 475280,
+        "anonymous_pss_kib": 413428,
+        "file_pss_kib": 59951,
+        "shared_pss_kib": 1900,
+        "private_dirty_kib": 415776,
+        "rss_kib": 534824,
+        "live_texture_bytes": 4096000,
+        "peak_texture_bytes": 8192000,
+        "live_full_textures": 1,
+        "live_tile_textures": 0,
+        "malloc_arena_bytes": 0,
+        "malloc_in_use_bytes": 0,
+        "malloc_free_bytes": 0,
+        "malloc_mmap_bytes": 0,
+        "heap_dump": false
+      },
+      {
+        "cycle": 1,
+        "phase": "idle",
+        "elapsed_us": 10260876,
+        "pss_kib": 475292,
+        "anonymous_pss_kib": 413440,
+        "file_pss_kib": 59951,
+        "shared_pss_kib": 1900,
+        "private_dirty_kib": 415788,
+        "rss_kib": 534836,
+        "live_texture_bytes": 4096000,
+        "peak_texture_bytes": 8192000,
+        "live_full_textures": 1,
+        "live_tile_textures": 0,
+        "malloc_arena_bytes": 0,
+        "malloc_in_use_bytes": 0,
+        "malloc_free_bytes": 0,
+        "malloc_mmap_bytes": 0,
+        "heap_dump": false
+      },
+      {
+        "cycle": 1,
+        "phase": "idle",
+        "elapsed_us": 11238982,
+        "pss_kib": 475292,
+        "anonymous_pss_kib": 413440,
+        "file_pss_kib": 59951,
+        "shared_pss_kib": 1900,
+        "private_dirty_kib": 415788,
+        "rss_kib": 534836,
+        "live_texture_bytes": 4096000,
+        "peak_texture_bytes": 8192000,
+        "live_full_textures": 1,
+        "live_tile_textures": 0,
+        "malloc_arena_bytes": 0,
+        "malloc_in_use_bytes": 0,
+        "malloc_free_bytes": 0,
+        "malloc_mmap_bytes": 0,
+        "heap_dump": false
+      },
+      {
+        "cycle": 1,
+        "phase": "cleared",
+        "elapsed_us": 11252546,
+        "pss_kib": 475788,
+        "anonymous_pss_kib": 413936,
+        "file_pss_kib": 59951,
+        "shared_pss_kib": 1900,
+        "private_dirty_kib": 416284,
+        "rss_kib": 535332,
+        "live_texture_bytes": 4096000,
+        "peak_texture_bytes": 8192000,
+        "live_full_textures": 1,
+        "live_tile_textures": 0,
+        "malloc_arena_bytes": 0,
+        "malloc_in_use_bytes": 0,
+        "malloc_free_bytes": 0,
+        "malloc_mmap_bytes": 0,
+        "heap_dump": false
+      },
+      {
+        "cycle": 1,
+        "phase": "cleared",
+        "elapsed_us": 12235691,
+        "pss_kib": 440248,
+        "anonymous_pss_kib": 378396,
+        "file_pss_kib": 59951,
+        "shared_pss_kib": 1900,
+        "private_dirty_kib": 380744,
+        "rss_kib": 499792,
+        "live_texture_bytes": 0,
+        "peak_texture_bytes": 8192000,
+        "live_full_textures": 0,
+        "live_tile_textures": 0,
+        "malloc_arena_bytes": 0,
+        "malloc_in_use_bytes": 0,
+        "malloc_free_bytes": 0,
+        "malloc_mmap_bytes": 0,
+        "heap_dump": false
+      },
+      {
+        "cycle": 1,
+        "phase": "closed",
+        "elapsed_us": 12252230,
+        "pss_kib": 440439,
+        "anonymous_pss_kib": 378588,
+        "file_pss_kib": 59951,
+        "shared_pss_kib": 1900,
+        "private_dirty_kib": 380936,
+        "rss_kib": 499980,
+        "live_texture_bytes": 0,
+        "peak_texture_bytes": 8192000,
+        "live_full_textures": 0,
+        "live_tile_textures": 0,
+        "malloc_arena_bytes": 0,
+        "malloc_in_use_bytes": 0,
+        "malloc_free_bytes": 0,
+        "malloc_mmap_bytes": 0,
+        "heap_dump": false
+      },
+      {
+        "cycle": 1,
+        "phase": "closed",
+        "elapsed_us": 13238616,
+        "pss_kib": 440443,
+        "anonymous_pss_kib": 378592,
+        "file_pss_kib": 59951,
+        "shared_pss_kib": 1900,
+        "private_dirty_kib": 380940,
+        "rss_kib": 499984,
+        "live_texture_bytes": 0,
+        "peak_texture_bytes": 8192000,
+        "live_full_textures": 0,
+        "live_tile_textures": 0,
+        "malloc_arena_bytes": 0,
+        "malloc_in_use_bytes": 0,
+        "malloc_free_bytes": 0,
+        "malloc_mmap_bytes": 0,
+        "heap_dump": false
+      },
+      {
+        "cycle": 1,
+        "phase": "cycle-end",
+        "elapsed_us": 13250830,
+        "pss_kib": 440443,
+        "anonymous_pss_kib": 378592,
+        "file_pss_kib": 59951,
+        "shared_pss_kib": 1900,
+        "private_dirty_kib": 380940,
+        "rss_kib": 499984,
+        "live_texture_bytes": 0,
+        "peak_texture_bytes": 8192000,
+        "live_full_textures": 0,
+        "live_tile_textures": 0,
+        "malloc_arena_bytes": 0,
+        "malloc_in_use_bytes": 0,
+        "malloc_free_bytes": 0,
+        "malloc_mmap_bytes": 0,
+        "heap_dump": false
+      },
+      {
+        "cycle": 1,
+        "phase": "before-trim",
+        "elapsed_us": 13266483,
+        "pss_kib": 440455,
+        "anonymous_pss_kib": 378604,
+        "file_pss_kib": 59951,
+        "shared_pss_kib": 1900,
+        "private_dirty_kib": 380952,
+        "rss_kib": 499996,
+        "live_texture_bytes": 0,
+        "peak_texture_bytes": 8192000,
+        "live_full_textures": 0,
+        "live_tile_textures": 0,
+        "malloc_arena_bytes": 0,
+        "malloc_in_use_bytes": 0,
+        "malloc_free_bytes": 0,
+        "malloc_mmap_bytes": 0,
+        "heap_dump": false
+      },
+      {
+        "cycle": 1,
+        "phase": "trimmed",
+        "elapsed_us": 13278698,
+        "pss_kib": 440455,
+        "anonymous_pss_kib": 378604,
+        "file_pss_kib": 59951,
+        "shared_pss_kib": 1900,
+        "private_dirty_kib": 380952,
+        "rss_kib": 499996,
+        "live_texture_bytes": 0,
+        "peak_texture_bytes": 8192000,
+        "live_full_textures": 0,
+        "live_tile_textures": 0,
+        "malloc_arena_bytes": 0,
+        "malloc_in_use_bytes": 0,
+        "malloc_free_bytes": 0,
+        "malloc_mmap_bytes": 0,
+        "heap_dump": false
+      },
+      {
+        "cycle": 1,
+        "phase": "trimmed",
+        "elapsed_us": 14240341,
+        "pss_kib": 440459,
+        "anonymous_pss_kib": 378608,
+        "file_pss_kib": 59951,
+        "shared_pss_kib": 1900,
+        "private_dirty_kib": 380956,
+        "rss_kib": 500000,
+        "live_texture_bytes": 0,
+        "peak_texture_bytes": 8192000,
+        "live_full_textures": 0,
+        "live_tile_textures": 0,
+        "malloc_arena_bytes": 0,
+        "malloc_in_use_bytes": 0,
+        "malloc_free_bytes": 0,
+        "malloc_mmap_bytes": 0,
+        "heap_dump": false
+      },
+      {
+        "cycle": 1,
+        "phase": "trimmed",
+        "elapsed_us": 14252567,
+        "pss_kib": 440463,
+        "anonymous_pss_kib": 378612,
+        "file_pss_kib": 59951,
+        "shared_pss_kib": 1900,
+        "private_dirty_kib": 380960,
+        "rss_kib": 500004,
+        "live_texture_bytes": 0,
+        "peak_texture_bytes": 8192000,
+        "live_full_textures": 0,
+        "live_tile_textures": 0,
+        "malloc_arena_bytes": 0,
+        "malloc_in_use_bytes": 0,
+        "malloc_free_bytes": 0,
+        "malloc_mmap_bytes": 0,
+        "heap_dump": false
+      }
+    ]
+  },
+  "cli_guards": [
+    {
+      "command": [
+        "build-perf/tests/benchmark-display-memory",
+        "--width",
+        "63"
+      ],
+      "returncode": 2,
+      "expected": 2,
+      "stderr_tail": "Invalid memory diagnostic arguments"
+    },
+    {
+      "command": [
+        "build-perf/tests/benchmark-display-memory",
+        "--mode",
+        "invalid"
+      ],
+      "returncode": 2,
+      "expected": 2,
+      "stderr_tail": "Invalid memory diagnostic arguments"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/profile-renderer-memory.py",
+        "--output",
+        "build/qa/renderer-memory/prepare-check/frozen"
+      ],
+      "returncode": 1,
+      "expected": 1,
+      "stderr_tail": "RuntimeError: Run measurements inside test-gnome.py's private desktop"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/profile-display.py",
+        "--modes",
+        "full,full",
+        "--output",
+        "build/qa/renderer-memory/unused.json"
+      ],
+      "returncode": 2,
+      "expected": 2,
+      "stderr_tail": "profile-display.py: error: Choose unique workloads from full,invalidate-full,small,burst,bands."
+    }
+  ],
+  "prepare_smoke": {
+    "command": [
+      "python3",
+      "scripts/profile-renderer-memory.py",
+      "--prepare-only",
+      "--output",
+      "build/qa/renderer-memory/prepare-check/frozen"
+    ],
+    "returncode": 0,
+    "note": "Compiled all six frozen controls from current rounded source, including flat controls with direct branch removed."
+  }
+}

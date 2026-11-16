@@ -1,0 +1,8 @@
+Use case: logo-brand
+Asset type: a single GNOME desktop application icon for Pirwa, a native virtual machine manager.
+Primary request: design a distinctive, polished GNOME HIG-style icon with a strong readable silhouette: a compact stack of two desktop display panels, showing a virtual computer inside a computer.
+Subject: two offset rounded rectangular display slabs. The rear slab is violet, offset slightly up and right, mostly hidden. The front slab is vivid GNOME blue, a friendly compact desktop monitor with a very short central support and broad simple blue foot. Within its blue frame is one pale icy-blue inset screen; inside that screen is one smaller saturated violet rounded window with a small pale cyan screen, suggesting a guest computer nested inside a host. Keep the nested window large and the arrangement immediately readable. No controls, no terminal text, no play triangle.
+Style/medium: carefully crafted geometric vector-like GNOME app icon, clean flat straight surfaces, modest darker front profile at the bottom of solid objects, light directly above, exact confident curves. Not a glossy 3D render.
+Composition: one centered icon on a square transparent canvas, 12 percent padding, equivalent to a 128 by 128 icon grid, stable bottom baseline. Use simple chunky forms that remain clear at 32 pixels.
+Color palette: GNOME blue #3584e4 with darker #1c71d8 bottom profile, violet #9141ac and #613583, pale blue #c7e6ff, cyan #99f6e4; restrained, flat fills.
+Constraints: actual transparent background, no background tile, no external drop shadow, no lettering or wordmark, no labels, no watermark, no gradients on flat surfaces, no fine lines. Deliver only the finished icon, not a mockup or presentation board.

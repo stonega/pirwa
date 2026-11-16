@@ -112,6 +112,85 @@ test_cropped_frame (void)
 }
 
 static void
+test_monitor_padding (void)
+{
+  guint32 pixels[32 * 16];
+  for (guint i = 0; i < G_N_ELEMENTS (pixels); i++)
+    pixels[i] = i;
+  SpiceDisplayPrimary primary = { .format = SPICE_SURFACE_FMT_32_xRGB,
+                                  .width = 32,
+                                  .height = 16,
+                                  .stride = 128,
+                                  .data = (guint8 *)pixels };
+  SpiceDisplayMonitorConfig monitor = { .width = 19, .height = 9 };
+  cairo_rectangle_int_t area = pirwa_frame_monitor_area (&primary, &monitor);
+  g_assert_cmpint (area.width, ==, 19);
+  g_assert_cmpint (area.height, ==, 9);
+  g_autoptr (GdkTexture) texture = pirwa_frame_texture_rect (&primary, &area);
+  g_assert_cmpint (gdk_texture_get_width (texture), ==, 19);
+  g_assert_cmpint (gdk_texture_get_height (texture), ==, 9);
+  guint32 output[19 * 9];
+  gdk_texture_download (texture, (guint8 *)output, 19 * 4);
+  /* The last row comes from the visible monitor, not aligned framebuffer padding. */
+  g_assert_cmpuint (output[18 + 8 * 19] & 0xffffff, ==, 18 + 8 * 32);
+  monitor.x = 2;
+  monitor.y = 3;
+  area = pirwa_frame_monitor_area (&primary, &monitor);
+  g_assert_cmpint (area.x, ==, 2);
+  g_assert_cmpint (area.y, ==, 3);
+  g_clear_object (&texture);
+  texture = pirwa_frame_texture_rect (&primary, &area);
+  gdk_texture_download (texture, (guint8 *)output, 19 * 4);
+  g_assert_cmpuint (output[0] & 0xffffff, ==, 2 + 3 * 32);
+  g_assert_cmpuint (output[18 + 8 * 19] & 0xffffff, ==, 20 + 11 * 32);
+  monitor.x = G_MAXUINT;
+  monitor.width = G_MAXUINT;
+  area = pirwa_frame_monitor_area (&primary, &monitor);
+  g_assert_cmpint (area.width, ==, 32);
+  g_assert_cmpint (area.height, ==, 16);
+  monitor = (SpiceDisplayMonitorConfig){ .width = 19, .height = 9, .surface_id = 1 };
+  area = pirwa_frame_monitor_area (&primary, &monitor);
+  g_assert_cmpint (area.width, ==, 32);
+  monitor = (SpiceDisplayMonitorConfig){ 0 };
+  area = pirwa_frame_monitor_area (&primary, &monitor);
+  g_assert_cmpint (area.width, ==, 32);
+  primary.data = NULL;
+  area = pirwa_frame_monitor_area (&primary, &monitor);
+  g_assert_cmpint (area.width, ==, 0);
+}
+
+static void
+test_contiguous_rgb (void)
+{
+  for (guint i = 0; i < 2; i++)
+    {
+      guint8 packed[] = { 1, 2, 3, 128, 4, 5, 6, 128, 7, 8, 9, 128, 10, 11, 12, 128 };
+      guint8 padded[24];
+      memset (padded, 99, sizeof padded);
+      memcpy (padded, packed, 8);
+      memcpy (padded + 12, packed + 8, 8);
+      SpiceDisplayPrimary primary
+          = { .format = i ? SPICE_SURFACE_FMT_32_ARGB : SPICE_SURFACE_FMT_32_xRGB,
+              .width = 2,
+              .height = 2,
+              .stride = 8,
+              .data = packed };
+      g_autoptr (GdkTexture) first = pirwa_frame_texture (&primary, NULL, NULL);
+      primary.stride = 12;
+      primary.data = padded;
+      g_autoptr (GdkTexture) reference = pirwa_frame_texture (&primary, NULL, NULL);
+      guint8 pixels[16], expected[16];
+      gdk_texture_download (first, pixels, 8);
+      gdk_texture_download (reference, expected, 8);
+      g_assert_cmpmem (pixels, 16, expected, 16);
+      memset (packed, 0, sizeof packed);
+      memset (padded, 0, sizeof padded);
+      gdk_texture_download (first, pixels, 8);
+      g_assert_cmpmem (pixels, 16, expected, 16);
+    }
+}
+
+static void
 test_input_coordinates (void)
 {
   int x, y;
@@ -141,5 +220,7 @@ main (int argc, char **argv)
   g_test_add_func ("/console/input-mapping", test_input_coordinates);
   g_test_add_func ("/console/alpha", test_alpha);
   g_test_add_func ("/console/crop-and-ownership", test_cropped_frame);
+  g_test_add_func ("/console/contiguous-rgb-and-alpha", test_contiguous_rgb);
+  g_test_add_func ("/console/monitor-padding", test_monitor_padding);
   return g_test_run ();
 }

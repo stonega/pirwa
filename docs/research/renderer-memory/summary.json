@@ -1,0 +1,215 @@
+{
+  "quantile": "Nearest rank pooled over each same-workload group; CPU is median of process trial means. Cadence is measured updates divided by summed elapsed time.",
+  "memory": [
+    {
+      "variant": "flat-rows",
+      "repeat": 0,
+      "cycles": 3,
+      "peak_sampled_pss_mib": 200.7099609375,
+      "peak_texture_mib": 71.009521484375,
+      "cycle_end_live_texture_bytes": [
+        0,
+        0,
+        0
+      ],
+      "settled_clear_live_texture_bytes": [
+        0,
+        0,
+        0
+      ],
+      "pss_before_trim_mib": 74.0234375,
+      "pss_after_trim_mib": 63.3359375,
+      "trim_released_pss_mib": 10.6875,
+      "free_heap_before_trim_mib": 11.921890258789062,
+      "free_heap_after_trim_mib": 4.069244384765625
+    },
+    {
+      "variant": "flat-packed",
+      "repeat": 0,
+      "cycles": 3,
+      "peak_sampled_pss_mib": 187.3056640625,
+      "peak_texture_mib": 71.009521484375,
+      "cycle_end_live_texture_bytes": [
+        0,
+        0,
+        0
+      ],
+      "settled_clear_live_texture_bytes": [
+        0,
+        0,
+        0
+      ],
+      "pss_before_trim_mib": 93.7294921875,
+      "pss_after_trim_mib": 48.7138671875,
+      "trim_released_pss_mib": 45.015625,
+      "free_heap_before_trim_mib": 46.42991638183594,
+      "free_heap_after_trim_mib": 42.44146728515625
+    },
+    {
+      "variant": "rounded-packed",
+      "repeat": 0,
+      "cycles": 3,
+      "peak_sampled_pss_mib": 191.423828125,
+      "peak_texture_mib": 71.009521484375,
+      "cycle_end_live_texture_bytes": [
+        0,
+        0,
+        0
+      ],
+      "settled_clear_live_texture_bytes": [
+        0,
+        0,
+        0
+      ],
+      "pss_before_trim_mib": 96.697265625,
+      "pss_after_trim_mib": 54.126953125,
+      "trim_released_pss_mib": 42.5703125,
+      "free_heap_before_trim_mib": 44.35606384277344,
+      "free_heap_after_trim_mib": 7.47308349609375
+    },
+    {
+      "variant": "rounded-packed",
+      "repeat": 1,
+      "cycles": 3,
+      "peak_sampled_pss_mib": 196.0263671875,
+      "peak_texture_mib": 71.009521484375,
+      "cycle_end_live_texture_bytes": [
+        0,
+        0,
+        0
+      ],
+      "settled_clear_live_texture_bytes": [
+        0,
+        0,
+        0
+      ],
+      "pss_before_trim_mib": 95.376953125,
+      "pss_after_trim_mib": 54.052734375,
+      "trim_released_pss_mib": 41.32421875,
+      "free_heap_before_trim_mib": 42.748016357421875,
+      "free_heap_after_trim_mib": 9.439254760742188
+    },
+    {
+      "variant": "flat-packed",
+      "repeat": 1,
+      "cycles": 3,
+      "peak_sampled_pss_mib": 193.26953125,
+      "peak_texture_mib": 71.009521484375,
+      "cycle_end_live_texture_bytes": [
+        0,
+        0,
+        0
+      ],
+      "settled_clear_live_texture_bytes": [
+        0,
+        0,
+        0
+      ],
+      "pss_before_trim_mib": 63.2705078125,
+      "pss_after_trim_mib": 54.8837890625,
+      "trim_released_pss_mib": 8.38671875,
+      "free_heap_before_trim_mib": 9.82965087890625,
+      "free_heap_after_trim_mib": 9.704788208007812
+    },
+    {
+      "variant": "flat-rows",
+      "repeat": 1,
+      "cycles": 3,
+      "peak_sampled_pss_mib": 157.6640625,
+      "peak_texture_mib": 71.009521484375,
+      "cycle_end_live_texture_bytes": [
+        0,
+        0,
+        0
+      ],
+      "settled_clear_live_texture_bytes": [
+        0,
+        0,
+        0
+      ],
+      "pss_before_trim_mib": 151.2373046875,
+      "pss_after_trim_mib": 74.2216796875,
+      "trim_released_pss_mib": 77.015625,
+      "free_heap_before_trim_mib": 110.26327514648438,
+      "free_heap_after_trim_mib": 110.261962890625
+    }
+  ],
+  "mask_control": {
+    "full": {
+      "flat-packed": {
+        "trials": 2,
+        "frames": 120,
+        "paint_wall_p95_ms": 36.537,
+        "paint_cpu_p95_ms": 36.131,
+        "producer_cpu_p95_ms": 13.656,
+        "cpu_percent_one_core_median": 86.697119,
+        "gtk_updates_per_second": 28.185727029689435,
+        "max_channel_error": 0
+      },
+      "rounded-packed": {
+        "trials": 2,
+        "frames": 120,
+        "paint_wall_p95_ms": 52.964,
+        "paint_cpu_p95_ms": 51.71,
+        "producer_cpu_p95_ms": 13.323,
+        "cpu_percent_one_core_median": 86.69581600000001,
+        "gtk_updates_per_second": 19.366605484332172,
+        "max_channel_error": 0
+      }
+    },
+    "small": {
+      "flat-packed": {
+        "trials": 2,
+        "frames": 120,
+        "paint_wall_p95_ms": 1.287,
+        "paint_cpu_p95_ms": 1.242,
+        "producer_cpu_p95_ms": 0.033,
+        "cpu_percent_one_core_median": 5.77672,
+        "gtk_updates_per_second": 60.002730124220655,
+        "max_channel_error": 0
+      },
+      "rounded-packed": {
+        "trials": 2,
+        "frames": 120,
+        "paint_wall_p95_ms": 1.61,
+        "paint_cpu_p95_ms": 1.585,
+        "producer_cpu_p95_ms": 0.044,
+        "cpu_percent_one_core_median": 7.229721,
+        "gtk_updates_per_second": 59.991601175835385,
+        "max_channel_error": 0
+      }
+    }
+  },
+  "direct_clip": {
+    "baseline": {
+      "trials": 3,
+      "frames": 180,
+      "paint_wall_p95_ms": 41.237,
+      "paint_cpu_p95_ms": 40.545,
+      "producer_cpu_p95_ms": 0.018,
+      "cpu_percent_one_core_median": 86.283209,
+      "gtk_updates_per_second": 24.427056602104148,
+      "max_channel_error": 0,
+      "per_trial_p95_ms": [
+        42.595,
+        39.993,
+        40.123
+      ]
+    },
+    "current": {
+      "trials": 3,
+      "frames": 180,
+      "paint_wall_p95_ms": 27.343,
+      "paint_cpu_p95_ms": 26.862,
+      "producer_cpu_p95_ms": 0.017,
+      "cpu_percent_one_core_median": 84.023776,
+      "gtk_updates_per_second": 37.02880079554321,
+      "max_channel_error": 1,
+      "per_trial_p95_ms": [
+        27.964,
+        24.715,
+        27.259
+      ]
+    }
+  }
+}

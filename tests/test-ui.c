@@ -1,11 +1,17 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /* Explicit desktop QA, never run by the default headless test suite. */
+#define _GNU_SOURCE
+#include "pirwa-avatar.h"
 #include "pirwa-machine.h"
+#include "pirwa-preferences.h"
 #include "pirwa-window.h"
+#include "qa-frame-feedback.h"
+#include <fcntl.h>
 #include <glib/gstdio.h>
 #include <locale.h>
 #include <sys/resource.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <sys/un.h>
 #include <time.h>
 #include <unistd.h>
@@ -17,8 +23,19 @@ typedef struct
   GdkFrameClock *clock;
   gulong paint_handler;
   gulong before_handler;
+  gulong map_handler;
+  gboolean window_painted;
+  guint windows_observed;
+  guint windows_painted;
   gint64 before_paint;
   GArray *frame_costs;
+  GArray *frame_cpus;
+  gint64 before_cpu;
+  GArray *feedback;
+  guint feedback_dropped;
+  gboolean presentation;
+  gint64 first_presentation;
+  gint64 startup_stages[5];
   char *renderer;
   char *focus_kind;
   gboolean window_active;
@@ -46,12 +63,51 @@ typedef struct
   gboolean exercise;
   gboolean finished;
   const char *snapshot;
+  const char *uri;
   PirwaMachine *original;
+  GtkMenuButton *recycled_menu;
+  char *filter_uuid;
+  gulong menu_unbind_handler;
+  gboolean menu_unbound;
   gboolean boxes_exercise;
+  gboolean boxes_deferred;
+  int scan_gate;
+  guint scans_finished;
+  AdwDialog *blocked_dialog;
   PirwaBoxesPaths *boxes_paths;
   char *boxes_root;
   int boxes_socket;
+  guint form_focus_steps;
+  gboolean chooser_reached;
+  gboolean reverse_focus;
+  int trace_step;
+  gboolean trace;
 } Run;
+
+static Run *active_run;
+PirwaBoxesScan *__real_pirwa_boxes_scan_finish (GAsyncResult *result, GError **error);
+
+/* Observe completion on the UI thread without replacing discovery or its result.
+ * The gated fixture needs to distinguish worker completion from modal closure. */
+PirwaBoxesScan *
+__wrap_pirwa_boxes_scan_finish (GAsyncResult *result, GError **error)
+{
+  PirwaBoxesScan *scan = __real_pirwa_boxes_scan_finish (result, error);
+  if (active_run)
+    active_run->scans_finished++;
+  return scan;
+}
+
+static void
+clear_clock (Run *run)
+{
+  if (!run->clock)
+    return;
+  g_signal_handler_disconnect (run->clock, run->paint_handler);
+  g_signal_handler_disconnect (run->clock, run->before_handler);
+  g_clear_object (&run->clock);
+  run->before_paint = 0;
+}
 
 static gint64
 cpu_time (void)
@@ -112,9 +168,9 @@ find_machine_list (GtkWidget *root)
 static GtkWidget *
 find_button (GtkWidget *root, const char *label)
 {
-  if (GTK_IS_BUTTON (root)
-      && (g_strcmp0 (gtk_button_get_label (GTK_BUTTON (root)), label) == 0
-          || g_strcmp0 (gtk_widget_get_tooltip_text (root), label) == 0))
+  if ((GTK_IS_BUTTON (root) && g_strcmp0 (gtk_button_get_label (GTK_BUTTON (root)), label) == 0)
+      || ((GTK_IS_BUTTON (root) || GTK_IS_MENU_BUTTON (root))
+          && g_strcmp0 (gtk_widget_get_tooltip_text (root), label) == 0))
     return root;
   for (GtkWidget *child = gtk_widget_get_first_child (root); child;
        child = gtk_widget_get_next_sibling (child))
@@ -158,16 +214,11 @@ has_label (GtkWidget *root, const char *text)
 static GtkMenuButton *
 find_machine_menu (GtkWidget *root, const char *uuid)
 {
-  if (GTK_IS_MENU_BUTTON (root))
+  if (GTK_IS_MENU_BUTTON (root) && gtk_widget_has_css_class (root, "pirwa-machine-menu"))
     {
-      GMenuModel *model = gtk_menu_button_get_menu_model (GTK_MENU_BUTTON (root));
-      if (model && g_menu_model_get_n_items (model) > 0)
-        {
-          g_autoptr (GVariant) target = g_menu_model_get_item_attribute_value (
-              model, 0, G_MENU_ATTRIBUTE_TARGET, G_VARIANT_TYPE_STRING);
-          if (target && g_str_equal (g_variant_get_string (target, NULL), uuid))
-            return GTK_MENU_BUTTON (root);
-        }
+      const char *target = gtk_widget_get_tooltip_text (gtk_widget_get_parent (root));
+      if (g_strcmp0 (target, uuid) == 0)
+        return GTK_MENU_BUTTON (root);
     }
   for (GtkWidget *child = gtk_widget_get_first_child (root); child;
        child = gtk_widget_get_next_sibling (child))
@@ -177,6 +228,15 @@ find_machine_menu (GtkWidget *root, const char *uuid)
         return found;
     }
   return NULL;
+}
+
+static void
+machine_menu_unbound (GtkSignalListItemFactory *factory, GtkListItem *item, Run *run)
+{
+  (void)factory;
+  GtkWidget *button = find_type (gtk_list_item_get_child (item), GTK_TYPE_MENU_BUTTON);
+  if (button == GTK_WIDGET (run->recycled_menu))
+    run->menu_unbound = TRUE;
 }
 
 static void
@@ -217,23 +277,33 @@ activate (Run *run, const char *action)
   g_action_group_activate_action (G_ACTION_GROUP (run->window), action, NULL);
 }
 
-static void
-save_snapshot (Run *run)
+static GdkTexture *
+window_texture (Run *run)
 {
-  if (!run->snapshot)
-    return;
   int width = gtk_widget_get_width (GTK_WIDGET (run->window));
   int height = gtk_widget_get_height (GTK_WIDGET (run->window));
+  if (width <= 0 || height <= 0)
+    return NULL;
   g_autoptr (GdkPaintable) paintable = gtk_widget_paintable_new (GTK_WIDGET (run->window));
   GtkSnapshot *snapshot = gtk_snapshot_new ();
   gdk_paintable_snapshot (paintable, GDK_SNAPSHOT (snapshot), width, height);
-  GskRenderNode *node = gtk_snapshot_free_to_node (snapshot);
-  g_assert_nonnull (node);
+  g_autoptr (GskRenderNode) node = gtk_snapshot_free_to_node (snapshot);
+  if (!node)
+    return NULL;
   GskRenderer *renderer = gtk_native_get_renderer (GTK_NATIVE (run->window));
-  g_autoptr (GdkTexture) texture = gsk_renderer_render_texture (renderer, node, NULL);
-  gsk_render_node_unref (node);
-  g_assert_nonnull (texture);
+  return gsk_renderer_render_texture (renderer, node, NULL);
+}
+
+static gboolean
+save_snapshot (Run *run)
+{
+  if (!run->snapshot)
+    return TRUE;
+  g_autoptr (GdkTexture) texture = window_texture (run);
+  if (!texture)
+    return FALSE;
   g_assert_true (gdk_texture_save_to_png (texture, run->snapshot));
+  return TRUE;
 }
 
 static void
@@ -241,7 +311,9 @@ finish (Run *run)
 {
   run->finished = TRUE;
   if (!run->exercise)
-    save_snapshot (run);
+    g_assert_true (save_snapshot (run));
+  g_signal_handler_disconnect (run->window, run->map_handler);
+  run->map_handler = 0;
   if (adw_application_window_get_visible_dialog (ADW_APPLICATION_WINDOW (run->window)))
     gtk_window_destroy (run->window); /* Profiling may end with onboarding open. */
   else
@@ -281,23 +353,48 @@ sample_start (gpointer data)
 static void
 after_paint (GdkFrameClock *clock, gpointer data)
 {
-  (void)clock;
   Run *run = data;
+  g_assert_true (clock == run->clock);
+  if (!run->window_painted)
+    {
+      run->window_painted = TRUE;
+      run->windows_painted++;
+    }
   run->frame_count++;
   if (run->sampling && run->scrolling && run->before_paint)
     {
       gint64 cost = g_get_monotonic_time () - run->before_paint;
       g_array_append_val (run->frame_costs, cost);
+      struct timespec now;
+      g_assert_cmpint (clock_gettime (CLOCK_THREAD_CPUTIME_ID, &now), ==, 0);
+      gint64 cpu
+          = (now.tv_sec * G_GINT64_CONSTANT (1000000000) + now.tv_nsec - run->before_cpu) / 1000;
+      g_array_append_val (run->frame_cpus, cpu);
     }
   if (!run->first_paint)
     run->first_paint = g_get_monotonic_time ();
+  if (run->feedback && (!run->first_presentation || (run->sampling && run->scrolling)))
+    {
+      if (run->feedback->len < 10000)
+        qa_frame_feedback_record (run->feedback, clock, run->before_paint, g_get_monotonic_time (),
+                                  0);
+      else
+        run->feedback_dropped++;
+    }
 }
 
 static void
 before_paint (GdkFrameClock *clock, gpointer data)
 {
   (void)clock;
-  ((Run *)data)->before_paint = g_get_monotonic_time ();
+  Run *run = data;
+  run->before_paint = g_get_monotonic_time ();
+  if (run->sampling && run->scrolling)
+    {
+      struct timespec now;
+      g_assert_cmpint (clock_gettime (CLOCK_THREAD_CPUTIME_ID, &now), ==, 0);
+      run->before_cpu = now.tv_sec * G_GINT64_CONSTANT (1000000000) + now.tv_nsec;
+    }
 }
 
 static gboolean
@@ -326,7 +423,10 @@ static void
 mapped (GtkWidget *widget, gpointer data)
 {
   Run *run = data;
+  g_assert_true (widget == GTK_WIDGET (run->window));
+  clear_clock (run);
   run->clock = g_object_ref (gtk_widget_get_frame_clock (widget));
+  g_free (run->renderer);
   run->renderer = g_strdup (G_OBJECT_TYPE_NAME (gtk_native_get_renderer (GTK_NATIVE (widget))));
   GdkSurface *surface = gtk_native_get_surface (GTK_NATIVE (widget));
   GdkMonitor *monitor
@@ -336,6 +436,21 @@ mapped (GtkWidget *widget, gpointer data)
   run->before_handler
       = g_signal_connect (run->clock, "before-paint", G_CALLBACK (before_paint), run);
   run->paint_handler = g_signal_connect (run->clock, "after-paint", G_CALLBACK (after_paint), run);
+}
+
+static void
+observe_window (Run *run, GtkWindow *window)
+{
+  /* A replacement window has a different frame clock. Stop observing the old
+   * one before it closes, and require a first paint from this window. */
+  if (run->map_handler)
+    g_signal_handler_disconnect (run->window, run->map_handler);
+  clear_clock (run);
+  run->window = window;
+  run->window_painted = FALSE;
+  run->windows_observed++;
+  gtk_window_set_default_size (window, run->requested_width, 680);
+  run->map_handler = g_signal_connect (window, "map", G_CALLBACK (mapped), run);
 }
 
 static void
@@ -361,10 +476,21 @@ watch_boxes (gpointer data)
   AdwDialog *dialog
       = adw_application_window_get_visible_dialog (ADW_APPLICATION_WINDOW (run->window));
   GtkWidget *import = dialog ? find_button (GTK_WIDGET (dialog), "Import Machine") : NULL;
+  if (run->trace && run->trace_step != run->step)
+    {
+      run->trace_step = run->step;
+      GdkFrameClock *clock = gtk_widget_get_frame_clock (GTK_WIDGET (run->window));
+      g_printerr ("BOXES step=%d time=%" G_GINT64_FORMAT
+                  " window=%p mapped=%d frame=%" G_GINT64_FORMAT " dialog=%p mapped=%d\n",
+                  run->step, g_get_monotonic_time (), (void *)run->window,
+                  gtk_widget_get_mapped (GTK_WIDGET (run->window)),
+                  clock ? gdk_frame_clock_get_frame_counter (clock) : -1, (void *)dialog,
+                  dialog && gtk_widget_get_mapped (GTK_WIDGET (dialog)));
+    }
   switch (run->step)
     {
     case 0:
-      if (!dialog || !import || !gtk_widget_get_mapped (import) || !run->first_paint)
+      if (!dialog || !import || !gtk_widget_get_mapped (import) || !run->window_painted)
         break;
       run->ready = g_get_monotonic_time ();
       g_assert_cmpstr (adw_dialog_get_title (dialog), ==, "Import from Boxes Flatpak");
@@ -399,17 +525,18 @@ watch_boxes (gpointer data)
         break;
       g_assert_true (g_file_test (run->boxes_paths->state_file, G_FILE_TEST_EXISTS));
       GtkWindow *previous = run->window;
-      run->window = pirwa_window_new_with_boxes (run->application, run->boxes_paths->native_uri,
-                                                 run->boxes_paths);
-      gtk_window_set_default_size (run->window, run->requested_width, 680);
+      observe_window (run, pirwa_window_new_with_boxes (
+                               run->application, run->boxes_paths->native_uri, run->boxes_paths));
       gtk_window_present (run->window);
       gtk_window_close (previous);
       run->step++;
       break;
     case 3:
       {
-        if (!enabled (run, "new") || !enabled (run, "import-boxes"))
+        if (!gtk_widget_get_mapped (GTK_WIDGET (run->window)) || !run->window_painted
+            || !enabled (run, "new") || !enabled (run, "import-boxes"))
           break;
+        g_assert_true (run->clock == gtk_widget_get_frame_clock (GTK_WIDGET (run->window)));
         g_assert_null (dialog);
         g_autofree char *directory
             = g_build_filename (run->boxes_paths->runtime_root, "libvirt", NULL);
@@ -467,15 +594,19 @@ watch_boxes (gpointer data)
       g_assert_cmpint (g_chmod (run->boxes_paths->flatpak_program, 0700), ==, 0);
       g_assert_cmpint (g_unlink (run->boxes_paths->state_file), ==, 0);
       GtkWindow *old = run->window;
-      run->window = pirwa_window_new_with_boxes (run->application, run->boxes_paths->native_uri,
-                                                 run->boxes_paths);
+      observe_window (run, pirwa_window_new_with_boxes (
+                               run->application, run->boxes_paths->native_uri, run->boxes_paths));
       gtk_window_present (run->window);
       gtk_window_close (old);
       run->step++;
       break;
     case 8:
-      if (!enabled (run, "new") || !enabled (run, "import-boxes"))
+      if (!gtk_widget_get_mapped (GTK_WIDGET (run->window)) || !run->window_painted
+          || !enabled (run, "new") || !enabled (run, "import-boxes"))
         break;
+      g_assert_true (run->clock == gtk_widget_get_frame_clock (GTK_WIDGET (run->window)));
+      g_assert_cmpuint (run->windows_observed, ==, 3);
+      g_assert_cmpuint (run->windows_painted, ==, run->windows_observed);
       g_assert_null (dialog);
       g_assert_false (g_file_test (run->boxes_paths->state_file, G_FILE_TEST_EXISTS));
       run->watch = 0;
@@ -486,11 +617,134 @@ watch_boxes (gpointer data)
 }
 
 static gboolean
+focus_within (Run *run, GtkWidget *widget)
+{
+  GtkWidget *focus = gtk_root_get_focus (GTK_ROOT (run->window));
+  return focus && (focus == widget || gtk_widget_is_ancestor (focus, widget));
+}
+
+static gboolean
+within_scroll_viewport (GtkWidget *widget)
+{
+  GtkWidget *scrolled = gtk_widget_get_ancestor (widget, GTK_TYPE_SCROLLED_WINDOW);
+  graphene_rect_t bounds;
+  return scrolled && gtk_widget_compute_bounds (widget, scrolled, &bounds) && bounds.origin.x >= -1
+         && bounds.origin.y >= -1
+         && bounds.origin.x + bounds.size.width <= gtk_widget_get_width (scrolled) + 1
+         && bounds.origin.y + bounds.size.height <= gtk_widget_get_height (scrolled) + 1;
+}
+
+static gboolean
+watch_deferred_boxes (Run *run)
+{
+  AdwDialog *dialog
+      = adw_application_window_get_visible_dialog (ADW_APPLICATION_WINDOW (run->window));
+  switch (run->step)
+    {
+    case 0:
+      {
+        g_autofree char *ready = g_build_filename (run->boxes_root, "scan-ready", NULL);
+        GtkWidget *list = find_machine_list (GTK_WIDGET (run->window));
+        if (!run->window_painted || !list || !g_file_test (ready, G_FILE_TEST_EXISTS))
+          break;
+        GtkSingleSelection *selection
+            = GTK_SINGLE_SELECTION (gtk_list_view_get_model (GTK_LIST_VIEW (list)));
+        if (g_list_model_get_n_items (G_LIST_MODEL (selection)) != 1 || !enabled (run, "search"))
+          break;
+        run->ready = g_get_monotonic_time ();
+        run->domains = 1;
+        gtk_single_selection_set_selected (selection, 0);
+        g_assert_cmpuint (run->scans_finished, ==, 0);
+        g_assert_false (enabled (run, "import-boxes"));
+        g_assert_true (enabled (run, "new"));
+        g_assert_true (enabled (run, "pause"));
+        activate (run, "pause");
+        run->step++;
+        break;
+      }
+    case 1:
+      if (!enabled (run, "resume"))
+        break;
+      g_assert_cmpuint (run->scans_finished, ==, 0);
+      activate (run, "resume");
+      run->step++;
+      break;
+    case 2:
+      if (!enabled (run, "pause"))
+        break;
+      g_assert_cmpuint (run->scans_finished, ==, 0);
+      activate (run, run->requested_width == 720 ? "new" : "preferences");
+      run->step++;
+      break;
+    case 3:
+      {
+        if (!dialog || !gtk_widget_get_mapped (GTK_WIDGET (dialog)))
+          break;
+        g_assert_cmpstr (adw_dialog_get_title (dialog), ==,
+                         run->requested_width == 720 ? "New Virtual Machine" : "Preferences");
+        run->blocked_dialog = dialog;
+        g_autofree char *released = g_build_filename (run->boxes_root, "scan-released", NULL);
+        g_assert_true (g_file_set_contents (released, "", 0, NULL));
+        g_assert_cmpint (write (run->scan_gate, "\n", 1), ==, 1);
+        run->step++;
+        break;
+      }
+    case 4:
+      if (run->scans_finished < 1)
+        break;
+      close (run->scan_gate);
+      run->scan_gate = -1;
+      g_assert_true (dialog == run->blocked_dialog);
+      g_assert_true (gtk_widget_get_mapped (GTK_WIDGET (dialog)));
+      g_assert_true (adw_dialog_close (dialog));
+      run->blocked_dialog = NULL;
+      run->step++;
+      break;
+    case 5:
+      if (!dialog || !gtk_widget_get_mapped (GTK_WIDGET (dialog)))
+        break;
+      g_assert_cmpstr (adw_dialog_get_title (dialog), ==, "Import from Boxes Flatpak");
+      GtkWidget *button = find_button (GTK_WIDGET (dialog), "Import Machine");
+      if (!button || !gtk_widget_get_mapped (button))
+        break;
+      g_assert_false (gtk_widget_get_sensitive (button));
+      if (!save_snapshot (run))
+        break;
+      g_signal_emit_by_name (find_button (GTK_WIDGET (dialog), "Not Now"), "clicked");
+      run->step++;
+      break;
+    case 6:
+      {
+        g_autofree char *state = g_build_filename (run->boxes_root, "state.ini", NULL);
+        if (dialog || !enabled (run, "import-boxes") || !g_file_test (state, G_FILE_TEST_EXISTS))
+          break;
+        GtkWidget *list = find_machine_list (GTK_WIDGET (run->window));
+        GtkSingleSelection *selection
+            = GTK_SINGLE_SELECTION (gtk_list_view_get_model (GTK_LIST_VIEW (list)));
+        PirwaMachine *machine = gtk_single_selection_get_selected_item (selection);
+        g_assert_nonnull (machine);
+        g_assert_cmpint (pirwa_machine_get_state_code (machine), ==, 1);
+        g_assert_cmpuint (run->scans_finished, ==, 1);
+        g_assert_cmpuint (run->windows_observed, ==, 1);
+        g_assert_cmpuint (run->windows_painted, ==, 1);
+        run->watch = 0;
+        finish (run);
+        return G_SOURCE_REMOVE;
+      }
+    }
+  return G_SOURCE_CONTINUE;
+}
+
+static gboolean
 watch (gpointer data)
 {
   Run *run = data;
+  if (run->boxes_deferred)
+    return watch_deferred_boxes (run);
   if (run->boxes_exercise)
     return watch_boxes (data);
+  if (run->feedback && !run->first_presentation)
+    run->first_presentation = qa_frame_feedback_first_presentation (run->feedback);
   AdwDialog *dialog
       = adw_application_window_get_visible_dialog (ADW_APPLICATION_WINDOW (run->window));
   if (!run->ready)
@@ -509,18 +763,20 @@ watch (gpointer data)
           G_LIST_MODEL (gtk_list_view_get_model (GTK_LIST_VIEW (list))));
       if (run->scrolling)
         gtk_widget_add_tick_callback (list, scroll_tick, run, NULL);
-      if (!run->exercise)
+    }
+  if (!run->exercise)
+    {
+      if (run->presentation && !run->first_presentation)
+        return G_SOURCE_CONTINUE;
+      run->watch = 0;
+      if (run->duration > 0)
+        g_timeout_add_seconds (2, sample_start, run);
+      else
         {
-          run->watch = 0;
-          if (run->duration > 0)
-            g_timeout_add_seconds (2, sample_start, run);
-          else
-            {
-              run->pss_kib = pss ();
-              finish (run);
-            }
-          return G_SOURCE_REMOVE;
+          run->pss_kib = pss ();
+          finish (run);
         }
+      return G_SOURCE_REMOVE;
     }
   GtkWidget *view = find_machine_list (GTK_WIDGET (run->window));
   g_assert_nonnull (view);
@@ -554,6 +810,7 @@ watch (gpointer data)
       g_assert_true (gtk_widget_is_ancestor (gtk_root_get_focus (GTK_ROOT (run->window)), search));
       g_signal_emit_by_name (search_button, "clicked");
       g_assert_false (gtk_search_bar_get_search_mode (search_bar));
+      g_assert_true (focus_within (run, view));
       activate (run, "search");
       g_assert_true (gtk_search_bar_get_search_mode (search_bar));
       g_assert_true (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (search_button)));
@@ -561,16 +818,30 @@ watch (gpointer data)
       g_signal_emit_by_name (search, "stop-search");
       g_assert_false (gtk_search_bar_get_search_mode (search_bar));
       g_assert_false (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (search_button)));
-      gtk_widget_grab_focus (view);
+      g_assert_true (focus_within (run, view));
       run->original = g_list_model_get_item (G_LIST_MODEL (selection), 0);
       gtk_single_selection_set_selected (selection, GTK_INVALID_LIST_POSITION);
       GtkMenuButton *options
           = find_machine_menu (GTK_WIDGET (run->window), pirwa_machine_get_uuid (run->original));
       g_assert_nonnull (options);
+      g_assert_null (gtk_menu_button_get_popover (options));
       gtk_menu_button_popup (options);
+      g_assert_nonnull (gtk_menu_button_get_popover (options));
       g_assert_true (run->original == gtk_single_selection_get_selected_item (selection));
       gtk_menu_button_popdown (options);
-      run->step++;
+      run->recycled_menu = g_object_ref (options);
+      run->menu_unbind_handler
+          = g_signal_connect_after (gtk_list_view_get_factory (GTK_LIST_VIEW (view)), "unbind",
+                                    G_CALLBACK (machine_menu_unbound), run);
+      if (run->domains > 1)
+        {
+          g_autoptr (PirwaMachine) other = g_list_model_get_item (G_LIST_MODEL (selection), 1);
+          run->filter_uuid = g_strdup (pirwa_machine_get_uuid (other));
+          gtk_editable_set_text (GTK_EDITABLE (search), pirwa_machine_get_name (other));
+        }
+      else
+        gtk_editable_set_text (GTK_EDITABLE (search), "No matching Pirwa QA machine 80f117");
+      run->step = 13;
       break;
     case 1:
       if (enabled (run, "start"))
@@ -617,7 +888,8 @@ watch (gpointer data)
       run->step++;
       break;
     case 6:
-      if (!enabled (run, "edit"))
+      if (!enabled (run, "edit")
+          || pirwa_machine_get_state_code (gtk_single_selection_get_selected_item (selection)) != 5)
         break;
       activate_machine_menu (run, "win.machine-edit");
       run->step++;
@@ -635,6 +907,19 @@ watch (gpointer data)
         gtk_editable_set_text (GTK_EDITABLE (entry), "Edited <test> & VM");
         GtkWidget *spin = find_type (GTK_WIDGET (dialog), ADW_TYPE_SPIN_ROW);
         adw_spin_row_set_value (ADW_SPIN_ROW (spin), 3);
+        GtkWidget *flow = find_type (GTK_WIDGET (dialog), GTK_TYPE_FLOW_BOX);
+        if (!flow)
+          {
+            GtkWidget *picker = find_type (GTK_WIDGET (dialog), ADW_TYPE_EXPANDER_ROW);
+            g_assert_nonnull (picker);
+            adw_expander_row_set_expanded (ADW_EXPANDER_ROW (picker), TRUE);
+            flow = find_type (picker, GTK_TYPE_FLOW_BOX);
+          }
+        g_assert_nonnull (flow);
+        for (GtkWidget *child = gtk_widget_get_first_child (flow); child;
+             child = gtk_widget_get_next_sibling (child))
+          if (g_strcmp0 (g_object_get_data (G_OBJECT (child), "avatar-id"), "cheerful") == 0)
+            g_signal_emit_by_name (flow, "child-activated", child);
         g_signal_emit_by_name (button, "clicked");
         run->step++;
       }
@@ -644,6 +929,12 @@ watch (gpointer data)
         break;
       g_assert_true (run->original == gtk_single_selection_get_selected_item (selection));
       g_assert_true (has_label (GTK_WIDGET (run->window), "Edited <test> & VM"));
+      {
+        g_autoptr (GSettings) settings = pirwa_preferences_new ();
+        g_autofree char *preset = pirwa_preferences_get_machine_avatar (
+            settings, run->uri, pirwa_machine_get_uuid (run->original));
+        g_assert_cmpstr (preset, ==, "cheerful");
+      }
       activate_machine_menu (run, "win.machine-remove");
       run->step++;
       break;
@@ -665,11 +956,34 @@ watch (gpointer data)
     case 11:
       if (!dialog || !gtk_widget_get_mapped (GTK_WIDGET (dialog)))
         break;
-      if (!gtk_widget_get_mapped (find_button (GTK_WIDGET (dialog), "Create")))
+      if (!gtk_widget_get_mapped (find_button (GTK_WIDGET (dialog), "Continue")))
         break;
-      assert_visible_button (GTK_WIDGET (dialog), find_button (GTK_WIDGET (dialog), "Create"));
+      assert_visible_button (GTK_WIDGET (dialog), find_button (GTK_WIDGET (dialog), "Continue"));
       assert_visible_button (GTK_WIDGET (dialog), find_button (GTK_WIDGET (dialog), "Cancel"));
-      save_snapshot (run);
+      g_assert_false (gtk_widget_get_sensitive (find_button (GTK_WIDGET (dialog), "Continue")));
+      g_assert_true (focus_within (run, GTK_WIDGET (dialog)));
+      if (!run->chooser_reached)
+        {
+          GtkWidget *chooser = find_button (GTK_WIDGET (dialog), "Choose an ISO…");
+          g_assert_nonnull (chooser);
+          if (!focus_within (run, chooser))
+            {
+              g_assert_cmpuint (run->form_focus_steps++, <, 40);
+              gtk_widget_child_focus (GTK_WIDGET (dialog), GTK_DIR_TAB_FORWARD);
+              break;
+            }
+          if (!within_scroll_viewport (chooser))
+            break;
+          run->chooser_reached = TRUE;
+          g_assert_true (gtk_widget_child_focus (GTK_WIDGET (dialog), GTK_DIR_TAB_BACKWARD));
+          g_assert_true (focus_within (run, GTK_WIDGET (dialog)));
+          g_assert_true (gtk_widget_child_focus (GTK_WIDGET (dialog), GTK_DIR_TAB_FORWARD));
+          g_assert_true (focus_within (run, chooser));
+          run->reverse_focus = TRUE;
+          break; /* Allow the focus change to be painted before capture. */
+        }
+      if (!save_snapshot (run))
+        break;
       g_signal_emit_by_name (find_button (GTK_WIDGET (dialog), "Cancel"), "clicked");
       run->step++;
       break;
@@ -685,6 +999,55 @@ watch (gpointer data)
       run->watch = 0;
       finish (run);
       return G_SOURCE_REMOVE;
+    case 13:
+      {
+        guint count = g_list_model_get_n_items (G_LIST_MODEL (selection));
+        if (count != (run->filter_uuid ? 1u : 0u) || !run->menu_unbound)
+          break;
+        /* Filtering unbinds the old row. A held button must drop its old menu
+         * before a recycled item can receive a different machine. */
+        g_assert_null (gtk_menu_button_get_popover (run->recycled_menu));
+        if (run->filter_uuid)
+          {
+            GtkMenuButton *other = find_machine_menu (GTK_WIDGET (run->window), run->filter_uuid);
+            if (!other)
+              break;
+            gtk_menu_button_popup (other);
+            GMenuModel *model = gtk_menu_button_get_menu_model (other);
+            g_assert_nonnull (model);
+            for (int i = 0; i < g_menu_model_get_n_items (model); i++)
+              {
+                g_autoptr (GVariant) target = g_menu_model_get_item_attribute_value (
+                    model, i, G_MENU_ATTRIBUTE_TARGET, G_VARIANT_TYPE_STRING);
+                g_assert_cmpstr (g_variant_get_string (target, NULL), ==, run->filter_uuid);
+              }
+            gtk_menu_button_popdown (other);
+          }
+        GtkWidget *search = find_type (GTK_WIDGET (run->window), GTK_TYPE_SEARCH_ENTRY);
+        gtk_editable_set_text (GTK_EDITABLE (search), "");
+        run->step++;
+      }
+      break;
+    case 14:
+      {
+        if (g_list_model_get_n_items (G_LIST_MODEL (selection)) != run->domains)
+          break;
+        GtkMenuButton *options
+            = find_machine_menu (GTK_WIDGET (run->window), pirwa_machine_get_uuid (run->original));
+        if (!options)
+          break;
+        g_assert_null (gtk_menu_button_get_popover (options));
+        gtk_menu_button_popup (options);
+        g_assert_true (run->original == gtk_single_selection_get_selected_item (selection));
+        gtk_menu_button_popdown (options);
+        g_signal_handler_disconnect (gtk_list_view_get_factory (GTK_LIST_VIEW (view)),
+                                     run->menu_unbind_handler);
+        run->menu_unbind_handler = 0;
+        g_clear_object (&run->recycled_menu);
+        g_clear_pointer (&run->filter_uuid, g_free);
+        run->step = 1;
+      }
+      break;
     }
   return G_SOURCE_CONTINUE;
 }
@@ -693,6 +1056,30 @@ static gboolean
 timeout (gpointer data)
 {
   Run *run = data;
+  AdwDialog *dialog
+      = adw_application_window_get_visible_dialog (ADW_APPLICATION_WINDOW (run->window));
+  GtkWidget *import = dialog ? find_button (GTK_WIDGET (dialog), "Import Machine") : NULL;
+  GdkFrameClock *current = gtk_widget_get_frame_clock (GTK_WIDGET (run->window));
+  if (run->feedback)
+    {
+      g_autoptr (GString) feedback = g_string_new (NULL);
+      qa_frame_feedback_json (run->feedback, feedback);
+      g_printerr ("UI presentation feedback: %s\n", feedback->str);
+    }
+  g_printerr (
+      "UI state: window=%p visible=%d realized=%d current-frame=%" G_GINT64_FORMAT
+      " import-action=%d dialog=%p title=%s visible=%d mapped=%d size=%dx%d "
+      "import=%p visible=%d mapped=%d size=%dx%d\n",
+      (void *)run->window, gtk_widget_get_visible (GTK_WIDGET (run->window)),
+      gtk_widget_get_realized (GTK_WIDGET (run->window)),
+      current ? gdk_frame_clock_get_frame_counter (current) : -1, enabled (run, "import-boxes"),
+      (void *)dialog, dialog ? adw_dialog_get_title (dialog) : "none",
+      dialog && gtk_widget_get_visible (GTK_WIDGET (dialog)),
+      dialog && gtk_widget_get_mapped (GTK_WIDGET (dialog)),
+      dialog ? gtk_widget_get_width (GTK_WIDGET (dialog)) : 0,
+      dialog ? gtk_widget_get_height (GTK_WIDGET (dialog)) : 0, (void *)import,
+      import && gtk_widget_get_visible (import), import && gtk_widget_get_mapped (import),
+      import ? gtk_widget_get_width (import) : 0, import ? gtk_widget_get_height (import) : 0);
   g_error ("UI QA timed out at step %d (mapped=%d, new-enabled=%d, first-paint=%" G_GINT64_FORMAT
            ", ready=%" G_GINT64_FORMAT ", frames=%" G_GINT64_FORMAT
            ", renderer=%s, size=%dx%d, active=%d)",
@@ -708,16 +1095,19 @@ qa_activate (GApplication *application, gpointer data)
 {
   (void)application;
   Run *run = data;
+  gint64 before = g_get_monotonic_time ();
   gtk_window_present (run->window);
+  run->startup_stages[4] = g_get_monotonic_time () - before;
 }
 
 int
 main (int argc, char **argv)
 {
-  Run run = { .start = g_get_monotonic_time (), .pss_kib = -1 };
+  Run run = { .start = g_get_monotonic_time (), .pss_kib = -1, .trace_step = -1 };
   char *uri = NULL, *snapshot = NULL;
   gboolean large = FALSE, dark = FALSE;
   run.frame_costs = g_array_new (FALSE, FALSE, sizeof (gint64));
+  run.frame_cpus = g_array_new (FALSE, FALSE, sizeof (gint64));
   int width = 1040;
   GOptionEntry entries[]
       = { { "uri", 0, 0, G_OPTION_ARG_STRING, &uri, "Connection to profile", "URI" },
@@ -728,6 +1118,11 @@ main (int argc, char **argv)
             NULL },
           { "boxes-exercise", 0, 0, G_OPTION_ARG_NONE, &run.boxes_exercise,
             "Exercise the first-run GNOME Boxes guide with isolated fixtures", NULL },
+          { "boxes-deferred-exercise", 0, 0, G_OPTION_ARG_NONE, &run.boxes_deferred,
+            "Hold discovery while a modal is open, then check guide presentation", NULL },
+          { "trace", 0, 0, G_OPTION_ARG_NONE, &run.trace, "Log Boxes UI step transitions", NULL },
+          { "presentation", 0, 0, G_OPTION_ARG_NONE, &run.presentation,
+            "Profile compositor feedback (GTK 4.24+, without exercises)", NULL },
           { "duration", 0, 0, G_OPTION_ARG_INT, &run.duration, "Idle sample seconds", "SECONDS" },
           { "large-text", 0, 0, G_OPTION_ARG_NONE, &large, "Double the desktop font size", NULL },
           { "dark", 0, 0, G_OPTION_ARG_NONE, &dark, "Use dark appearance", NULL },
@@ -743,8 +1138,20 @@ main (int argc, char **argv)
     }
   if (!uri)
     uri = g_strdup ("test:///default");
-  if (run.boxes_exercise)
+  if (run.boxes_exercise || run.boxes_deferred)
     run.exercise = TRUE;
+  if (run.boxes_exercise && run.boxes_deferred)
+    {
+      g_printerr ("Choose one Boxes exercise mode.\n");
+      return 2;
+    }
+  if (run.presentation && (run.exercise || !GTK_CHECK_VERSION (4, 24, 0)))
+    {
+      g_printerr ("Presentation profiling requires GTK 4.24+ and no exercise mode.\n");
+      return 2;
+    }
+  if (run.presentation)
+    run.feedback = qa_frame_feedback_new ();
   if (run.duration < 0 || run.duration > 300 || width < 600 || width > 1920
       || (run.scrolling && run.duration == 0)
       || (run.exercise && !g_str_has_prefix (uri, "test:///")))
@@ -755,11 +1162,12 @@ main (int argc, char **argv)
   setlocale (LC_ALL, "C");
   if (run.exercise)
     g_setenv ("GTK_A11Y", "test", TRUE);
-  if (run.boxes_exercise)
+  if (run.boxes_exercise || run.boxes_deferred)
     {
       run.boxes_socket = -1;
-      run.boxes_root = g_dir_make_tmp ("pirwa-boxes-ui-XXXXXX", &error);
-      g_assert_no_error (error);
+      run.scan_gate = -1;
+      run.boxes_root = g_build_filename (g_get_user_runtime_dir (), "pirwa-boxes-ui-XXXXXX", NULL);
+      g_assert_nonnull (g_mkdtemp_full (run.boxes_root, 0700));
       run.boxes_paths = g_new0 (PirwaBoxesPaths, 1);
       run.boxes_paths->native_uri = g_strdup (uri);
       run.boxes_paths->state_file = g_build_filename (run.boxes_root, "state.ini", NULL);
@@ -781,16 +1189,38 @@ main (int argc, char **argv)
       run.boxes_paths->flatpak_program = g_strdup (program);
       g_assert_true (g_file_set_contents (program, "#!/bin/sh\nexit 0\n", -1, &error));
       g_assert_no_error (error);
+      if (run.boxes_deferred)
+        {
+          g_autofree char *gate = g_build_filename (run.boxes_root, "scan-gate", NULL);
+          g_autofree char *ready = g_build_filename (run.boxes_root, "scan-ready", NULL);
+          g_autofree char *released = g_build_filename (run.boxes_root, "scan-released", NULL);
+          g_assert_cmpint (mkfifo (gate, 0600), ==, 0);
+          run.scan_gate = open (gate, O_RDWR | O_NONBLOCK | O_CLOEXEC);
+          g_assert_cmpint (run.scan_gate, >=, 0);
+          g_autofree char *gate_quoted = g_shell_quote (gate);
+          g_autofree char *ready_quoted = g_shell_quote (ready);
+          g_autofree char *released_quoted = g_shell_quote (released);
+          g_autofree char *script
+              = g_strdup_printf ("#!/bin/sh\nif [ ! -f %s ]; then\n  exec 3< %s\n  : > %s\n"
+                                 "  IFS= read -r token <&3\n  exec 3<&-\nfi\nexit 0\n",
+                                 released_quoted, gate_quoted, ready_quoted);
+          g_assert_true (g_file_set_contents (program, script, -1, &error));
+          g_assert_no_error (error);
+        }
       g_assert_cmpint (g_chmod (program, 0700), ==, 0);
       g_autofree char *path = g_strconcat (bin, ":", g_getenv ("PATH"), NULL);
       g_setenv ("PATH", path, TRUE);
     }
+  gint64 stage_start = g_get_monotonic_time ();
   if (!gtk_init_check ())
     {
       g_printerr ("A desktop display is required for explicit UI QA.\n");
       return 77;
     }
+  run.startup_stages[0] = g_get_monotonic_time () - stage_start;
+  stage_start = g_get_monotonic_time ();
   adw_init ();
+  run.startup_stages[1] = g_get_monotonic_time () - stage_start;
   if (large)
     {
       g_autofree char *font = NULL;
@@ -810,29 +1240,30 @@ main (int argc, char **argv)
   /* Unexpected GTK/GObject warnings in these paths are test failures. */
   g_log_set_always_fatal (G_LOG_FATAL_MASK | G_LOG_LEVEL_WARNING | G_LOG_LEVEL_CRITICAL);
   g_autoptr (AdwApplication) application
-      = adw_application_new ("io.github.pirwa.Pirwa.QA", G_APPLICATION_NON_UNIQUE);
+      = adw_application_new ("io.github.stonega.Pirwa.QA", G_APPLICATION_NON_UNIQUE);
+  stage_start = g_get_monotonic_time ();
   g_assert_true (g_application_register (G_APPLICATION (application), NULL, &error));
+  run.startup_stages[2] = g_get_monotonic_time () - stage_start;
   g_assert_no_error (error);
   run.application = GTK_APPLICATION (application);
+  run.uri = uri;
+  active_run = &run;
   run.snapshot = snapshot;
+  stage_start = g_get_monotonic_time ();
   run.window = run.boxes_paths ? pirwa_window_new_with_boxes (run.application, uri, run.boxes_paths)
                                : pirwa_window_new (run.application, uri);
+  run.startup_stages[3] = g_get_monotonic_time () - stage_start;
   run.requested_width = width;
-  gtk_window_set_default_size (run.window, width, 680);
-  g_signal_connect (run.window, "map", G_CALLBACK (mapped), &run);
+  observe_window (&run, run.window);
   g_signal_connect (application, "activate", G_CALLBACK (qa_activate), &run);
   run.watch = g_timeout_add (10, watch, &run);
   run.timeout = g_timeout_add_seconds (run.duration + 20, timeout, &run);
   int result = g_application_run (G_APPLICATION (application), 0, NULL);
+  active_run = NULL;
   if (run.watch)
     g_source_remove (run.watch);
   g_source_remove (run.timeout);
-  if (run.clock)
-    {
-      g_signal_handler_disconnect (run.clock, run.paint_handler);
-      g_signal_handler_disconnect (run.clock, run.before_handler);
-      g_object_unref (run.clock);
-    }
+  clear_clock (&run);
   g_clear_object (&run.original);
   g_assert_true (run.finished);
   double cpu = run.idle_wall_us > 0 ? run.idle_cpu_ns / (run.idle_wall_us * 10.0) : 0;
@@ -841,18 +1272,45 @@ main (int argc, char **argv)
       ",\"ready_monotonic_us\":%" G_GINT64_FORMAT ",\"main_to_first_paint_ms\":%.3f,"
       "\"sample_wall_ms\":%.3f,\"sample_cpu_percent\":%.4f,\"sample_frames\":%" G_GINT64_FORMAT
       ",\"pss_kib\":%" G_GINT64_FORMAT ",\"exercise_steps\":%d,\"domains\":%u,\"renderer\":\"%s\","
+      "\"sample_start_monotonic_us\":%" G_GINT64_FORMAT
+      ",\"sample_end_monotonic_us\":%" G_GINT64_FORMAT ","
       "\"text_scale\":%d,\"scroll\":%s,\"focus_kind\":\"%s\",\"initial_focus_kind\":\"%s\","
       "\"active\":%s,\"refresh_millihz\":%d,\"surface_scale\":%d,\"frame_work_us\":[",
       run.start, run.first_paint, run.ready, (run.first_paint - run.start) / 1000.0,
       run.idle_wall_us / 1000.0, cpu, run.idle_frames, run.pss_kib, run.step, run.domains,
-      run.renderer, large ? 2 : 1, run.scrolling ? "true" : "false",
+      run.renderer, run.idle_start, run.idle_start ? run.idle_start + run.idle_wall_us : 0,
+      large ? 2 : 1, run.scrolling ? "true" : "false",
       run.focus_kind ? run.focus_kind : "not-sampled",
       run.initial_focus_kind ? run.initial_focus_kind : "not-sampled",
       run.window_active ? "true" : "false", run.refresh_millihz, run.surface_scale);
   for (guint i = 0; i < run.frame_costs->len; i++)
     g_print ("%s%" G_GINT64_FORMAT, i ? "," : "", g_array_index (run.frame_costs, gint64, i));
-  g_print ("]}\n");
+  g_print ("],\"frame_cpu_us\":[");
+  for (guint i = 0; i < run.frame_cpus->len; i++)
+    g_print ("%s%" G_GINT64_FORMAT, i ? "," : "", g_array_index (run.frame_cpus, gint64, i));
+  g_print ("],\"form_focus_steps\":%u,\"chooser_reached\":%s,\"reverse_focus\":%s,"
+           "\"windows_observed\":%u,\"windows_painted\":%u,\"scans_finished\":%u,"
+           "\"first_presentation_monotonic_us\":%" G_GINT64_FORMAT ","
+           "\"feedback_dropped\":%u,\"presentation_feedback\":",
+           run.form_focus_steps, run.chooser_reached ? "true" : "false",
+           run.reverse_focus ? "true" : "false", run.windows_observed, run.windows_painted,
+           run.scans_finished, run.first_presentation, run.feedback_dropped);
+  if (run.feedback)
+    {
+      g_autoptr (GString) json = g_string_new (NULL);
+      qa_frame_feedback_json (run.feedback, json);
+      g_print ("%s", json->str);
+    }
+  else
+    g_print ("null");
+  g_print (",\"startup_stage_us\":{\"gtk_init\":%" G_GINT64_FORMAT ",\"adw_init\":%" G_GINT64_FORMAT
+           ",\"application_register\":%" G_GINT64_FORMAT ",\"window_new\":%" G_GINT64_FORMAT
+           ",\"window_present\":%" G_GINT64_FORMAT "}}\n",
+           run.startup_stages[0], run.startup_stages[1], run.startup_stages[2],
+           run.startup_stages[3], run.startup_stages[4]);
+  g_clear_pointer (&run.feedback, g_array_unref);
   g_array_unref (run.frame_costs);
+  g_array_unref (run.frame_cpus);
   g_free (run.renderer);
   g_free (run.focus_kind);
   g_free (run.initial_focus_kind);
@@ -862,8 +1320,15 @@ main (int argc, char **argv)
     {
       if (run.boxes_socket >= 0)
         close (run.boxes_socket);
-      const char *files[] = { "state.ini", "bin/flatpak", "config/libvirt/qemu/boxes.xml",
-                              "runtime/libvirt/libvirt-sock" };
+      if (run.scan_gate >= 0)
+        close (run.scan_gate);
+      const char *files[] = { "state.ini",
+                              "bin/flatpak",
+                              "config/libvirt/qemu/boxes.xml",
+                              "runtime/libvirt/libvirt-sock",
+                              "scan-gate",
+                              "scan-ready",
+                              "scan-released" };
       const char *dirs[] = { "bin",    "config/libvirt/qemu", "config/libvirt",
                              "config", "runtime/libvirt",     "runtime" };
       for (guint i = 0; i < G_N_ELEMENTS (files); i++)

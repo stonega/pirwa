@@ -2,6 +2,7 @@
 /* Explicit desktop QA with synthetic domains; never opens a real guest. */
 #include "pirwa-console.h"
 #include "pirwa-display.h"
+#include "pirwa-preferences.h"
 #include "pirwa-window.h"
 #include <glib/gstdio.h>
 
@@ -12,7 +13,10 @@ static GtkSingleSelection *selection;
 static GMainLoop *loop;
 static char *output;
 static guint step;
+static guint startup_step;
 static guint ticks;
+static gint64 detach_frame;
+static gint64 stopped_frame = -1;
 static int width = 1040;
 static GDBusConnection *desktop_bus;
 static char *keyboard_path;
@@ -177,10 +181,53 @@ assert_header_action (const char *name)
                      gtk_widget_get_width (GTK_WIDGET (window)));
 }
 
+static GtkWidget *
+assert_header_resources (const char *text)
+{
+  GtkWidget *shutdown = find_action (GTK_WIDGET (window), "win.shutdown");
+  g_assert_nonnull (shutdown);
+  GtkWidget *header = gtk_widget_get_ancestor (shutdown, ADW_TYPE_HEADER_BAR);
+  g_assert_nonnull (header);
+  GtkWidget *resources = find_label_prefix (header, text);
+  g_assert_nonnull (resources);
+  g_assert_cmpstr (widget_text (resources), ==, text);
+  g_assert_true (gtk_widget_is_visible (resources));
+  g_assert_nonnull (gtk_widget_get_ancestor (resources, ADW_TYPE_HEADER_BAR));
+  g_assert_cmpstr (gtk_widget_get_tooltip_text (resources), ==, text);
+  return resources;
+}
+
+static void
+reopen_window (const char *uri)
+{
+  GtkWindow *previous = window;
+  window = pirwa_window_new (application, uri);
+  gtk_window_set_default_size (window, width, 680);
+  gtk_window_present (window);
+  gtk_window_close (previous);
+  selection = NULL;
+}
+
+static gboolean
+window_is_visible (void)
+{
+  if (!desktop_bus || !gtk_window_is_suspended (window))
+    return TRUE;
+  gint64 now = g_get_monotonic_time ();
+  if (!focus_source && now - focus_requested_at >= G_USEC_PER_SEC)
+    {
+      /* Initial mapping/overview transitions can consume a request.
+       * Retry only until visible; the existing watchdog bounds QA. */
+      focus_requested_at = now;
+      focus_source = g_timeout_add (40, focus_private_window, NULL);
+    }
+  return FALSE;
+}
+
 static gboolean
 advance (gpointer data)
 {
-  (void)data;
+  const char *uri = data;
   if (++ticks > 150)
     {
       GtkWidget *reading = find_label_prefix (GTK_WIDGET (window), "CPU ");
@@ -195,32 +242,112 @@ advance (gpointer data)
   switch (step)
     {
     case 0:
-      if (!g_action_group_get_action_enabled (G_ACTION_GROUP (window), "new"))
+      if (!g_action_group_get_action_enabled (G_ACTION_GROUP (window), "new")
+          || !window_is_visible ())
         break;
       {
         GtkWidget *list = find_type (GTK_WIDGET (window), GTK_TYPE_LIST_VIEW);
         g_assert_nonnull (list);
         selection = GTK_SINGLE_SELECTION (gtk_list_view_get_model (GTK_LIST_VIEW (list)));
-        gtk_single_selection_set_selected (selection, 0);
+        if (startup_step == 0)
+          {
+            g_assert_cmpuint (gtk_single_selection_get_selected (selection), ==, 0);
+            gtk_single_selection_set_selected (selection, 2);
+            startup_step++;
+            break;
+          }
+        if (startup_step == 1)
+          {
+            g_autoptr (GSettings) settings = pirwa_preferences_new ();
+            g_autofree char *saved = pirwa_preferences_get_selected_machine (settings, uri);
+            g_assert_cmpstr (saved, ==, "33333333-3333-4333-8333-333333333333");
+            reopen_window (uri);
+            startup_step++;
+            break;
+          }
+        if (startup_step == 2)
+          {
+            g_assert_cmpuint (gtk_single_selection_get_selected (selection), ==, 2);
+            activate ("refresh");
+            startup_step++;
+            break;
+          }
+        if (startup_step == 3)
+          {
+            g_assert_cmpuint (gtk_single_selection_get_selected (selection), ==, 2);
+            g_autoptr (GSettings) settings = pirwa_preferences_new ();
+            g_assert_true (pirwa_preferences_set_selected_machine (
+                settings, uri, "44444444-4444-4444-8444-444444444444"));
+            reopen_window (uri);
+            startup_step++;
+            break;
+          }
+        g_assert_cmpuint (gtk_single_selection_get_selected (selection), ==, 0);
+        gtk_single_selection_set_selected (selection, 2);
         step++;
       }
       break;
     case 1:
+      if (!g_action_group_get_action_enabled (G_ACTION_GROUP (window), "edit"))
+        break;
+      if (stopped_frame < 0)
+        {
+          stopped_frame = gdk_frame_clock_get_frame_counter (
+              gtk_widget_get_frame_clock (GTK_WIDGET (window)));
+          gtk_widget_queue_draw (GTK_WIDGET (window));
+          break;
+        }
+      if (gdk_frame_clock_get_frame_counter (gtk_widget_get_frame_clock (GTK_WIDGET (window)))
+          <= stopped_frame)
+        break;
+      {
+        GtkWidget *start = find_action (GTK_WIDGET (window), "win.start");
+        g_assert_nonnull (start);
+        g_assert_true (gtk_widget_get_mapped (start));
+        g_assert_null (gtk_widget_get_ancestor (start, ADW_TYPE_HEADER_BAR));
+        GtkWidget *status = gtk_widget_get_ancestor (start, ADW_TYPE_STATUS_PAGE);
+        g_assert_nonnull (status);
+        g_assert_cmpstr (adw_status_page_get_description (ADW_STATUS_PAGE (status)), ==, "");
+        GtkWidget *details = find_label_prefix (status, "1 CPUs · 512 MiB RAM");
+        g_assert_nonnull (details);
+        g_assert_true (gtk_widget_is_visible (details));
+        graphene_rect_t start_bounds, details_bounds;
+        g_assert_true (gtk_widget_compute_bounds (start, status, &start_bounds));
+        g_assert_true (gtk_widget_compute_bounds (details, status, &details_bounds));
+        g_assert_cmpfloat (start_bounds.origin.y, >,
+                           details_bounds.origin.y + details_bounds.size.height);
+        g_assert_cmpfloat_with_epsilon (start_bounds.origin.x + start_bounds.size.width / 2,
+                                        gtk_widget_get_width (status) / 2.0, 1);
+        GtkWidget *shutdown = find_action (GTK_WIDGET (window), "win.shutdown");
+        GtkWidget *header = gtk_widget_get_ancestor (shutdown, ADW_TYPE_HEADER_BAR);
+        g_assert_false (gtk_widget_is_visible (gtk_widget_get_parent (shutdown)));
+        GtkWidget *resources = find_label_prefix (header, "1 CPUs · 512 MiB RAM");
+        g_assert_nonnull (resources);
+        g_assert_false (gtk_widget_is_visible (resources));
+        GtkWidget *eject = find_action (GTK_WIDGET (window), "win.eject");
+        g_assert_nonnull (eject);
+        g_assert_false (gtk_widget_is_visible (eject));
+        g_assert_false (g_action_group_get_action_enabled (G_ACTION_GROUP (window), "eject"));
+        GtkWidget *state = find_label_prefix (header, "Powered off");
+        g_assert_nonnull (state);
+        g_assert_false (gtk_widget_is_visible (state));
+        g_assert_null (find_label_prefix (header, "x86_64"));
+        if (!save_snapshot (window, "stopped.png"))
+          break;
+        gtk_single_selection_set_selected (selection, GTK_INVALID_LIST_POSITION);
+        g_assert_false (gtk_widget_is_visible (resources));
+        g_assert_cmpstr (widget_text (resources), ==, "");
+        gtk_single_selection_set_selected (selection, 0);
+        g_assert_cmpstr (widget_text (resources), ==, "Loading resources…");
+        step++;
+      }
+      break;
+    case 2:
       console = (PirwaConsole *)find_type (GTK_WIDGET (window), PIRWA_TYPE_CONSOLE);
       if (!console)
         break;
-      if (desktop_bus && gtk_window_is_suspended (window))
-        {
-          gint64 now = g_get_monotonic_time ();
-          if (!focus_source && now - focus_requested_at >= G_USEC_PER_SEC)
-            {
-              /* Initial mapping/overview transitions can consume a request.
-               * Retry only until visible; the existing watchdog bounds QA. */
-              focus_requested_at = now;
-              focus_source = g_timeout_add (40, focus_private_window, NULL);
-            }
-          break;
-        }
+      if (!window_is_visible ())
+        break;
       GtkWidget *usage = find_label_prefix (GTK_WIDGET (window), "CPU ");
       if (!usage)
         usage = find_label_prefix (GTK_WIDGET (window), "Usage unavailable");
@@ -228,8 +355,8 @@ advance (gpointer data)
         usage = find_label_prefix (GTK_WIDGET (window), "Sampling usage");
       if (!usage)
         break; /* A visible window must complete a real backend sample. */
-      GtkWidget *host = find_label_prefix (GTK_WIDGET (window), "x86_64 ·");
-      g_assert_nonnull (host);
+      GtkWidget *resources = assert_header_resources ("2 CPUs · 1024 MiB RAM");
+      g_assert_false (gtk_widget_is_visible (find_action (GTK_WIDGET (window), "win.start")));
       GtkWidget *network = find_label_prefix (GTK_WIDGET (window), "↓ ");
       if (!network)
         network = find_label_prefix (GTK_WIDGET (window), "NET ");
@@ -239,17 +366,21 @@ advance (gpointer data)
       GtkWidget *sidebar = gtk_paned_get_start_child (paned);
       g_assert_cmpint (gtk_widget_get_height (sidebar), ==,
                        gtk_widget_get_height (GTK_WIDGET (window)));
-      graphene_rect_t host_bounds, usage_bounds;
-      g_assert_true (gtk_widget_compute_bounds (host, GTK_WIDGET (window), &host_bounds));
+      graphene_rect_t resources_bounds, usage_bounds;
+      g_assert_true (gtk_widget_compute_bounds (resources, GTK_WIDGET (window), &resources_bounds));
       g_assert_true (gtk_widget_compute_bounds (usage, GTK_WIDGET (window), &usage_bounds));
-      g_assert_cmpfloat (host_bounds.origin.x, >=, gtk_widget_get_width (sidebar));
-      g_assert_cmpfloat (host_bounds.origin.x, <, usage_bounds.origin.x);
+      g_assert_cmpfloat (resources_bounds.origin.x, >=, gtk_widget_get_width (sidebar));
+      g_assert_cmpfloat (resources_bounds.origin.x, <, usage_bounds.origin.x);
       g_assert_cmpfloat (usage_bounds.origin.x + usage_bounds.size.width, <=,
                          gtk_widget_get_width (GTK_WIDGET (window)));
-      g_assert_cmpfloat (gtk_inscription_get_xalign (GTK_INSCRIPTION (host)), ==, 0);
-      g_assert_cmpfloat (gtk_inscription_get_xalign (GTK_INSCRIPTION (usage)), ==, 1);
-      GtkWidget *header = gtk_widget_get_ancestor (host, ADW_TYPE_HEADER_BAR);
+      g_assert_cmpfloat (gtk_label_get_xalign (GTK_LABEL (resources)), ==, 0);
+      g_assert_cmpfloat (gtk_label_get_xalign (GTK_LABEL (usage)), ==, 1);
+      GtkWidget *header = gtk_widget_get_ancestor (resources, ADW_TYPE_HEADER_BAR);
       g_assert_nonnull (header);
+      g_assert_null (find_label_prefix (header, "x86_64"));
+      GtkWidget *state = find_label_prefix (header, "Running");
+      g_assert_nonnull (state);
+      g_assert_false (gtk_widget_is_visible (state));
       g_assert_true (gtk_widget_get_ancestor (usage, ADW_TYPE_HEADER_BAR) == header);
       g_assert_true (gtk_widget_get_ancestor (network, ADW_TYPE_HEADER_BAR) == header);
       g_assert_cmpint (adw_toolbar_view_get_bottom_bar_height (
@@ -258,28 +389,87 @@ advance (gpointer data)
       g_assert_cmpint (gtk_widget_get_width (GTK_WIDGET (window)), <=, width);
       assert_header_action ("win.pause");
       assert_header_action ("win.shutdown");
+      GtkWidget *shutdown = find_action (GTK_WIDGET (window), "win.shutdown");
+      GtkWidget *eject = find_action (GTK_WIDGET (window), "win.eject");
+      g_assert_true (gtk_widget_is_visible (eject));
+      g_assert_true (g_action_group_get_action_enabled (G_ACTION_GROUP (window), "eject"));
+      g_assert_true (gtk_widget_get_next_sibling (shutdown) == eject);
+      GtkLabel *media = GTK_LABEL (find_type (eject, GTK_TYPE_LABEL));
+      g_assert_cmpstr (gtk_label_get_text (media), ==,
+                       "Fedora-Workstation-Live-x86_64-43-1.6-installation-media.iso");
+      g_assert_cmpint (gtk_label_get_max_width_chars (media), ==, 18);
+      g_assert_cmpint (gtk_label_get_ellipsize (media), ==, PANGO_ELLIPSIZE_END);
+      g_assert_true (pango_layout_is_ellipsized (gtk_label_get_layout (media)));
+      g_assert_cmpstr (gtk_widget_get_tooltip_text (eject), ==,
+                       "Eject Fedora-Workstation-Live-x86_64-43-1.6-installation-media.iso");
+      GtkImage *eject_icon = GTK_IMAGE (find_type (eject, GTK_TYPE_IMAGE));
+      g_assert_cmpstr (gtk_image_get_icon_name (eject_icon), ==, "media-eject-symbolic");
+      assert_header_action ("win.eject");
+      graphene_rect_t console_bounds, shutdown_bounds;
+      g_assert_true (
+          gtk_widget_compute_bounds (GTK_WIDGET (console), GTK_WIDGET (window), &console_bounds));
+      g_assert_true (gtk_widget_compute_bounds (shutdown, GTK_WIDGET (window), &shutdown_bounds));
+      GtkWidget *guest = find_type (GTK_WIDGET (console), PIRWA_TYPE_DISPLAY);
+      g_assert_nonnull (guest);
+      g_assert_cmpfloat_with_epsilon (console_bounds.origin.x + gtk_widget_get_margin_start (guest),
+                                      shutdown_bounds.origin.x, 1);
+      g_assert_cmpfloat_with_epsilon (console_bounds.origin.x + console_bounds.size.width
+                                          - gtk_widget_get_margin_end (guest),
+                                      gtk_widget_get_width (GTK_WIDGET (window)) - 6, 1);
       assert_header_action ("win.reboot");
       assert_header_action ("win.pop-out");
+      graphene_rect_t controls_bounds;
+      GtkWidget *controls = gtk_widget_get_parent (shutdown);
+      g_assert_true (gtk_widget_compute_bounds (controls, GTK_WIDGET (window), &controls_bounds));
+      g_assert_cmpfloat (controls_bounds.origin.x + controls_bounds.size.width, <=,
+                         resources_bounds.origin.x);
       g_assert_null (find_action (GTK_WIDGET (window), "win.edit"));
       g_assert_null (find_action (GTK_WIDGET (window), "win.force-stop"));
       g_assert_null (find_action (GTK_WIDGET (window), "win.remove"));
       if (!save_snapshot (window, "embedded.png"))
         break;
+      {
+        activate ("preferences");
+        AdwDialog *preferences
+            = adw_application_window_get_visible_dialog (ADW_APPLICATION_WINDOW (window));
+        g_assert_nonnull (preferences);
+        GtkWidget *resize = find_type (GTK_WIDGET (preferences), ADW_TYPE_SWITCH_ROW);
+        g_assert_nonnull (resize);
+        g_assert_false (adw_switch_row_get_active (ADW_SWITCH_ROW (resize)));
+        g_autoptr (GSettings) settings = pirwa_preferences_new ();
+        adw_switch_row_set_active (ADW_SWITCH_ROW (resize), TRUE);
+        g_assert_true (g_settings_get_boolean (settings, "auto-resize-display"));
+        adw_switch_row_set_active (ADW_SWITCH_ROW (resize), FALSE);
+        adw_dialog_force_close (preferences);
+      }
       g_object_add_weak_pointer (G_OBJECT (console), (gpointer *)&console);
+      detach_frame
+          = gdk_frame_clock_get_frame_counter (gtk_widget_get_frame_clock (GTK_WIDGET (window)));
       activate ("pop-out");
       g_assert_true (pirwa_console_is_detached (console));
       step++;
       break;
-    case 2:
+    case 3:
       {
+        /* Reparenting and changing the visible stack child need a layout frame. */
+        if (gdk_frame_clock_get_frame_counter (gtk_widget_get_frame_clock (GTK_WIDGET (window)))
+            <= detach_frame)
+          break;
         g_assert_nonnull (popup ());
         g_assert_true (gtk_widget_get_root (GTK_WIDGET (console)) == GTK_ROOT (popup ()));
         GtkWidget *bring_back = find_action (GTK_WIDGET (window), "win.return-viewer");
         g_assert_nonnull (bring_back);
         g_assert_true (gtk_widget_get_mapped (bring_back));
-        graphene_rect_t bounds;
+        GtkWidget *detached_label
+            = find_label_prefix (GTK_WIDGET (window), "Viewer is in a separate window");
+        g_assert_nonnull (detached_label);
+        graphene_rect_t bounds, label_bounds;
         g_assert_true (gtk_widget_compute_bounds (bring_back, GTK_WIDGET (window), &bounds));
-        g_assert_cmpfloat (bounds.origin.y, <, 140);
+        g_assert_true (
+            gtk_widget_compute_bounds (detached_label, GTK_WIDGET (window), &label_bounds));
+        g_assert_cmpfloat (bounds.origin.y, >, label_bounds.origin.y + label_bounds.size.height);
+        g_assert_cmpfloat_with_epsilon (bounds.origin.x + bounds.size.width / 2,
+                                        label_bounds.origin.x + label_bounds.size.width / 2, 1);
         if (!save_snapshot (window, "detached.png") || !save_snapshot (popup (), "popup.png"))
           break;
         activate ("return-viewer");
@@ -291,7 +481,7 @@ advance (gpointer data)
         step++;
       }
       break;
-    case 3:
+    case 4:
       if (!gtk_window_is_fullscreen (popup ()))
         break;
       {
@@ -309,22 +499,34 @@ advance (gpointer data)
         step++;
       }
       break;
-    case 4:
+    case 5:
       {
         GtkWidget *other = find_type (GTK_WIDGET (window), PIRWA_TYPE_CONSOLE);
         if (!other)
           break;
+        assert_header_resources ("4 CPUs · 2048 MiB RAM");
+        g_assert_false (gtk_widget_is_visible (find_action (GTK_WIDGET (window), "win.eject")));
         g_assert_true (other != GTK_WIDGET (console));
         g_assert_nonnull (popup ());
         gtk_single_selection_set_selected (selection, 0);
         step++;
       }
       break;
-    case 5:
-      if (!g_action_group_get_action_enabled (G_ACTION_GROUP (window), "return-viewer"))
+    case 6:
+      if (!g_action_group_get_action_enabled (G_ACTION_GROUP (window), "return-viewer")
+          || !g_action_group_get_action_enabled (G_ACTION_GROUP (window), "eject"))
         break;
       activate ("return-viewer");
       g_assert_true (find_type (GTK_WIDGET (window), PIRWA_TYPE_CONSOLE) == GTK_WIDGET (console));
+      activate ("eject");
+      step++;
+      break;
+    case 7:
+      if (!g_action_group_get_action_enabled (G_ACTION_GROUP (window), "new")
+          || find_label_prefix (GTK_WIDGET (window), "Loading resources"))
+        break;
+      g_assert_false (gtk_widget_is_visible (find_action (GTK_WIDGET (window), "win.eject")));
+      g_assert_false (g_action_group_get_action_enabled (G_ACTION_GROUP (window), "eject"));
       activate ("pop-out");
       gtk_window_close (window); /* An explicit popup survives its collection. */
       window = NULL;
@@ -332,14 +534,19 @@ advance (gpointer data)
       g_assert_nonnull (popup ());
       step++;
       break;
-    case 6:
+    case 8:
       gtk_window_close (popup ());
       step++;
       break;
-    case 7:
+    case 9:
       if (console)
         break;
-      g_print ("PASS embedded viewer, header actions, pop-out/return identity, fullscreen, "
+      g_print ("PASS initial machine selection, remembered selection after reopening, refresh "
+               "preservation, missing-machine fallback, centered stopped-machine Start, "
+               "hidden stopped header controls and resources, "
+               "VM configuration and state in running header, embedded viewer, header actions, "
+               "mounted media name and eject, "
+               "pop-out/return identity, fullscreen, "
                "selection changes, popup close, collection close, final session disposal\n");
       g_main_loop_quit (loop);
       return G_SOURCE_REMOVE;
@@ -361,6 +568,7 @@ main (int argc, char **argv)
   g_option_context_add_main_entries (options, entries, NULL);
   g_assert_true (g_option_context_parse (options, &argc, &argv, NULL));
   g_setenv ("GTK_A11Y", "test", TRUE);
+  g_setenv ("GSETTINGS_BACKEND", "memory", TRUE);
   adw_init ();
   setup_private_keyboard ();
   g_object_set (gtk_settings_get_default (), "gtk-enable-animations", FALSE, NULL);
@@ -379,20 +587,28 @@ main (int argc, char **argv)
         "<domain type='test'><name>Embedded "
         "Test</name><uuid>11111111-1111-4111-8111-111111111111</uuid>"
         "<memory>1048576</memory><vcpu>2</vcpu><os><type>hvm</type></os>"
-        "<devices><graphics type='spice' autoport='yes'/></devices></domain>"
+        "<devices><graphics type='spice' autoport='yes'/>"
+        "<disk type='file' device='cdrom'><source file='/images/"
+        "Fedora-Workstation-Live-x86_64-43-1.6-installation-media.iso'/>"
+        "<target dev='sda' bus='sata'/><readonly/></disk></devices></domain>"
         "<domain type='test'><name>Other "
         "Test</name><uuid>22222222-2222-4222-8222-222222222222</uuid>"
-        "<memory>1048576</memory><vcpu>2</vcpu><os><type>hvm</type></os>"
+        "<memory>2097152</memory><vcpu>4</vcpu><os><type>hvm</type></os>"
+        "<devices><graphics type='spice' autoport='yes'/></devices></domain>"
+        "<domain type='test'><name>Stopped "
+        "Test</name><uuid>33333333-3333-4333-8333-333333333333</uuid>"
+        "<memory>524288</memory><vcpu>1</vcpu><os><type>hvm</type></os>"
+        "<test:runstate xmlns:test='http://libvirt.org/schemas/domain/test/1.0'>5</test:runstate>"
         "<devices><graphics type='spice' autoport='yes'/></devices></domain></node>";
   g_assert_true (g_file_set_contents (node, xml, -1, NULL));
   g_autofree char *uri = g_strconcat ("test://", node, NULL);
-  application = gtk_application_new ("io.github.pirwa.ConsoleQA", G_APPLICATION_NON_UNIQUE);
+  application = gtk_application_new ("io.github.stonega.ConsoleQA", G_APPLICATION_NON_UNIQUE);
   g_assert_true (g_application_register (G_APPLICATION (application), NULL, NULL));
   loop = g_main_loop_new (NULL, FALSE);
   window = pirwa_window_new (application, uri);
   gtk_window_set_default_size (window, width, 680);
   gtk_window_present (window);
-  g_timeout_add (200, advance, NULL);
+  g_timeout_add (200, advance, uri);
   g_main_loop_run (loop);
   g_main_loop_unref (loop);
   if (desktop_bus)

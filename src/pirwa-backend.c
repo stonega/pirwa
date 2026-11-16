@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 #include "pirwa-backend.h"
+#include "pirwa-network.h"
 #include "pirwa-provision.h"
 #include <libvirt-glib/libvirt-glib.h>
 #include <unistd.h>
@@ -22,6 +23,7 @@ typedef struct
   virConnectPtr connection;
   PirwaInventoryCache *inventory_cache;
   int event_id;
+  int tray_event_id;
   gboolean close_registered;
   gint stopping;
   gint refresh_pending;
@@ -63,9 +65,12 @@ job_free (gpointer data)
   g_clear_object (&job->task);
   g_free ((char *)job->request.uuid);
   g_free ((char *)job->request.source_uri);
+  g_free ((char *)job->request.media_source);
+  g_free ((char *)job->request.media_target);
   g_free (job->request.options.name);
   g_free (job->request.options.source);
   g_free (job->request.options.pool);
+  g_free (job->request.options.driver_iso);
   g_free (job);
 }
 
@@ -188,6 +193,17 @@ lifecycle (virConnectPtr connection, virDomainPtr domain, int event, int detail,
 }
 
 static void
+tray_changed (virConnectPtr connection, virDomainPtr domain, const char *alias, int reason,
+              void *opaque)
+{
+  (void)connection;
+  (void)domain;
+  (void)alias;
+  (void)reason;
+  queue_event (opaque, PIRWA_REFRESH);
+}
+
+static void
 connection_closed (virConnectPtr connection, int reason, void *opaque)
 {
   (void)connection;
@@ -215,10 +231,13 @@ close_connection (BackendState *state)
     virConnectUnregisterCloseCallback (state->connection, connection_closed);
   if (state->event_id >= 0)
     virConnectDomainEventDeregisterAny (state->connection, state->event_id);
+  if (state->tray_event_id >= 0)
+    virConnectDomainEventDeregisterAny (state->connection, state->tray_event_id);
   virConnectClose (state->connection);
   state->connection = NULL;
   state->close_registered = FALSE;
   state->event_id = -1;
+  state->tray_event_id = -1;
 }
 
 static gboolean
@@ -244,11 +263,22 @@ connect_backend (BackendState *state, GError **error)
       return FALSE;
     }
   state_ref (state);
-  if (virConnectRegisterCloseCallback (state->connection, connection_closed, state, state_unref)
-      == 0)
-    state->close_registered = TRUE;
-  else
+  state->tray_event_id = virConnectDomainEventRegisterAny (
+      state->connection, NULL, VIR_DOMAIN_EVENT_ID_TRAY_CHANGE,
+      VIR_DOMAIN_EVENT_CALLBACK (tray_changed), state, state_unref);
+  if (state->tray_event_id < 0)
     state_unref (state);
+  /* Only QEMU has a persistent transport among our supported drivers. The
+   * test driver's successful no-op never calls the opaque-data destructor. */
+  if (g_strcmp0 (virConnectGetType (state->connection), "QEMU") == 0)
+    {
+      state_ref (state);
+      if (virConnectRegisterCloseCallback (state->connection, connection_closed, state, state_unref)
+          == 0)
+        state->close_registered = TRUE;
+      else
+        state_unref (state);
+    }
   state->retries = 0;
   return TRUE;
 }
@@ -313,6 +343,50 @@ edit_domain (virConnectPtr connection, virDomainPtr domain, const PirwaRequest *
   return TRUE;
 }
 
+static gboolean
+eject_media (virDomainPtr domain, const PirwaRequest *request, GCancellable *cancellable,
+             GError **error)
+{
+  int active = virDomainIsActive (domain);
+  if (active < 0)
+    {
+      pirwa_libvirt_error (error, "Cannot read VM state");
+      return FALSE;
+    }
+  int persistent = virDomainIsPersistent (domain);
+  if (persistent < 0)
+    {
+      pirwa_libvirt_error (error, "Cannot read VM persistence");
+      return FALSE;
+    }
+  g_autofree char *xml = virDomainGetXMLDesc (domain, 0);
+  if (!xml)
+    {
+      pirwa_libvirt_error (error, "Cannot read mounted media");
+      return FALSE;
+    }
+  g_autoptr (PirwaDetails) media = pirwa_config_parse (xml, error);
+  if (!media)
+    return FALSE;
+  if (!media->media_source || !request->media_source || !request->media_target
+      || g_strcmp0 (media->media_source, request->media_source) != 0
+      || g_strcmp0 (media->media_target, request->media_target) != 0)
+    {
+      g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_BUSY, "Mounted media changed. Try again.");
+      return FALSE;
+    }
+  if (g_cancellable_set_error_if_cancelled (cancellable, error))
+    return FALSE;
+  unsigned int flags
+      = (active ? VIR_DOMAIN_AFFECT_LIVE : 0) | (persistent ? VIR_DOMAIN_AFFECT_CONFIG : 0);
+  if (virDomainUpdateDeviceFlags (domain, media->media_eject_xml, flags) < 0)
+    {
+      pirwa_libvirt_error (error, "Cannot eject media");
+      return FALSE;
+    }
+  return TRUE;
+}
+
 static PirwaReply *
 execute (BackendState *state, const PirwaRequest *request, GCancellable *cancellable,
          gboolean describe_host, GError **error)
@@ -320,9 +394,15 @@ execute (BackendState *state, const PirwaRequest *request, GCancellable *cancell
   if (g_cancellable_set_error_if_cancelled (cancellable, error))
     return NULL;
   if (request->operation == PIRWA_RECONNECT)
-    close_connection (state);
+    {
+      close_connection (state);
+      state->retries = 0;
+    }
+  gboolean new_connection = state->connection == NULL;
   if (!connect_backend (state, error))
     return NULL;
+  /* Automatic recovery also needs the new connection's creation resources. */
+  describe_host = describe_host || new_connection;
   gboolean metadata_dirty = g_atomic_int_compare_and_exchange (&state->metadata_dirty, 1, 0);
   if (request->operation == PIRWA_RECONNECT || describe_host || metadata_dirty)
     pirwa_inventory_cache_clear (state->inventory_cache);
@@ -350,7 +430,8 @@ execute (BackendState *state, const PirwaRequest *request, GCancellable *cancell
   switch (request->operation)
     {
     case PIRWA_START:
-      status = virDomainCreate (domain);
+      if (!pirwa_network_start (state->connection, domain, cancellable, error))
+        goto fail;
       break;
     case PIRWA_SHUTDOWN:
       status = virDomainShutdown (domain);
@@ -384,10 +465,33 @@ execute (BackendState *state, const PirwaRequest *request, GCancellable *cancell
         reply->details = pirwa_config_parse (xml, error);
         if (!reply->details)
           goto fail;
+        /* Resources describe the saved definition; media follows the live tray. */
+        if (virDomainIsActive (domain) == 1)
+          {
+            g_autofree char *live_xml = virDomainGetXMLDesc (domain, 0);
+            if (!live_xml)
+              {
+                pirwa_libvirt_error (error, "Cannot read mounted media");
+                goto fail;
+              }
+            g_autoptr (PirwaDetails) live = pirwa_config_parse (live_xml, error);
+            if (!live)
+              goto fail;
+            g_free (reply->details->media_source);
+            g_free (reply->details->media_target);
+            g_free (reply->details->media_eject_xml);
+            reply->details->media_source = g_steal_pointer (&live->media_source);
+            reply->details->media_target = g_steal_pointer (&live->media_target);
+            reply->details->media_eject_xml = g_steal_pointer (&live->media_eject_xml);
+          }
         reply->details->managed
             = pirwa_provision_owned (state->connection, request->uuid, reply->details);
         break;
       }
+    case PIRWA_EJECT:
+      if (!eject_media (domain, request, cancellable, error))
+        goto fail;
+      break;
     case PIRWA_EDIT:
       if (!edit_domain (state->connection, domain, request, error))
         goto fail;
@@ -556,7 +660,10 @@ worker (gpointer data)
       if (shutdown_id)
         g_cancellable_disconnect (state->shutdown, shutdown_id);
       if (!state->connection)
-        state->retries++;
+        {
+          if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+            state->retries++;
+        }
       else if (!reply && virConnectIsAlive (state->connection) == 0)
         {
           close_connection (state);
@@ -647,6 +754,7 @@ pirwa_backend_new (const char *uri)
   state->shutdown = g_cancellable_new ();
   state->uri = g_strdup (uri);
   state->event_id = -1;
+  state->tray_event_id = -1;
   self->state = state;
   g_thread_unref (g_thread_new ("pirwa-backend", worker, state_ref (state)));
   return self;
@@ -669,9 +777,12 @@ pirwa_backend_request_async (PirwaBackend *self, const PirwaRequest *request,
   job->request = *request;
   job->request.uuid = g_strdup (request->uuid);
   job->request.source_uri = g_strdup (request->source_uri);
+  job->request.media_source = g_strdup (request->media_source);
+  job->request.media_target = g_strdup (request->media_target);
   job->request.options.name = g_strdup (request->options.name);
   job->request.options.source = g_strdup (request->options.source);
   job->request.options.pool = g_strdup (request->options.pool);
+  job->request.options.driver_iso = g_strdup (request->options.driver_iso);
   if (g_atomic_int_get (&self->state->stopping))
     {
       g_task_return_new_error (job->task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Connection closed");

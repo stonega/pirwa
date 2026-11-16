@@ -8,6 +8,7 @@ console with controlled guest drawing, then removes only its own resources.
 import argparse
 import hashlib
 import json
+import math
 import os
 import platform
 import shutil
@@ -23,7 +24,7 @@ from pathlib import Path
 from gi.repository import Gio, GLib
 
 ROOT = Path(__file__).resolve().parent.parent
-APP = "io.github.pirwa.ConsoleProfile"
+APP = "io.github.stonega.ConsoleProfile"
 GUEST_LAUNCH = r"""
 import glob, os, pwd, subprocess, sys
 runtime = f'/run/user/{pwd.getpwnam("liveuser").pw_uid}'
@@ -60,13 +61,90 @@ def guest(channel, argv, timeout=30):
     return result["out"]
 
 
+def host_pressure():
+    return {
+        name: Path(f"/proc/pressure/{name}").read_text().splitlines()
+        for name in ("cpu", "memory", "io")
+    }
+
+
+def memory_headroom(memory_mb):
+    """Leave 1 GiB for the host/compositor/client before allocating a QA guest."""
+    contents = Path("/proc/meminfo").read_text()
+    try:
+        available = next(
+            int(line.split()[1])
+            for line in contents.splitlines()
+            if line.startswith("MemAvailable:")
+        )
+    except (StopIteration, ValueError, IndexError) as error:
+        raise RuntimeError("Cannot determine available host memory") from error
+    required = (memory_mb + 1024) * 1024
+    if available < required:
+        raise RuntimeError(
+            f"Not enough host memory for QA: {available / 1024:.0f} MiB available; "
+            f"need {memory_mb + 1024} MiB ({memory_mb} MiB guest + 1024 MiB headroom). "
+            "No test resources were created."
+        )
+    return {"available_kib": available, "required_kib": required}
+
+
+def wait_for_framebuffer(ready, expected, process, *, quiet=5, timeout=30):
+    """Wait for agent readiness and a quiet framebuffer before sampling."""
+    started = changed = time.monotonic()
+    version = None
+    versions = 0
+    while True:
+        now = time.monotonic()
+        if process.poll() is not None:
+            raise RuntimeError("Console exited while its framebuffer was settling")
+        try:
+            state = json.loads(ready.read_text())
+            info = ready.stat()
+            current = (info.st_ino, info.st_mtime_ns)
+        except FileNotFoundError:
+            state, current = {}, None
+        valid = (
+            state.get("agent_connected")
+            and (state.get("width"), state.get("height")) == expected
+        )
+        if current != version:
+            version = current
+            versions += 1
+            changed = now
+        if not valid:
+            changed = now
+        if now - started >= timeout:
+            raise RuntimeError("Guest framebuffer did not settle at the expected size")
+        if valid and now - changed >= quiet:
+            return {"seconds": now - started, "ready_versions_observed": versions}
+        time.sleep(0.2)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--uri", required=True)
     parser.add_argument("--iso", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--build", default="build-perf")
+    parser.add_argument(
+        "--baseline-binary",
+        type=Path,
+        help="Compare two native renderers in fresh client processes",
+    )
     parser.add_argument("--runs", type=int, default=3)
+    parser.add_argument("--memory-mb", type=int, default=4096)
+    parser.add_argument(
+        "--setup-seconds",
+        type=int,
+        default=5,
+        help="Allow the live welcome screen to settle after the SPICE agent connects",
+    )
+    parser.add_argument(
+        "--modes",
+        default="idle,small,full",
+        help="Comma-separated idle,small,full workloads",
+    )
     parser.add_argument("--seconds", type=int, default=10)
     parser.add_argument(
         "--boot-seconds", type=int, default=180, help="Guest-agent readiness deadline"
@@ -75,6 +153,13 @@ def main():
         "--expect-size", required=True, help="Actual guest framebuffer WxH"
     )
     args = parser.parse_args()
+    modes = args.modes.split(",")
+    if (
+        not modes
+        or len(set(modes)) != len(modes)
+        or any(mode not in {"idle", "small", "full"} for mode in modes)
+    ):
+        parser.error("Choose unique workloads from idle,small,full.")
     runtime = Path(os.environ.get("XDG_RUNTIME_DIR", "/"))
     if (
         os.environ.get("PIRWA_RUN_KVM_TESTS") != "1"
@@ -88,8 +173,13 @@ def main():
         1 <= args.runs <= 5
         and 5 <= args.seconds <= 30
         and 30 <= args.boot_seconds <= 180
+        and 2048 <= args.memory_mb <= 8192
+        and 5 <= args.setup_seconds <= 60
     ):
-        parser.error("Use 1–5 runs, 5–30 measurement seconds, and 30–180 boot seconds.")
+        parser.error(
+            "Use 1–5 runs, 5–30 measurement seconds, 30–180 boot seconds, "
+            "5–60 setup seconds, and 2048–8192 MiB guest memory."
+        )
     try:
         expected = tuple(map(int, args.expect_size.split("x")))
         if len(expected) != 2 or any(n < 640 or n > 3840 for n in expected):
@@ -99,6 +189,7 @@ def main():
             "Use an expected framebuffer size between 640 and 3840 pixels per axis."
         )
     args.iso = args.iso.resolve(strict=True)
+    preflight_memory = memory_headroom(args.memory_mb)
     args.output = args.output.resolve()
     args.output.mkdir(mode=0o700)  # Refuse overwriting an existing run.
     # Pin both executables: another development session may rebuild the tree.
@@ -108,6 +199,13 @@ def main():
         (ROOT / args.build / "tests/benchmark-console").resolve(strict=True), binary
     )
     shutil.copy2((ROOT / args.build / "tests/qa-vm").resolve(strict=True), fixture)
+    binaries = {"current": binary}
+    variants = {"tiles": (binary, False), "full-copy": (binary, True)}
+    if args.baseline_binary:
+        baseline_binary = args.output / "baseline-console"
+        shutil.copy2(args.baseline_binary.resolve(strict=True), baseline_binary)
+        binaries["baseline"] = baseline_binary
+        variants = {"current": (binary, False), "baseline": (baseline_binary, False)}
     name = "pirwa-qa-" + str(uuid.uuid4())
     pool_name = name + "-pool"
     pool = args.output / "pool"
@@ -124,11 +222,25 @@ def main():
                 "src/pirwa-display.c",
                 "src/pirwa-frame.c",
                 "tests/benchmark-console.c",
+                "tests/qa-frame-feedback.c",
+                "tests/qa-frame-feedback.h",
                 "tests/fixtures/qa-display-workload.py",
                 "scripts/profile-console.py",
             ]
         },
         "binary_sha256": hashlib.sha256(binary.read_bytes()).hexdigest(),
+        "compared_binaries": {
+            name: {
+                "path": str(path),
+                "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            }
+            for name, path in binaries.items()
+        },
+        "fresh_client_per_trial": bool(args.baseline_binary),
+        "warmup_policy": {"framebuffer_quiet_seconds": 5, "deadline_seconds": 30},
+        "guest_resources": {"cpus": 4, "memory_mb": args.memory_mb, "disk_gb": 16},
+        "preflight_memory": preflight_memory,
+        "setup_settle_seconds": args.setup_seconds,
         "iso": str(args.iso),
         "iso_size": args.iso.stat().st_size,
         "host": platform.platform(),
@@ -161,6 +273,12 @@ def main():
             "paint_wall_us",
             "paint_cpu_us",
             "damage_to_after_paint_us",
+            "full_copies",
+            "tile_copies",
+            "compactions",
+            "texture_appends",
+            "previous_texture_appends",
+            "copy_cpu_us",
         ],
         "runs": [],
         "cleanup": {},
@@ -194,7 +312,7 @@ def main():
     def action(name, value=None):
         bus.call_sync(
             APP,
-            "/io/github/pirwa/ConsoleProfile",
+            "/io/github/stonega/ConsoleProfile",
             "org.gtk.Actions",
             "Activate",
             GLib.Variant("(sava{sv})", (name, [] if value is None else [value], {})),
@@ -203,6 +321,62 @@ def main():
             10000,
             None,
         )
+
+    def stop_client():
+        nonlocal child
+        if child and child.poll() is None:
+            try:
+                action("quit")
+                child.wait(timeout=10)
+            except (GLib.Error, subprocess.TimeoutExpired):
+                child.terminate()
+                try:
+                    child.wait(timeout=10)
+                except subprocess.TimeoutExpired:
+                    child.kill()
+                    child.wait()
+        child = None
+
+    def launch_client(executable, directory):
+        nonlocal child
+        with (
+            (args.output / "console.stdout.log").open("a") as out,
+            (args.output / "console.stderr.log").open("a") as err,
+        ):
+            env = dict(
+                os.environ, GTK_A11Y="test", PULSE_SERVER=f"unix:{runtime}/no-audio"
+            )
+            child = subprocess.Popen(
+                [
+                    str(executable),
+                    "--uri",
+                    args.uri,
+                    "--uuid",
+                    guest_uuid,
+                    "--output",
+                    str(directory),
+                    "--seconds",
+                    str(args.seconds),
+                ],
+                stdout=out,
+                stderr=err,
+                env=env,
+            )
+        report["client_pid"] = child.pid
+        save()
+
+    def wait_client(directory, timeout):
+        started = time.monotonic()
+        ready = directory / "ready.json"
+        while not ready.exists() or not json.loads(ready.read_text()).get(
+            "agent_connected"
+        ):
+            if child.poll() is not None or time.monotonic() - started > timeout:
+                raise RuntimeError(
+                    "Guest agent did not become ready; inspect console.stderr.log"
+                )
+            time.sleep(0.2)
+        return time.monotonic() - started
 
     def keys(codes):
         # Setup input goes straight to our disposable QEMU guest. Its timing
@@ -311,7 +485,15 @@ def main():
         virsh("pool-start", pool_name)
         guest_uuid = json.loads(
             run(
-                [str(fixture), args.uri, "create", name, str(args.iso), pool_name]
+                [
+                    str(fixture),
+                    args.uri,
+                    "create",
+                    name,
+                    str(args.iso),
+                    pool_name,
+                    str(args.memory_mb),
+                ]
             ).stdout
         )["uuid"]
         report["uuid"] = guest_uuid
@@ -337,29 +519,7 @@ def main():
             virsh("dumpxml", guest_uuid, "--inactive").stdout.encode()
         ).hexdigest()
         run([str(fixture), args.uri, "start", guest_uuid])
-        with (
-            (args.output / "console.stdout.log").open("w") as out,
-            (args.output / "console.stderr.log").open("w") as err,
-        ):
-            env = dict(
-                os.environ, GTK_A11Y="test", PULSE_SERVER=f"unix:{runtime}/no-audio"
-            )
-            child = subprocess.Popen(
-                [
-                    str(binary),
-                    "--uri",
-                    args.uri,
-                    "--uuid",
-                    guest_uuid,
-                    "--output",
-                    str(args.output / "trials"),
-                    "--seconds",
-                    str(args.seconds),
-                ],
-                stdout=out,
-                stderr=err,
-                env=env,
-            )
+        launch_client(binary, args.output / "trials")
         print(
             f"Waiting for disposable Fedora guest {name} to connect its SPICE agent",
             flush=True,
@@ -377,22 +537,11 @@ def main():
             5000,
             None,
         )
-        boot_started = time.monotonic()
-        ready = args.output / "trials/ready.json"
-        while not ready.exists() or not json.loads(ready.read_text()).get(
-            "agent_connected"
-        ):
-            if (
-                child.poll() is not None
-                or time.monotonic() - boot_started > args.boot_seconds
-            ):
-                raise RuntimeError(
-                    "Guest agent did not become ready; inspect console.stderr.log"
-                )
-            time.sleep(0.2)
-        report["guest_agent_ready_seconds"] = time.monotonic() - boot_started
+        report["guest_agent_ready_seconds"] = wait_client(
+            args.output / "trials", args.boot_seconds
+        )
         save()
-        time.sleep(5)  # Let the live welcome/overview transition finish before input.
+        time.sleep(args.setup_seconds)
         # Fedora live starts in the overview. Escape establishes a known state.
         keys([1])
         keys([56, 60])  # GNOME Run Command (Alt+F2), with no terminal cold start.
@@ -409,6 +558,8 @@ def main():
                 "uname -a; cat /etc/os-release; rpm -q gtk3 python3-gobject spice-vdagent; loginctl list-sessions --no-legend",
             ],
         )
+        if args.baseline_binary:
+            stop_client()
         # qemu-monitor query is read-only and always targets our disposable UUID.
         cpus = json.loads(
             virsh(
@@ -432,22 +583,35 @@ def main():
                 "SC_CLK_TCK"
             )
 
-        for mode in ["idle", "small", "full"]:
+        for mode in modes:
             status = f"/tmp/pirwa-display-{uuid.uuid4()}.json"
             workload_pid = int(
                 guest(channel, ["python3", "-c", GUEST_LAUNCH, mode, status])
             )
             time.sleep(3)
             for repeat in range(args.runs):
-                for full in [False, True] if repeat % 2 == 0 else [True, False]:
-                    variant = "full-copy" if full else "tiles"
+                order = list(variants)
+                if repeat % 2:
+                    order.reverse()
+                for variant in order:
+                    executable, full = variants[variant]
                     label = f"{mode}-{repeat}-{variant}"
+                    directory = args.output / "trials"
+                    if args.baseline_binary:
+                        directory = args.output / f"client-{label}"
+                        launch_client(executable, directory)
+                        wait_client(directory, 30)
                     action("full", GLib.Variant("b", full))
-                    time.sleep(3)
+                    warmup = wait_for_framebuffer(
+                        directory / "ready.json", expected, child
+                    )
                     before_guest = json.loads(guest(channel, ["cat", status]))
+                    before_pressure = host_pressure()
                     before_qemu = qemu_cpu()
+                    report["active_trial"] = label
+                    save()
                     action("measure", GLib.Variant("(sb)", (label, full)))
-                    trial = args.output / "trials" / (label + ".json")
+                    trial = directory / (label + ".json")
                     deadline = time.monotonic() + args.seconds + 20
                     while not trial.exists():
                         if child.poll() is not None or time.monotonic() > deadline:
@@ -456,6 +620,14 @@ def main():
                     after_qemu = qemu_cpu()
                     after_guest = json.loads(guest(channel, ["cat", status]))
                     result = json.loads(trial.read_text())
+                    if any(
+                        len(sample) != len(report["frame_sample_columns"])
+                        for sample in result["samples"]
+                    ):
+                        raise RuntimeError(
+                            "Console sample format differs; rebuild the baseline "
+                            "with matching profiling instrumentation"
+                        )
                     if result["primary_changes"] or result["suspended"]:
                         raise RuntimeError(
                             "Framebuffer changed or console suspended during a trial"
@@ -475,9 +647,17 @@ def main():
                         )
                     result.update(
                         mode=mode,
+                        variant=variant,
+                        client_pid=child.pid,
+                        binary_sha256=hashlib.sha256(
+                            executable.read_bytes()
+                        ).hexdigest(),
                         repeat=repeat,
+                        warmup=warmup,
                         guest_before=before_guest,
                         guest_after=after_guest,
+                        host_pressure_before=before_pressure,
+                        host_pressure_after=host_pressure(),
                         qemu_observer_wall_seconds=after_qemu[0] - before_qemu[0],
                         qemu_cpu_seconds=after_qemu[1] - before_qemu[1],
                     )
@@ -487,6 +667,8 @@ def main():
                         f"{mode} {repeat + 1}/{args.runs} {variant}: {result['cpu_us'] * 100 / result['wall_us']:.2f}% CPU, {len(result['samples']) * 1e6 / result['wall_us']:.1f} GTK updates/s, {result['copied_bytes'] / 1024**2:.1f} MiB copied",
                         flush=True,
                     )
+                    if args.baseline_binary:
+                        stop_client()
             guest(channel, ["kill", "-TERM", "--", f"-{workload_pid}"])
             deadline = time.monotonic() + 5
             while not json.loads(guest(channel, ["cat", status]))["complete"]:
@@ -516,13 +698,7 @@ def main():
                 report["failure_capture"] = "Capture timed out"
         raise
     finally:
-        if child and child.poll() is None:
-            try:
-                action("quit")
-                child.wait(timeout=10)
-            except (GLib.Error, subprocess.TimeoutExpired):
-                child.terminate()
-                child.wait(timeout=10)
+        stop_client()
         if guest_uuid:
             for operation in ["stop", "remove"]:
                 result = run(
@@ -562,17 +738,18 @@ def main():
         )
     # Summarize paired results; all raw trials remain in results.json.
     report["summary"] = []
-    for mode in ["idle", "small", "full"]:
-        for full in [False, True]:
+    for mode in modes:
+        for variant, (_, full) in variants.items():
             trials = [
                 r
                 for r in report["runs"]
-                if r["mode"] == mode and r["force_full"] == full
+                if r["mode"] == mode and r["variant"] == variant
             ]
             values = sorted(s[0] for r in trials for s in r["samples"])
             report["summary"].append(
                 {
                     "mode": mode,
+                    "variant": variant,
                     "force_full": full,
                     "median_cpu_percent": statistics.median(
                         r["cpu_us"] * 100 / r["wall_us"] for r in trials
@@ -580,9 +757,7 @@ def main():
                     "median_updates_per_second": statistics.median(
                         len(r["samples"]) * 1e6 / r["wall_us"] for r in trials
                     ),
-                    "paint_wall_p95_us": values[
-                        min(len(values) - 1, int(len(values) * 0.95))
-                    ]
+                    "paint_wall_p95_us": values[math.ceil(len(values) * 0.95) - 1]
                     if values
                     else None,
                 }

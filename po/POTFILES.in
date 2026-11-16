@@ -1,5 +1,7 @@
 src/main.c
 src/pirwa-window.c
+src/pirwa-avatar.c
+src/pirwa-create-dialog.c
 src/pirwa-boxes-dialog.c
 src/pirwa-inventory.c
 src/pirwa-console.c

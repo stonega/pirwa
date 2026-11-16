@@ -1,0 +1,140 @@
+{
+  "scope": "Real Fedora live guest, production native console component. Instrumented CPU/copy and GTK submission measurements; excludes physical presentation, GPU completion and main collection UI.",
+  "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+  "source_dirty": true,
+  "source_sha256": {
+    "src/pirwa-console.c": "ee75bc41701e5a52a8c621d590df1cc0adea9f04be6208db1505b01941621362",
+    "src/pirwa-display.c": "45e9c71db46f89016f25a5445119eaeaeac108ceb701ca574e8da6088ab5971a",
+    "src/pirwa-frame.c": "0c319d33e13230c94b62b71df10be4e7f935e378af3286fd20ed59698d3e122c",
+    "tests/benchmark-console.c": "2001a1c7a73f1d86f2b81cfa267f87687212c58453006194465970fbc3318857",
+    "tests/fixtures/qa-display-workload.py": "cfd314fda7b3d254fb1b79fb05c91991556ad6b1009e58923664309b9b19621a",
+    "scripts/profile-console.py": "a23ea807d49fc6e563bddde35f3d83f8a3b383e988774f46f02d9ae340a88292"
+  },
+  "binary_sha256": "469b8fab87075b96f686be51f2b663ed04be48f40806ebbdadb4432d32e7533a",
+  "compared_binaries": {
+    "current": {
+      "path": "/home/stone/Gnome/pirwa/build/qa/contiguous-real/benchmark-console",
+      "sha256": "469b8fab87075b96f686be51f2b663ed04be48f40806ebbdadb4432d32e7533a"
+    },
+    "baseline": {
+      "path": "/home/stone/Gnome/pirwa/build/qa/contiguous-real/baseline-console",
+      "sha256": "ebc2e9c39a6e636cdfcb77f331f36ab3a34f171b46726915e7b3d4c7733f3638"
+    }
+  },
+  "fresh_client_per_trial": true,
+  "guest_resources": {
+    "cpus": 4,
+    "memory_mb": 4096,
+    "disk_gb": 16
+  },
+  "setup_settle_seconds": 45,
+  "iso": "/home/stone/Downloads/Fedora-Workstation-Live-43-1.6.x86_64.iso",
+  "iso_size": 2742190080,
+  "host": "Linux-7.2.15-300.fc45.x86_64-x86_64-with-glibc2.44",
+  "cpu": "Intel(R) Core(TM) Ultra 9 185H",
+  "packages": [
+    "gtk4-4.24.1-1.fc45.x86_64",
+    "spice-glib-0.43-5.fc45.x86_64",
+    "gnome-shell-51.1-1.fc45.x86_64",
+    "mutter-51.1-1.fc45.x86_64",
+    "qemu-kvm-11.1.3-1.fc45.x86_64",
+    "libvirt-daemon-12.6.0-2.fc45.x86_64"
+  ],
+  "requested_size": [
+    3840,
+    2160
+  ],
+  "audio_enabled": false,
+  "host_load_at_start": [
+    7.00244140625,
+    9.376953125,
+    9.8310546875
+  ],
+  "allowed_cpus": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21
+  ],
+  "seconds_per_trial": 10,
+  "boot_wait_limit_seconds": 180,
+  "name": "pirwa-qa-d5b59989-052d-4cc1-bad2-f8e493bbed00",
+  "pool_name": "pirwa-qa-d5b59989-052d-4cc1-bad2-f8e493bbed00-pool",
+  "frame_sample_columns": [
+    "paint_wall_us",
+    "paint_cpu_us",
+    "damage_to_after_paint_us",
+    "full_copies",
+    "tile_copies",
+    "compactions",
+    "texture_appends",
+    "previous_texture_appends",
+    "copy_cpu_us"
+  ],
+  "runs": [],
+  "cleanup": {
+    "stop": {
+      "code": 0,
+      "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n"
+    },
+    "remove": {
+      "code": 0,
+      "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n"
+    },
+    "pool_destroy": 0,
+    "pool_undefine": 0,
+    "remaining_pool_files": [],
+    "domain_absent": true,
+    "pool_absent": true,
+    "baseline_unchanged": true
+  },
+  "iso_sha256": "2a4a16c009244eb5ab2198700eb04103793b62407e8596f30a3e0cc8ac294d77",
+  "baseline_before": {
+    "cc95a3c6-9eb6-4f84-8fa8-dfa54423285f": {
+      "name": "boxes-unknown-3",
+      "state": "running",
+      "xml_sha256": "620f41b9b0fcb06c347d50c37f1e48c4595c9cb4ce279a3d43e9c708647fd5d9"
+    },
+    "81f4bdb2-ed17-411a-bae9-9a67c86d7fb8": {
+      "name": "boxes-unknown",
+      "state": "shut off",
+      "xml_sha256": "5593947c7c612872cef9a92315a8c766d763156b19870d8f3eb383f34a4418ba"
+    }
+  },
+  "uuid": "497664d5-2b94-4006-bdf6-0d479752e3f5",
+  "guest_xml_sha256": "5db8916c582fdf63bb203f7015567ec7b5f16ae79f5397705e82e89d21104ac8",
+  "client_pid": 2680207,
+  "guest_agent_ready_seconds": 89.35329253901727,
+  "error": "Command '['virsh', '-c', 'qemu+unix:///session?socket=/run/user/1000/libvirt/virtqemud-sock', 'send-key', '497664d5-2b94-4006-bdf6-0d479752e3f5', '--codeset', 'linux', '--holdtime', '30', '57']' timed out after 120 seconds",
+  "failure_capture": "Capture timed out",
+  "baseline_after": {
+    "cc95a3c6-9eb6-4f84-8fa8-dfa54423285f": {
+      "name": "boxes-unknown-3",
+      "state": "running",
+      "xml_sha256": "620f41b9b0fcb06c347d50c37f1e48c4595c9cb4ce279a3d43e9c708647fd5d9"
+    },
+    "81f4bdb2-ed17-411a-bae9-9a67c86d7fb8": {
+      "name": "boxes-unknown",
+      "state": "shut off",
+      "xml_sha256": "5593947c7c612872cef9a92315a8c766d763156b19870d8f3eb383f34a4418ba"
+    }
+  }
+}

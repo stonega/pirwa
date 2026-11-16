@@ -6,6 +6,13 @@ int pirwa_config_spice_index (const char *xml);
 #define PIRWA_METADATA_NS "urn:pirwa:domain:1"
 #define PIRWA_OSINFO_NS "http://libosinfo.org/xmlns/libvirt/domain/1.0"
 
+typedef enum
+{
+  PIRWA_GUEST_LINUX,
+  PIRWA_GUEST_WINDOWS_10,
+  PIRWA_GUEST_WINDOWS_11
+} PirwaGuest;
+
 typedef struct
 {
   char *name;
@@ -16,6 +23,8 @@ typedef struct
   guint disk_gb;
   gboolean import_image;
   gboolean legacy_bios;
+  PirwaGuest guest;
+  char *driver_iso;
 } PirwaCreate;
 
 typedef struct
@@ -25,15 +34,20 @@ typedef struct
   char *pool_uuid;
   char *volume_key;
   char *volume_name;
+  char *media_source;
+  char *media_target;
+  char *media_eject_xml;
   guint cpus;
   guint memory_mb;
   gboolean native_console;
   gboolean has_cdrom;
   gboolean has_nvram;
+  gboolean has_tpm;
   gboolean managed;
 } PirwaDetails;
 
 gboolean pirwa_config_validate (const PirwaCreate *options, GError **error);
+gboolean pirwa_config_check_host (const PirwaCreate *options, const char *caps, GError **error);
 char *pirwa_config_domain (const PirwaCreate *options, const char *uuid, const char *disk_path,
                            const char *pool_uuid, const char *volume_key, gboolean uefi,
                            gboolean passt, const char *os_id);

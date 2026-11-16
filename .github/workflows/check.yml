@@ -5,18 +5,26 @@ jobs:
     runs-on: ubuntu-latest
     container: fedora:45
     steps:
-      - uses: actions/checkout@v4
       - name: Install build dependencies
         run: >
           dnf install -y gcc meson ninja-build gettext pkgconf-pkg-config
           glib2-devel gtk4-devel libadwaita-devel libvirt-devel libvirt-glib-devel
-          libxml2-devel libosinfo-devel spice-glib-devel clang-tools-extra desktop-file-utils appstream
-          libasan libubsan
+          libxml2-devel libosinfo-devel spice-glib-devel libslirp-devel clang-tools-extra desktop-file-utils appstream
+          python3 gsettings-desktop-schemas
+          libasan libubsan git rpm-build redhat-rpm-config
+      - uses: actions/checkout@v4
       - run: meson setup build
-      - run: meson compile -C build
+      - run: meson compile -C build -j 2
       - run: meson test -C build --print-errorlogs
       - run: clang-format --dry-run --Werror src/*.[ch] tests/*.c
       - name: Address and undefined behavior checks
         run: |
           meson setup build-sanitize -Db_sanitize=address,undefined -Db_lundef=false
-          ASAN_OPTIONS=detect_leaks=0 meson test -C build-sanitize --print-errorlogs
+          meson compile -C build-sanitize -j 2
+          ASAN_OPTIONS=detect_leaks=1 LSAN_OPTIONS="suppressions=$PWD/tests/lsan.supp:print_suppressions=1" meson test -C build-sanitize --no-rebuild --print-errorlogs
+      - name: Build the Fedora RPM with normal build requirements
+        run: |
+          pirwa_version=$(meson introspect --projectinfo build | python3 -c 'import json,sys; print(json.load(sys.stdin)["version"])')
+          mkdir -p "$RUNNER_TEMP/rpmbuild/SOURCES"
+          git archive --format=tar --prefix="pirwa-$pirwa_version/" HEAD | xz > "$RUNNER_TEMP/rpmbuild/SOURCES/pirwa-$pirwa_version.tar.xz"
+          rpmbuild --define "_topdir $RUNNER_TEMP/rpmbuild" --define "pirwa_source_version $pirwa_version" --define '_smp_mflags -j2' --define '_smp_build_ncpus 2' -bb packaging/pirwa.spec

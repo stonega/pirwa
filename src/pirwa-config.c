@@ -137,12 +137,79 @@ pirwa_config_validate (const PirwaCreate *options, GError **error)
   if (options->cpus < 1 || options->cpus > 64 || options->memory_mb < 256
       || options->memory_mb > 262144 || options->disk_gb < 4 || options->disk_gb > 2048)
     goto invalid;
+  if (options->guest < PIRWA_GUEST_LINUX || options->guest > PIRWA_GUEST_WINDOWS_11)
+    goto invalid;
+  if (options->guest != PIRWA_GUEST_LINUX)
+    {
+      if (options->import_image)
+        {
+          g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+                               "Windows profiles require an installation ISO; importing Windows "
+                               "disks with new hardware or TPM state is not supported");
+          return FALSE;
+        }
+      if (!options->driver_iso || !g_path_is_absolute (options->driver_iso))
+        {
+          g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT,
+                               "Choose a local virtio-win driver ISO for Windows installation");
+          return FALSE;
+        }
+      guint min_memory = options->guest == PIRWA_GUEST_WINDOWS_11 ? 4096 : 2048;
+      guint min_disk = options->guest == PIRWA_GUEST_WINDOWS_11 ? 64 : 32;
+      guint min_cpus = options->guest == PIRWA_GUEST_WINDOWS_11 ? 2 : 1;
+      if (options->cpus < min_cpus || options->memory_mb < min_memory
+          || options->disk_gb < min_disk)
+        {
+          g_set_error (
+              error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT,
+              "This Windows profile requires at least %u CPUs, %u MiB RAM and a %u GiB disk",
+              min_cpus, min_memory, min_disk);
+          return FALSE;
+        }
+      if (options->guest == PIRWA_GUEST_WINDOWS_11 && options->legacy_bios)
+        {
+          g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT,
+                               "Windows 11 requires UEFI, Secure Boot and TPM 2.0");
+          return FALSE;
+        }
+    }
   return TRUE;
 invalid:
   g_set_error_literal (
       error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT,
       "Use a name of 1–80 characters, 1–64 CPUs, 256–262144 MiB RAM, and a 4–2048 GiB disk.");
   return FALSE;
+}
+
+gboolean
+pirwa_config_check_host (const PirwaCreate *options, const char *caps, GError **error)
+{
+  if (options->guest != PIRWA_GUEST_WINDOWS_11)
+    return TRUE;
+  if (!pirwa_config_supports (caps, "/domainCapabilities/os/enum[@name='firmware']/value[.='efi']")
+      || !pirwa_config_supports (caps, "/domainCapabilities/devices/tpm[@supported='yes']"
+                                       "[enum[@name='model']/value='tpm-crb']"
+                                       "[enum[@name='backendModel']/value='emulator']"
+                                       "[enum[@name='backendVersion']/value='2.0']"))
+    {
+      g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+                           "Windows 11 requires UEFI firmware and an emulated TPM 2.0. "
+                           "Install edk2-ovmf, swtpm and swtpm-tools on the libvirt host.");
+      return FALSE;
+    }
+  /* Libvirt before 12.1 lacks firmwareFeatures. In that case definition-time
+   * firmware selection checks the requested Secure Boot/key combination. */
+  if (pirwa_config_supports (caps, "/domainCapabilities/os/firmwareFeatures")
+      && !pirwa_config_supports (
+          caps, "/domainCapabilities/os/firmwareFeatures[@supported='yes']"
+                "[enum[@name='secureBoot']/value='yes'][enum[@name='enrolledKeys']/value='yes']"))
+    {
+      g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+                           "Windows 11 requires Secure Boot firmware with enrolled keys. "
+                           "Install the distribution's edk2-ovmf firmware package.");
+      return FALSE;
+    }
+  return TRUE;
 }
 
 char *
@@ -214,6 +281,18 @@ pirwa_config_domain (const PirwaCreate *o, const char *uuid, const char *disk_pa
   xmlNode *os = element (root, "os", NULL);
   if (uefi)
     attribute (os, "firmware", "efi");
+  if (o->guest == PIRWA_GUEST_WINDOWS_11)
+    {
+      attribute (os, "firmware", "efi");
+      xmlNode *firmware = element (os, "firmware", NULL);
+      const char *names[] = { "secure-boot", "enrolled-keys" };
+      for (guint i = 0; i < G_N_ELEMENTS (names); i++)
+        {
+          xmlNode *feature = element (firmware, "feature", NULL);
+          attribute (feature, "name", names[i]);
+          attribute (feature, "enabled", "yes");
+        }
+    }
   xmlNode *type = element (os, "type", "hvm");
   attribute (type, "arch", "x86_64");
   attribute (type, "machine", "q35");
@@ -224,6 +303,10 @@ pirwa_config_domain (const PirwaCreate *o, const char *uuid, const char *disk_pa
   xmlNode *features = element (root, "features", NULL);
   element (features, "acpi", NULL);
   element (features, "apic", NULL);
+  if (o->guest == PIRWA_GUEST_WINDOWS_11)
+    attribute (element (features, "smm", NULL), "state", "on");
+  if (o->guest != PIRWA_GUEST_LINUX)
+    attribute (element (root, "clock", NULL), "offset", "localtime");
   element (root, "on_poweroff", "destroy");
   element (root, "on_reboot", "restart");
   element (root, "on_crash", "destroy");
@@ -252,6 +335,29 @@ pirwa_config_domain (const PirwaCreate *o, const char *uuid, const char *disk_pa
       attribute (target, "bus", "sata");
       element (disk, "readonly", NULL);
     }
+  if (o->guest != PIRWA_GUEST_LINUX && o->driver_iso)
+    {
+      disk = element (devices, "disk", NULL);
+      attribute (disk, "type", "file");
+      attribute (disk, "device", "cdrom");
+      driver = element (disk, "driver", NULL);
+      attribute (driver, "name", "qemu");
+      attribute (driver, "type", "raw");
+      attribute (element (disk, "source", NULL), "file", o->driver_iso);
+      target = element (disk, "target", NULL);
+      attribute (target, "dev", "sdb");
+      attribute (target, "bus", "sata");
+      element (disk, "readonly", NULL);
+    }
+  if (o->guest == PIRWA_GUEST_WINDOWS_11)
+    {
+      xmlNode *tpm = element (devices, "tpm", NULL);
+      attribute (tpm, "model", "tpm-crb");
+      xmlNode *backend = element (tpm, "backend", NULL);
+      attribute (backend, "type", "emulator");
+      attribute (backend, "version", "2.0");
+      attribute (backend, "persistent_state", "yes");
+    }
   xmlNode *nic = element (devices, "interface", NULL);
   attribute (nic, "type", "user");
   attribute (element (nic, "model", NULL), "type", "virtio");
@@ -260,7 +366,9 @@ pirwa_config_domain (const PirwaCreate *o, const char *uuid, const char *disk_pa
   xmlNode *graphics = element (devices, "graphics", NULL);
   attribute (graphics, "type", "spice");
   attribute (element (graphics, "listen", NULL), "type", "socket");
-  attribute (element (element (devices, "video", NULL), "model", NULL), "type", "virtio");
+  /* Non-accelerated virtio-gpu cannot boot some Wayland compositors (COSMIC).
+   * QXL supports software rendering over the native, non-GL SPICE console. */
+  attribute (element (element (devices, "video", NULL), "model", NULL), "type", "qxl");
   xmlNode *channel = element (devices, "channel", NULL);
   attribute (channel, "type", "spicevmc");
   target = element (channel, "target", NULL);
@@ -282,6 +390,50 @@ pirwa_config_domain (const PirwaCreate *o, const char *uuid, const char *disk_pa
   return serialize (doc);
 }
 
+static void
+parse_media (xmlDoc *doc, PirwaDetails *details)
+{
+  xmlXPathObject *disks = query (doc, "/domain/devices/disk[@device='cdrom'][target/@dev]"
+                                      "[source/@file!='' or source/@dev!='' or source/@name!=''"
+                                      " or source/@volume!='']");
+  if (disks && disks->nodesetval && disks->nodesetval->nodeNr > 0)
+    {
+      xmlNode *disk = disks->nodesetval->nodeTab[0];
+      xmlDoc *eject = xmlNewDoc (BAD_CAST "1.0");
+      xmlNode *copy = xmlDocCopyNode (disk, eject, 1);
+      xmlDocSetRootElement (eject, copy);
+      for (xmlNode *child = copy->children; child;)
+        {
+          xmlNode *next = child->next;
+          if (xmlStrEqual (child->name, BAD_CAST "source"))
+            {
+              const char *attributes[] = { "file", "dev", "name", "volume" };
+              for (guint i = 0; i < G_N_ELEMENTS (attributes); i++)
+                {
+                  xmlChar *source = xmlGetProp (child, BAD_CAST attributes[i]);
+                  if (source && *source && !details->media_source)
+                    details->media_source = g_strdup ((const char *)source);
+                  xmlFree (source);
+                }
+              /* Removing the source requests ejection. Preserve target attributes;
+               * QEMU rejects an explicit change to the tray during a live update. */
+              xmlUnlinkNode (child);
+              xmlFreeNode (child);
+            }
+          else if (xmlStrEqual (child->name, BAD_CAST "target"))
+            {
+              xmlChar *target = xmlGetProp (child, BAD_CAST "dev");
+              details->media_target = g_strdup ((const char *)target);
+              xmlFree (target);
+            }
+          child = next;
+        }
+      details->media_eject_xml = serialize (eject);
+    }
+  if (disks)
+    xmlXPathFreeObject (disks);
+}
+
 PirwaDetails *
 pirwa_config_parse (const char *xml, GError **error)
 {
@@ -297,7 +449,6 @@ pirwa_config_parse (const char *xml, GError **error)
   g_autofree char *cpus = value (doc, "/domain/vcpu");
   g_autofree char *memory = value (doc, "/domain/memory");
   g_autofree char *unit = value (doc, "/domain/memory/@unit");
-  g_autofree char *cdrom = value (doc, "/domain/devices/disk[@device='cdrom']/source/@file");
   details->cpus = cpus ? g_ascii_strtoull (cpus, NULL, 10) : 1;
   guint64 ram = memory ? g_ascii_strtoull (memory, NULL, 10) : 0;
   if (g_strcmp0 (unit, "MiB") == 0)
@@ -314,11 +465,16 @@ pirwa_config_parse (const char *xml, GError **error)
   details->native_console = spice && xmlXPathCastToBoolean (spice);
   if (spice)
     xmlXPathFreeObject (spice);
-  details->has_cdrom = cdrom != NULL;
-  xmlXPathObject *nvram = query (doc, "/domain/os/nvram");
+  parse_media (doc, details);
+  details->has_cdrom = details->media_source != NULL;
+  xmlXPathObject *nvram = query (doc, "/domain/os/nvram | /domain/os/varstore");
   details->has_nvram = nvram && xmlXPathCastToBoolean (nvram);
   if (nvram)
     xmlXPathFreeObject (nvram);
+  xmlXPathObject *tpm = query (doc, "/domain/devices/tpm/backend[@type='emulator']");
+  details->has_tpm = tpm && xmlXPathCastToBoolean (tpm);
+  if (tpm)
+    xmlXPathFreeObject (tpm);
   details->managed
       = details->pool_uuid && details->volume_key && details->volume_name && details->disk_path;
   xmlFreeDoc (doc);
@@ -396,6 +552,9 @@ pirwa_details_free (PirwaDetails *details)
   g_free (details->pool_uuid);
   g_free (details->volume_key);
   g_free (details->volume_name);
+  g_free (details->media_source);
+  g_free (details->media_target);
+  g_free (details->media_eject_xml);
   g_free (details);
 }
 

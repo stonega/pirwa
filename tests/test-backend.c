@@ -351,6 +351,77 @@ test_result_order_and_progress (void)
 }
 
 static void
+test_media (void)
+{
+  const int states[] = { 1, 3, 5 };
+  for (guint i = 0; i < G_N_ELEMENTS (states); i++)
+    {
+      g_autofree char *path = NULL;
+      g_autoptr (GError) error = NULL;
+      int fd = g_file_open_tmp ("pirwa-media-XXXXXX", &path, &error);
+      g_assert_no_error (error);
+      close (fd);
+      g_autofree char *xml = g_strdup_printf (
+          "<node><domain type='test'><name>test</name>"
+          "<uuid>22222222-2222-4222-8222-222222222222</uuid>"
+          "<memory unit='KiB'>262144</memory><vcpu>1</vcpu><os><type>hvm</type></os>"
+          "<test:runstate xmlns:test='http://libvirt.org/schemas/domain/test/1.0'>"
+          "%d</test:runstate><devices><disk type='file' device='cdrom'>"
+          "<source file='/images/Fedora &amp; Test.iso'/><target dev='sda' bus='sata'/>"
+          "<readonly/></disk></devices></domain></node>",
+          states[i]);
+      g_assert_true (g_file_set_contents (path, xml, -1, &error));
+      g_autofree char *uri = g_strconcat ("test://", path, NULL);
+      g_autoptr (PirwaBackend) backend = pirwa_backend_new (uri);
+      PirwaRequest request
+          = { .operation = PIRWA_DETAILS, .uuid = "22222222-2222-4222-8222-222222222222" };
+      g_autoptr (PirwaReply) initial = run (backend, &request, NULL, &error);
+      g_assert_no_error (error);
+      g_assert_cmpstr (initial->details->media_source, ==, "/images/Fedora & Test.iso");
+      request.operation = PIRWA_EJECT;
+      request.media_target = "sda";
+      request.media_source = "/images/stale.iso";
+      g_autoptr (PirwaReply) stale = run (backend, &request, NULL, &error);
+      g_assert_null (stale);
+      g_assert_error (error, G_IO_ERROR, G_IO_ERROR_BUSY);
+      g_clear_error (&error);
+      request.media_source = initial->details->media_source;
+      g_autoptr (GCancellable) cancel = g_cancellable_new ();
+      g_cancellable_cancel (cancel);
+      g_autoptr (PirwaReply) cancelled = run (backend, &request, cancel, &error);
+      g_assert_null (cancelled);
+      g_assert_error (error, G_IO_ERROR, G_IO_ERROR_CANCELLED);
+      g_clear_error (&error);
+      g_autoptr (PirwaReply) ejected = run (backend, &request, NULL, &error);
+      g_assert_no_error (error);
+      g_assert_nonnull (ejected);
+      request.operation = PIRWA_DETAILS;
+      g_autoptr (PirwaReply) current = run (backend, &request, NULL, &error);
+      g_assert_no_error (error);
+      g_assert_null (current->details->media_source);
+      g_assert_false (current->details->has_cdrom);
+      /* An active tray and the next boot must both stay empty. */
+      if (states[i] != 5)
+        {
+          request.operation = PIRWA_FORCE_STOP;
+          g_autoptr (PirwaReply) stopped = run (backend, &request, NULL, &error);
+          g_assert_no_error (error);
+        }
+      request.operation = PIRWA_START;
+      g_autoptr (PirwaReply) started = run (backend, &request, NULL, &error);
+      g_assert_no_error (error);
+      request.operation = PIRWA_DETAILS;
+      g_autoptr (PirwaReply) rebooted = run (backend, &request, NULL, &error);
+      g_assert_no_error (error);
+      g_assert_null (rebooted->details->media_source);
+      g_assert_cmpuint (rebooted->details->cpus, ==, initial->details->cpus);
+      g_assert_cmpuint (rebooted->details->memory_mb, ==, initial->details->memory_mb);
+      pirwa_backend_stop (backend);
+      g_unlink (path);
+    }
+}
+
+static void
 test_native_console (void)
 {
   g_autofree char *path = NULL;
@@ -407,6 +478,7 @@ main (int argc, char **argv)
   g_test_add_func ("/backend/usage", test_usage);
   g_test_add_func ("/backend/socket-ownership", test_socket_ownership);
   g_test_add_func ("/backend/native-console", test_native_console);
+  g_test_add_func ("/backend/media", test_media);
   g_test_add_func ("/backend/controls-and-ownership", test_controls);
   g_test_add_func ("/backend/cancellation-and-stop", test_cancellation_and_stop);
   g_test_add_func ("/backend/reconnect-and-missing", test_reconnect_and_missing);

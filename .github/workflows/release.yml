@@ -1,0 +1,187 @@
+name: Release packages
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Test publication guards
+        run: python3 tests/test-release.py
+      - name: Freeze one source snapshot
+        env:
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          args=()
+          if [ "$REF_TYPE" = tag ]; then args+=(--tag "$REF_NAME"); fi
+          python3 scripts/release.py source --output dist/source "${args[@]}"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-source
+          path: dist/source/*
+          if-no-files-found: error
+
+  deb:
+    needs: source
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v8
+        with:
+          name: release-source
+          path: dist/source
+      - name: Build the standard amd64 DEB
+        run: |
+          context=$(mktemp -d)
+          docker build -f packaging/Containerfile.deb -t pirwa-deb "$context"
+          rmdir "$context"
+          mkdir -p dist/deb
+          docker run --rm --network=none --cpus=2 \
+            -v "$PWD:/project:ro" -v "$PWD/dist/deb:/out" pirwa-deb \
+            python3 /project/scripts/release.py deb --source /project/dist/source/source.json --output /out
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-deb
+          path: dist/deb/*
+          if-no-files-found: error
+
+  rpm:
+    needs: source
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v8
+        with:
+          name: release-source
+          path: dist/source
+      - name: Build Fedora RPM and self-contained SRPM
+        run: |
+          context=$(mktemp -d)
+          docker build -f packaging/Containerfile.qa -t pirwa-rpm "$context"
+          rmdir "$context"
+          mkdir -p dist/rpm
+          docker run --rm --network=none --cpus=2 \
+            -v "$PWD:/project:ro" -v "$PWD/dist/rpm:/out" pirwa-rpm \
+            python3 /project/scripts/release.py rpm --source /project/dist/source/source.json --output /out
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-rpm
+          path: dist/rpm/*
+          if-no-files-found: error
+
+  flatpak:
+    needs: source
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v8
+        with:
+          name: release-source
+          path: dist/source
+      - name: Install Flatpak tools and GNOME SDK
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder
+          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak install --user --noninteractive flathub org.gnome.Sdk//51 org.gnome.Platform//51
+      - name: Build the Flatpak bundle
+        run: >
+          python3 scripts/release.py flatpak --source dist/source/source.json
+          --work flatpak-build --output dist/flatpak
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-flatpak
+          path: dist/flatpak/*
+          if-no-files-found: error
+
+  assemble:
+    needs: [deb, rpm, flatpak]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: release-*
+          path: dist/inputs
+      - name: Verify the complete package set
+        run: >
+          python3 scripts/release.py manifest --source dist/inputs/release-source/source.json
+          --input dist/inputs --output dist/release
+      - uses: actions/upload-artifact@v7
+        with:
+          name: complete-release
+          path: dist/release/*
+          if-no-files-found: error
+
+  publish:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: assemble
+    runs-on: ubuntu-24.04
+    container: fedora:45
+    environment: release
+    permissions:
+      contents: write
+    steps:
+      - name: Install release clients
+        run: dnf install -y git python3 gh copr-cli
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v8
+        with:
+          name: complete-release
+          path: dist/release
+      - name: Verify stable source and triggering tag
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_COMMIT: ${{ github.sha }}
+        run: |
+          python3 scripts/release.py verify --input dist/release --publish
+          python3 - <<'PY'
+          import json, os
+          source = json.load(open('dist/release/release.json'))['source']
+          if (source['commit'] != os.environ['RELEASE_COMMIT'] or
+                  'v' + source['version'] != os.environ['RELEASE_TAG']):
+              raise SystemExit('Release source differs from the triggering tag')
+          PY
+      - name: Submit the SRPM and wait for COPR success
+        env:
+          COPR_CONFIG: ${{ secrets.COPR_CONFIG }}
+        run: |
+          test -n "$COPR_CONFIG" || { echo 'Set the release environment COPR_CONFIG secret'; exit 1; }
+          umask 077
+          mkdir -p "$HOME/.config"
+          trap 'rm -f "$HOME/.config/copr"' EXIT
+          printf '%s\n' "$COPR_CONFIG" > "$HOME/.config/copr"
+          python3 scripts/release.py copr --input dist/release --project stonegate/pirwa
+      - name: Publish every verified asset to GitHub Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$RELEASE_TAG" dist/release/* \
+            --verify-tag --title "Pirwa $RELEASE_TAG" --generate-notes

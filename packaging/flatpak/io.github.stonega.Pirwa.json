@@ -1,0 +1,232 @@
+{
+  "app-id": "io.github.stonega.Pirwa",
+  "runtime": "org.gnome.Platform",
+  "runtime-version": "51",
+  "sdk": "org.gnome.Sdk",
+  "command": "pirwa",
+  "default-branch": "stable",
+  "finish-args": [
+    "--share=ipc",
+    "--socket=wayland",
+    "--socket=fallback-x11",
+    "--device=dri",
+    "--socket=pulseaudio",
+    "--share=network",
+    "--filesystem=host",
+    "--filesystem=xdg-run/libvirt:ro",
+    "--filesystem=/run/libvirt:ro",
+    "--filesystem=~/.var/app/org.gnome.Boxes:ro",
+    "--filesystem=xdg-run/app/org.gnome.Boxes:ro",
+    "--filesystem=/var/lib/flatpak:ro",
+    "--filesystem=~/.local/share/flatpak:ro",
+    "--filesystem=xdg-run/dconf",
+    "--filesystem=~/.config/dconf:ro",
+    "--talk-name=ca.desrt.dconf",
+    "--env=DCONF_USER_CONFIG_DIR=.config/dconf",
+    "--env=GIO_EXTRA_MODULES=/app/lib/gio/modules",
+    "--talk-name=org.freedesktop.Flatpak",
+    "--system-talk-name=org.freedesktop.PolicyKit1",
+    "--env=LIBVIRT_AUTOSTART=0"
+  ],
+  "cleanup": [
+    "/include",
+    "/lib/pkgconfig",
+    "/share/pkgconfig",
+    "/lib/*.a",
+    "/share/gtk-doc",
+    "/share/man"
+  ],
+  "modules": [
+    {
+      "name": "dconf",
+      "buildsystem": "meson",
+      "config-opts": [
+        "-Dvapi=false",
+        "-Dman=false",
+        "-Dgtk_doc=false",
+        "-Dbash_completion=false"
+      ],
+      "sources": [
+        {
+          "type": "archive",
+          "url": "https://download.gnome.org/sources/dconf/0.49/dconf-0.49.0.tar.xz",
+          "sha256": "16a47e49a58156dbb96578e1708325299e4c19eea9be128d5bd12fd0963d6c36"
+        }
+      ]
+    },
+    {
+      "name": "libtirpc",
+      "buildsystem": "autotools",
+      "config-opts": [
+        "--disable-gssapi",
+        "--libdir=/app/lib"
+      ],
+      "sources": [
+        {
+          "type": "archive",
+          "url": "https://downloads.sourceforge.net/sourceforge/libtirpc/libtirpc-1.3.7.tar.bz2",
+          "sha256": "b47d3ac19d3549e54a05d0019a6c400674da716123858cfdb6d3bdd70a66c702"
+        }
+      ]
+    },
+    {
+      "name": "libvirt",
+      "buildsystem": "meson",
+      "config-opts": [
+        "-Dauto_features=disabled",
+        "-Ddriver_remote=enabled",
+        "-Ddriver_test=enabled",
+        "-Dpolkit=enabled",
+        "-Dsasl=enabled",
+        "-Ddocs=disabled",
+        "-Dtests=disabled",
+        "-Drpath=enabled"
+      ],
+      "sources": [
+        {
+          "type": "archive",
+          "url": "https://libvirt.org/sources/libvirt-12.6.0.tar.xz",
+          "sha256": "1592256deb76fc94028ff083a4d9f06a74f3b92a66a1794f37bc26f21430c888"
+        }
+      ]
+    },
+    {
+      "name": "libvirt-glib",
+      "buildsystem": "meson",
+      "config-opts": [
+        "-Dintrospection=disabled",
+        "-Dvapi=disabled",
+        "-Ddocs=disabled",
+        "-Dtests=disabled"
+      ],
+      "sources": [
+        {
+          "type": "archive",
+          "url": "https://libvirt.org/sources/glib/libvirt-glib-5.0.0.tar.xz",
+          "sha256": "9bfec346382416a3575d87299bc641b2a464aa519fd9b1287e318aa43a2f3b8b"
+        }
+      ]
+    },
+    {
+      "name": "spice-protocol",
+      "buildsystem": "meson",
+      "config-opts": [],
+      "sources": [
+        {
+          "type": "archive",
+          "url": "https://www.spice-space.org/download/releases/spice-protocol-0.14.5.tar.xz",
+          "sha256": "baf58449f6e89d19f475899ad5fb9196fdc46c03cc53233f4e39cf2978f9cff7"
+        }
+      ]
+    },
+    {
+      "name": "python3-pyparsing",
+      "buildsystem": "simple",
+      "build-commands": [
+        "python3 -m pip install --no-index --no-deps --prefix=/app pyparsing-3.3.3-py3-none-any.whl"
+      ],
+      "cleanup": [
+        "*"
+      ],
+      "sources": [
+        {
+          "type": "file",
+          "url": "https://files.pythonhosted.org/packages/38/bb/d215ee7c73b61497b28a5503f9f53523f294fcc936762b7caf90e0c1c2b5/pyparsing-3.3.3-py3-none-any.whl",
+          "sha256": "ece8c00a69cf01b45d0b1dedabb469c90d8caf996d4fda40f147627a122849a4"
+        }
+      ]
+    },
+    {
+      "name": "spice-glib",
+      "buildsystem": "meson",
+      "config-opts": [
+        "-Dgtk=disabled",
+        "-Dwayland-protocols=disabled",
+        "-Dusbredir=disabled",
+        "-Dsmartcard=disabled",
+        "-Dwebdav=disabled",
+        "-Dpolkit=disabled",
+        "-Dintrospection=disabled",
+        "-Dvapi=disabled",
+        "-Dgtk_doc=disabled"
+      ],
+      "sources": [
+        {
+          "type": "archive",
+          "url": "https://www.spice-space.org/download/gtk/spice-gtk-0.43.tar.xz",
+          "sha256": "cee26e5b2d22909f35b40a94398d1e863ca3962ee46494ca97aab206abc3203b"
+        }
+      ]
+    },
+    {
+      "name": "libosinfo",
+      "buildsystem": "meson",
+      "config-opts": [
+        "-Denable-gtk-doc=false",
+        "-Denable-introspection=disabled",
+        "-Denable-vala=disabled",
+        "-Denable-tests=false",
+        "-Dlibsoup-abi=3.0"
+      ],
+      "sources": [
+        {
+          "type": "archive",
+          "url": "https://gitlab.com/libosinfo/libosinfo/-/releases/v1.12.0/downloads/libosinfo-1.12.0.tar.xz",
+          "sha256": "ad8557ece26793da43d26de565e3d68ce2ee6bfb8d0113b7cc7dfe07f6bfc6b6"
+        },
+        {
+          "type": "patch",
+          "path": "libosinfo-0adf385-libxml2.patch"
+        }
+      ]
+    },
+    {
+      "name": "osinfo-db",
+      "buildsystem": "simple",
+      "build-commands": [
+        "mkdir -p /app/share/osinfo",
+        "cp -a . /app/share/osinfo/"
+      ],
+      "sources": [
+        {
+          "type": "archive",
+          "url": "https://gitlab.com/libosinfo/osinfo-db/-/releases/v20260812/downloads/osinfo-db-20260812.tar.xz",
+          "sha256": "f13ed6e1e480b5266d39cad7f0010febdf0265dfc45579de2fb34543bc6b35de"
+        }
+      ]
+    },
+    {
+      "name": "libslirp",
+      "buildsystem": "meson",
+      "config-opts": [],
+      "sources": [
+        {
+          "type": "archive",
+          "url": "https://gitlab.freedesktop.org/slirp/libslirp/-/archive/v4.9.3/libslirp-v4.9.3.tar.gz",
+          "sha256": "ee698ca4ce05217ca7d520c7f0b1b1228fd7d32922dd32d1051c347152588417"
+        }
+      ]
+    },
+    {
+      "name": "pirwa",
+      "buildsystem": "meson",
+      "config-opts": [
+        "--buildtype=release",
+        "-Dlibexecdir=libexec"
+      ],
+      "run-tests": true,
+      "test-rule": "test",
+      "post-install": [
+        "install -Dm755 ../packaging/flatpak/flatpak-host /app/bin/flatpak",
+        "install -Dm755 ../packaging/flatpak/virt-viewer-host /app/bin/virt-viewer",
+        "gio-querymodules /app/lib/gio/modules"
+      ],
+      "sources": [
+        {
+          "type": "archive",
+          "path": "pirwa-source.tar.xz"
+        }
+      ]
+    }
+  ]
+}

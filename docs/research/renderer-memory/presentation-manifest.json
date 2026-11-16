@@ -1,0 +1,246 @@
+{
+  "scope": "Shared production GTK display renderer; synthetic xRGB framebuffer. Frame-clock spans include the Update phase and end at after-paint; they exclude compositor presentation/GPU completion. Total process CPU includes synthetic pixel generation; its main-thread CPU is also recorded per update. No SPICE decoding, guest workload or libvirt is measured.",
+  "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+  "source_dirty": true,
+  "source_sha256": {
+    "src/pirwa-display.c": "2b121efb057bde7fa52dd0066f486c883af12624a151215630e84f2a8cd862f4",
+    "src/pirwa-display.h": "3665b0622c62de2d7cad19f063d5b3e7aabb51fd7689ffdf6ab3108801bfa897",
+    "src/pirwa-frame.c": "0c319d33e13230c94b62b71df10be4e7f935e378af3286fd20ed59698d3e122c",
+    "src/pirwa-frame.h": "cfa5c1f641a14d9397cd3a3c4c98b459b2a60c442498788d46bcf6791b16d7e3",
+    "tests/benchmark-display.c": "d28a82d3a725664a7caba583ca7be8083245e065c836565dcfebcccf07605bff"
+  },
+  "binary_sha256": "d3ada02132bef5fe1a818d941f7da33121988b97d739d3e43ea6cebe5eeb4c6b",
+  "compared_binaries": {
+    "current": {
+      "path": "/home/stone/Gnome/pirwa/build/qa/rounded-feedback/frozen/tests/benchmark-display",
+      "sha256": "d3ada02132bef5fe1a818d941f7da33121988b97d739d3e43ea6cebe5eeb4c6b"
+    },
+    "baseline": {
+      "path": "/home/stone/Gnome/pirwa/build/qa/rounded-feedback/frozen/baseline",
+      "sha256": "9ed22828fb2711d0f249b6b9c10c806e888357b1522afc8c218e573907f71836"
+    }
+  },
+  "qa_runtime_directory": "/tmp/pirwa-gnome-f53v82jj/runtime",
+  "platform": "Linux-7.2.15-300.fc45.x86_64-x86_64-with-glibc2.44",
+  "distribution": "Fedora Linux 45 (Workstation Edition)",
+  "cpu_model": "Intel(R) Core(TM) Ultra 9 185H",
+  "allowed_cpus": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21
+  ],
+  "power_profile": "balanced",
+  "requested_renderer": "default",
+  "requested_backend": "wayland",
+  "requested_a11y": "test",
+  "packages": [
+    "gtk4-4.24.1-1.fc45.x86_64",
+    "glib2-2.90.1-1.fc45.x86_64",
+    "spice-glib-0.43-5.fc45.x86_64",
+    "gnome-shell-51.1-1.fc45.x86_64",
+    "mutter-51.1-1.fc45.x86_64",
+    "mesa-dri-drivers-26.2.6-1.fc45.x86_64"
+  ],
+  "host_load_at_start": [
+    9.9775390625,
+    8.4052734375,
+    7.64306640625
+  ],
+  "frames_per_run": 60,
+  "host_load_at_end": [
+    24.49658203125,
+    19.30712890625,
+    12.638671875
+  ],
+  "frozen_comparison": {
+    "scope": "Synthetic production renderer. Memory probe observes app-created texture lifetimes, /proc PSS, glibc allocation and GPU fdinfo. No SPICE decoding, VM or physical presentation.",
+    "control": "Flat control removes only the outer rounded luminance mask; current transparent empty-state behavior is retained.",
+    "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+    "source_dirty": true,
+    "input_sha256": {
+      "src/pirwa-display.c": "2b121efb057bde7fa52dd0066f486c883af12624a151215630e84f2a8cd862f4",
+      "src/pirwa-display.h": "3665b0622c62de2d7cad19f063d5b3e7aabb51fd7689ffdf6ab3108801bfa897",
+      "src/pirwa-frame.c": "0c319d33e13230c94b62b71df10be4e7f935e378af3286fd20ed59698d3e122c",
+      "src/pirwa-frame.h": "cfa5c1f641a14d9397cd3a3c4c98b459b2a60c442498788d46bcf6791b16d7e3",
+      "tests/benchmark-display.c": "d28a82d3a725664a7caba583ca7be8083245e065c836565dcfebcccf07605bff",
+      "tests/benchmark-display-memory.c": "2709b3c1114664f8f0f5a2722e6abc2d45cbd1a1a22ae62265b53ba75d5da531",
+      "tests/qa-frame-feedback.c": "4e1a472d882dc4e380f266a2fe00fae223e44021ebc7ab5d5073afb2747b2463",
+      "tests/qa-frame-feedback.h": "9c40c0fc9ae030d353f13f391986455ebd1eaa5840249299da5b9667912728cd"
+    },
+    "frozen_sha256": {
+      "pirwa-display.c": "2b121efb057bde7fa52dd0066f486c883af12624a151215630e84f2a8cd862f4",
+      "pirwa-display.h": "3665b0622c62de2d7cad19f063d5b3e7aabb51fd7689ffdf6ab3108801bfa897",
+      "pirwa-frame.c": "0c319d33e13230c94b62b71df10be4e7f935e378af3286fd20ed59698d3e122c",
+      "pirwa-frame.h": "cfa5c1f641a14d9397cd3a3c4c98b459b2a60c442498788d46bcf6791b16d7e3",
+      "benchmark-display.c": "d28a82d3a725664a7caba583ca7be8083245e065c836565dcfebcccf07605bff",
+      "benchmark-display-memory.c": "2709b3c1114664f8f0f5a2722e6abc2d45cbd1a1a22ae62265b53ba75d5da531",
+      "qa-frame-feedback.c": "4e1a472d882dc4e380f266a2fe00fae223e44021ebc7ab5d5073afb2747b2463",
+      "qa-frame-feedback.h": "9c40c0fc9ae030d353f13f391986455ebd1eaa5840249299da5b9667912728cd",
+      "config.h": "3caf75ae3d7f7ac1838dfa6d7995adb260764318d1ede8b2a15881d45d27e508",
+      "display-flat.c": "7374a2403284434a671809fbcb62a2cc29eabe3939edb7d2c1cd30f859d40b4f",
+      "frame-rows.c": "c496be6f3b17744558c857959b9fe5d236d15769b11c5fa108ecb1b45494fe76"
+    },
+    "flags": [
+      "-O3",
+      "-g",
+      "-std=c17",
+      "-I/home/stone/Gnome/pirwa/build/qa/rounded-feedback/frozen/source"
+    ],
+    "dependency_flags": [
+      "-I/usr/include/gtk-4.0",
+      "-I/usr/include/pango-1.0",
+      "-I/usr/include/fribidi",
+      "-I/usr/include/harfbuzz",
+      "-I/usr/include/gdk-pixbuf-2.0",
+      "-I/usr/include/glycin-2",
+      "-I/usr/include/cairo",
+      "-I/usr/include/libxml2",
+      "-I/usr/include/freetype2",
+      "-I/usr/include/libpng16",
+      "-I/usr/include/pixman-1",
+      "-I/usr/include/graphene-1.0",
+      "-I/usr/lib64/graphene-1.0/include",
+      "-mfpmath=sse",
+      "-msse",
+      "-msse2",
+      "-I/tmp/pirwa-build-deps.ihjR8B/usr/include/spice-client-glib-2.0",
+      "-I/tmp/pirwa-build-deps.ihjR8B/usr/include/spice-1",
+      "-I/usr/include/glib-2.0",
+      "-I/usr/lib64/glib-2.0/include",
+      "-DWITH_GZFILEOP",
+      "-I/usr/include/libmount",
+      "-I/usr/include/blkid",
+      "-I/usr/include/sysprof-6",
+      "-pthread",
+      "-lgtk-4",
+      "-lpangocairo-1.0",
+      "-lpango-1.0",
+      "-lgdk_pixbuf-2.0",
+      "-lcairo-gobject",
+      "-lcairo",
+      "-lharfbuzz",
+      "-lvulkan",
+      "-lgraphene-1.0",
+      "-L/tmp/pirwa-build-deps.ihjR8B/usr/lib64",
+      "-lspice-client-glib-2.0",
+      "-lgio-2.0",
+      "-lgobject-2.0",
+      "-lglib-2.0"
+    ],
+    "variants": {
+      "flat-rows": {
+        "memory": {
+          "path": "/home/stone/Gnome/pirwa/build/qa/rounded-feedback/frozen/flat-rows-memory",
+          "sha256": "fb9db46c38f7ed58c19f9e3c6e49700bbf711ff90ecd028224f6583c82b5f25a"
+        },
+        "timing": {
+          "path": "/home/stone/Gnome/pirwa/build/qa/rounded-feedback/frozen/flat-rows-timing",
+          "sha256": "244c5ad7ed43a7bdf51df723716fbc4e0aa375d4c126378dfaa8f7cb5619ce9d"
+        }
+      },
+      "flat-packed": {
+        "memory": {
+          "path": "/home/stone/Gnome/pirwa/build/qa/rounded-feedback/frozen/flat-packed-memory",
+          "sha256": "e910645360433396410c3bb48d84c72e48c304e48cab6c7c5e4cbd16ce09cb31"
+        },
+        "timing": {
+          "path": "/home/stone/Gnome/pirwa/build/qa/rounded-feedback/frozen/flat-packed-timing",
+          "sha256": "4d8a0f760b97ee6782cf2cb8c669c872b00a4559d11c668a0dd5a440c42f66b6"
+        }
+      },
+      "rounded-packed": {
+        "memory": {
+          "path": "/home/stone/Gnome/pirwa/build/qa/rounded-feedback/frozen/rounded-packed-memory",
+          "sha256": "4a5a7c0e2c3c2cae623abe163c144f1717edac20c269bfbb3dba17154983c8cf"
+        },
+        "timing": {
+          "path": "/home/stone/Gnome/pirwa/build/qa/rounded-feedback/frozen/rounded-packed-timing",
+          "sha256": "d3ada02132bef5fe1a818d941f7da33121988b97d739d3e43ea6cebe5eeb4c6b"
+        }
+      }
+    },
+    "host": "Linux-7.2.15-300.fc45.x86_64-x86_64-with-glibc2.44",
+    "compiler": "cc (GCC) 16.2.1 20261029 (Red Hat 16.2.1-3)",
+    "packages": [
+      "glibc-2.44-2.fc45.x86_64",
+      "gtk4-4.24.1-1.fc45.x86_64",
+      "spice-glib-0.43-5.fc45.x86_64",
+      "gnome-shell-51.1-1.fc45.x86_64",
+      "mutter-51.1-1.fc45.x86_64"
+    ],
+    "masked_control_command": [
+      "cc",
+      "-O3",
+      "-g",
+      "-std=c17",
+      "-I/home/stone/Gnome/pirwa/build/qa/rounded-feedback/frozen/source",
+      "/home/stone/Gnome/pirwa/build/qa/rounded-feedback/frozen/source/benchmark-display.c",
+      "/home/stone/Gnome/pirwa/build/qa/rounded-feedback/frozen/source/qa-frame-feedback.c",
+      "/home/stone/Gnome/pirwa/build/qa/rounded-feedback/frozen/source/display-mask.c",
+      "/home/stone/Gnome/pirwa/build/qa/rounded-feedback/frozen/source/pirwa-frame.c",
+      "-o",
+      "/home/stone/Gnome/pirwa/build/qa/rounded-feedback/frozen/baseline",
+      "-I/usr/include/gtk-4.0",
+      "-I/usr/include/pango-1.0",
+      "-I/usr/include/fribidi",
+      "-I/usr/include/harfbuzz",
+      "-I/usr/include/gdk-pixbuf-2.0",
+      "-I/usr/include/glycin-2",
+      "-I/usr/include/cairo",
+      "-I/usr/include/libxml2",
+      "-I/usr/include/freetype2",
+      "-I/usr/include/libpng16",
+      "-I/usr/include/pixman-1",
+      "-I/usr/include/graphene-1.0",
+      "-I/usr/lib64/graphene-1.0/include",
+      "-mfpmath=sse",
+      "-msse",
+      "-msse2",
+      "-I/tmp/pirwa-build-deps.ihjR8B/usr/include/spice-client-glib-2.0",
+      "-I/tmp/pirwa-build-deps.ihjR8B/usr/include/spice-1",
+      "-I/usr/include/glib-2.0",
+      "-I/usr/lib64/glib-2.0/include",
+      "-DWITH_GZFILEOP",
+      "-I/usr/include/libmount",
+      "-I/usr/include/blkid",
+      "-I/usr/include/sysprof-6",
+      "-pthread",
+      "-lgtk-4",
+      "-lpangocairo-1.0",
+      "-lpango-1.0",
+      "-lgdk_pixbuf-2.0",
+      "-lcairo-gobject",
+      "-lcairo",
+      "-lharfbuzz",
+      "-lvulkan",
+      "-lgraphene-1.0",
+      "-L/tmp/pirwa-build-deps.ihjR8B/usr/lib64",
+      "-lspice-client-glib-2.0",
+      "-lgio-2.0",
+      "-lgobject-2.0",
+      "-lglib-2.0"
+    ],
+    "masked_display_sha256": "bd7f145b089df394972ac0a0c5e1daf4ac006e2b3d5f9d9ff23ca683da8bc829",
+    "masked_binary_sha256": "9ed22828fb2711d0f249b6b9c10c806e888357b1522afc8c218e573907f71836"
+  },
+  "measurement_runner_sha256": "bcf8f71f3f11f7b981672ea1e0aa5cb35231fba3be18ba2fe7eb9be887ba0ff0"
+}

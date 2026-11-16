@@ -1,0 +1,473 @@
+{
+  "normal_suite": {
+    "passed": 12,
+    "failed": 0,
+    "log": "build/meson-logs/testlog.txt"
+  },
+  "address_undefined_suite": {
+    "passed": 12,
+    "failed": 0,
+    "leak_detection": false,
+    "reason": "Existing libvirt initialization finding; separate frame-only leak check below"
+  },
+  "frame_leak_check": {
+    "passed": true,
+    "command": "ASAN_OPTIONS=detect_leaks=1 meson test -C build-sanitize console-frame --print-errorlogs"
+  },
+  "fullscreen_4k_pixel_checks": {
+    "desktop": "build/qa/contiguous-renderer-desktop",
+    "passed": true,
+    "trials": 4,
+    "maximum_channel_error": 0,
+    "performance_scope": "Correctness only: initial trials overlapped a separate copy benchmark and later compilation; excluded from accepted performance results."
+  },
+  "real_guest_comparison": {
+    "status": "completed",
+    "passed": true,
+    "trials": 12,
+    "pairs_per_workload": 3,
+    "seconds_per_trial": 10,
+    "guest_resources": {
+      "cpus": 4,
+      "memory_mb": 3072,
+      "disk_gb": 16
+    },
+    "framebuffer": [
+      3840,
+      2160
+    ],
+    "warmup_policy": {
+      "framebuffer_quiet_seconds": 5,
+      "deadline_seconds": 30
+    },
+    "all_primary_changes_zero": true,
+    "all_unsuspended": true,
+    "warmups_within_deadline": true,
+    "fresh_client_per_trial": true,
+    "cleanup": {
+      "stop": {
+        "code": 0,
+        "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n"
+      },
+      "remove": {
+        "code": 0,
+        "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n"
+      },
+      "pool_destroy": 0,
+      "pool_undefine": 0,
+      "remaining_pool_files": [],
+      "domain_absent": true,
+      "pool_absent": true,
+      "baseline_unchanged": true
+    },
+    "desktop_process_cleanup": {
+      "signalled": [],
+      "remaining": {}
+    },
+    "raw_data": "real-console.jsonl",
+    "source_scope": "Pinned pre-rounded-corner display renderer; concurrent renderer edits are outside this measurement.",
+    "source_changes_observed_after_run": {
+      "src/pirwa-display.c": {
+        "measured": "45e9c71db46f89016f25a5445119eaeaeac108ceb701ca574e8da6088ab5971a",
+        "observed_after_run": "bd7f145b089df394972ac0a0c5e1daf4ac006e2b3d5f9d9ff23ca683da8bc829"
+      }
+    }
+  },
+  "post_failure_host_observation": {
+    "time": "2026-11-14T14:39:56.158050+00:00",
+    "pressure": {
+      "cpu": [
+        "some avg10=0.01 avg60=0.67 avg300=2.66 total=1690108558",
+        "full avg10=0.00 avg60=0.00 avg300=0.00 total=0"
+      ],
+      "memory": [
+        "some avg10=0.00 avg60=3.72 avg300=9.27 total=1811400765",
+        "full avg10=0.00 avg60=2.71 avg300=6.78 total=1378705306"
+      ],
+      "io": [
+        "some avg10=0.12 avg60=9.70 avg300=21.19 total=2747668833",
+        "full avg10=0.12 avg60=4.85 avg300=9.99 total=1535238258"
+      ]
+    },
+    "note": "Observed after failure and resource cleanup; averages include the earlier pressure interval."
+  },
+  "current_frame_source_matches_copy_measurement": true,
+  "manager_ui_matrix": {
+    "passed": true,
+    "cases": [
+      {
+        "name": "light",
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-ui",
+          "--exercise",
+          "--snapshot",
+          "/home/stone/Gnome/pirwa/build/qa/packed-copy-manager-ui/light.png"
+        ],
+        "returncode": 0,
+        "metrics": {
+          "main_monotonic_us": 313072008532,
+          "first_paint_monotonic_us": 313072815529,
+          "ready_monotonic_us": 313072815559,
+          "main_to_first_paint_ms": 806.997,
+          "sample_wall_ms": 0.0,
+          "sample_cpu_percent": 0.0,
+          "sample_frames": 0,
+          "pss_kib": -1,
+          "exercise_steps": 12,
+          "domains": 1,
+          "renderer": "GskVulkanRenderer",
+          "text_scale": 1,
+          "scroll": false,
+          "focus_kind": "not-sampled",
+          "initial_focus_kind": "not-sampled",
+          "active": false,
+          "refresh_millihz": 60000,
+          "surface_scale": 1,
+          "frame_work_us": []
+        }
+      },
+      {
+        "name": "large-dark",
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-ui",
+          "--exercise",
+          "--large-text",
+          "--dark",
+          "--width",
+          "720",
+          "--snapshot",
+          "/home/stone/Gnome/pirwa/build/qa/packed-copy-manager-ui/large-dark.png"
+        ],
+        "returncode": 0,
+        "metrics": {
+          "main_monotonic_us": 313073569910,
+          "first_paint_monotonic_us": 313073988764,
+          "ready_monotonic_us": 313073988785,
+          "main_to_first_paint_ms": 418.854,
+          "sample_wall_ms": 0.0,
+          "sample_cpu_percent": 0.0,
+          "sample_frames": 0,
+          "pss_kib": -1,
+          "exercise_steps": 12,
+          "domains": 1,
+          "renderer": "GskVulkanRenderer",
+          "text_scale": 2,
+          "scroll": false,
+          "focus_kind": "not-sampled",
+          "initial_focus_kind": "not-sampled",
+          "active": false,
+          "refresh_millihz": 60000,
+          "surface_scale": 1,
+          "frame_work_us": []
+        }
+      },
+      {
+        "name": "empty",
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-ui",
+          "--exercise",
+          "--uri",
+          "test:///tmp/pirwa-gnome-xv8jh_a0/node.xml",
+          "--snapshot",
+          "/home/stone/Gnome/pirwa/build/qa/packed-copy-manager-ui/empty.png"
+        ],
+        "returncode": 0,
+        "metrics": {
+          "main_monotonic_us": 313074829202,
+          "first_paint_monotonic_us": 313075153068,
+          "ready_monotonic_us": 313075153157,
+          "main_to_first_paint_ms": 323.866,
+          "sample_wall_ms": 0.0,
+          "sample_cpu_percent": 0.0,
+          "sample_frames": 0,
+          "pss_kib": -1,
+          "exercise_steps": 12,
+          "domains": 0,
+          "renderer": "GskVulkanRenderer",
+          "text_scale": 1,
+          "scroll": false,
+          "focus_kind": "not-sampled",
+          "initial_focus_kind": "not-sampled",
+          "active": false,
+          "refresh_millihz": 60000,
+          "surface_scale": 1,
+          "frame_work_us": []
+        }
+      },
+      {
+        "name": "boxes",
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-ui",
+          "--boxes-exercise",
+          "--snapshot",
+          "/home/stone/Gnome/pirwa/build/qa/packed-copy-manager-ui/boxes.png"
+        ],
+        "returncode": 0,
+        "metrics": {
+          "main_monotonic_us": 313075404188,
+          "first_paint_monotonic_us": 313075796127,
+          "ready_monotonic_us": 313076025552,
+          "main_to_first_paint_ms": 391.939,
+          "sample_wall_ms": 0.0,
+          "sample_cpu_percent": 0.0,
+          "sample_frames": 0,
+          "pss_kib": -1,
+          "exercise_steps": 8,
+          "domains": 1,
+          "renderer": "GskVulkanRenderer",
+          "text_scale": 1,
+          "scroll": false,
+          "focus_kind": "not-sampled",
+          "initial_focus_kind": "not-sampled",
+          "active": false,
+          "refresh_millihz": 60000,
+          "surface_scale": 1,
+          "frame_work_us": []
+        }
+      },
+      {
+        "name": "boxes-large-dark",
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-ui",
+          "--boxes-exercise",
+          "--large-text",
+          "--dark",
+          "--width",
+          "720",
+          "--snapshot",
+          "/home/stone/Gnome/pirwa/build/qa/packed-copy-manager-ui/boxes-large-dark.png"
+        ],
+        "returncode": 0,
+        "metrics": {
+          "main_monotonic_us": 313076422198,
+          "first_paint_monotonic_us": 313076874409,
+          "ready_monotonic_us": 313076911694,
+          "main_to_first_paint_ms": 452.211,
+          "sample_wall_ms": 0.0,
+          "sample_cpu_percent": 0.0,
+          "sample_frames": 0,
+          "pss_kib": -1,
+          "exercise_steps": 8,
+          "domains": 1,
+          "renderer": "GskVulkanRenderer",
+          "text_scale": 2,
+          "scroll": false,
+          "focus_kind": "not-sampled",
+          "initial_focus_kind": "not-sampled",
+          "active": false,
+          "refresh_millihz": 60000,
+          "surface_scale": 1,
+          "frame_work_us": []
+        }
+      },
+      {
+        "name": "viewer",
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-console-ui",
+          "--output",
+          "/home/stone/Gnome/pirwa/build/qa/packed-copy-manager-ui/viewer"
+        ],
+        "returncode": 0
+      },
+      {
+        "name": "viewer-large-dark",
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-console-ui",
+          "--large-text",
+          "--dark",
+          "--width",
+          "720",
+          "--output",
+          "/home/stone/Gnome/pirwa/build/qa/packed-copy-manager-ui/viewer-large-dark"
+        ],
+        "returncode": 0
+      }
+    ],
+    "private_desktop_cleanup": {
+      "signalled": [],
+      "remaining": {}
+    }
+  },
+  "renderer_cases": [
+    {
+      "requested_renderer": "vulkan",
+      "actual_renderer": "GskVulkanRenderer",
+      "source": [
+        1232,
+        776
+      ],
+      "scale": 1,
+      "max_channel_error": 1,
+      "command": [
+        "build-sanitize/tests/benchmark-display",
+        "--width",
+        "1232",
+        "--height",
+        "776",
+        "--frames",
+        "30",
+        "--mode",
+        "burst",
+        "--expect-scale",
+        "1"
+      ],
+      "sanitizers": "address,undefined",
+      "leak_detection": false,
+      "diagnostics": ""
+    },
+    {
+      "requested_renderer": "gl",
+      "actual_renderer": "GskGLRenderer",
+      "source": [
+        1920,
+        1080
+      ],
+      "scale": 1,
+      "max_channel_error": 1,
+      "command": [
+        "build-sanitize/tests/benchmark-display",
+        "--width",
+        "1920",
+        "--height",
+        "1080",
+        "--frames",
+        "30",
+        "--mode",
+        "burst",
+        "--expect-scale",
+        "1"
+      ],
+      "sanitizers": "address,undefined",
+      "leak_detection": false,
+      "diagnostics": ""
+    },
+    {
+      "requested_renderer": "cairo",
+      "actual_renderer": "GskCairoRenderer",
+      "source": [
+        1234,
+        777
+      ],
+      "scale": 1,
+      "max_channel_error": 0,
+      "command": [
+        "build-sanitize/tests/benchmark-display",
+        "--width",
+        "1234",
+        "--height",
+        "777",
+        "--frames",
+        "30",
+        "--mode",
+        "burst",
+        "--expect-scale",
+        "1"
+      ],
+      "sanitizers": "address,undefined",
+      "leak_detection": false,
+      "diagnostics": ""
+    }
+  ],
+  "renderer_private_desktop_cleanup": {
+    "signalled": [],
+    "remaining": {}
+  },
+  "source_sha256": {
+    "src/pirwa-frame.c": "0c319d33e13230c94b62b71df10be4e7f935e378af3286fd20ed59698d3e122c",
+    "tests/test-frame.c": "d62c8a47a2e7f0ba60ef1229227359d8079eea9df3f4ac7c54281570ee2d9667",
+    "tests/benchmark-frame.c": "14268f5c4911036bcf4cde0ae6b8de03e265cfae30e67c884dabd2c0bab9aba8",
+    "tests/benchmark-console.c": "2001a1c7a73f1d86f2b81cfa267f87687212c58453006194465970fbc3318857",
+    "tests/benchmark-display.c": "9778d852c45e7e9e2652c2fb8a31c19fd6e288d3b94237a5b40780a7b8f58cd7",
+    "scripts/profile-console.py": "100e53dbd0daf17714325321fb1d1471715d893ae99bba18c64c813646c51ebc",
+    "scripts/profile-display.py": "45b7f520163c853e1f19fd83ca20b55b5eb76d5907d68cd9e3face79ef3f7aa5",
+    "tests/test-console-profile.py": "9c6e80b025a02348dc63ea55d6b19210c4a4defc56553c1cdca900c2d610bf8b"
+  },
+  "hidpi": {
+    "passed": true,
+    "renderer": "GskVulkanRenderer",
+    "actual_scale": 2,
+    "source": [
+      1234,
+      777
+    ],
+    "viewport": [
+      960,
+      601
+    ],
+    "max_channel_error": 1,
+    "sanitizers": "address,undefined",
+    "leak_detection": false,
+    "command": [
+      "python3",
+      "scripts/qa-display-scale.py",
+      "--scale",
+      "2",
+      "--",
+      "env",
+      "GTK_A11Y=test",
+      "ASAN_OPTIONS=detect_leaks=0",
+      "build-sanitize/tests/benchmark-display",
+      "--width",
+      "1234",
+      "--height",
+      "777",
+      "--frames",
+      "30",
+      "--mode",
+      "burst",
+      "--expect-scale",
+      "2"
+    ],
+    "private_desktop_cleanup": {
+      "signalled": [],
+      "remaining": {}
+    }
+  },
+  "remaining_acceptance": [
+    "Performance validation of concurrently changed rounded display renderer",
+    "Dense-console GPU/CPU and memory profiling",
+    "Physical presentation and broader guest applications"
+  ],
+  "headless_benchmark_invalid_arguments_rejected": true,
+  "previous_real_guest_comparison": {
+    "status": "setup_failed_no_samples",
+    "trials": 0,
+    "cleanup": {
+      "stop": {
+        "code": 0,
+        "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n"
+      },
+      "remove": {
+        "code": 0,
+        "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n"
+      },
+      "pool_destroy": 0,
+      "pool_undefine": 0,
+      "remaining_pool_files": [],
+      "domain_absent": true,
+      "pool_absent": true,
+      "baseline_unchanged": true
+    },
+    "desktop_process_cleanup": {
+      "signalled": [
+        {
+          "pid": 2679006,
+          "name": "evolution-sourc",
+          "signal": "SIGTERM"
+        }
+      ],
+      "remaining": {}
+    }
+  },
+  "profile_readiness_regressions": {
+    "passed": 5,
+    "command": "python3 tests/test-console-profile.py",
+    "covers": [
+      "surface recreation resets quiet period",
+      "agent and expected size required",
+      "continuous changes time out",
+      "client exit detected",
+      "host clock advance cannot bypass timeout"
+    ]
+  }
+}

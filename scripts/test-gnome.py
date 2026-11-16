@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
-"""Run Pirwa UI QA in a disposable headless GNOME Shell desktop."""
+"""Run Pirwa UI QA with private session state on virtual or physical GNOME."""
 import argparse
+import hashlib
 import json
 import os
 import re
-from pathlib import Path
 import runpy
 import shutil
 import signal
+import stat
 import subprocess
 import sys
 import tempfile
 import time
+from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -89,7 +91,7 @@ def session(args):
     output = args.output
     runtime = Path(args.session_root) / "runtime"
     socket = runtime / "pirwa-qa-wayland"
-    shell_args = ["gnome-shell", "--headless", "--wayland", "--no-x11",
+    shell_args = None if args.physical else ["gnome-shell", "--headless", "--wayland", "--no-x11",
                   "--virtual-monitor", args.monitor,
                   "--wayland-display", socket.name]
     report = {
@@ -100,16 +102,24 @@ def session(args):
         "gnome_shell": subprocess.check_output(
             ["gnome-shell", "--version"], text=True).strip(),
         "shell_command": shell_args,
+        "display_kind": "physical" if args.physical else "virtual",
+        "graphics_environment": {key: os.environ[key] for key in
+                                 ["GSK_RENDERER", "VK_DRIVER_FILES", "VK_ICD_FILENAMES", "DRI_PRIME",
+                                  "MESA_VK_DEVICE_SELECT", "__NV_PRIME_RENDER_OFFLOAD"] if key in os.environ},
         "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
-        "scope": ("Custom command in an isolated desktop; inspect the command's own results"
+        "scope": ("Custom command with isolated session state; inspect the command's own results"
                   if args.command else
-                  "Programmed production GTK UI actions; not physical input, screen reader, or guest console certification"),
+                  "Programmed GTK actions and focus traversal; not physical input, screen reader, or guest console certification"),
+        "repetitions": args.repeat,
         "cases": [],
         "passed": False,
     }
-    env = dict(os.environ, WAYLAND_DISPLAY=socket.name, GDK_BACKEND="wayland")
+    env = dict(os.environ, GDK_BACKEND="wayland")
+    if not args.physical:
+        env["WAYLAND_DISPLAY"] = socket.name
 
     def execute(name, command):
+        started = time.monotonic()
         child = subprocess.Popen(command, cwd=ROOT, env=env, stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE, text=True)
         timed_out = False
@@ -127,7 +137,8 @@ def session(args):
                 stdout, stderr = child.communicate()
         (output / f"{name}.stdout.log").write_text(stdout)
         (output / f"{name}.stderr.log").write_text(stderr)
-        case = {"name": name, "command": command, "returncode": child.returncode}
+        case = {"name": name, "command": command, "returncode": child.returncode,
+                "elapsed_seconds": round(time.monotonic() - started, 3)}
         try:
             case["metrics"] = json.loads(stdout)
         except json.JSONDecodeError:
@@ -141,50 +152,73 @@ def session(args):
         print(f"PASS {name}", flush=True)
 
     with (output / "gnome-shell.log").open("w") as log:
-        shell = subprocess.Popen(shell_args, stdout=log, stderr=subprocess.STDOUT,
-                                 start_new_session=True)
+        shell = (subprocess.Popen(shell_args, stdout=log, stderr=subprocess.STDOUT,
+                                  start_new_session=True) if shell_args else None)
         try:
             # Wait for compositor initialization, not merely socket creation.
             deadline = time.monotonic() + 30
-            while time.monotonic() < deadline:
-                if shell.poll() is not None:
-                    raise RuntimeError(f"GNOME Shell exited ({shell.returncode})")
-                if socket.exists() and "GNOME Shell started" in (output / "gnome-shell.log").read_text():
-                    break
-                time.sleep(0.05)
-            else:
-                raise RuntimeError("GNOME Shell startup timed out")
+            if shell:
+                while time.monotonic() < deadline:
+                    if shell.poll() is not None:
+                        raise RuntimeError(f"GNOME Shell exited ({shell.returncode})")
+                    if socket.exists() and "GNOME Shell started" in (output / "gnome-shell.log").read_text():
+                        break
+                    time.sleep(0.05)
+                else:
+                    raise RuntimeError("GNOME Shell startup timed out")
 
             if args.command:
                 execute("command", args.command)
             else:
-                binary = str((ROOT / args.build / "tests/test-ui").resolve())
-                execute("light", [binary, "--exercise", "--snapshot", str(output / "light.png")])
-                execute("large-dark", [binary, "--exercise", "--large-text", "--dark",
-                                       "--width", "720", "--snapshot", str(output / "large-dark.png")])
-                fixture = runpy.run_path(str(ROOT / "scripts/profile-ui.py"))["fixture"]
-                uri = fixture(Path(args.session_root), 0)
-                execute("empty", [binary, "--exercise", "--uri", uri,
-                                  "--snapshot", str(output / "empty.png")])
-                execute("boxes", [binary, "--boxes-exercise", "--snapshot", str(output / "boxes.png")])
-                execute("boxes-large-dark", [binary, "--boxes-exercise", "--large-text", "--dark",
-                                             "--width", "720", "--snapshot", str(output / "boxes-large-dark.png")])
-                viewer = str((ROOT / args.build / "tests/test-console-ui").resolve())
-                execute("viewer", [viewer, "--output", str(output / "viewer")])
-                execute("viewer-large-dark", [viewer, "--large-text", "--dark", "--width", "720",
-                                               "--output", str(output / "viewer-large-dark")])
+                schemas = (ROOT / args.build / "data").resolve()
+                compiled = schemas / "gschemas.compiled"
+                if not compiled.is_file():
+                    raise RuntimeError("Build the matching GSettings schemas before desktop QA")
+                env["GSETTINGS_SCHEMA_DIR"] = str(schemas)
+                report["schema_sha256"] = hashlib.sha256(compiled.read_bytes()).hexdigest()
+                for repetition in range(args.repeat):
+                    prefix = f"run-{repetition + 1:02d}-" if args.repeat > 1 else ""
+                    matrix_output = output / f"run-{repetition + 1:02d}" if args.repeat > 1 else output
+                    matrix_output.mkdir(parents=True, exist_ok=True)
+                    binary = str((ROOT / args.build / "tests/test-ui").resolve())
+                    execute(prefix + "light", [binary, "--exercise", "--snapshot",
+                                              str(matrix_output / "light.png")])
+                    execute(prefix + "large-dark", [binary, "--exercise", "--large-text", "--dark",
+                                                   "--width", "720", "--snapshot",
+                                                   str(matrix_output / "large-dark.png")])
+                    fixture = runpy.run_path(str(ROOT / "scripts/profile-ui.py"))["fixture"]
+                    uri = fixture(Path(args.session_root), 0)
+                    execute(prefix + "empty", [binary, "--exercise", "--uri", uri,
+                                              "--snapshot", str(matrix_output / "empty.png")])
+                    execute(prefix + "boxes", [binary, "--boxes-exercise", "--snapshot",
+                                              str(matrix_output / "boxes.png")])
+                    execute(prefix + "boxes-large-dark", [binary, "--boxes-exercise", "--large-text", "--dark",
+                                                         "--width", "720", "--snapshot",
+                                                         str(matrix_output / "boxes-large-dark.png")])
+                    execute(prefix + "boxes-deferred", [binary, "--boxes-deferred-exercise", "--snapshot",
+                                                       str(matrix_output / "boxes-deferred.png")])
+                    execute(prefix + "boxes-deferred-large-dark",
+                            [binary, "--boxes-deferred-exercise", "--large-text", "--dark", "--width", "720",
+                             "--snapshot", str(matrix_output / "boxes-deferred-large-dark.png")])
+                    viewer = str((ROOT / args.build / "tests/test-console-ui").resolve())
+                    execute(prefix + "viewer", [viewer, "--output", str(matrix_output / "viewer")])
+                    execute(prefix + "viewer-large-dark", [viewer, "--large-text", "--dark", "--width", "720",
+                                                           "--output", str(matrix_output / "viewer-large-dark")])
+                    lifetime = str((ROOT / args.build / "tests/test-ui-lifetime").resolve())
+                    execute(prefix + "lifetime", [lifetime])
             report["passed"] = True
-        except Exception as error:
+        except Exception as error:  # noqa: BLE001 - preserve diagnostics before teardown
             report["error"] = str(error)
             print(str(error), file=sys.stderr)
         finally:
-            shell.terminate()
-            try:
-                shell.wait(timeout=10)
-            except subprocess.TimeoutExpired:
-                shell.kill()
-                shell.wait()
-            report["shell_exitcode"] = shell.returncode
+            if shell:
+                shell.terminate()
+                try:
+                    shell.wait(timeout=10)
+                except subprocess.TimeoutExpired:
+                    shell.kill()
+                    shell.wait()
+            report["shell_exitcode"] = shell.returncode if shell else None
             (output / "report.json").write_text(json.dumps(report, indent=2) + "\n")
     return 0 if report["passed"] else 1
 
@@ -192,6 +226,10 @@ def session(args):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--build", default="build")
+    parser.add_argument("--physical", action="store_true",
+                        help="Use the caller's unlocked Wayland desktop with private bus and state; do not start a compositor")
+    parser.add_argument("--repeat", type=int, default=1,
+                        help="Repeat the standard matrix 1–20 times in one desktop")
     parser.add_argument("--monitor", default="1280x800@60",
                         help="Virtual monitor WxH@Hz (default: 1280x800@60)")
     parser.add_argument("--output", type=Path, default=ROOT / "build/qa/gnome")
@@ -209,19 +247,45 @@ def main():
         parser.error("Use a command timeout between 1 and 7200 seconds")
     if args.command[:1] == ["--"]:
         args.command = args.command[1:]
+    if not 1 <= args.repeat <= 20 or (args.command and args.repeat != 1):
+        parser.error("Use --repeat 1–20 with the standard matrix only")
     args.output = args.output.resolve()
     args.output.mkdir(parents=True, exist_ok=True)
     if args.session_root:
         return session(args)
-    for program in ("gnome-shell", "dbus-run-session"):
+    programs = ["gnome-shell", "dbus-run-session"]
+    if args.physical:
+        programs.append("gdbus")
+    for program in programs:
         if not shutil.which(program):
             parser.error(f"{program} is required; install the GNOME desktop test dependencies")
+
+    display_socket = None
+    if args.physical:
+        display = os.environ.get("WAYLAND_DISPLAY")
+        host_runtime = os.environ.get("XDG_RUNTIME_DIR")
+        if not display or (not Path(display).is_absolute() and not host_runtime):
+            parser.error("Physical QA needs WAYLAND_DISPLAY and its host XDG_RUNTIME_DIR")
+        display_socket = Path(display) if Path(display).is_absolute() else Path(host_runtime) / display
+        display_socket = display_socket.resolve()
+        if not display_socket.exists() or not stat.S_ISSOCK(display_socket.stat().st_mode):
+            parser.error("The caller's Wayland display socket is unavailable")
+        locked = subprocess.run(["gdbus", "call", "--session", "--dest", "org.gnome.ScreenSaver",
+                                 "--object-path", "/org/gnome/ScreenSaver", "--method",
+                                 "org.gnome.ScreenSaver.GetActive"], text=True,
+                                capture_output=True, timeout=10, check=False)
+        if locked.returncode or locked.stdout.strip() != "(false,)":
+            parser.error("Physical QA needs an unlocked GNOME desktop; leave test windows unobscured")
 
     with tempfile.TemporaryDirectory(prefix="pirwa-gnome-") as directory:
         base = Path(directory)
         env = os.environ.copy()
         for key in ("DISPLAY", "WAYLAND_DISPLAY", "DBUS_SESSION_BUS_ADDRESS"):
             env.pop(key, None)
+        if display_socket:
+            # An absolute socket path connects to the host compositor while all
+            # services and cleanup retain this run's private runtime marker.
+            env["WAYLAND_DISPLAY"] = str(display_socket)
         for suffix in ("RUNTIME_DIR", "CONFIG_HOME", "DATA_HOME", "CACHE_HOME", "STATE_HOME"):
             path = base / suffix.split("_", 1)[0].lower()
             path.mkdir(mode=0o700)
@@ -232,12 +296,14 @@ def main():
         command = ["dbus-run-session", "--", sys.executable, str(Path(__file__).resolve()),
                    "--build", args.build, "--monitor", args.monitor, "--output", str(args.output),
                    "--session-root", directory]
-        command += ["--command-timeout", str(args.command_timeout)]
+        command += ["--command-timeout", str(args.command_timeout), "--repeat", str(args.repeat)]
+        if args.physical:
+            command.append("--physical")
         if args.command:
             command += ["--", *args.command]
         try:
             with (args.output / "session.log").open("w") as log:
-                result = subprocess.run(command, cwd=ROOT, env=env, stdout=log,
+                result = subprocess.run(command, check=False, cwd=ROOT, env=env, stdout=log,
                                         stderr=subprocess.STDOUT, start_new_session=True)
         finally:
             try:
@@ -245,7 +311,8 @@ def main():
             finally:
                 unmount_session_filesystems(base, args.output)
         code = result.returncode
-    print(f"{'PASS' if code == 0 else 'FAIL'} virtual GNOME desktop: {args.output}")
+    kind = "physical" if args.physical else "virtual"
+    print(f"{'PASS' if code == 0 else 'FAIL'} {kind} GNOME desktop: {args.output}")
     return code
 
 

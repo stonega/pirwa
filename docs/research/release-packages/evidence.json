@@ -1,0 +1,113 @@
+{
+  "date": "2026-11-16",
+  "source": {
+    "version": "0.1.0-dev",
+    "commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+    "dirty": true,
+    "epoch": 1794663770,
+    "app_id": "io.github.stonega.Pirwa",
+    "archive": "pirwa-0.1.0-dev.tar.xz",
+    "sha256": "35b4fe336b4e10ebd46eb2d5503d810d2308c52b9bd1cdfa724cc9f37d323c3a"
+  },
+  "assets": {
+    "pirwa-dbgsym_0.1.0~dev-1_amd64.deb": "24347a58f2985d60d172d1445f46f08aacd12f46dc65b4b3ee8eddd11f9cc18f",
+    "pirwa_0.1.0~dev-1_amd64.buildinfo": "b618cbb9b9a5c452821f3b080b36d372152fe4e019d5bfec4f5b298f20e09ebd",
+    "pirwa_0.1.0~dev-1_amd64.changes": "474056a5317aeb1f19001226197b0ef67d0642a60349d69e02599a7e4bee254f",
+    "pirwa_0.1.0~dev-1_amd64.deb": "75069a83372362a263d035814e3847391ce9b99b78efaff91d402e05b9f8b53f",
+    "io.github.stonega.Pirwa-0.1.0-dev-x86_64.flatpak": "db1960e433f9655525db09600cd7e03cc655f15dfda358b3149739185e15eae0",
+    "pirwa-0.1.0-0.1.dev.fc45.src.rpm": "07428e3978f74f41cce73ff73563d2f876376bed502af8a507123ab42b19a393",
+    "pirwa-0.1.0-0.1.dev.fc45.x86_64.rpm": "0e39b5b13d1afeaac3dca9bd82c97f5b3046d4418d5d854d857f7f673450f070",
+    "pirwa-debuginfo-0.1.0-0.1.dev.fc45.x86_64.rpm": "07206ab724d81acdb5a6d3389009acc107b1d9626f289e4f53d499a5e647b951",
+    "pirwa-debugsource-0.1.0-0.1.dev.fc45.x86_64.rpm": "435e0a0492543d844f2500cc2baab27cc6250b9dd87dd4700ba18a0f18ea7d5c",
+    "pirwa-0.1.0-dev.tar.xz": "35b4fe336b4e10ebd46eb2d5503d810d2308c52b9bd1cdfa724cc9f37d323c3a"
+  },
+  "headless_tests_per_package": 23,
+  "native_desktop_cases": 10,
+  "release_guard_cases": 13,
+  "copr_project": "https://copr.fedorainfracloud.org/coprs/stonegate/pirwa/",
+  "copr_build_submitted": false,
+  "github_release_published": false,
+  "raw_root": "build/qa/distribution-20261116",
+  "logs": {
+    "deb_build": {
+      "path": "deb-v8.log",
+      "sha256": "10ddf04939c09711da606aa073e59faf714f59fdf9f01e7f40c7fdc109f66270"
+    },
+    "rpm_build": {
+      "path": "rpm-v8.log",
+      "sha256": "f0b442f1bcfeb447743169b50a69780cf14b6cd9ab6a9fc772774dd83a6f1dfd"
+    },
+    "flatpak_build": {
+      "path": "flatpak-v8.log",
+      "sha256": "105a1a35f73705946faadb47ad8a3d29841ea21bc0b772c7a4e59ae0e0e5c035"
+    },
+    "deb_install": {
+      "path": "deb-install-v8.log",
+      "sha256": "7e243028b5793d61cac709256d8e094de9b6e56fd4b6436ad96ec64533de732c"
+    },
+    "rpm_install": {
+      "path": "rpm-install-v8.log",
+      "sha256": "5727dc405f339f5483fbf75ba4179e5748a6f8d64215b3bf1828c2eb4d2903ef"
+    },
+    "srpm_rebuild_control": {
+      "path": "srpm-rebuild-v5.log",
+      "sha256": "c740447040042233389384d3b36d56ed453b7dad2f9d713d4bb5b98d5923a121"
+    },
+    "sanitizers": {
+      "path": "sanitize-tests-avatar-fix.log",
+      "sha256": "d24d069493a42c10459f754e7f9a830e838295688e78ed5a432ccc97264b61c4"
+    },
+    "native_tests": {
+      "path": "native-tests-final.log",
+      "sha256": "b153b4553c2a3f9c4123a5807c075ade504a145a25b8167118e8a97ef9e705f4"
+    },
+    "native_ui": {
+      "path": "native-ui-final/report.json",
+      "sha256": "f2885b39130b819f84fa764910d98598e43cde107090a1787343cd2846b67fba"
+    },
+    "flatpak_creation_ui": {
+      "path": "flatpak-ui-v8-bus/report.json",
+      "sha256": "883eadaed7f37da0134c61b2778fa04f8335f208e784d964a6694a867819b99d"
+    },
+    "flatpak_inventory_ui": {
+      "path": "flatpak-inventory-v8-no-a11y/report.json",
+      "sha256": "9a40e39bcb66153fe469a48e9d556b9e8152b0f88a6849208224db4e99f916bf"
+    },
+    "flatpak_runtime": {
+      "path": "flatpak-runtime-final-v8.log",
+      "sha256": "f0f1fd0b9811cb85d7f02f386a58e990b5296a9782e070b02f295f2eee0cd635"
+    },
+    "flatpak_bundle_import": {
+      "path": "flatpak-import-v8.log",
+      "sha256": "0f7414941ef105d6423bb7f657d54dbe09042d315ef0fe5009d4199dfa3a5848"
+    },
+    "copr_dry_run": {
+      "path": "copr-dry-run-v8.json",
+      "sha256": "a56cd4c27bbdc7eda0d17a48fd48057051f02f6450993ea3c0e5bc507641d6ef"
+    },
+    "publish_rejection": {
+      "path": "publish-guard-v8.log",
+      "sha256": "67a605756d67c27a4cb1d500666b901de3fe105776cc0e4afd43be94c32ca6d5"
+    },
+    "release_client_image": {
+      "path": "release-clients.log",
+      "sha256": "0194587343bbb2be9f007d5c602cd084b4d857f061b829d1bc9512ab013b944b"
+    },
+    "formatting": {
+      "path": "format-last.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "snapshot_files_changed_before_evidence": [
+    "docs/design/architecture.md",
+    "docs/user/getting-started.md",
+    "po/pirwa.pot",
+    "src/pirwa-avatar.c",
+    "src/pirwa-create-dialog.c",
+    "src/pirwa-create-dialog.h",
+    "src/pirwa-window.c",
+    "tests/test-avatar-ui.c",
+    "tests/test-create-ui.c",
+    "tests/test-ui.c"
+  ]
+}

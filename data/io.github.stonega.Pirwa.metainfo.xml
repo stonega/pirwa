@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.stonega.Pirwa</id>
+  <name>Pirwa</name>
+  <summary>Manage local virtual machines</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <developer id="io.github.stonega">
+    <name>Pirwa Contributors</name>
+  </developer>
+  <description>
+    <p>Create Linux virtual machines from local installation media, import
+    standalone qcow2 images, and manage their power and basic resources.</p>
+    <p>Pirwa uses libvirt and a native GNOME interface. SPICE consoles appear in
+    the main window or a separate window, with virt-viewer as a fallback for VNC and SPICE GL.</p>
+  </description>
+  <url type="homepage">https://github.com/stonega/pirwa</url>
+  <url type="bugtracker">https://github.com/stonega/pirwa/issues</url>
+  <url type="vcs-browser">https://github.com/stonega/pirwa</url>
+  <screenshots>
+    <screenshot type="default">
+      <caption>Manage a local collection of virtual machines</caption>
+      <image type="source" width="1088" height="680">https://raw.githubusercontent.com/stonega/pirwa/main/data/screenshots/collection.png</image>
+    </screenshot>
+  </screenshots>
+  <releases>
+    <release version="0.1.0-dev" type="snapshot" date="2026-11-16">
+      <description>
+        <p>Development preview with local VM creation and import, power controls,
+        resource settings, and an embedded or detached native SPICE console.</p>
+      </description>
+    </release>
+  </releases>
+  <launchable type="desktop-id">io.github.stonega.Pirwa.desktop</launchable>
+  <provides><binary>pirwa</binary></provides>
+  <content_rating type="oars-1.1"/>
+  <supports><control>pointing</control><control>keyboard</control></supports>
+</component>

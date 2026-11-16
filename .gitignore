@@ -5,3 +5,8 @@
 /.env.*
 *.swp
 compile_commands.json
+__pycache__/
+*.py[cod]
+.flatpak-builder/
+dist/
+flatpak-build/

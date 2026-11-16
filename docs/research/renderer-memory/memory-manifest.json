@@ -1,0 +1,121 @@
+{
+  "scope": "Synthetic production renderer. Memory probe observes app-created texture lifetimes, /proc PSS, glibc allocation and GPU fdinfo. No SPICE decoding, VM or physical presentation.",
+  "control": "Flat control removes only the outer rounded luminance mask; current transparent empty-state behavior is retained.",
+  "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+  "source_dirty": true,
+  "input_sha256": {
+    "src/pirwa-display.c": "bd7f145b089df394972ac0a0c5e1daf4ac006e2b3d5f9d9ff23ca683da8bc829",
+    "src/pirwa-display.h": "3665b0622c62de2d7cad19f063d5b3e7aabb51fd7689ffdf6ab3108801bfa897",
+    "src/pirwa-frame.c": "0c319d33e13230c94b62b71df10be4e7f935e378af3286fd20ed59698d3e122c",
+    "src/pirwa-frame.h": "cfa5c1f641a14d9397cd3a3c4c98b459b2a60c442498788d46bcf6791b16d7e3",
+    "tests/benchmark-display.c": "e6a63a28a5c3711915aa22b7b770e7ce4b9f076542a4fa35ffb13695a17bf3cb",
+    "tests/benchmark-display-memory.c": "d94a8a4f6a37b58e3e624d1208176008a4e217ad71a26d67d0dbbd5b4520261a"
+  },
+  "frozen_sha256": {
+    "pirwa-display.c": "bd7f145b089df394972ac0a0c5e1daf4ac006e2b3d5f9d9ff23ca683da8bc829",
+    "pirwa-display.h": "3665b0622c62de2d7cad19f063d5b3e7aabb51fd7689ffdf6ab3108801bfa897",
+    "pirwa-frame.c": "0c319d33e13230c94b62b71df10be4e7f935e378af3286fd20ed59698d3e122c",
+    "pirwa-frame.h": "cfa5c1f641a14d9397cd3a3c4c98b459b2a60c442498788d46bcf6791b16d7e3",
+    "benchmark-display.c": "e6a63a28a5c3711915aa22b7b770e7ce4b9f076542a4fa35ffb13695a17bf3cb",
+    "benchmark-display-memory.c": "d94a8a4f6a37b58e3e624d1208176008a4e217ad71a26d67d0dbbd5b4520261a",
+    "config.h": "3caf75ae3d7f7ac1838dfa6d7995adb260764318d1ede8b2a15881d45d27e508",
+    "display-flat.c": "7374a2403284434a671809fbcb62a2cc29eabe3939edb7d2c1cd30f859d40b4f",
+    "frame-rows.c": "c496be6f3b17744558c857959b9fe5d236d15769b11c5fa108ecb1b45494fe76"
+  },
+  "flags": [
+    "-O3",
+    "-g",
+    "-std=c17",
+    "-I/home/stone/Gnome/pirwa/build/qa/renderer-memory/frozen/source"
+  ],
+  "dependency_flags": [
+    "-I/usr/include/gtk-4.0",
+    "-I/usr/include/pango-1.0",
+    "-I/usr/include/fribidi",
+    "-I/usr/include/harfbuzz",
+    "-I/usr/include/gdk-pixbuf-2.0",
+    "-I/usr/include/glycin-2",
+    "-I/usr/include/cairo",
+    "-I/usr/include/libxml2",
+    "-I/usr/include/freetype2",
+    "-I/usr/include/libpng16",
+    "-I/usr/include/pixman-1",
+    "-I/usr/include/graphene-1.0",
+    "-I/usr/lib64/graphene-1.0/include",
+    "-mfpmath=sse",
+    "-msse",
+    "-msse2",
+    "-I/tmp/pirwa-build-deps.ihjR8B/usr/include/spice-client-glib-2.0",
+    "-I/tmp/pirwa-build-deps.ihjR8B/usr/include/spice-1",
+    "-I/usr/include/glib-2.0",
+    "-I/usr/lib64/glib-2.0/include",
+    "-DWITH_GZFILEOP",
+    "-I/usr/include/libmount",
+    "-I/usr/include/blkid",
+    "-I/usr/include/sysprof-6",
+    "-pthread",
+    "-lgtk-4",
+    "-lpangocairo-1.0",
+    "-lpango-1.0",
+    "-lgdk_pixbuf-2.0",
+    "-lcairo-gobject",
+    "-lcairo",
+    "-lharfbuzz",
+    "-lvulkan",
+    "-lgraphene-1.0",
+    "-L/tmp/pirwa-build-deps.ihjR8B/usr/lib64",
+    "-lspice-client-glib-2.0",
+    "-lgio-2.0",
+    "-lgobject-2.0",
+    "-lglib-2.0"
+  ],
+  "variants": {
+    "flat-rows": {
+      "memory": {
+        "path": "/home/stone/Gnome/pirwa/build/qa/renderer-memory/frozen/flat-rows-memory",
+        "sha256": "879cad7cac368afebfafb2ae8c19ce74811006a21e75bbc86661b3142b9cce43"
+      },
+      "timing": {
+        "path": "/home/stone/Gnome/pirwa/build/qa/renderer-memory/frozen/flat-rows-timing",
+        "sha256": "0d78d5f45c531fd0881cd16b652b6882b9468c6322f3a1fe0db1aa5c58b6cf0e"
+      }
+    },
+    "flat-packed": {
+      "memory": {
+        "path": "/home/stone/Gnome/pirwa/build/qa/renderer-memory/frozen/flat-packed-memory",
+        "sha256": "dce7f5e42b38c5d54e2197f0fe7167ea6dd14c61bbc25bbd3ae3b52e4274373c"
+      },
+      "timing": {
+        "path": "/home/stone/Gnome/pirwa/build/qa/renderer-memory/frozen/flat-packed-timing",
+        "sha256": "1a3b10f99ccd72e83ff6d489d54b13e713fbed9c512a7c7b7f3c7311bb9d6dbd"
+      }
+    },
+    "rounded-packed": {
+      "memory": {
+        "path": "/home/stone/Gnome/pirwa/build/qa/renderer-memory/frozen/rounded-packed-memory",
+        "sha256": "2381462740d491e9cd73bd8b65a45725a670db75dc08a828285b18079c679469"
+      },
+      "timing": {
+        "path": "/home/stone/Gnome/pirwa/build/qa/renderer-memory/frozen/rounded-packed-timing",
+        "sha256": "92b21e1c57d18e8c782dd106e15144727edde22581bbda80597d4c92fec5d305"
+      }
+    }
+  },
+  "host": "Linux-7.2.15-300.fc45.x86_64-x86_64-with-glibc2.44",
+  "compiler": "cc (GCC) 16.2.1 20261029 (Red Hat 16.2.1-3)",
+  "packages": [
+    "glibc-2.44-2.fc45.x86_64",
+    "gtk4-4.24.1-1.fc45.x86_64",
+    "spice-glib-0.43-5.fc45.x86_64",
+    "gnome-shell-51.1-1.fc45.x86_64",
+    "mutter-51.1-1.fc45.x86_64"
+  ],
+  "failures": [],
+  "observer_scope": "Memory sampling/weak refs are diagnostic only. Timing runs use the separate uninstrumented correctness fixture. malloc_trim is called once after the last viewer closes, only as an allocator diagnostic.",
+  "requested_renderer": "default",
+  "power_profile": "balanced",
+  "started_unix": 1794670445.0681858,
+  "measurement_runner_sha256": "025951e2d481df0728c24280ab80be26b04999ad8ca892791e2b7c30661d7467",
+  "completed": true,
+  "source_changes_observed_after_run": {}
+}

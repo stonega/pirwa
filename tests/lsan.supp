@@ -1,0 +1,5 @@
+# libvirt 12.6.0: four process-initialization classes and their names (263 bytes).
+# Reproduced by virConnectOpen/virConnectClose alone, without Pirwa code.
+# Restrict this exception to the initialization stack; backend allocations,
+# other libvirt calls, GLib and GTK remain visible to LeakSanitizer.
+leak:virDataTypesOnce

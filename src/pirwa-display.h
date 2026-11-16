@@ -7,6 +7,7 @@
 G_DECLARE_FINAL_TYPE (PirwaDisplay, pirwa_display, PIRWA, DISPLAY, GtkWidget)
 
 GtkWidget *pirwa_display_new (void);
+void pirwa_display_set_rounded (PirwaDisplay *self, gboolean rounded);
 /* Primary memory stays owned by the transport. Call clear before it is freed.
  * These functions, like GTK, must be used on the main thread. */
 gboolean pirwa_display_set_primary (PirwaDisplay *self, const SpiceDisplayPrimary *primary);

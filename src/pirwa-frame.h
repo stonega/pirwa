@@ -4,6 +4,9 @@
 #include <spice-client.h>
 
 gboolean pirwa_frame_valid (const SpiceDisplayPrimary *primary);
+/* The monitor may occupy only part of an aligned QXL primary surface. */
+cairo_rectangle_int_t pirwa_frame_monitor_area (const SpiceDisplayPrimary *primary,
+                                                const SpiceDisplayMonitorConfig *monitor);
 GdkTexture *pirwa_frame_texture_rect (const SpiceDisplayPrimary *primary,
                                       const cairo_rectangle_int_t *rect);
 GdkTexture *pirwa_frame_texture (const SpiceDisplayPrimary *primary, GdkTexture *previous,

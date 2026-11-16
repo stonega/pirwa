@@ -22,6 +22,18 @@ Start backend overhead was p95 27.127 ms over persistent direct libvirt.
 Presentation and cold-cache gates remain separate. Guest storage results are
 inconclusive: substantial variation also occurred with the manager closed.
 
+The [presentation follow-up](../research/startup-presentation/README.md) records
+complete GDK feedback, production entry-point launches and physical-display
+measurements. Keep those results separate from the earlier after-paint samples.
+
+The [collection-menu follow-up](../research/collection-menus/README.md) defers
+row popover creation until opening. Three alternating 1,000-domain scroll
+trials reduce paint thread CPU p95 from 19.5–21.3 ms to 5.1–5.5 ms. The matched
+production-launch comparison still has first-presentation p95 607.657 ms, and
+virtual presentation intervals remain above 16.7 ms. Current idle PSS is lower
+in the recorded 60-second sample; hardware, cold-start and backend-stall
+acceptance remain separate.
+
 ## Provisional release budgets
 
 | Measure | Target | Conditions |
@@ -53,18 +65,25 @@ performance or guest boot speed from inventory microbenchmarks.
    (enter this as one line). The Python standard-library wrapper generates isolated
    libvirt test-driver XML. It warms once, saves every launch sample, then samples
    the production window/backend with normal GTK animations and accessibility.
-   It records all-thread process CPU, `/proc/self/smaps_rollup` PSS, passive frame
+   It pins the executable and matching GSettings schema, uses in-memory settings,
+   and records all-thread process CPU, `/proc/self/smaps_rollup` PSS, passive frame
    counts, renderer, monitor refresh/scale, source revision, binary hash, packages,
    power profile, and host load. Do not interact with the windows during sampling.
 4. Use `--domains 1000 --scroll-seconds 5` for a large collection. The harness
-   scrolls 40 pixels per frame and records before-paint to after-paint CPU work.
-   That span excludes compositor presentation and GPU completion. Startup spans
+   scrolls 40 pixels per frame and records before-paint to after-paint wall time
+   and main-thread CPU time separately. Both exclude compositor presentation and
+   GPU completion. Historical `frame_work_us` samples measured elapsed wall time,
+   despite their former CPU label. New reports use `paint_wall_p95_ms` and
+   `paint_thread_cpu_p95_ms`; neither is a presentation percentile. Startup spans
    end at after-paint or connection readiness in a non-unique QA application;
    they do not include production single-instance bus activation. No cold-cache
    claim is made. Synthetic domains live inside the process, unlike a real daemon.
    Measure a real QEMU session separately. Use Sysprof/presentation traces for
-   actual frame latency, allocations, backend stalls, and wakeups. Those gates
-   remain open; a CPU work sample alone does not pass the frame-time budget.
+   actual allocations, backend stalls and wakeups. Add `--presentation` on GTK
+   4.24+ to record complete `presented` GDK feedback separately. Missing or
+   discarded feedback cannot count as zero latency. Reports retain result counts,
+   raw timings, paint-to-presentation latency and presentation intervals; display
+   type and refresh still determine whether a reference condition was met.
 5. For guest throughput compare the same domain XML and guest workload launched
    with Pirwa and direct libvirt/virsh, in alternating repeated runs. Record
    vCPU/RAM, CPU mode, KVM, storage format, I/O mode, network backend, video, and
@@ -92,6 +111,32 @@ example explicitly uses GTK's test accessibility backend because AT-SPI service
 activation is unavailable in the isolated host session; that setting is
 recorded in the raw profile. It is not a production accessibility measurement.
 
+To include the unchanged production entry point and its unique GApplication
+lifecycle, use the explicit QA preload observer (built but never installed):
+
+```sh
+./scripts/test-gnome.py --output build/qa/application-startup -- \
+  env GTK_A11Y=test ./scripts/profile-ui.py --build build-perf --application \
+  --domains 100 --launches 30 --idle-seconds 0 --display-kind virtual \
+  --output build/qa/application-startup/profile.json
+```
+
+`--application` requires the isolated wrapper, synthetic test-driver URI and
+startup-only sampling. Its passive GTK observer writes a capture only for that
+test process, verifies inventory readiness, then closes its window. It records
+first complete presented feedback; it does not measure desktop-launcher
+activation, an already-running instance or cold caches.
+
+For a hardware run, add `--physical` to `test-gnome.py` and change the profile's
+`--display-kind` to `physical`. Run from an unlocked GNOME Wayland session and
+leave each test window unobscured. The wrapper connects to the existing
+compositor through its absolute socket path, with a private D-Bus and private
+runtime/config/data/cache/state directories. It creates no compositor and
+does not stop the user's GNOME Shell. Display mode, renderer and power profile
+are left unchanged; record the actual monitor mode separately. A 240 Hz run
+does not establish the 60 Hz reference condition. The explicit test accessibility
+backend above also leaves physical screen-reader acceptance open.
+
 ## Design constraints
 
 Bulk RPCs, lifecycle events, virtualized rows, lazy details, bounded background
@@ -118,3 +163,30 @@ For active guest work, the [real-console profiling workflow](../research/active-
 boots a disposable Fedora live guest and pairs normal tile rendering with a
 forced full-frame control. It records actual SPICE regions, copied bytes,
 process CPU and passive GTK spans. Its test-only wrappers do not enter the app.
+
+The [dense-console follow-up](../research/dense-console-performance/README.md)
+records packed-frame copy measurements, a 12-trial real-console comparison and
+rejected cache/compaction experiments. Its pinned display renderer predates
+concurrent rounded-display edits. The QA
+runner requires a five-second quiet framebuffer before timing and rejects any
+in-trial primary change. `python3 tests/test-console-profile.py` checks that guard.
+`build-perf/tests/benchmark-frame 3840 2160 180` isolates immutable texture
+creation without a display or VM. Keep those component measurements separate
+from real-console CPU, GTK submission spans and physical presentation latency.
+
+The [rounding and memory follow-up](../research/renderer-memory/README.md)
+adds repeated texture-lifetime/allocator diagnostics and a paired 4K comparison
+of masked and direct rounded rendering. The memory observers and diagnostic
+`malloc_trim` call exist only in a separate executable. The app has no allocator
+trimming policy. The `invalidate-full` display workload mutates one pixel but
+invalidates the whole framebuffer, isolating rendering from the scalar synthetic
+pixel producer. Keep its results separate from the `full` workload and real guests.
+
+The explicit display/console profilers export GDK frame feedback separately
+from paint spans. Only complete `presented` results on GTK 4.24 or newer are
+eligible for compositor-presentation statistics. Keep missing, outstanding and
+discarded feedback counts alongside the accepted samples. A virtual monitor
+cannot pass the physical-presentation gate. These observers retain timing
+objects in QA processes only and add no frame-driving callback to the app.
+The guest profiler checks available memory before creating resources, requiring
+the selected guest allocation plus 1024 MiB of headroom inside the private desktop.

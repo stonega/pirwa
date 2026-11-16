@@ -1,0 +1,2518 @@
+{
+  "recorded_utc": "2026-11-15T04:52:50.743319+00:00",
+  "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+  "source_dirty": true,
+  "status": "frame-observer-harness-regression-fixed",
+  "historical_timeout_status": "not-reproduced-cause-unconfirmed",
+  "scope": "Test-harness lifecycle and current-window after-paint readiness; no application presentation change.",
+  "manifest": {
+    "sources": {
+      "src/pirwa-machine.c": "3874c8c27e9c3fd88dd69731c592a5bc3ed6297b20c9f77d77e76a3028abd902",
+      "src/pirwa-inventory.h": "549ebabd3a04fd381185deab06978055d622e6fd39bbac54b5b2c6caa0a9b804",
+      "src/pirwa-config.h": "bed38f80afd86996d5544a9907a2b48d47f1947642dea1d14d6db9807624e5a8",
+      "src/main.c": "3a92167e52b73db67ad8a703a9804a60a07df783ff983bb51b76571448863654",
+      "src/pirwa-backend.h": "9ea1592f45acf8c38db157e4210df860905b01cbbcd59221cc6ad7d67abb1db2",
+      "src/pirwa-machine.h": "c0dfaa631ef74fb163cab05b6e22cc25dd9792bd8817ddf89d45a7a245ce8411",
+      "src/pirwa-provision.h": "d9826cc3f48dcc1926820dfd7b98d9af4edc02353c32821d3cd64ac2975aceb0",
+      "src/pirwa-model.c": "2383ab0620a507c297e53ee715f625acd1abeeda932e0bc22db8e6e0ea61f94d",
+      "src/pirwa-model.h": "919dd6fcf72c86780c1c442063e18bc67eef0a8c6009d9cdaa1927bea90888d3",
+      "src/pirwa-boxes-dialog.h": "36fccca7274066a9289a608fdf6140cabebfdc3a36c4221af4fb0c243aca20a0",
+      "src/pirwa-window.h": "e764cbd1307547c74b4624a36e3a8ade1c9c9b3519faab973704c27dfeb8a496",
+      "src/pirwa-display.h": "7181f67d78751f0ba01ad6d491956ab1c74f8f6c366e827ce35ed6607fc6d142",
+      "src/pirwa-inventory.c": "e7c5e88bbd6aab26e98eef025fce6176625bddbae5a8f9bc58903c243106d36c",
+      "src/pirwa-console.h": "b0470c77756effb734fefc50799611ca698594b118d0b5bfe92c2d991c61f3f4",
+      "src/pirwa-usage.h": "4d863f2a0820d8867da38f6aff543f1f254fb4042cbd19b425dd22fb342d0550",
+      "src/pirwa-import.h": "fb30f61bcc10da9f8ac6c52da04024e29cd731533cc95ca37b4b9963ee88b81c",
+      "src/pirwa-boxes.c": "85f1fb16574bc57116363386388c41aa57586f03e2249398d51ecb68cb3bb160",
+      "src/pirwa-boxes.h": "e2ec79c2abb0d0f2bf9063fa0f66cde6ffdf235b5d3e00ca3d308647509085f7",
+      "src/pirwa-boxes-dialog.c": "f9bd14d2c88739d4b6b78f54e9e75a4f73ffdec9427f7f3bfbba428d2e463b9b",
+      "src/pirwa-import.c": "a6eb59558365a28764fce3f42b8e00cb160430ddfafabe366191ba2767be1fcd",
+      "src/pirwa-usage.c": "9199e3dcf56d5f61044d3ddf58a1ee856225128deb6adc9981ca6c93bfbd43d1",
+      "src/pirwa-libvirt.h": "6b20112325bc4afcda34654d4cc1c5ac9e2529045a7f1b7c004cac495120f739",
+      "src/pirwa-display.c": "b8c36fcee44e615a6bf3010ef4bcd63335d79d40c4e1c0c533f387f52b369038",
+      "src/pirwa-frame.c": "83863d6d451cbe76cc00c7a5290fd47cb6cf121c12e96e0a8de9c726ac10f7ea",
+      "src/pirwa-frame.h": "18155860a3a25564fd34d57f4888f12480a4219addf8b777f0d1fea977c20130",
+      "src/pirwa-create-dialog.h": "328f3a338adee425c41087a9abaf91d8d17d28e9e567ceff1326757c7ec80f7e",
+      "src/pirwa-create-dialog.c": "c28b3e9e955d39744264f5a181432e657ae32bcf37f1405160c88743ddd967a5",
+      "src/pirwa-preferences.h": "97f7deb707624737ab20941295b54e30ae984a8d81ce876431741ecddc7cf490",
+      "src/pirwa-preferences.c": "3f8ad49c6683d00a287726c036b9410cdedd9cb6689053b05e444080ae02f53a",
+      "src/pirwa-window.c": "0a567124f2550864e14c00d781ef5ab1a08048e957014b2338cee5479f89d540",
+      "src/pirwa-provision.c": "e28d48576ccee0135750f3ae0523eec4364507eed3b4cf27a741d0799ce39317",
+      "src/pirwa-config.c": "5c43a3739737615642ea8bb7791f63e5d8a4a8bfd4363f7b083949c8cdf26fa2",
+      "src/pirwa-backend.c": "927871efae0f520bbdbcc6118845c64fab5477ee63d482897caba407d92c5eaa",
+      "src/pirwa-console.c": "01121b5b30728ec5c5000bd633e67c7dcc4571a2d9889a27478aff3a1af49e00",
+      "tests/benchmark-inventory.c": "187e446c0bd7b184396a60c7830b5b92028ded725091150e1565381ff24c4158",
+      "tests/benchmark-scale.c": "d7345715ef35257b7dd12af6115683500ff30e2b0ec6d765ee216591a54ff174",
+      "tests/test-kvm.c": "e524138f927e2b42cbf6ed24a4d2e467244d7daca022f03a7fc72b8c80ef6199",
+      "tests/test-model.c": "a8d92778c34ac6745d3146b4495549a47d517fcd4a4b55ce94dd6c5c921f8499",
+      "tests/test-provision.c": "77be4030d3b65c0b83a25e970a666734975a7cb34cf8e81c1720fd9f6c5ca3da",
+      "tests/qa-vm.c": "6a1bae787822df50eed08f37bcefde1d09a73c43a45755a21b983f8ddbc941e7",
+      "tests/test-inventory.c": "8b67c8e326bdaac3ddd68ecbd9f148a8adbf1f42cd6c34534a7857a2447a6bef",
+      "tests/test-usage.c": "b685a264cff9aa4f525526352caa2278dd163c0f147f7add16799dfaf96f037d",
+      "tests/test-boxes.c": "b019b900409e0dce89ddff52b3c3b0efa27149117ee6e01a448ff16c53e432e5",
+      "tests/test-import.c": "14faaf8c796e65ca21053fc9f93b2e88b09c40d606b6011a4098bf31c948a62c",
+      "tests/benchmark-console.c": "8e720a9c35e4da9d4cb0bcbeb0ea04d1ec02d976bbec69cd253b914674512633",
+      "tests/test-frame.c": "dca02ed66e4879645c219a2bae0557d35025f76f4d7c22ea461837cdbef78e6d",
+      "tests/benchmark-frame.c": "14268f5c4911036bcf4cde0ae6b8de03e265cfae30e67c884dabd2c0bab9aba8",
+      "tests/test-console-connect.c": "a1d2952345c1f94b7add81ef2690469e1b750a66bc573063cfea0a96835c5675",
+      "tests/benchmark-display-memory.c": "2709b3c1114664f8f0f5a2722e6abc2d45cbd1a1a22ae62265b53ba75d5da531",
+      "tests/benchmark-display.c": "d28a82d3a725664a7caba583ca7be8083245e065c836565dcfebcccf07605bff",
+      "tests/qa-frame-feedback.h": "9c40c0fc9ae030d353f13f391986455ebd1eaa5840249299da5b9667912728cd",
+      "tests/qa-frame-feedback.c": "4e1a472d882dc4e380f266a2fe00fae223e44021ebc7ab5d5073afb2747b2463",
+      "tests/test-preferences.c": "20d21b75ee88053d9df7b37fc7b2b7e9eae319557ed700db48b3f31bbc430584",
+      "tests/test-console-ui.c": "8615dd6341e14f81f5a8be54648718753a2186dc713698c77bff2b74ba5e5d11",
+      "tests/test-create-ui.c": "a4028538b1586ba25a7f43cbddcf34c39bc7febc944495f6eb24002e4c5a4493",
+      "tests/test-backend-faults.c": "152ecb4bb55873a70c32608864ff33790c68280e078a73326b6ed794d87a2574",
+      "tests/test-backend.c": "bae5f138f9ed901084faecfa83c3d4f7b57a53ff7cffb251ad366f80aa467467",
+      "tests/test-config.c": "40d7bc2b21bec93083a04c1c4f2a036c95a234a5f2e73c66d165a0665324a5e3",
+      "tests/test-backend-daemon.c": "82eb8040dc011f6dd60fede2716d086a456c151d97c01f7e2bb050427d35499e",
+      "tests/test-ui.c": "682a82ca1f38e99abb809d3b7588e3740c0f564203f4a34b8b674b382f37bbd2",
+      "scripts/test-gnome.py": "caad6c2f71dcba0e1cb280c788f9aa9c797252d8dba0cd9641021462f2244388"
+    },
+    "binaries": {
+      "normal": {
+        "tests/test-ui": "6491ff063724a378467c65ebc59d94371f6fb4040559a96c6d878e2ec074db28",
+        "tests/test-console-ui": "edc83f94b8f49ada23ca5597b1c1744133e15dde49a169ee8270145b6d746017",
+        "tests/test-create-ui": "63a3e0be9c98846dbf9f57ee443adbae6473a730abbe0de5bd885e9960c76bf9"
+      },
+      "sanitizer": {
+        "tests/test-ui": "89dc148c83408ce9ad2e5b87a6aad25ef087ec2f2932aa1ea379f8b7f7646034",
+        "tests/test-console-ui": "5add4e1db1f202fdcb86f5bd30dd7aab846cc0de374c43324f81e6dd06e7bc60",
+        "tests/test-create-ui": "19321a3637c3c7f9c045ea6acb7901af577ae69f67de89d64e8ec06917932061"
+      }
+    }
+  },
+  "source_drift_during_accepted_runs": [],
+  "regression_before_fix": {
+    "report": {
+      "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+      "source_dirty": true,
+      "gnome_shell": "GNOME Shell 51.1",
+      "shell_command": [
+        "gnome-shell",
+        "--headless",
+        "--wayland",
+        "--no-x11",
+        "--virtual-monitor",
+        "1280x800@60",
+        "--wayland-display",
+        "pirwa-qa-wayland"
+      ],
+      "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
+      "scope": "Custom command in an isolated desktop; inspect the command's own results",
+      "cases": [
+        {
+          "name": "command",
+          "command": [
+            "build/qa/boxes-mapping/regression-before-sanitizer",
+            "--boxes-exercise"
+          ],
+          "returncode": -6
+        }
+      ],
+      "passed": false,
+      "error": "command failed (-6); see /home/stone/Gnome/pirwa/build/qa/boxes-mapping/regression-before-desktop",
+      "shell_exitcode": 0
+    },
+    "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n**\nERROR:../tests/test-ui.c:438:watch_boxes: 'run->clock == gtk_widget_get_frame_clock (GTK_WIDGET (run->window))' should be TRUE\n",
+    "binary_sha256": "2c7eca47820db5c25ff08332c25f3c53d869346ca826f191b4661ccc348150ba",
+    "process_cleanup": {
+      "signalled": [],
+      "remaining": {}
+    }
+  },
+  "ui_after_fix": {
+    "normal": {
+      "report": {
+        "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+        "source_dirty": true,
+        "gnome_shell": "GNOME Shell 51.1",
+        "shell_command": [
+          "gnome-shell",
+          "--headless",
+          "--wayland",
+          "--no-x11",
+          "--virtual-monitor",
+          "1280x800@60",
+          "--wayland-display",
+          "pirwa-qa-wayland"
+        ],
+        "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
+        "scope": "Programmed GTK actions and focus traversal; not physical input, screen reader, or guest console certification",
+        "repetitions": 2,
+        "cases": [
+          {
+            "name": "run-01-light",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/normal/tests/test-ui",
+              "--exercise",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-normal/run-01/light.png"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 1.628,
+            "metrics": {
+              "main_monotonic_us": 363846979311,
+              "first_paint_monotonic_us": 363847803262,
+              "ready_monotonic_us": 363847803293,
+              "main_to_first_paint_ms": 823.951,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 12,
+              "domains": 1,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 1,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 1,
+              "chooser_reached": true,
+              "reverse_focus": true,
+              "windows_observed": 1,
+              "windows_painted": 1
+            }
+          },
+          {
+            "name": "run-01-large-dark",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/normal/tests/test-ui",
+              "--exercise",
+              "--large-text",
+              "--dark",
+              "--width",
+              "720",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-normal/run-01/large-dark.png"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 1.413,
+            "metrics": {
+              "main_monotonic_us": 363848578491,
+              "first_paint_monotonic_us": 363849061341,
+              "ready_monotonic_us": 363849061358,
+              "main_to_first_paint_ms": 482.85,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 12,
+              "domains": 1,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 2,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 1,
+              "chooser_reached": true,
+              "reverse_focus": true,
+              "windows_observed": 1,
+              "windows_painted": 1
+            }
+          },
+          {
+            "name": "run-01-empty",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/normal/tests/test-ui",
+              "--exercise",
+              "--uri",
+              "test:///tmp/pirwa-gnome-r_fs9_13/node.xml",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-normal/run-01/empty.png"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 0.681,
+            "metrics": {
+              "main_monotonic_us": 363850045873,
+              "first_paint_monotonic_us": 363850413633,
+              "ready_monotonic_us": 363850413662,
+              "main_to_first_paint_ms": 367.76,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 12,
+              "domains": 0,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 1,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 1,
+              "chooser_reached": true,
+              "reverse_focus": true,
+              "windows_observed": 1,
+              "windows_painted": 1
+            }
+          },
+          {
+            "name": "run-01-boxes",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/normal/tests/test-ui",
+              "--boxes-exercise",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-normal/run-01/boxes.png"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 0.951,
+            "metrics": {
+              "main_monotonic_us": 363850692125,
+              "first_paint_monotonic_us": 363851083043,
+              "ready_monotonic_us": 363851227257,
+              "main_to_first_paint_ms": 390.918,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 8,
+              "domains": 1,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 1,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 0,
+              "chooser_reached": false,
+              "reverse_focus": false,
+              "windows_observed": 3,
+              "windows_painted": 3
+            }
+          },
+          {
+            "name": "run-01-boxes-large-dark",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/normal/tests/test-ui",
+              "--boxes-exercise",
+              "--large-text",
+              "--dark",
+              "--width",
+              "720",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-normal/run-01/boxes-large-dark.png"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 0.901,
+            "metrics": {
+              "main_monotonic_us": 363851645036,
+              "first_paint_monotonic_us": 363852110551,
+              "ready_monotonic_us": 363852144517,
+              "main_to_first_paint_ms": 465.515,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 8,
+              "domains": 1,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 2,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 0,
+              "chooser_reached": false,
+              "reverse_focus": false,
+              "windows_observed": 3,
+              "windows_painted": 3
+            }
+          },
+          {
+            "name": "run-01-viewer",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/normal/tests/test-console-ui",
+              "--output",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-normal/run-01/viewer"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 4.472
+          },
+          {
+            "name": "run-01-viewer-large-dark",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/normal/tests/test-console-ui",
+              "--large-text",
+              "--dark",
+              "--width",
+              "720",
+              "--output",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-normal/run-01/viewer-large-dark"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 4.521
+          },
+          {
+            "name": "run-02-light",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/normal/tests/test-ui",
+              "--exercise",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-normal/run-02/light.png"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 0.922,
+            "metrics": {
+              "main_monotonic_us": 363861564285,
+              "first_paint_monotonic_us": 363861993450,
+              "ready_monotonic_us": 363861993474,
+              "main_to_first_paint_ms": 429.165,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 12,
+              "domains": 1,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 1,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 1,
+              "chooser_reached": true,
+              "reverse_focus": true,
+              "windows_observed": 1,
+              "windows_painted": 1
+            }
+          },
+          {
+            "name": "run-02-large-dark",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/normal/tests/test-ui",
+              "--exercise",
+              "--large-text",
+              "--dark",
+              "--width",
+              "720",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-normal/run-02/large-dark.png"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 0.902,
+            "metrics": {
+              "main_monotonic_us": 363862469095,
+              "first_paint_monotonic_us": 363862908554,
+              "ready_monotonic_us": 363862908578,
+              "main_to_first_paint_ms": 439.459,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 12,
+              "domains": 1,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 2,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 1,
+              "chooser_reached": true,
+              "reverse_focus": true,
+              "windows_observed": 1,
+              "windows_painted": 1
+            }
+          },
+          {
+            "name": "run-02-empty",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/normal/tests/test-ui",
+              "--exercise",
+              "--uri",
+              "test:///tmp/pirwa-gnome-r_fs9_13/node.xml",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-normal/run-02/empty.png"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 0.638,
+            "metrics": {
+              "main_monotonic_us": 363863382658,
+              "first_paint_monotonic_us": 363863741226,
+              "ready_monotonic_us": 363863741249,
+              "main_to_first_paint_ms": 358.568,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 12,
+              "domains": 0,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 1,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 1,
+              "chooser_reached": true,
+              "reverse_focus": true,
+              "windows_observed": 1,
+              "windows_painted": 1
+            }
+          },
+          {
+            "name": "run-02-boxes",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/normal/tests/test-ui",
+              "--boxes-exercise",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-normal/run-02/boxes.png"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 1.557,
+            "metrics": {
+              "main_monotonic_us": 363864007190,
+              "first_paint_monotonic_us": 363864365477,
+              "ready_monotonic_us": 363864380916,
+              "main_to_first_paint_ms": 358.287,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 8,
+              "domains": 1,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 1,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 0,
+              "chooser_reached": false,
+              "reverse_focus": false,
+              "windows_observed": 3,
+              "windows_painted": 3
+            }
+          },
+          {
+            "name": "run-02-boxes-large-dark",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/normal/tests/test-ui",
+              "--boxes-exercise",
+              "--large-text",
+              "--dark",
+              "--width",
+              "720",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-normal/run-02/boxes-large-dark.png"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 1.646,
+            "metrics": {
+              "main_monotonic_us": 363865569613,
+              "first_paint_monotonic_us": 363866000345,
+              "ready_monotonic_us": 363866036489,
+              "main_to_first_paint_ms": 430.732,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 8,
+              "domains": 1,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 2,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 0,
+              "chooser_reached": false,
+              "reverse_focus": false,
+              "windows_observed": 3,
+              "windows_painted": 3
+            }
+          },
+          {
+            "name": "run-02-viewer",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/normal/tests/test-console-ui",
+              "--output",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-normal/run-02/viewer"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 4.448
+          },
+          {
+            "name": "run-02-viewer-large-dark",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/normal/tests/test-console-ui",
+              "--large-text",
+              "--dark",
+              "--width",
+              "720",
+              "--output",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-normal/run-02/viewer-large-dark"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 4.518
+          }
+        ],
+        "passed": true,
+        "shell_exitcode": 0
+      },
+      "stderr": {
+        "run-01-light": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "run-01-large-dark": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "run-01-empty": "",
+        "run-01-boxes": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-boxes-ui-VY6NY3/runtime/libvirt/libvirt-sock': Connection refused\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "run-01-boxes-large-dark": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-boxes-ui-VAAKY3/runtime/libvirt/libvirt-sock': Connection refused\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "run-01-viewer": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\n",
+        "run-01-viewer-large-dark": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "run-02-light": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "run-02-large-dark": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "run-02-empty": "",
+        "run-02-boxes": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-boxes-ui-75VVY3/runtime/libvirt/libvirt-sock': Connection refused\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "run-02-boxes-large-dark": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-boxes-ui-RVWLY3/runtime/libvirt/libvirt-sock': Connection refused\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "run-02-viewer": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "run-02-viewer-large-dark": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\n"
+      },
+      "process_cleanup": {
+        "signalled": [],
+        "remaining": {}
+      }
+    },
+    "sanitizer": {
+      "report": {
+        "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+        "source_dirty": true,
+        "gnome_shell": "GNOME Shell 51.1",
+        "shell_command": [
+          "gnome-shell",
+          "--headless",
+          "--wayland",
+          "--no-x11",
+          "--virtual-monitor",
+          "1280x800@60",
+          "--wayland-display",
+          "pirwa-qa-wayland"
+        ],
+        "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
+        "scope": "Programmed GTK actions and focus traversal; not physical input, screen reader, or guest console certification",
+        "repetitions": 2,
+        "cases": [
+          {
+            "name": "run-01-light",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/sanitizer/tests/test-ui",
+              "--exercise",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-sanitizer/run-01/light.png"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 11.019,
+            "metrics": {
+              "main_monotonic_us": 363937900250,
+              "first_paint_monotonic_us": 363947597321,
+              "ready_monotonic_us": 363947597373,
+              "main_to_first_paint_ms": 9697.071,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 12,
+              "domains": 1,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 1,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 1,
+              "chooser_reached": true,
+              "reverse_focus": true,
+              "windows_observed": 1,
+              "windows_painted": 1
+            }
+          },
+          {
+            "name": "run-01-large-dark",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/sanitizer/tests/test-ui",
+              "--exercise",
+              "--large-text",
+              "--dark",
+              "--width",
+              "720",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-sanitizer/run-01/large-dark.png"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 9.988,
+            "metrics": {
+              "main_monotonic_us": 363948923326,
+              "first_paint_monotonic_us": 363957627712,
+              "ready_monotonic_us": 363957627747,
+              "main_to_first_paint_ms": 8704.386,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 12,
+              "domains": 1,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 2,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 1,
+              "chooser_reached": true,
+              "reverse_focus": true,
+              "windows_observed": 1,
+              "windows_painted": 1
+            }
+          },
+          {
+            "name": "run-01-empty",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/sanitizer/tests/test-ui",
+              "--exercise",
+              "--uri",
+              "test:///tmp/pirwa-gnome-b4unkrn3/node.xml",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-sanitizer/run-01/empty.png"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 8.999,
+            "metrics": {
+              "main_monotonic_us": 363958933368,
+              "first_paint_monotonic_us": 363967421277,
+              "ready_monotonic_us": 363967421307,
+              "main_to_first_paint_ms": 8487.909,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 12,
+              "domains": 0,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 1,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 1,
+              "chooser_reached": true,
+              "reverse_focus": true,
+              "windows_observed": 1,
+              "windows_painted": 1
+            }
+          },
+          {
+            "name": "run-01-boxes",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/sanitizer/tests/test-ui",
+              "--boxes-exercise",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-sanitizer/run-01/boxes.png"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 10.236,
+            "metrics": {
+              "main_monotonic_us": 363967930630,
+              "first_paint_monotonic_us": 363976494329,
+              "ready_monotonic_us": 363976733104,
+              "main_to_first_paint_ms": 8563.699,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 8,
+              "domains": 1,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 1,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 0,
+              "chooser_reached": false,
+              "reverse_focus": false,
+              "windows_observed": 3,
+              "windows_painted": 3
+            }
+          },
+          {
+            "name": "run-01-boxes-large-dark",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/sanitizer/tests/test-ui",
+              "--boxes-exercise",
+              "--large-text",
+              "--dark",
+              "--width",
+              "720",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-sanitizer/run-01/boxes-large-dark.png"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 10.265,
+            "metrics": {
+              "main_monotonic_us": 363978154288,
+              "first_paint_monotonic_us": 363986752457,
+              "ready_monotonic_us": 363987064117,
+              "main_to_first_paint_ms": 8598.169,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 8,
+              "domains": 1,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 2,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 0,
+              "chooser_reached": false,
+              "reverse_focus": false,
+              "windows_observed": 3,
+              "windows_painted": 3
+            }
+          },
+          {
+            "name": "run-01-viewer",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/sanitizer/tests/test-console-ui",
+              "--output",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-sanitizer/run-01/viewer"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 12.788
+          },
+          {
+            "name": "run-01-viewer-large-dark",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/sanitizer/tests/test-console-ui",
+              "--large-text",
+              "--dark",
+              "--width",
+              "720",
+              "--output",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-sanitizer/run-01/viewer-large-dark"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 12.96
+          },
+          {
+            "name": "run-02-light",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/sanitizer/tests/test-ui",
+              "--exercise",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-sanitizer/run-02/light.png"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 9.359,
+            "metrics": {
+              "main_monotonic_us": 364014174677,
+              "first_paint_monotonic_us": 364022848370,
+              "ready_monotonic_us": 364022848401,
+              "main_to_first_paint_ms": 8673.693,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 12,
+              "domains": 1,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 1,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 1,
+              "chooser_reached": true,
+              "reverse_focus": true,
+              "windows_observed": 1,
+              "windows_painted": 1
+            }
+          },
+          {
+            "name": "run-02-large-dark",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/sanitizer/tests/test-ui",
+              "--exercise",
+              "--large-text",
+              "--dark",
+              "--width",
+              "720",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-sanitizer/run-02/large-dark.png"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 9.66,
+            "metrics": {
+              "main_monotonic_us": 364023542145,
+              "first_paint_monotonic_us": 364032306460,
+              "ready_monotonic_us": 364032306482,
+              "main_to_first_paint_ms": 8764.315,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 12,
+              "domains": 1,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 2,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 1,
+              "chooser_reached": true,
+              "reverse_focus": true,
+              "windows_observed": 1,
+              "windows_painted": 1
+            }
+          },
+          {
+            "name": "run-02-empty",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/sanitizer/tests/test-ui",
+              "--exercise",
+              "--uri",
+              "test:///tmp/pirwa-gnome-b4unkrn3/node.xml",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-sanitizer/run-02/empty.png"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 8.959,
+            "metrics": {
+              "main_monotonic_us": 364033198423,
+              "first_paint_monotonic_us": 364041754558,
+              "ready_monotonic_us": 364041754581,
+              "main_to_first_paint_ms": 8556.135,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 12,
+              "domains": 0,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 1,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 1,
+              "chooser_reached": true,
+              "reverse_focus": true,
+              "windows_observed": 1,
+              "windows_painted": 1
+            }
+          },
+          {
+            "name": "run-02-boxes",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/sanitizer/tests/test-ui",
+              "--boxes-exercise",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-sanitizer/run-02/boxes.png"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 9.986,
+            "metrics": {
+              "main_monotonic_us": 364042162081,
+              "first_paint_monotonic_us": 364050661011,
+              "ready_monotonic_us": 364050699672,
+              "main_to_first_paint_ms": 8498.93,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 8,
+              "domains": 1,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 1,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 0,
+              "chooser_reached": false,
+              "reverse_focus": false,
+              "windows_observed": 3,
+              "windows_painted": 3
+            }
+          },
+          {
+            "name": "run-02-boxes-large-dark",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/sanitizer/tests/test-ui",
+              "--boxes-exercise",
+              "--large-text",
+              "--dark",
+              "--width",
+              "720",
+              "--snapshot",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-sanitizer/run-02/boxes-large-dark.png"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 10.185,
+            "metrics": {
+              "main_monotonic_us": 364052153894,
+              "first_paint_monotonic_us": 364060920187,
+              "ready_monotonic_us": 364060966450,
+              "main_to_first_paint_ms": 8766.293,
+              "sample_wall_ms": 0.0,
+              "sample_cpu_percent": 0.0,
+              "sample_frames": 0,
+              "pss_kib": -1,
+              "exercise_steps": 8,
+              "domains": 1,
+              "renderer": "GskVulkanRenderer",
+              "text_scale": 2,
+              "scroll": false,
+              "focus_kind": "not-sampled",
+              "initial_focus_kind": "not-sampled",
+              "active": false,
+              "refresh_millihz": 60000,
+              "surface_scale": 1,
+              "frame_work_us": [],
+              "form_focus_steps": 0,
+              "chooser_reached": false,
+              "reverse_focus": false,
+              "windows_observed": 3,
+              "windows_painted": 3
+            }
+          },
+          {
+            "name": "run-02-viewer",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/sanitizer/tests/test-console-ui",
+              "--output",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-sanitizer/run-02/viewer"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 12.57
+          },
+          {
+            "name": "run-02-viewer-large-dark",
+            "command": [
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final/sanitizer/tests/test-console-ui",
+              "--large-text",
+              "--dark",
+              "--width",
+              "720",
+              "--output",
+              "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/final-sanitizer/run-02/viewer-large-dark"
+            ],
+            "returncode": 0,
+            "elapsed_seconds": 12.917
+          }
+        ],
+        "passed": true,
+        "shell_exitcode": 0
+      },
+      "stderr": {
+        "run-01-light": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "run-01-large-dark": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "run-01-empty": "",
+        "run-01-boxes": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-boxes-ui-B8VRY3/runtime/libvirt/libvirt-sock': Connection refused\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "run-01-boxes-large-dark": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-boxes-ui-0P1YY3/runtime/libvirt/libvirt-sock': Connection refused\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "run-01-viewer": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "run-01-viewer-large-dark": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "run-02-light": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "run-02-large-dark": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "run-02-empty": "",
+        "run-02-boxes": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-boxes-ui-ZTKZY3/runtime/libvirt/libvirt-sock': Connection refused\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "run-02-boxes-large-dark": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-boxes-ui-CS1YY3/runtime/libvirt/libvirt-sock': Connection refused\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "run-02-viewer": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "run-02-viewer-large-dark": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\n\n(test-console-ui:3582300): Gtk-WARNING **: 12:49:13.797: gtk_svg_advance: time went backward: self->current_time=364084665149 current_time=364084664480 delta=669 clock_frame_time=364084664480\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n"
+      },
+      "process_cleanup": {
+        "signalled": [],
+        "remaining": {}
+      }
+    }
+  },
+  "headless": {
+    "normal": [
+      {
+        "name": "pirwa:desktop-file",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.08707380294799805,
+        "command": [
+          "/usr/bin/desktop-file-validate",
+          "/home/stone/Gnome/pirwa/data/io.github.pirwa.Pirwa.desktop"
+        ],
+        "stdout": ""
+      },
+      {
+        "name": "pirwa:appstream",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.0818014144897461,
+        "command": [
+          "/usr/bin/appstreamcli",
+          "validate",
+          "--no-net",
+          "--override",
+          "url-homepage-missing=info",
+          "/home/stone/Gnome/pirwa/data/io.github.pirwa.Pirwa.metainfo.xml"
+        ],
+        "stdout": "I: io.github.pirwa.Pirwa:~: url-homepage-missing\n\n\u2714 Validation was successful: infos: 1, pedantic: 2\n"
+      },
+      {
+        "name": "pirwa:usage",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.05383443832397461,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-usage"
+        ],
+        "stdout": "TAP version 14\n# random seed: R02S34c00ef743a765b16a12aee59b6d3e1c\n1..5\n# Start of usage tests\nok 1 /usage/cpu-units\nok 2 /usage/missing-and-reset\nok 3 /usage/network-rates\nok 4 /usage/network-baselines\nok 5 /usage/network-stats\n# End of usage tests\n"
+      },
+      {
+        "name": "pirwa:config",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.04799389839172363,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-config"
+        ],
+        "stdout": "TAP version 14\n# random seed: R02Sbd2e29aa1e974a0c2fefef71ea94e2ea\n1..9\n# Start of config tests\nok 1 /config/os-metadata\nok 2 /config/graphics-index\nok 3 /config/embedded-graphics\nok 4 /config/creation-graphics\nok 5 /config/roundtrip-and-eject\nok 6 /config/media\nok 7 /config/media-tray\nok 8 /config/validation\nok 9 /config/qcow2\n# End of config tests\n"
+      },
+      {
+        "name": "pirwa:model",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.030460119247436523,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-model"
+        ],
+        "stdout": "TAP version 14\n# random seed: R02Sed2ecc66305710f8c980709b3adf8602\n1..2\n# Start of model tests\nok 1 /model/os-title-and-fallback\nok 2 /model/late-delivery-and-stable-identity\n# End of model tests\n"
+      },
+      {
+        "name": "pirwa:preferences",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.00856328010559082,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-preferences"
+        ],
+        "stdout": "TAP version 14\n# random seed: R02S57afff7e1d4041d4bcb780a56e5bca00\n# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation memory (GMemorySettingsBackend) for \u2018gsettings-backend\u2019\n"
+      },
+      {
+        "name": "pirwa:provision",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.03954005241394043,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-provision"
+        ],
+        "stdout": "TAP version 14\n# random seed: R02S7fb416076266a352892b8fb2e871365f\n1..5\n# Start of provision tests\nok 1 /provision/references-and-missing-media\nok 2 /provision/rollback-inactive\nok 3 /provision/rollback-running\nok 4 /provision/rollback-shared\nok 5 /provision/cancel-before-remove\n# End of provision tests\n",
+        "stderr": "libvirt: Test Driver error : Storage volume not found: no storage vol with matching name 'pirwa-11111111-1111-4111-8111-111111111111.qcow2'\nlibvirt: Test Driver error : Storage volume not found: no storage vol with matching name 'pirwa-11111111-1111-4111-8111-111111111111.qcow2'\n"
+      },
+      {
+        "name": "pirwa:backend",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.07326412200927734,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-backend"
+        ],
+        "stdout": "TAP version 14\n# random seed: R02S28a5078d8700e395b798ce5dd4719cdf\n1..10\n# Start of backend tests\n# DEBUG: Add timeout 0x7f3d200665f0 -1 0x7f3d33327b80 0x7f3d2005ed90 1\n# \n# DEBUG: Update timeout 0x7f3d200665f0 1 0\n# \n# DEBUG: Dispatch timeout 0x7f3d200665f0 0x7f3d33327b80 1 0x7f3d2005ed90\n# \n# DEBUG: Update timeout 0x7f3d200665f0 1 -1\n# \nok 1 /backend/usage\n# DEBUG: Remove timeout 0x7f3d200665f0 1\n# \nok 2 /backend/socket-ownership\n# DEBUG: Add timeout 0x7f3d20000da0 -1 0x7f3d33327b80 0x7f3d200667d0 2\n# \n# DEBUG: Remove timeout 0x7f3d20000da0 2\n# \nok 3 /backend/native-console\n# DEBUG: Add timeout 0x7f3d2001ef60 -1 0x7f3d33327b80 0x7f3d20071270 3\n# \n# DEBUG: Update timeout 0x7f3d2001ef60 3 0\n# \n# DEBUG: Dispatch timeout 0x7f3d2001ef60 0x7f3d33327b80 3 0x7f3d20071270\n# \n# DEBUG: Update timeout 0x7f3d2001ef60 3 -1\n# \n# DEBUG: Update timeout 0x7f3d2001ef60 3 0\n# \n# DEBUG: Dispatch timeout 0x7f3d2001ef60 0x7f3d33327b80 3 0x7f3d20071270\n# \n# DEBUG: Update timeout 0x7f3d2001ef60 3 -1\n# \n# DEBUG: Update timeout 0x7f3d2001ef60 3 0\n# \n# DEBUG: Dispatch timeout 0x7f3d2001ef60 0x7f3d33327b80 3 0x7f3d20071270\n# \n# DEBUG: Update timeout 0x7f3d2001ef60 3 -1\n# \n# DEBUG: Remove timeout 0x7f3d2001ef60 3\n# \n# DEBUG: Add timeout 0x7f3d200610f0 -1 0x7f3d33327b80 0x7f3d20075400 4\n# \n# DEBUG: Update timeout 0x7f3d200610f0 4 0\n# \n# DEBUG: Dispatch timeout 0x7f3d200610f0 0x7f3d33327b80 4 0x7f3d20075400\n# \n# DEBUG: Update timeout 0x7f3d200610f0 4 -1\n# \n# DEBUG: Update timeout 0x7f3d200610f0 4 0\n# \n# DEBUG: Dispatch timeout 0x7f3d200610f0 0x7f3d33327b80 4 0x7f3d20075400\n# \n# DEBUG: Update timeout 0x7f3d200610f0 4 -1\n# \n# DEBUG: Update timeout 0x7f3d200610f0 4 0\n# \n# DEBUG: Dispatch timeout 0x7f3d200610f0 0x7f3d33327b80 4 0x7f3d20075400\n# \n# DEBUG: Update timeout 0x7f3d200610f0 4 -1\n# \n# DEBUG: Remove timeout 0x7f3d200610f0 4\n# \n# DEBUG: Add timeout 0x7f3d20067510 -1 0x7f3d33327b80 0x7f3d20076a70 5\n# \n# DEBUG: Update timeout 0x7f3d20067510 5 0\n# \n# DEBUG: Dispatch timeout 0x7f3d20067510 0x7f3d33327b80 5 0x7f3d20076a70\n# \n# DEBUG: Update timeout 0x7f3d20067510 5 -1\n# \n# DEBUG: Update timeout 0x7f3d20067510 5 0\n# \n# DEBUG: Dispatch timeout 0x7f3d20067510 0x7f3d33327b80 5 0x7f3d20076a70\n# \n# DEBUG: Update timeout 0x7f3d20067510 5 -1\n# \n# DEBUG: Remove timeout 0x7f3d20067510 5\n# \nok 4 /backend/media\n# DEBUG: Add timeout 0x7f3d20067cd0 -1 0x7f3d33327b80 0x7f3d20071270 6\n# \n# DEBUG: Update timeout 0x7f3d20067cd0 6 0\n# \n# DEBUG: Dispatch timeout 0x7f3d20067cd0 0x7f3d33327b80 6 0x7f3d20071270\n# \n# DEBUG: Update timeout 0x7f3d20067cd0 6 -1\n# \n# DEBUG: Update timeout 0x7f3d20067cd0 6 0\n# \n# DEBUG: Dispatch timeout 0x7f3d20067cd0 0x7f3d33327b80 6 0x7f3d20071270\n# \n# DEBUG: Update timeout 0x7f3d20067cd0 6 -1\n# \n# DEBUG: Update timeout 0x7f3d20067cd0 6 0\n# \n# DEBUG: Dispatch timeout 0x7f3d20067cd0 0x7f3d33327b80 6 0x7f3d20071270\n# \n# DEBUG: Update timeout 0x7f3d20067cd0 6 -1\n# \n# DEBUG: Update timeout 0x7f3d20067cd0 6 0\n# \n# DEBUG: Dispatch timeout 0x7f3d20067cd0 0x7f3d33327b80 6 0x7f3d20071270\n# \n# DEBUG: Update timeout 0x7f3d20067cd0 6 -1\n# \n# DEBUG: Update timeout 0x7f3d20067cd0 6 0\n# \n# DEBUG: Dispatch timeout 0x7f3d20067cd0 0x7f3d33327b80 6 0x7f3d20071270\n# \n# DEBUG: Update timeout 0x7f3d20067cd0 6 -1\n# \n# DEBUG: Update timeout 0x7f3d20067cd0 6 0\n# \n# DEBUG: Dispatch timeout 0x7f3d20067cd0 0x7f3d33327b80 6 0x7f3d20071270\n# \n# DEBUG: Update timeout 0x7f3d20067cd0 6 -1\n# \n# DEBUG: Update timeout 0x7f3d20067cd0 6 0\n# \n# DEBUG: Dispatch timeout 0x7f3d20067cd0 0x7f3d33327b80 6 0x7f3d20071270\n# \n# DEBUG: Update timeout 0x7f3d20067cd0 6 -1\n# \nok 5 /backend/controls-and-ownership\n# DEBUG: Remove timeout 0x7f3d20067cd0 6\n# \nok 6 /backend/cancellation-and-stop\n# DEBUG: Add timeout 0x7f3d2400cfa0 -1 0x7f3d33327b80 0x7f3d240013d0 7\n# \n# DEBUG: Remove timeout 0x7f3d2400cfa0 7\n# \n# DEBUG: Add timeout 0x7f3d24013af0 -1 0x7f3d33327b80 0x7f3d24012f20 8\n# \n# DEBUG: Remove timeout 0x7f3d24013af0 8\n# \nok 7 /backend/reconnect-and-missing\n# DEBUG: Add timeout 0x7f3d24017450 -1 0x7f3d33327b80 0x7f3d24015250 9\n# \n# DEBUG: Update timeout 0x7f3d24017450 9 0\n# \n# DEBUG: Dispatch timeout 0x7f3d24017450 0x7f3d33327b80 9 0x7f3d24015250\n# \n# DEBUG: Update timeout 0x7f3d24017450 9 -1\n# \nok 8 /backend/lifecycle-events\n# DEBUG: Remove timeout 0x7f3d24017450 9\n# \n# DEBUG: Add timeout 0x7f3d24005430 -1 0x7f3d33327b80 0x7f3d24013a40 10\n# \n# DEBUG: Remove timeout 0x7f3d24005430 10\n# \nok 9 /backend/stop-in-flight\n# DEBUG: Add timeout 0x7f3d24002850 -1 0x7f3d33327b80 0x7f3d24005580 11\n# \n# DEBUG: Remove timeout 0x7f3d24002850 11\n# \nok 10 /backend/result-order-and-progress\n# End of backend tests\n",
+        "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Test Driver error : Domain not found\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n"
+      },
+      {
+        "name": "pirwa:console-frame",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.03340625762939453,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-frame"
+        ],
+        "stdout": "TAP version 14\n# random seed: R02Se208c272f3ff997072e5a31dd7c4dca2\n1..7\n# Start of console tests\nok 1 /console/owned-pixels-and-damage\nok 2 /console/formats-and-bounds\nok 3 /console/input-mapping\nok 4 /console/alpha\nok 5 /console/crop-and-ownership\nok 6 /console/contiguous-rgb-and-alpha\nok 7 /console/monitor-padding\n# End of console tests\n"
+      },
+      {
+        "name": "pirwa:boxes",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.04594063758850098,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-boxes"
+        ],
+        "stdout": "TAP version 14\n# random seed: R02Sc5f87d3616c1d467b3e8ca2676e74efa\n1..8\n# Start of boxes tests\nok 1 /boxes/native-library\nok 2 /boxes/not-installed-with-leftover-data\nok 3 /boxes/empty-library\nok 4 /boxes/flatpak-read-only-discovery\nok 5 /boxes/one-time-preference\nok 6 /boxes/offline-socket-preference\nok 7 /boxes/cancellation\nok 8 /boxes/main-thread-callback\n# End of boxes tests\n"
+      },
+      {
+        "name": "pirwa:boxes-import",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.049486637115478516,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-import"
+        ],
+        "stdout": "TAP version 14\n# random seed: R02Saf4005a8b05a939a1ccbd0b96faf8eb3\n1..8\n# Start of import tests\nok 1 /import/copy-independent-machine\nok 2 /import/reject-running\nok 3 /import/cancel-and-rollback\nok 4 /import/reject-changed-source\nok 5 /import/upload-failure-rolls-back\nok 6 /import/reject-internal-snapshots\nok 7 /import/reject-unsupported-devices\nok 8 /import/firmware-no-overwrite-or-symlink\n# End of import tests\n"
+      },
+      {
+        "name": "pirwa:backend-faults",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.2115154266357422,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-backend-faults"
+        ],
+        "stdout": "TAP version 14\n# random seed: R02S50afe777eb47cd8d649f05f8f5bc46dd\n1..7\n# Start of backend-faults tests\nok 1 /backend-faults/startup-recovery-metadata\nok 2 /backend-faults/retry-budget-and-manual-reconnect\nok 3 /backend-faults/cancelled-work-keeps-budget\nok 4 /backend-faults/close-notification\nok 5 /backend-faults/permission-denied\nok 6 /backend-faults/transport-lost-no-replay\nok 7 /backend-faults/blocked-inventory-stop\n# End of backend-faults tests\n"
+      },
+      {
+        "name": "pirwa:inventory",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.29450488090515137,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-inventory"
+        ],
+        "stdout": "TAP version 14\n# random seed: R02Sf8c0871f60835c115ad6ec275c86bd86\n1..4\n# Start of inventory tests\n# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation local (GLocalVfs) for \u2018gio-vfs\u2019\nok 1 /inventory/os-names-and-cache\nok 2 /inventory/discovery\nok 3 /inventory/cancelled\nok 4 /inventory/connection-failure\n# End of inventory tests\n",
+        "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: XML-RPC error : Failed to connect socket to '/var/run/libvirt/virtpirwa-unsupportedd-sock-ro': No such file or directory\n"
+      },
+      {
+        "name": "pirwa:scale-1000",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.31030941009521484,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/benchmark-scale",
+          "1000"
+        ],
+        "stdout": "{\"driver\":\"test:///default\",\"method\":\"persistent_bulk\",\"domains\":1000,\"p50_ms\":7.274,\"p95_ms\":7.502,\"raw_us\":[8115,7417,7335,7185,7200,7332,7304,7319,7356,7502,7263,7213,7148,7143,7226,7274,7272,7279,7460,7334,7309,7116,7108,7170,7212]}\n"
+      }
+    ],
+    "sanitizer": [
+      {
+        "name": "pirwa:desktop-file",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.08637475967407227,
+        "command": [
+          "/usr/bin/desktop-file-validate",
+          "/home/stone/Gnome/pirwa/data/io.github.pirwa.Pirwa.desktop"
+        ],
+        "stdout": ""
+      },
+      {
+        "name": "pirwa:appstream",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.07848286628723145,
+        "command": [
+          "/usr/bin/appstreamcli",
+          "validate",
+          "--no-net",
+          "--override",
+          "url-homepage-missing=info",
+          "/home/stone/Gnome/pirwa/data/io.github.pirwa.Pirwa.metainfo.xml"
+        ],
+        "stdout": "I: io.github.pirwa.Pirwa:~: url-homepage-missing\n\n\u2714 Validation was successful: infos: 1, pedantic: 2\n"
+      },
+      {
+        "name": "pirwa:config",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.04971957206726074,
+        "command": [
+          "/home/stone/Gnome/pirwa/build-sanitize/tests/test-config"
+        ],
+        "stdout": "TAP version 14\n# random seed: R02Sdb4f7fe82271b0d38c6d86922dd80fbe\n1..9\n# Start of config tests\nok 1 /config/os-metadata\nok 2 /config/graphics-index\nok 3 /config/embedded-graphics\nok 4 /config/creation-graphics\nok 5 /config/roundtrip-and-eject\nok 6 /config/media\nok 7 /config/media-tray\nok 8 /config/validation\nok 9 /config/qcow2\n# End of config tests\n"
+      },
+      {
+        "name": "pirwa:model",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.03088545799255371,
+        "command": [
+          "/home/stone/Gnome/pirwa/build-sanitize/tests/test-model"
+        ],
+        "stdout": "TAP version 14\n# random seed: R02S48cc0af0c178a28a6bbb6000c9a37e91\n1..2\n# Start of model tests\nok 1 /model/os-title-and-fallback\nok 2 /model/late-delivery-and-stable-identity\n# End of model tests\n"
+      },
+      {
+        "name": "pirwa:usage",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.05743670463562012,
+        "command": [
+          "/home/stone/Gnome/pirwa/build-sanitize/tests/test-usage"
+        ],
+        "stdout": "TAP version 14\n# random seed: R02S2ff85fd56103beb764948cdda834193b\n1..5\n# Start of usage tests\nok 1 /usage/cpu-units\nok 2 /usage/missing-and-reset\nok 3 /usage/network-rates\nok 4 /usage/network-baselines\nok 5 /usage/network-stats\n# End of usage tests\n"
+      },
+      {
+        "name": "pirwa:preferences",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.02037525177001953,
+        "command": [
+          "/home/stone/Gnome/pirwa/build-sanitize/tests/test-preferences"
+        ],
+        "stdout": "TAP version 14\n# random seed: R02S0fdb6f2c470fee0ad2d637b1c57dc24b\n# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation memory (GMemorySettingsBackend) for \u2018gsettings-backend\u2019\n"
+      },
+      {
+        "name": "pirwa:console-frame",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.04709315299987793,
+        "command": [
+          "/home/stone/Gnome/pirwa/build-sanitize/tests/test-frame"
+        ],
+        "stdout": "TAP version 14\n# random seed: R02Safe5f9e7e4f2c277e0f6a198e775574e\n1..7\n# Start of console tests\nok 1 /console/owned-pixels-and-damage\nok 2 /console/formats-and-bounds\nok 3 /console/input-mapping\nok 4 /console/alpha\nok 5 /console/crop-and-ownership\nok 6 /console/contiguous-rgb-and-alpha\nok 7 /console/monitor-padding\n# End of console tests\n"
+      },
+      {
+        "name": "pirwa:boxes",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.08937191963195801,
+        "command": [
+          "/home/stone/Gnome/pirwa/build-sanitize/tests/test-boxes"
+        ],
+        "stdout": "TAP version 14\n# random seed: R02S063f54db5b76ae9158bffeac2281e45d\n1..8\n# Start of boxes tests\nok 1 /boxes/native-library\nok 2 /boxes/not-installed-with-leftover-data\nok 3 /boxes/empty-library\nok 4 /boxes/flatpak-read-only-discovery\nok 5 /boxes/one-time-preference\nok 6 /boxes/offline-socket-preference\nok 7 /boxes/cancellation\nok 8 /boxes/main-thread-callback\n# End of boxes tests\n"
+      },
+      {
+        "name": "pirwa:provision",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.13834333419799805,
+        "command": [
+          "/home/stone/Gnome/pirwa/build-sanitize/tests/test-provision"
+        ],
+        "stdout": "TAP version 14\n# random seed: R02S3e723791601558b7f91c945ba5fe0764\n1..5\n# Start of provision tests\nok 1 /provision/references-and-missing-media\nok 2 /provision/rollback-inactive\nok 3 /provision/rollback-running\nok 4 /provision/rollback-shared\nok 5 /provision/cancel-before-remove\n# End of provision tests\n",
+        "stderr": "libvirt: Test Driver error : Storage volume not found: no storage vol with matching name 'pirwa-11111111-1111-4111-8111-111111111111.qcow2'\nlibvirt: Test Driver error : Storage volume not found: no storage vol with matching name 'pirwa-11111111-1111-4111-8111-111111111111.qcow2'\n"
+      },
+      {
+        "name": "pirwa:backend",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.2036747932434082,
+        "command": [
+          "/home/stone/Gnome/pirwa/build-sanitize/tests/test-backend"
+        ],
+        "stdout": "TAP version 14\n# random seed: R02Sd948a8200090e0f7ee579d8f3a915965\n1..10\n# Start of backend tests\n# DEBUG: Add timeout 0x7b5d6cbfae90 -1 0x7f1d70527b80 0x7bcd6cbedf10 1\n# \n# DEBUG: Update timeout 0x7b5d6cbfae90 1 0\n# \n# DEBUG: Dispatch timeout 0x7b5d6cbfae90 0x7f1d70527b80 1 0x7bcd6cbedf10\n# \n# DEBUG: Update timeout 0x7b5d6cbfae90 1 -1\n# \n# DEBUG: Remove timeout 0x7b5d6cbfae90 1\n# \nok 1 /backend/usage\nok 2 /backend/socket-ownership\n# DEBUG: Add timeout 0x7b5d6cc00d50 -1 0x7f1d70527b80 0x7bcd6cbf3c90 2\n# \n# DEBUG: Remove timeout 0x7b5d6cc00d50 2\n# \nok 3 /backend/native-console\n# DEBUG: Add timeout 0x7b5d6cc082d0 -1 0x7f1d70527b80 0x7bcd6cbf6b50 3\n# \n# DEBUG: Update timeout 0x7b5d6cc082d0 3 0\n# \n# DEBUG: Dispatch timeout 0x7b5d6cc082d0 0x7f1d70527b80 3 0x7bcd6cbf6b50\n# \n# DEBUG: Update timeout 0x7b5d6cc082d0 3 -1\n# \n# DEBUG: Update timeout 0x7b5d6cc082d0 3 0\n# \n# DEBUG: Dispatch timeout 0x7b5d6cc082d0 0x7f1d70527b80 3 0x7bcd6cbf6b50\n# \n# DEBUG: Update timeout 0x7b5d6cc082d0 3 -1\n# \n# DEBUG: Update timeout 0x7b5d6cc082d0 3 0\n# \n# DEBUG: Dispatch timeout 0x7b5d6cc082d0 0x7f1d70527b80 3 0x7bcd6cbf6b50\n# \n# DEBUG: Update timeout 0x7b5d6cc082d0 3 -1\n# \n# DEBUG: Remove timeout 0x7b5d6cc082d0 3\n# \n# DEBUG: Add timeout 0x7b5d6cc1bdd0 -1 0x7f1d70527b80 0x7bcd6cc03780 4\n# \n# DEBUG: Update timeout 0x7b5d6cc1bdd0 4 0\n# \n# DEBUG: Dispatch timeout 0x7b5d6cc1bdd0 0x7f1d70527b80 4 0x7bcd6cc03780\n# \n# DEBUG: Update timeout 0x7b5d6cc1bdd0 4 -1\n# \n# DEBUG: Update timeout 0x7b5d6cc1bdd0 4 0\n# \n# DEBUG: Dispatch timeout 0x7b5d6cc1bdd0 0x7f1d70527b80 4 0x7bcd6cc03780\n# \n# DEBUG: Update timeout 0x7b5d6cc1bdd0 4 -1\n# \n# DEBUG: Update timeout 0x7b5d6cc1bdd0 4 0\n# \n# DEBUG: Dispatch timeout 0x7b5d6cc1bdd0 0x7f1d70527b80 4 0x7bcd6cc03780\n# \n# DEBUG: Update timeout 0x7b5d6cc1bdd0 4 -1\n# \n# DEBUG: Remove timeout 0x7b5d6cc1bdd0 4\n# \n# DEBUG: Add timeout 0x7b5d6cc2f310 -1 0x7f1d70527b80 0x7bcd6cc103b0 5\n# \n# DEBUG: Update timeout 0x7b5d6cc2f310 5 0\n# \n# DEBUG: Dispatch timeout 0x7b5d6cc2f310 0x7f1d70527b80 5 0x7bcd6cc103b0\n# \n# DEBUG: Update timeout 0x7b5d6cc2f310 5 -1\n# \n# DEBUG: Update timeout 0x7b5d6cc2f310 5 0\n# \n# DEBUG: Dispatch timeout 0x7b5d6cc2f310 0x7f1d70527b80 5 0x7bcd6cc103b0\n# \n# DEBUG: Update timeout 0x7b5d6cc2f310 5 -1\n# \n# DEBUG: Remove timeout 0x7b5d6cc2f310 5\n# \nok 4 /backend/media\n# DEBUG: Add timeout 0x7b5d6cc43e90 -1 0x7f1d70527b80 0x7bcd6cc196d0 6\n# \n# DEBUG: Update timeout 0x7b5d6cc43e90 6 0\n# \n# DEBUG: Dispatch timeout 0x7b5d6cc43e90 0x7f1d70527b80 6 0x7bcd6cc196d0\n# \n# DEBUG: Update timeout 0x7b5d6cc43e90 6 -1\n# \n# DEBUG: Update timeout 0x7b5d6cc43e90 6 0\n# \n# DEBUG: Dispatch timeout 0x7b5d6cc43e90 0x7f1d70527b80 6 0x7bcd6cc196d0\n# \n# DEBUG: Update timeout 0x7b5d6cc43e90 6 -1\n# \n# DEBUG: Update timeout 0x7b5d6cc43e90 6 0\n# \n# DEBUG: Dispatch timeout 0x7b5d6cc43e90 0x7f1d70527b80 6 0x7bcd6cc196d0\n# \n# DEBUG: Update timeout 0x7b5d6cc43e90 6 -1\n# \n# DEBUG: Update timeout 0x7b5d6cc43e90 6 0\n# \n# DEBUG: Dispatch timeout 0x7b5d6cc43e90 0x7f1d70527b80 6 0x7bcd6cc196d0\n# \n# DEBUG: Update timeout 0x7b5d6cc43e90 6 -1\n# \n# DEBUG: Update timeout 0x7b5d6cc43e90 6 0\n# \n# DEBUG: Dispatch timeout 0x7b5d6cc43e90 0x7f1d70527b80 6 0x7bcd6cc196d0\n# \n# DEBUG: Update timeout 0x7b5d6cc43e90 6 -1\n# \n# DEBUG: Update timeout 0x7b5d6cc43e90 6 0\n# \n# DEBUG: Dispatch timeout 0x7b5d6cc43e90 0x7f1d70527b80 6 0x7bcd6cc196d0\n# \n# DEBUG: Update timeout 0x7b5d6cc43e90 6 -1\n# \n# DEBUG: Update timeout 0x7b5d6cc43e90 6 0\n# \n# DEBUG: Dispatch timeout 0x7b5d6cc43e90 0x7f1d70527b80 6 0x7bcd6cc196d0\n# \n# DEBUG: Update timeout 0x7b5d6cc43e90 6 -1\n# \n# DEBUG: Remove timeout 0x7b5d6cc43e90 6\n# \nok 5 /backend/controls-and-ownership\nok 6 /backend/cancellation-and-stop\n# DEBUG: Add timeout 0x7b5d6cc5b550 -1 0x7f1d70527b80 0x7bcd6cc31a90 7\n# \n# DEBUG: Remove timeout 0x7b5d6cc5b550 7\n# \n# DEBUG: Add timeout 0x7b5d6cc65c90 -1 0x7f1d70527b80 0x7bcd6cc35920 8\n# \n# DEBUG: Remove timeout 0x7b5d6cc65c90 8\n# \nok 7 /backend/reconnect-and-missing\n# DEBUG: Add timeout 0x7b5d6cc71cd0 -1 0x7f1d70527b80 0x7bcd6cc39860 9\n# \n# DEBUG: Update timeout 0x7b5d6cc71cd0 9 0\n# \n# DEBUG: Dispatch timeout 0x7b5d6cc71cd0 0x7f1d70527b80 9 0x7bcd6cc39860\n# \n# DEBUG: Update timeout 0x7b5d6cc71cd0 9 -1\n# \n# DEBUG: Remove timeout 0x7b5d6cc71cd0 9\n# \nok 8 /backend/lifecycle-events\n# DEBUG: Add timeout 0x7b5d6cc72910 -1 0x7f1d70527b80 0x7bcd6cc3d900 10\n# \n# DEBUG: Remove timeout 0x7b5d6cc72910 10\n# \nok 9 /backend/stop-in-flight\n# DEBUG: Add timeout 0x7b5d6cc7c7d0 -1 0x7f1d70527b80 0x7bcd6cc3de80 11\n# \n# DEBUG: Remove timeout 0x7b5d6cc7c7d0 11\n# \nok 10 /backend/result-order-and-progress\n# End of backend tests\n",
+        "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Test Driver error : Domain not found\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n"
+      },
+      {
+        "name": "pirwa:boxes-import",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.19778776168823242,
+        "command": [
+          "/home/stone/Gnome/pirwa/build-sanitize/tests/test-import"
+        ],
+        "stdout": "TAP version 14\n# random seed: R02Sc1c7b470554abe4a9a7db26b2f88b79a\n1..8\n# Start of import tests\nok 1 /import/copy-independent-machine\nok 2 /import/reject-running\nok 3 /import/cancel-and-rollback\nok 4 /import/reject-changed-source\nok 5 /import/upload-failure-rolls-back\nok 6 /import/reject-internal-snapshots\nok 7 /import/reject-unsupported-devices\nok 8 /import/firmware-no-overwrite-or-symlink\n# End of import tests\n"
+      },
+      {
+        "name": "pirwa:backend-faults",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.47775959968566895,
+        "command": [
+          "/home/stone/Gnome/pirwa/build-sanitize/tests/test-backend-faults"
+        ],
+        "stdout": "TAP version 14\n# random seed: R02S0febb8dd7c6cedd8b46978dc47c4e625\n1..7\n# Start of backend-faults tests\nok 1 /backend-faults/startup-recovery-metadata\nok 2 /backend-faults/retry-budget-and-manual-reconnect\nok 3 /backend-faults/cancelled-work-keeps-budget\nok 4 /backend-faults/close-notification\nok 5 /backend-faults/permission-denied\nok 6 /backend-faults/transport-lost-no-replay\nok 7 /backend-faults/blocked-inventory-stop\n# End of backend-faults tests\n"
+      },
+      {
+        "name": "pirwa:inventory",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.6241657733917236,
+        "command": [
+          "/home/stone/Gnome/pirwa/build-sanitize/tests/test-inventory"
+        ],
+        "stdout": "TAP version 14\n# random seed: R02S8818e70baaf9aeefe8da0d2a30f89e77\n1..4\n# Start of inventory tests\n# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation local (GLocalVfs) for \u2018gio-vfs\u2019\nok 1 /inventory/os-names-and-cache\n# slow test /inventory/os-names-and-cache executed in 0.53 secs\nok 2 /inventory/discovery\nok 3 /inventory/cancelled\nok 4 /inventory/connection-failure\n# End of inventory tests\n",
+        "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: XML-RPC error : Failed to connect socket to '/var/run/libvirt/virtpirwa-unsupportedd-sock-ro': No such file or directory\n"
+      },
+      {
+        "name": "pirwa:scale-1000",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 1.4916744232177734,
+        "command": [
+          "/home/stone/Gnome/pirwa/build-sanitize/tests/benchmark-scale",
+          "1000"
+        ],
+        "stdout": "{\"driver\":\"test:///default\",\"method\":\"persistent_bulk\",\"domains\":1000,\"p50_ms\":22.678,\"p95_ms\":23.746,\"raw_us\":[23746,21782,22973,22678,22999,22938,23246,22295,23098,23154,32849,22724,22375,22579,22411,22553,23035,22872,22429,22088,22261,22379,22866,22347,22645]}\n"
+      }
+    ]
+  },
+  "final_trace": {
+    "report": {
+      "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+      "source_dirty": true,
+      "gnome_shell": "GNOME Shell 51.1",
+      "shell_command": [
+        "gnome-shell",
+        "--headless",
+        "--wayland",
+        "--no-x11",
+        "--virtual-monitor",
+        "1280x800@60",
+        "--wayland-display",
+        "pirwa-qa-wayland"
+      ],
+      "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
+      "scope": "Custom command in an isolated desktop; inspect the command's own results",
+      "repetitions": 1,
+      "cases": [
+        {
+          "name": "command",
+          "command": [
+            "build/qa/boxes-mapping/final/normal/tests/test-ui",
+            "--boxes-exercise",
+            "--trace"
+          ],
+          "returncode": 0,
+          "elapsed_seconds": 1.624,
+          "metrics": {
+            "main_monotonic_us": 364175941934,
+            "first_paint_monotonic_us": 364176739398,
+            "ready_monotonic_us": 364177180700,
+            "main_to_first_paint_ms": 797.464,
+            "sample_wall_ms": 0.0,
+            "sample_cpu_percent": 0.0,
+            "sample_frames": 0,
+            "pss_kib": -1,
+            "exercise_steps": 8,
+            "domains": 1,
+            "renderer": "GskVulkanRenderer",
+            "text_scale": 1,
+            "scroll": false,
+            "focus_kind": "not-sampled",
+            "initial_focus_kind": "not-sampled",
+            "active": false,
+            "refresh_millihz": 60000,
+            "surface_scale": 1,
+            "frame_work_us": [],
+            "form_focus_steps": 0,
+            "chooser_reached": false,
+            "reverse_focus": false,
+            "windows_observed": 3,
+            "windows_painted": 3
+          }
+        }
+      ],
+      "passed": true,
+      "shell_exitcode": 0
+    },
+    "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nBOXES step=0 time=364176296637 window=0x218affe0 mapped=1 frame=-1 dialog=(nil) mapped=0\nBOXES step=1 time=364177250768 window=0x218affe0 mapped=1 frame=2 dialog=(nil) mapped=0\nBOXES step=2 time=364177281840 window=0x218affe0 mapped=1 frame=4 dialog=(nil) mapped=0\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nBOXES step=3 time=364177300716 window=0x227b91f0 mapped=1 frame=-1 dialog=(nil) mapped=0\nBOXES step=4 time=364177322940 window=0x227b91f0 mapped=1 frame=1 dialog=(nil) mapped=0\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-boxes-ui-7EORY3/runtime/libvirt/libvirt-sock': Connection refused\nBOXES step=5 time=364177365745 window=0x227b91f0 mapped=1 frame=3 dialog=0x218ee820 mapped=1\nBOXES step=6 time=364177375831 window=0x227b91f0 mapped=1 frame=4 dialog=(nil) mapped=0\nBOXES step=7 time=364177385919 window=0x227b91f0 mapped=1 frame=4 dialog=(nil) mapped=0\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nBOXES step=8 time=364177422405 window=0x21911420 mapped=1 frame=-1 dialog=(nil) mapped=0\n",
+    "process_cleanup": {
+      "signalled": [],
+      "remaining": {}
+    }
+  },
+  "exploratory_successes_without_historical_timeout": {
+    "baseline": [
+      {
+        "index": 0,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/diagnostic-sanitizer",
+          "--boxes-exercise",
+          "--snapshot",
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/baseline/00.png"
+        ],
+        "returncode": 0,
+        "metrics": {
+          "main_monotonic_us": 362735135684,
+          "first_paint_monotonic_us": 362744235888,
+          "ready_monotonic_us": 362744970414,
+          "main_to_first_paint_ms": 9100.204,
+          "sample_wall_ms": 0.0,
+          "sample_cpu_percent": 0.0,
+          "sample_frames": 0,
+          "pss_kib": -1,
+          "exercise_steps": 8,
+          "domains": 1,
+          "renderer": "GskVulkanRenderer",
+          "text_scale": 1,
+          "scroll": false,
+          "focus_kind": "not-sampled",
+          "initial_focus_kind": "not-sampled",
+          "active": false,
+          "refresh_millihz": 60000,
+          "surface_scale": 1,
+          "frame_work_us": [],
+          "form_focus_steps": 0,
+          "chooser_reached": false,
+          "reverse_focus": false
+        }
+      },
+      {
+        "index": 1,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/diagnostic-sanitizer",
+          "--boxes-exercise",
+          "--snapshot",
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/baseline/01.png",
+          "--large-text",
+          "--dark",
+          "--width",
+          "720"
+        ],
+        "returncode": 0,
+        "metrics": {
+          "main_monotonic_us": 362746552220,
+          "first_paint_monotonic_us": 362754850355,
+          "ready_monotonic_us": 362755372441,
+          "main_to_first_paint_ms": 8298.135,
+          "sample_wall_ms": 0.0,
+          "sample_cpu_percent": 0.0,
+          "sample_frames": 0,
+          "pss_kib": -1,
+          "exercise_steps": 8,
+          "domains": 1,
+          "renderer": "GskVulkanRenderer",
+          "text_scale": 2,
+          "scroll": false,
+          "focus_kind": "not-sampled",
+          "initial_focus_kind": "not-sampled",
+          "active": false,
+          "refresh_millihz": 60000,
+          "surface_scale": 1,
+          "frame_work_us": [],
+          "form_focus_steps": 0,
+          "chooser_reached": false,
+          "reverse_focus": false
+        }
+      },
+      {
+        "index": 2,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/diagnostic-sanitizer",
+          "--boxes-exercise",
+          "--snapshot",
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/baseline/02.png"
+        ],
+        "returncode": 0,
+        "metrics": {
+          "main_monotonic_us": 362756850398,
+          "first_paint_monotonic_us": 362765126740,
+          "ready_monotonic_us": 362765165494,
+          "main_to_first_paint_ms": 8276.342,
+          "sample_wall_ms": 0.0,
+          "sample_cpu_percent": 0.0,
+          "sample_frames": 0,
+          "pss_kib": -1,
+          "exercise_steps": 8,
+          "domains": 1,
+          "renderer": "GskVulkanRenderer",
+          "text_scale": 1,
+          "scroll": false,
+          "focus_kind": "not-sampled",
+          "initial_focus_kind": "not-sampled",
+          "active": false,
+          "refresh_millihz": 60000,
+          "surface_scale": 1,
+          "frame_work_us": [],
+          "form_focus_steps": 0,
+          "chooser_reached": false,
+          "reverse_focus": false
+        }
+      },
+      {
+        "index": 3,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/diagnostic-sanitizer",
+          "--boxes-exercise",
+          "--snapshot",
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/baseline/03.png",
+          "--large-text",
+          "--dark",
+          "--width",
+          "720"
+        ],
+        "returncode": 0,
+        "metrics": {
+          "main_monotonic_us": 362766563885,
+          "first_paint_monotonic_us": 362774855252,
+          "ready_monotonic_us": 362774903208,
+          "main_to_first_paint_ms": 8291.367,
+          "sample_wall_ms": 0.0,
+          "sample_cpu_percent": 0.0,
+          "sample_frames": 0,
+          "pss_kib": -1,
+          "exercise_steps": 8,
+          "domains": 1,
+          "renderer": "GskVulkanRenderer",
+          "text_scale": 2,
+          "scroll": false,
+          "focus_kind": "not-sampled",
+          "initial_focus_kind": "not-sampled",
+          "active": false,
+          "refresh_millihz": 60000,
+          "surface_scale": 1,
+          "frame_work_us": [],
+          "form_focus_steps": 0,
+          "chooser_reached": false,
+          "reverse_focus": false
+        }
+      },
+      {
+        "index": 4,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/diagnostic-sanitizer",
+          "--boxes-exercise",
+          "--snapshot",
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/baseline/04.png"
+        ],
+        "returncode": 0,
+        "metrics": {
+          "main_monotonic_us": 362776304962,
+          "first_paint_monotonic_us": 362784510844,
+          "ready_monotonic_us": 362784542970,
+          "main_to_first_paint_ms": 8205.882,
+          "sample_wall_ms": 0.0,
+          "sample_cpu_percent": 0.0,
+          "sample_frames": 0,
+          "pss_kib": -1,
+          "exercise_steps": 8,
+          "domains": 1,
+          "renderer": "GskVulkanRenderer",
+          "text_scale": 1,
+          "scroll": false,
+          "focus_kind": "not-sampled",
+          "initial_focus_kind": "not-sampled",
+          "active": false,
+          "refresh_millihz": 60000,
+          "surface_scale": 1,
+          "frame_work_us": [],
+          "form_focus_steps": 0,
+          "chooser_reached": false,
+          "reverse_focus": false
+        }
+      },
+      {
+        "index": 5,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/diagnostic-sanitizer",
+          "--boxes-exercise",
+          "--snapshot",
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/baseline/05.png",
+          "--large-text",
+          "--dark",
+          "--width",
+          "720"
+        ],
+        "returncode": 0,
+        "metrics": {
+          "main_monotonic_us": 362785927443,
+          "first_paint_monotonic_us": 362794209913,
+          "ready_monotonic_us": 362794275821,
+          "main_to_first_paint_ms": 8282.47,
+          "sample_wall_ms": 0.0,
+          "sample_cpu_percent": 0.0,
+          "sample_frames": 0,
+          "pss_kib": -1,
+          "exercise_steps": 8,
+          "domains": 1,
+          "renderer": "GskVulkanRenderer",
+          "text_scale": 2,
+          "scroll": false,
+          "focus_kind": "not-sampled",
+          "initial_focus_kind": "not-sampled",
+          "active": false,
+          "refresh_millihz": 60000,
+          "surface_scale": 1,
+          "frame_work_us": [],
+          "form_focus_steps": 0,
+          "chooser_reached": false,
+          "reverse_focus": false
+        }
+      },
+      {
+        "index": 6,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/diagnostic-sanitizer",
+          "--boxes-exercise",
+          "--snapshot",
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/baseline/06.png"
+        ],
+        "returncode": 0,
+        "metrics": {
+          "main_monotonic_us": 362795648576,
+          "first_paint_monotonic_us": 362803696959,
+          "ready_monotonic_us": 362803731785,
+          "main_to_first_paint_ms": 8048.383,
+          "sample_wall_ms": 0.0,
+          "sample_cpu_percent": 0.0,
+          "sample_frames": 0,
+          "pss_kib": -1,
+          "exercise_steps": 8,
+          "domains": 1,
+          "renderer": "GskVulkanRenderer",
+          "text_scale": 1,
+          "scroll": false,
+          "focus_kind": "not-sampled",
+          "initial_focus_kind": "not-sampled",
+          "active": false,
+          "refresh_millihz": 60000,
+          "surface_scale": 1,
+          "frame_work_us": [],
+          "form_focus_steps": 0,
+          "chooser_reached": false,
+          "reverse_focus": false
+        }
+      },
+      {
+        "index": 7,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/diagnostic-sanitizer",
+          "--boxes-exercise",
+          "--snapshot",
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/baseline/07.png",
+          "--large-text",
+          "--dark",
+          "--width",
+          "720"
+        ],
+        "returncode": 0,
+        "metrics": {
+          "main_monotonic_us": 362804310656,
+          "first_paint_monotonic_us": 362812578882,
+          "ready_monotonic_us": 362812622634,
+          "main_to_first_paint_ms": 8268.226,
+          "sample_wall_ms": 0.0,
+          "sample_cpu_percent": 0.0,
+          "sample_frames": 0,
+          "pss_kib": -1,
+          "exercise_steps": 8,
+          "domains": 1,
+          "renderer": "GskVulkanRenderer",
+          "text_scale": 2,
+          "scroll": false,
+          "focus_kind": "not-sampled",
+          "initial_focus_kind": "not-sampled",
+          "active": false,
+          "refresh_millihz": 60000,
+          "surface_scale": 1,
+          "frame_work_us": [],
+          "form_focus_steps": 0,
+          "chooser_reached": false,
+          "reverse_focus": false
+        }
+      },
+      {
+        "index": 8,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/diagnostic-sanitizer",
+          "--boxes-exercise",
+          "--snapshot",
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/baseline/08.png"
+        ],
+        "returncode": 0,
+        "metrics": {
+          "main_monotonic_us": 362814025742,
+          "first_paint_monotonic_us": 362822137726,
+          "ready_monotonic_us": 362822181215,
+          "main_to_first_paint_ms": 8111.984,
+          "sample_wall_ms": 0.0,
+          "sample_cpu_percent": 0.0,
+          "sample_frames": 0,
+          "pss_kib": -1,
+          "exercise_steps": 8,
+          "domains": 1,
+          "renderer": "GskVulkanRenderer",
+          "text_scale": 1,
+          "scroll": false,
+          "focus_kind": "not-sampled",
+          "initial_focus_kind": "not-sampled",
+          "active": false,
+          "refresh_millihz": 60000,
+          "surface_scale": 1,
+          "frame_work_us": [],
+          "form_focus_steps": 0,
+          "chooser_reached": false,
+          "reverse_focus": false
+        }
+      },
+      {
+        "index": 9,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/diagnostic-sanitizer",
+          "--boxes-exercise",
+          "--snapshot",
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/baseline/09.png",
+          "--large-text",
+          "--dark",
+          "--width",
+          "720"
+        ],
+        "returncode": 0,
+        "metrics": {
+          "main_monotonic_us": 362823546351,
+          "first_paint_monotonic_us": 362832114936,
+          "ready_monotonic_us": 362832182043,
+          "main_to_first_paint_ms": 8568.585,
+          "sample_wall_ms": 0.0,
+          "sample_cpu_percent": 0.0,
+          "sample_frames": 0,
+          "pss_kib": -1,
+          "exercise_steps": 8,
+          "domains": 1,
+          "renderer": "GskVulkanRenderer",
+          "text_scale": 2,
+          "scroll": false,
+          "focus_kind": "not-sampled",
+          "initial_focus_kind": "not-sampled",
+          "active": false,
+          "refresh_millihz": 60000,
+          "surface_scale": 1,
+          "frame_work_us": [],
+          "form_focus_steps": 0,
+          "chooser_reached": false,
+          "reverse_focus": false
+        }
+      },
+      {
+        "index": 10,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/diagnostic-sanitizer",
+          "--boxes-exercise",
+          "--snapshot",
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/baseline/10.png"
+        ],
+        "returncode": 0,
+        "metrics": {
+          "main_monotonic_us": 362833591358,
+          "first_paint_monotonic_us": 362841612359,
+          "ready_monotonic_us": 362841646159,
+          "main_to_first_paint_ms": 8021.001,
+          "sample_wall_ms": 0.0,
+          "sample_cpu_percent": 0.0,
+          "sample_frames": 0,
+          "pss_kib": -1,
+          "exercise_steps": 8,
+          "domains": 1,
+          "renderer": "GskVulkanRenderer",
+          "text_scale": 1,
+          "scroll": false,
+          "focus_kind": "not-sampled",
+          "initial_focus_kind": "not-sampled",
+          "active": false,
+          "refresh_millihz": 60000,
+          "surface_scale": 1,
+          "frame_work_us": [],
+          "form_focus_steps": 0,
+          "chooser_reached": false,
+          "reverse_focus": false
+        }
+      },
+      {
+        "index": 11,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/diagnostic-sanitizer",
+          "--boxes-exercise",
+          "--snapshot",
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/baseline/11.png",
+          "--large-text",
+          "--dark",
+          "--width",
+          "720"
+        ],
+        "returncode": 0,
+        "metrics": {
+          "main_monotonic_us": 362842984280,
+          "first_paint_monotonic_us": 362851179112,
+          "ready_monotonic_us": 362851234549,
+          "main_to_first_paint_ms": 8194.832,
+          "sample_wall_ms": 0.0,
+          "sample_cpu_percent": 0.0,
+          "sample_frames": 0,
+          "pss_kib": -1,
+          "exercise_steps": 8,
+          "domains": 1,
+          "renderer": "GskVulkanRenderer",
+          "text_scale": 2,
+          "scroll": false,
+          "focus_kind": "not-sampled",
+          "initial_focus_kind": "not-sampled",
+          "active": false,
+          "refresh_millihz": 60000,
+          "surface_scale": 1,
+          "frame_work_us": [],
+          "form_focus_steps": 0,
+          "chooser_reached": false,
+          "reverse_focus": false
+        }
+      }
+    ],
+    "pending-map": [
+      {
+        "index": 0,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/pending-map-sanitizer",
+          "--boxes-exercise",
+          "--snapshot",
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/pending-map/00.png"
+        ],
+        "returncode": 0,
+        "metrics": {
+          "main_monotonic_us": 362888061973,
+          "first_paint_monotonic_us": 362896735445,
+          "ready_monotonic_us": 362897459505,
+          "main_to_first_paint_ms": 8673.472,
+          "sample_wall_ms": 0.0,
+          "sample_cpu_percent": 0.0,
+          "sample_frames": 0,
+          "pss_kib": -1,
+          "exercise_steps": 8,
+          "domains": 1,
+          "renderer": "GskVulkanRenderer",
+          "text_scale": 1,
+          "scroll": false,
+          "focus_kind": "not-sampled",
+          "initial_focus_kind": "not-sampled",
+          "active": false,
+          "refresh_millihz": 60000,
+          "surface_scale": 1,
+          "frame_work_us": [],
+          "form_focus_steps": 0,
+          "chooser_reached": false,
+          "reverse_focus": false
+        }
+      },
+      {
+        "index": 1,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/pending-map-sanitizer",
+          "--boxes-exercise",
+          "--snapshot",
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/pending-map/01.png",
+          "--large-text",
+          "--dark",
+          "--width",
+          "720"
+        ],
+        "returncode": 0,
+        "metrics": {
+          "main_monotonic_us": 362898514940,
+          "first_paint_monotonic_us": 362906732045,
+          "ready_monotonic_us": 362907036464,
+          "main_to_first_paint_ms": 8217.105,
+          "sample_wall_ms": 0.0,
+          "sample_cpu_percent": 0.0,
+          "sample_frames": 0,
+          "pss_kib": -1,
+          "exercise_steps": 8,
+          "domains": 1,
+          "renderer": "GskVulkanRenderer",
+          "text_scale": 2,
+          "scroll": false,
+          "focus_kind": "not-sampled",
+          "initial_focus_kind": "not-sampled",
+          "active": false,
+          "refresh_millihz": 60000,
+          "surface_scale": 1,
+          "frame_work_us": [],
+          "form_focus_steps": 0,
+          "chooser_reached": false,
+          "reverse_focus": false
+        }
+      }
+    ],
+    "traced": [
+      {
+        "index": 0,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/traced-sanitizer",
+          "--boxes-exercise",
+          "--snapshot",
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/traced/00.png"
+        ],
+        "returncode": 0
+      },
+      {
+        "index": 1,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/traced-sanitizer",
+          "--boxes-exercise",
+          "--snapshot",
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/traced/01.png",
+          "--large-text",
+          "--dark",
+          "--width",
+          "720"
+        ],
+        "returncode": 0
+      },
+      {
+        "index": 2,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/traced-sanitizer",
+          "--boxes-exercise",
+          "--snapshot",
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/traced/02.png"
+        ],
+        "returncode": 0
+      },
+      {
+        "index": 3,
+        "command": [
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/traced-sanitizer",
+          "--boxes-exercise",
+          "--snapshot",
+          "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/traced/03.png",
+          "--large-text",
+          "--dark",
+          "--width",
+          "720"
+        ],
+        "returncode": 0
+      }
+    ],
+    "current-matrix": {
+      "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+      "source_dirty": true,
+      "gnome_shell": "GNOME Shell 51.1",
+      "shell_command": [
+        "gnome-shell",
+        "--headless",
+        "--wayland",
+        "--no-x11",
+        "--virtual-monitor",
+        "1280x800@60",
+        "--wayland-display",
+        "pirwa-qa-wayland"
+      ],
+      "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
+      "scope": "Programmed GTK actions and focus traversal; not physical input, screen reader, or guest console certification",
+      "cases": [
+        {
+          "name": "light",
+          "command": [
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/current/tests/test-ui",
+            "--exercise",
+            "--snapshot",
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/current-matrix/light.png"
+          ],
+          "returncode": 0,
+          "metrics": {
+            "main_monotonic_us": 363093231018,
+            "first_paint_monotonic_us": 363101975318,
+            "ready_monotonic_us": 363101975344,
+            "main_to_first_paint_ms": 8744.3,
+            "sample_wall_ms": 0.0,
+            "sample_cpu_percent": 0.0,
+            "sample_frames": 0,
+            "pss_kib": -1,
+            "exercise_steps": 12,
+            "domains": 1,
+            "renderer": "GskVulkanRenderer",
+            "text_scale": 1,
+            "scroll": false,
+            "focus_kind": "not-sampled",
+            "initial_focus_kind": "not-sampled",
+            "active": false,
+            "refresh_millihz": 60000,
+            "surface_scale": 1,
+            "frame_work_us": [],
+            "form_focus_steps": 1,
+            "chooser_reached": true,
+            "reverse_focus": true
+          }
+        },
+        {
+          "name": "large-dark",
+          "command": [
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/current/tests/test-ui",
+            "--exercise",
+            "--large-text",
+            "--dark",
+            "--width",
+            "720",
+            "--snapshot",
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/current-matrix/large-dark.png"
+          ],
+          "returncode": 0,
+          "metrics": {
+            "main_monotonic_us": 363103310761,
+            "first_paint_monotonic_us": 363111365162,
+            "ready_monotonic_us": 363111365184,
+            "main_to_first_paint_ms": 8054.401,
+            "sample_wall_ms": 0.0,
+            "sample_cpu_percent": 0.0,
+            "sample_frames": 0,
+            "pss_kib": -1,
+            "exercise_steps": 12,
+            "domains": 1,
+            "renderer": "GskVulkanRenderer",
+            "text_scale": 2,
+            "scroll": false,
+            "focus_kind": "not-sampled",
+            "initial_focus_kind": "not-sampled",
+            "active": false,
+            "refresh_millihz": 60000,
+            "surface_scale": 1,
+            "frame_work_us": [],
+            "form_focus_steps": 1,
+            "chooser_reached": true,
+            "reverse_focus": true
+          }
+        },
+        {
+          "name": "empty",
+          "command": [
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/current/tests/test-ui",
+            "--exercise",
+            "--uri",
+            "test:///tmp/pirwa-gnome-gppmuelu/node.xml",
+            "--snapshot",
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/current-matrix/empty.png"
+          ],
+          "returncode": 0,
+          "metrics": {
+            "main_monotonic_us": 363112619708,
+            "first_paint_monotonic_us": 363120572102,
+            "ready_monotonic_us": 363120572124,
+            "main_to_first_paint_ms": 7952.394,
+            "sample_wall_ms": 0.0,
+            "sample_cpu_percent": 0.0,
+            "sample_frames": 0,
+            "pss_kib": -1,
+            "exercise_steps": 12,
+            "domains": 0,
+            "renderer": "GskVulkanRenderer",
+            "text_scale": 1,
+            "scroll": false,
+            "focus_kind": "not-sampled",
+            "initial_focus_kind": "not-sampled",
+            "active": false,
+            "refresh_millihz": 60000,
+            "surface_scale": 1,
+            "frame_work_us": [],
+            "form_focus_steps": 1,
+            "chooser_reached": true,
+            "reverse_focus": true
+          }
+        },
+        {
+          "name": "boxes",
+          "command": [
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/current/tests/test-ui",
+            "--boxes-exercise",
+            "--snapshot",
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/current-matrix/boxes.png"
+          ],
+          "returncode": 0,
+          "metrics": {
+            "main_monotonic_us": 363121031125,
+            "first_paint_monotonic_us": 363128941128,
+            "ready_monotonic_us": 363129155703,
+            "main_to_first_paint_ms": 7910.003,
+            "sample_wall_ms": 0.0,
+            "sample_cpu_percent": 0.0,
+            "sample_frames": 0,
+            "pss_kib": -1,
+            "exercise_steps": 8,
+            "domains": 1,
+            "renderer": "GskVulkanRenderer",
+            "text_scale": 1,
+            "scroll": false,
+            "focus_kind": "not-sampled",
+            "initial_focus_kind": "not-sampled",
+            "active": false,
+            "refresh_millihz": 60000,
+            "surface_scale": 1,
+            "frame_work_us": [],
+            "form_focus_steps": 0,
+            "chooser_reached": false,
+            "reverse_focus": false
+          }
+        },
+        {
+          "name": "boxes-large-dark",
+          "command": [
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/current/tests/test-ui",
+            "--boxes-exercise",
+            "--large-text",
+            "--dark",
+            "--width",
+            "720",
+            "--snapshot",
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/current-matrix/boxes-large-dark.png"
+          ],
+          "returncode": 0,
+          "metrics": {
+            "main_monotonic_us": 363130553790,
+            "first_paint_monotonic_us": 363138674439,
+            "ready_monotonic_us": 363138986900,
+            "main_to_first_paint_ms": 8120.649,
+            "sample_wall_ms": 0.0,
+            "sample_cpu_percent": 0.0,
+            "sample_frames": 0,
+            "pss_kib": -1,
+            "exercise_steps": 8,
+            "domains": 1,
+            "renderer": "GskVulkanRenderer",
+            "text_scale": 2,
+            "scroll": false,
+            "focus_kind": "not-sampled",
+            "initial_focus_kind": "not-sampled",
+            "active": false,
+            "refresh_millihz": 60000,
+            "surface_scale": 1,
+            "frame_work_us": [],
+            "form_focus_steps": 0,
+            "chooser_reached": false,
+            "reverse_focus": false
+          }
+        },
+        {
+          "name": "viewer",
+          "command": [
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/current/tests/test-console-ui",
+            "--output",
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/current-matrix/viewer"
+          ],
+          "returncode": 0
+        },
+        {
+          "name": "viewer-large-dark",
+          "command": [
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/current/tests/test-console-ui",
+            "--large-text",
+            "--dark",
+            "--width",
+            "720",
+            "--output",
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/current-matrix/viewer-large-dark"
+          ],
+          "returncode": 0
+        }
+      ],
+      "passed": true,
+      "shell_exitcode": 0
+    },
+    "legacy-matrix": {
+      "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+      "source_dirty": true,
+      "gnome_shell": "GNOME Shell 51.1",
+      "shell_command": [
+        "gnome-shell",
+        "--headless",
+        "--wayland",
+        "--no-x11",
+        "--virtual-monitor",
+        "1280x800@60",
+        "--wayland-display",
+        "pirwa-qa-wayland"
+      ],
+      "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
+      "scope": "Programmed GTK actions and focus traversal; not physical input, screen reader, or guest console certification",
+      "cases": [
+        {
+          "name": "light",
+          "command": [
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/legacy/tests/test-ui",
+            "--exercise",
+            "--snapshot",
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/legacy-matrix/light.png"
+          ],
+          "returncode": 0,
+          "metrics": {
+            "main_monotonic_us": 363311667666,
+            "first_paint_monotonic_us": 363321033087,
+            "ready_monotonic_us": 363321033112,
+            "main_to_first_paint_ms": 9365.421,
+            "sample_wall_ms": 0.0,
+            "sample_cpu_percent": 0.0,
+            "sample_frames": 0,
+            "pss_kib": -1,
+            "exercise_steps": 12,
+            "domains": 1,
+            "renderer": "GskVulkanRenderer",
+            "text_scale": 1,
+            "scroll": false,
+            "focus_kind": "not-sampled",
+            "initial_focus_kind": "not-sampled",
+            "active": false,
+            "refresh_millihz": 60000,
+            "surface_scale": 1,
+            "frame_work_us": [],
+            "form_focus_steps": 1,
+            "chooser_reached": true,
+            "reverse_focus": true
+          }
+        },
+        {
+          "name": "large-dark",
+          "command": [
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/legacy/tests/test-ui",
+            "--exercise",
+            "--large-text",
+            "--dark",
+            "--width",
+            "720",
+            "--snapshot",
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/legacy-matrix/large-dark.png"
+          ],
+          "returncode": 0,
+          "metrics": {
+            "main_monotonic_us": 363322441063,
+            "first_paint_monotonic_us": 363331217374,
+            "ready_monotonic_us": 363331217396,
+            "main_to_first_paint_ms": 8776.311,
+            "sample_wall_ms": 0.0,
+            "sample_cpu_percent": 0.0,
+            "sample_frames": 0,
+            "pss_kib": -1,
+            "exercise_steps": 12,
+            "domains": 1,
+            "renderer": "GskVulkanRenderer",
+            "text_scale": 2,
+            "scroll": false,
+            "focus_kind": "not-sampled",
+            "initial_focus_kind": "not-sampled",
+            "active": false,
+            "refresh_millihz": 60000,
+            "surface_scale": 1,
+            "frame_work_us": [],
+            "form_focus_steps": 1,
+            "chooser_reached": true,
+            "reverse_focus": true
+          }
+        },
+        {
+          "name": "empty",
+          "command": [
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/legacy/tests/test-ui",
+            "--exercise",
+            "--uri",
+            "test:///tmp/pirwa-gnome-40ncasrx/node.xml",
+            "--snapshot",
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/legacy-matrix/empty.png"
+          ],
+          "returncode": 0,
+          "metrics": {
+            "main_monotonic_us": 363332491781,
+            "first_paint_monotonic_us": 363341230797,
+            "ready_monotonic_us": 363341230829,
+            "main_to_first_paint_ms": 8739.016,
+            "sample_wall_ms": 0.0,
+            "sample_cpu_percent": 0.0,
+            "sample_frames": 0,
+            "pss_kib": -1,
+            "exercise_steps": 12,
+            "domains": 0,
+            "renderer": "GskVulkanRenderer",
+            "text_scale": 1,
+            "scroll": false,
+            "focus_kind": "not-sampled",
+            "initial_focus_kind": "not-sampled",
+            "active": false,
+            "refresh_millihz": 60000,
+            "surface_scale": 1,
+            "frame_work_us": [],
+            "form_focus_steps": 1,
+            "chooser_reached": true,
+            "reverse_focus": true
+          }
+        },
+        {
+          "name": "boxes",
+          "command": [
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/legacy/tests/test-ui",
+            "--boxes-exercise",
+            "--snapshot",
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/legacy-matrix/boxes.png"
+          ],
+          "returncode": 0,
+          "metrics": {
+            "main_monotonic_us": 363341697343,
+            "first_paint_monotonic_us": 363350260963,
+            "ready_monotonic_us": 363350479558,
+            "main_to_first_paint_ms": 8563.62,
+            "sample_wall_ms": 0.0,
+            "sample_cpu_percent": 0.0,
+            "sample_frames": 0,
+            "pss_kib": -1,
+            "exercise_steps": 8,
+            "domains": 1,
+            "renderer": "GskVulkanRenderer",
+            "text_scale": 1,
+            "scroll": false,
+            "focus_kind": "not-sampled",
+            "initial_focus_kind": "not-sampled",
+            "active": false,
+            "refresh_millihz": 60000,
+            "surface_scale": 1,
+            "frame_work_us": [],
+            "form_focus_steps": 0,
+            "chooser_reached": false,
+            "reverse_focus": false
+          }
+        },
+        {
+          "name": "boxes-large-dark",
+          "command": [
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/legacy/tests/test-ui",
+            "--boxes-exercise",
+            "--large-text",
+            "--dark",
+            "--width",
+            "720",
+            "--snapshot",
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/legacy-matrix/boxes-large-dark.png"
+          ],
+          "returncode": 0,
+          "metrics": {
+            "main_monotonic_us": 363351912431,
+            "first_paint_monotonic_us": 363360547814,
+            "ready_monotonic_us": 363360864079,
+            "main_to_first_paint_ms": 8635.383,
+            "sample_wall_ms": 0.0,
+            "sample_cpu_percent": 0.0,
+            "sample_frames": 0,
+            "pss_kib": -1,
+            "exercise_steps": 8,
+            "domains": 1,
+            "renderer": "GskVulkanRenderer",
+            "text_scale": 2,
+            "scroll": false,
+            "focus_kind": "not-sampled",
+            "initial_focus_kind": "not-sampled",
+            "active": false,
+            "refresh_millihz": 60000,
+            "surface_scale": 1,
+            "frame_work_us": [],
+            "form_focus_steps": 0,
+            "chooser_reached": false,
+            "reverse_focus": false
+          }
+        },
+        {
+          "name": "viewer",
+          "command": [
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/legacy/tests/test-console-ui",
+            "--output",
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/legacy-matrix/viewer"
+          ],
+          "returncode": 0
+        },
+        {
+          "name": "viewer-large-dark",
+          "command": [
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/legacy/tests/test-console-ui",
+            "--large-text",
+            "--dark",
+            "--width",
+            "720",
+            "--output",
+            "/home/stone/Gnome/pirwa/build/qa/boxes-mapping/legacy-matrix/viewer-large-dark"
+          ],
+          "returncode": 0
+        }
+      ],
+      "passed": true,
+      "shell_exitcode": 0
+    }
+  },
+  "pre_fix_trace_stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nBOXES step=0 time=363432499734 window=0x7ce640601330 mapped=1 frame=-1 dialog=(nil) mapped=0\nBOXES step=1 time=363434275817 window=0x7ce640601330 mapped=1 frame=1 dialog=(nil) mapped=0\nBOXES step=2 time=363434432060 window=0x7ce640601330 mapped=1 frame=4 dialog=(nil) mapped=0\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nBOXES step=3 time=363434476374 window=0x7ce640921730 mapped=1 frame=-1 dialog=(nil) mapped=0\nBOXES step=4 time=363434514084 window=0x7ce640921730 mapped=1 frame=0 dialog=(nil) mapped=0\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-boxes-ui-T2YOY3/runtime/libvirt/libvirt-sock': Connection refused\nBOXES step=5 time=363435303216 window=0x7ce640921730 mapped=1 frame=4 dialog=0x7ca6407e57a0 mapped=1\nBOXES step=6 time=363435313262 window=0x7ce640921730 mapped=1 frame=4 dialog=(nil) mapped=0\nBOXES step=7 time=363435353825 window=0x7ce640921730 mapped=1 frame=5 dialog=(nil) mapped=0\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nBOXES step=8 time=363435422781 window=0x7ce640d3ed30 mapped=1 frame=-1 dialog=(nil) mapped=0\n",
+  "pre_fix_scan_trace_stdout": "(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:13.280: scan start window=0x7ce640601330 auto=1 loading=0 remembering=0\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:21.609: offer window=0x7ce640601330 open=1 pending=(nil) manual=0 busy=1 loading=1 mapped=1 dialog=(nil)\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:21.637: scan done window=0x7ce640601330 open=1 manual=0 scan=0x7b764087f2f0\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:21.637: offer window=0x7ce640601330 open=1 pending=0x7b764087f2f0 manual=0 busy=1 loading=0 mapped=1 dialog=(nil)\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:21.643: offer window=0x7ce640601330 open=1 pending=0x7b764087f2f0 manual=0 busy=0 loading=0 mapped=1 dialog=(nil)\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:21.677: offer window=0x7ce640601330 open=1 pending=(nil) manual=0 busy=0 loading=0 mapped=1 dialog=0x7ca6407497a0\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:23.371: scan start window=0x7ce640601330 auto=0 loading=0 remembering=0\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:23.373: offer window=0x7ce640601330 open=1 pending=(nil) manual=1 busy=0 loading=1 mapped=1 dialog=(nil)\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:23.537: scan done window=0x7ce640601330 open=1 manual=1 scan=0x7b7640ad45c0\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:23.537: offer window=0x7ce640601330 open=1 pending=0x7b7640ad45c0 manual=1 busy=0 loading=0 mapped=1 dialog=(nil)\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:23.547: offer window=0x7ce640601330 open=1 pending=(nil) manual=1 busy=0 loading=0 mapped=1 dialog=0x7ca640830da0\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:23.560: offer window=0x7ce640601330 open=1 pending=(nil) manual=1 busy=0 loading=0 mapped=1 dialog=(nil)\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:23.587: scan start window=0x7ce640921730 auto=1 loading=0 remembering=0\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:23.594: offer window=0x7ce640921730 open=1 pending=(nil) manual=0 busy=1 loading=1 mapped=1 dialog=(nil)\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:23.614: scan done window=0x7ce640921730 open=1 manual=0 scan=0x7b7640a8afd0\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:23.614: offer window=0x7ce640921730 open=1 pending=0x7b7640a8afd0 manual=0 busy=1 loading=0 mapped=1 dialog=(nil)\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:23.616: offer window=0x7ce640921730 open=1 pending=0x7b7640a8afd0 manual=0 busy=0 loading=0 mapped=1 dialog=(nil)\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:23.633: scan start window=0x7ce640921730 auto=0 loading=0 remembering=0\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:23.672: scan done window=0x7ce640921730 open=1 manual=1 scan=0x7b7640ad3ed0\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:23.672: offer window=0x7ce640921730 open=1 pending=0x7b7640ad3ed0 manual=1 busy=0 loading=0 mapped=1 dialog=(nil)\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:23.679: offer window=0x7ce640921730 open=1 pending=(nil) manual=1 busy=0 loading=0 mapped=1 dialog=0x7ca6407e57a0\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:24.417: offer window=0x7ce640921730 open=1 pending=(nil) manual=1 busy=0 loading=0 mapped=1 dialog=0x7ca6407e57a0\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:24.441: offer window=0x7ce640921730 open=1 pending=(nil) manual=1 busy=0 loading=0 mapped=1 dialog=(nil)\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:24.509: scan start window=0x7ce640d3ed30 auto=1 loading=0 remembering=0\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:24.536: offer window=0x7ce640d3ed30 open=1 pending=(nil) manual=0 busy=1 loading=1 mapped=1 dialog=(nil)\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:24.564: offer window=0x7ce640d3ed30 open=1 pending=(nil) manual=0 busy=0 loading=1 mapped=1 dialog=(nil)\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:24.564: scan done window=0x7ce640d3ed30 open=1 manual=0 scan=0x7b7640af7390\n(traced-sanitizer:3568873): PirwaBoxes-DEBUG: 12:38:24.565: offer window=0x7ce640d3ed30 open=1 pending=0x7b7640af7390 manual=0 busy=0 loading=0 mapped=1 dialog=(nil)\n{\"main_monotonic_us\":363423850677,\"first_paint_monotonic_us\":363433390426,\"ready_monotonic_us\":363434122074,\"main_to_first_paint_ms\":9539.749,\"sample_wall_ms\":0.000,\"sample_cpu_percent\":0.0000,\"sample_frames\":0,\"pss_kib\":-1,\"exercise_steps\":8,\"domains\":1,\"renderer\":\"GskVulkanRenderer\",\"text_scale\":1,\"scroll\":false,\"focus_kind\":\"not-sampled\",\"initial_focus_kind\":\"not-sampled\",\"active\":false,\"refresh_millihz\":60000,\"surface_scale\":1,\"frame_work_us\":[],\"form_focus_steps\":0,\"chooser_reached\":false,\"reverse_focus\":false}\n",
+  "repeat_cli_guards": [
+    {
+      "args": [
+        "--repeat",
+        "0"
+      ],
+      "returncode": 2,
+      "stderr": "usage: test-gnome.py [-h] [--build BUILD] [--repeat REPEAT]\n                     [--monitor MONITOR] [--output OUTPUT]\n                     [--command-timeout COMMAND_TIMEOUT]\n                     ...\ntest-gnome.py: error: Use --repeat 1\u201320 with the standard matrix only\n"
+    },
+    {
+      "args": [
+        "--repeat",
+        "21"
+      ],
+      "returncode": 2,
+      "stderr": "usage: test-gnome.py [-h] [--build BUILD] [--repeat REPEAT]\n                     [--monitor MONITOR] [--output OUTPUT]\n                     [--command-timeout COMMAND_TIMEOUT]\n                     ...\ntest-gnome.py: error: Use --repeat 1\u201320 with the standard matrix only\n"
+    },
+    {
+      "args": [
+        "--repeat",
+        "2",
+        "--",
+        "true"
+      ],
+      "returncode": 2,
+      "stderr": "usage: test-gnome.py [-h] [--build BUILD] [--repeat REPEAT]\n                     [--monitor MONITOR] [--output OUTPUT]\n                     [--command-timeout COMMAND_TIMEOUT]\n                     ...\ntest-gnome.py: error: Use --repeat 1\u201320 with the standard matrix only\n"
+    }
+  ],
+  "commands": [
+    "meson compile -C build -j 2",
+    "meson compile -C build-sanitize -j 2",
+    "env -i PATH=/usr/bin:/bin LANG=C.UTF-8 LD_LIBRARY_PATH=<matching SDK lib64> python3 scripts/test-gnome.py --build <pinned-normal-GUI-executables> --repeat 2 --output build/qa/boxes-mapping/final-normal",
+    "env -i PATH=/usr/bin:/bin LANG=C.UTF-8 LD_LIBRARY_PATH=<matching SDK lib64> ASAN_OPTIONS=detect_leaks=0 python3 scripts/test-gnome.py --build <pinned-sanitizer-GUI-executables> --repeat 2 --output build/qa/boxes-mapping/final-sanitizer",
+    "python3 scripts/test-gnome.py --output <fresh-output> -- <pinned-normal-test-ui> --boxes-exercise --trace",
+    "env -i PATH=/usr/bin:/bin LANG=C.UTF-8 meson test -C build --no-rebuild --print-errorlogs",
+    "env -i PATH=/usr/bin:/bin LANG=C.UTF-8 LD_LIBRARY_PATH=<matching SDK lib64> ASAN_OPTIONS=detect_leaks=0 meson test -C build-sanitize --no-rebuild --print-errorlogs"
+  ],
+  "paint_definition": "GdkFrameClock after-paint on the current window; not compositor presentation confirmation.",
+  "watchdog": "Original duration + 20 seconds unchanged; repetition does not increase a case watchdog or ignore failures.",
+  "environment_recording": "Only selected test results and explicit non-secret commands are retained; Meson process environments are omitted.",
+  "real_vm_operations": false,
+  "application_runtime_changes": false,
+  "limits": [
+    "The historical step-4 timeout was not reproduced and its precise cause remains unconfirmed.",
+    "The clock-identity assertion reproduces a definite separate harness defect; passing repeats alone do not establish causality for the historical timeout.",
+    "No physical input, screen-reader or physical-presentation acceptance is claimed.",
+    "Leak detection disabled for existing third-party initialization findings; leak freedom is not claimed.",
+    "These correctness checks establish no startup or guest performance improvement."
+  ]
+}

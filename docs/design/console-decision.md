@@ -19,9 +19,22 @@ to the selected session; detached windows keep their own sessions alive. Selecti
 and connection changes dispose the previous inline session and retain explicit
 popups. Detached lookup uses both connection URI and domain UUID.
 
+Detached windows fit the visible guest monitor plus the measured native header,
+using the initial guest mode until a frame arrives. Compositor bounds limit the
+size while preserving the guest aspect ratio. Each dimension is capped at 88%
+of those bounds to leave desktop space and avoid GNOME automatically maximizing
+near-screen-sized windows. Guest monitor size changes refit
+an ordinary popup; unchanged geometry leaves manual window sizing alone.
+Maximized and fullscreen windows keep their state and refit on restoration.
+When automatic guest resolution adjustment is enabled, subsequent guest size
+updates do not resize the popup, avoiding a viewport/guest feedback loop.
+Sizing follows display and window events, with one cancellable idle callback
+to coalesce changes; it introduces no polling or new dependency.
+
 Popping out copies one immutable guest frame for the content panel preview.
-The preview and top-center return button replace the inline viewer while it is
-detached. There is no preview update timer or second display connection.
+The preview replaces the inline viewer while it is detached. A centered message
+with a return button directly below it overlays the preview. There is no preview
+update timer or second display connection.
 Closing a popup returns it if its machine is still selected in an open collection;
 otherwise it closes the session. Closing the collection preserves explicit popups.
 Input is released before each reparent, and shortcut inhibition follows the
@@ -46,14 +59,58 @@ Focus loss and disconnection also release input. Standard GNOME Linux evdev/XKB
 keycodes are translated to XT set 1. The console has no bottom status bar.
 Fullscreen is a header button; the header hides in fullscreen and overlays the
 display when the pointer reaches the top edge or Ctrl+Alt releases input. It
-hides again when the pointer leaves the header. Overlaying the controls does
-not change the guest display allocation. Agent-enabled
-guests receive debounced display-size requests; other guests are aspect-fitted.
+hides again when the pointer leaves the header. Overlaying the controls preserves
+the guest display allocation. The initial guest mode matches the pixel resolution
+of the monitor containing the host window, including its display scale. Each axis
+is bounded to the renderer's 8192-pixel limit. Selection waits for the console to
+be mapped, then the mode is cached until the SPICE agent is available.
+Window resizing, fullscreen and pop-out/return
+scale the image while preserving its aspect ratio. Later changes in the guest's
+Display settings are respected, including during transport reconnects within the
+same console. A newly opened console starts with the default mode again.
+Preferences offers “Automatically adjust guest resolution”, disabled by default.
+Enabling it restores debounced viewport-size requests for all open consoles,
+including detached viewers. Disabling it keeps the current guest mode and cancels
+pending resize work. The boolean is persisted with GSettings; this uses the
+existing GLib/GIO dependency. Installed and development builds load the same
+schema, and test desktops use an isolated memory settings backend.
+Guests without an agent keep their existing mode and are aspect-fitted.
+The unused viewer area shows the same native surface as the header in light and
+dark themes. The embedded viewer has 6 px insets matching the content header
+controls. The fitted guest desktop has 12 px rounded corners in inline and
+windowed pop-out viewers. Fullscreen removes the guest corner rounding; leaving
+fullscreen or returning to the collection restores it.
+SPICE monitor 0's geometry determines the visible area, rather than the QXL
+allocation size. Rendering, damage coordinates, pointer mapping and the detached
+preview use that same area, excluding alignment padding and stale video memory.
+Missing or out-of-bounds monitor geometry falls back to the validated primary
+surface until a valid configuration arrives. A single opaque texture that fills
+the widget uses a direct rounded clip. Layered updates, ARGB and letterboxed views composite through a
+luminance mask so corner coverage is applied once. The
+[rounding and memory investigation](../research/renderer-memory/README.md)
+records the guarded optimization and pixel comparisons.
 The first display and cursor channel (ID 0) are supported. Playback uses SPICE's
 audio helper. Microphone, USB, smartcard and file channels are not connected.
 
-Lifecycle events reconnect a stopped/restarted guest. Unexpected main-channel
-disconnects have three retry attempts, followed by the explicit Reconnect action.
+Selecting a running guest starts its connection automatically. Before the first
+frame, Pirwa enables monitor 0 and supplies its initial mode once the host monitor
+is known, independently of the guest widget's allocation. With automatic
+adjustment off, configuration is sent once per
+transport connection and cached until the guest agent is available. This lets a disabled guest monitor produce
+its first frame automatically without tying guest resolution to window resizing.
+If the console is mapped and its input channel is ready but no primary surface
+arrives within 500 ms, it sends two adjacent pointer positions near the guest
+monitor's center. This one-pixel movement wakes idle QXL displays without clicks
+or keys.
+It runs once per connection; a primary surface or disconnection cancels the
+pending activation. Hidden consoles do not send this activation.
+Lifecycle events reconnect a stopped/restarted guest. Socket failures and main/display-channel
+disconnects retry automatically after 1/2/4/8/16 seconds, capped at 16 seconds
+while the guest is running. A 15-second first-frame timeout also schedules a
+retry, so an initiated connection cannot leave the viewer waiting indefinitely.
+A spinner accompanies connection status; no Reconnect button is needed.
+The first valid frame resets backoff and cancels the timeout. Stopping the guest
+or disposing its console cancels pending connection and retry timers.
 Disposing a console closes its sockets and stops its backend, while the VM keeps running.
 
 The [native console validation](../research/native-console/README.md) records the

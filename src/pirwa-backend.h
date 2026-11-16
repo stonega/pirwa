@@ -24,7 +24,8 @@ typedef enum
   PIRWA_CONSOLE,
   PIRWA_GRAPHICS_FD,
   PIRWA_USAGE,
-  PIRWA_IMPORT_BOXES
+  PIRWA_IMPORT_BOXES,
+  PIRWA_EJECT
 } PirwaOperation;
 
 typedef struct
@@ -33,6 +34,8 @@ typedef struct
   guint64 request_id; /* Correlates progress; zero is valid for non-UI callers. */
   const char *uuid;
   const char *source_uri;
+  const char *media_source;
+  const char *media_target;
   PirwaCreate options;
   gboolean eject;
   gboolean delete_disk;

@@ -41,6 +41,12 @@ The benchmark drives updates explicitly; its passive idle phase removes that tic
 - `small`: change a fixed 64×64 region.
 - `burst`: the small region plus 15 overlapping writes/invalidations per update.
 
+The later `bands` diagnostic moves a 32-pixel-high full-width stripe to stress
+cache compaction. It is outside the historical matrix below. Use
+`--modes bands,small --fullscreen` on `profile-display.py` with a matching virtual
+monitor for a native-resolution comparison. Without `--fullscreen`, the benchmark
+continues to use its 960-pixel-wide window.
+
 The comparison uses four paired trials of 60 measured frames for every workload
 at 1280×720, 1920×1080 and 3840×2160. Pair order alternates and case order rotates.
 The baseline binary preserves the initial extracted renderer, whose full-copy

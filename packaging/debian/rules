@@ -1,0 +1,12 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@ --buildsystem=meson
+
+override_dh_auto_install:
+	dh_auto_install --destdir=debian/tmp
+
+execute_after_dh_install:
+	desktop-file-validate debian/pirwa/usr/share/applications/io.github.stonega.Pirwa.desktop
+	appstreamcli validate-tree --strict --no-net debian/pirwa/usr
+	glib-compile-schemas --strict --dry-run debian/pirwa/usr/share/glib-2.0/schemas

@@ -26,6 +26,8 @@ def main():
     parser.add_argument("--build", default="build-perf")
     parser.add_argument("--frames", type=int, default=180)
     parser.add_argument("--runs", type=int, default=3)
+    parser.add_argument("--modes", default="full,small,burst")
+    parser.add_argument("--fullscreen", action="store_true")
     parser.add_argument(
         "--baseline-binary",
         type=Path,
@@ -35,6 +37,14 @@ def main():
     parser.add_argument("--idle-seconds", type=int, default=10)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    modes = args.modes.split(",")
+    if len(set(modes)) != len(modes) or any(
+        mode not in {"full", "invalidate-full", "small", "burst", "bands"}
+        for mode in modes
+    ):
+        parser.error(
+            "Choose unique workloads from full,invalidate-full,small,burst,bands."
+        )
     try:
         sizes = [tuple(map(int, size.split("x"))) for size in args.sizes.split(",")]
         if not 1 <= len(sizes) <= 5 or len(set(sizes)) != len(sizes):
@@ -60,6 +70,8 @@ def main():
         "src/pirwa-frame.c",
         "src/pirwa-frame.h",
         "tests/benchmark-display.c",
+        "tests/qa-frame-feedback.c",
+        "tests/qa-frame-feedback.h",
     ]
     power = Path("/sys/firmware/acpi/platform_profile")
     packages = subprocess.run(
@@ -134,7 +146,6 @@ def main():
     def save():
         args.output.write_text(json.dumps(report, indent=2) + "\n")
 
-    modes = ["full", "small", "burst"]
     for repeat in range(args.runs):
         # Rotate order to reduce the influence of warm caches and host drift.
         cases = [(width, height, mode) for width, height in sizes for mode in modes]
@@ -155,6 +166,8 @@ def main():
                     "--mode",
                     mode,
                 ]
+                if args.fullscreen:
+                    command.append("--fullscreen")
                 if repeat == 0:
                     command += [
                         "--snapshot",
@@ -162,6 +175,10 @@ def main():
                     ]
                 if repeat == 0 and (width, height) == sizes[0] and mode == "small":
                     command += ["--idle-seconds", str(args.idle_seconds)]
+                pressure_before = {
+                    name: Path(f"/proc/pressure/{name}").read_text().splitlines()
+                    for name in ("cpu", "memory", "io")
+                }
                 result = subprocess.run(
                     command,
                     capture_output=True,
@@ -183,6 +200,11 @@ def main():
                 sample["repeat"] = repeat
                 sample["variant"] = variant
                 sample["command"] = command
+                sample["host_pressure_before"] = pressure_before
+                sample["host_pressure_after"] = {
+                    name: Path(f"/proc/pressure/{name}").read_text().splitlines()
+                    for name in ("cpu", "memory", "io")
+                }
                 if result.stderr.strip():
                     sample["diagnostics"] = result.stderr.strip()
                 report["runs"].append(sample)

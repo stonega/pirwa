@@ -10,8 +10,22 @@ decoding. The main collection window and audio are outside this measurement.
 `tests/benchmark-console.c` links production UI/backend code. Linker wrappers
 instrument only this executable: SPICE invalidation counts, CPU texture-copy
 bytes/time, process CPU, PSS and passive GTK before-paint/after-paint spans.
+Frame samples also record full/tile copies, cache compactions, texture appends,
+the preceding frame's texture appends and texture-copy CPU time. Appends count
+scene construction in Pirwa, not GPU draw calls. The first preceding-frame count
+in each trial is zero. Replacing cached tile copies with a full copy is counted
+as a compaction; trials that change the primary surface are rejected separately.
 It adds no frame-driving callback. The application binary has no profiling
 wrappers or additional polling.
+The explicit profiling tools also retain GDK frame timing objects for measured
+updates and export a separate `frame_feedback` object. It records before/after
+paint, first decoded-damage receipt, completion, presentation time and result.
+Only complete `presented` results identify accurate compositor feedback;
+unavailable timestamps remain zero, and pending/discarded results remain in the
+raw data. Result classification needs GTK 4.24; earlier supported GTK versions
+record `unknown` and cannot establish this presentation metric. Virtual desktop
+feedback describes a virtual output, not physical scanout or guest-to-screen
+latency. The app does not collect these diagnostics.
 The fixture also overrides SPICE's audio getter to keep agent volume queries
 out of these display measurements.
 
@@ -19,6 +33,14 @@ The control forces full-frame invalidation in the same executable. It exercises
 the whole-copy rendering path, including full GTK damage hints. The paired
 comparison describes that control and the normal tile path. It does not reuse
 the earlier synthetic benchmark's saved baseline executable.
+For a renderer change, `--baseline-binary /path/to/saved/benchmark-console`
+instead compares two native binaries. Each trial opens a fresh client, waits for
+its agent and waits for the framebuffer to settle. Variant order alternates by pair, and
+both binary hashes are recorded. Save the baseline executable and its source
+manifest before rebuilding; never compare binaries with different sample formats.
+Rebuild both sides with the same profiling fixture, including
+`qa-frame-feedback.c`, when validating the new feedback fields. A matching
+paint-column count alone does not establish matching instrumentation.
 
 The guest uses a fullscreen GTK 3 drawing area with three workloads:
 
@@ -32,7 +54,15 @@ invalidation counts and summed region areas retain that distinction. Guest
 status records actual draw counts, allocation and device scale. Requested
 cadence is not a presented-frame claim.
 
-Each variant settles for three seconds before sampling. Variant order alternates
+The historical measurements below used a three-second warmup. Current runs
+require the agent to be ready at the expected size, with no ready-file change
+for five seconds, within a 30-second deadline. The file is rewritten on primary
+surface and agent updates, so a resize restarts that quiet window. Per-trial
+warmup records retain elapsed time and observed ready-file versions. Any primary
+change during measurement still rejects the trial. This polling is test-only
+and ends before sampling. Check the readiness guard with
+`python3 tests/test-console-profile.py` (no guest or display required).
+Variant order alternates
 by pair. QEMU process CPU is sampled separately over a recorded observer interval
 that includes the control/readback calls surrounding each console sample.
 Frame-clock spans end at GTK submission, excluding GPU completion and physical
@@ -47,6 +77,8 @@ The test-only argv bridge uses a dedicated virtio channel; it has no network
 listener. A read-only tools CD provides the guest scripts. No guest disk is
 formatted or installed. The fixture retains Pirwa's normal four-vCPU, 4096 MiB,
 16 GiB, KVM/UEFI/software-SPICE defaults.
+`--memory-mb` can select 2048–8192 MiB for the disposable fixture only; it does
+not change application defaults. Keep that setting identical in paired trials.
 
 ## Results — 2026-11-14
 
@@ -123,6 +155,17 @@ Use a fresh output directory. The explicit host-session socket avoids opening a
 different libvirt session beneath the private runtime. Adjust the socket for the
 host's daemon configuration. Use `3840x2160@60` and `--expect-size 3840x2160` for
 4K. Actual primary dimensions are checked; suspended or resizing trials fail.
+Before creating its output or any guest resources, the runner requires
+`MemAvailable` to cover the selected guest RAM plus 1024 MiB of host headroom.
+This check runs inside the private desktop. It prevents starting the fixture
+when the host is already short of memory; it does not reserve memory or guarantee
+that later pressure cannot occur. Per-trial pressure records still need review.
+Use `--modes full,small` to focus a follow-up, or `--modes full` for a diagnostic.
+`--setup-seconds 45` allows a slow live welcome screen to settle before setup
+input (5 seconds by default, permitted range 5–60). This wait is outside sampling.
+New trials record host CPU, memory and I/O pressure before/after sampling so
+host stalls can be distinguished from renderer work. Loaded-host results need
+separate interpretation and do not replace the historical dataset above.
 
 The runner creates a random `pirwa-qa-UUID` guest and pool, then stops/removes its
 fixture and verifies that the domain, volume and pool are absent. Reports include
@@ -145,6 +188,10 @@ Trace dense 4K paint-time spikes and correlate them with tile count, compaction,
 SPICE decode and GPU submission. Compare a bounded/adaptive dense-update path
 and native accelerated scanout while preserving sparse-update gains. Broader
 application workloads and physical presentation remain release gates.
+The [dense-console follow-up](../dense-console-performance/README.md) records
+the packed RGB copy change, per-frame counters and rejected tuning experiments.
+The [rounded renderer follow-up](../renderer-memory/README.md) records the
+direct-clip comparison and subsequent compositor-feedback validation.
 
 ## Acceptance limits
 

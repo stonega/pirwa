@@ -1,0 +1,69 @@
+--- a/tests/benchmark-console.c
++++ b/tests/benchmark-console.c
+@@ -13,0 +14,2 @@
++  guint64 full_copies, tile_copies, compactions, texture_appends, previous_texture_appends;
++  gint64 copy_cpu_us;
+@@ -25,0 +28,3 @@
++static guint64 full_before_paint, tiles_before_paint, compactions_before_paint;
++static guint64 compactions, texture_appends, appends_before_paint, previous_appends;
++static gint64 copy_cpu_before_paint;
+@@ -30,0 +36 @@
++static gboolean tiles_cached;
+@@ -75,0 +82,10 @@
++void __real_gtk_snapshot_append_texture (GtkSnapshot *, GdkTexture *, const graphene_rect_t *);
++
++void
++__wrap_gtk_snapshot_append_texture (GtkSnapshot *snapshot, GdkTexture *texture,
++                                    const graphene_rect_t *bounds)
++{
++  if (measuring)
++    texture_appends++;
++  __real_gtk_snapshot_append_texture (snapshot, texture, bounds);
++}
+@@ -146,0 +163,2 @@
++      if (tiles_cached)
++        compactions++;
+@@ -149,0 +168,2 @@
++  if (texture)
++    tiles_cached = FALSE;
+@@ -164,0 +185,2 @@
++  if (texture)
++    tiles_cached = TRUE;
+@@ -175,0 +198,5 @@
++  full_before_paint = full_copies;
++  tiles_before_paint = tile_copies;
++  compactions_before_paint = compactions;
++  appends_before_paint = texture_appends;
++  copy_cpu_before_paint = copy_cpu_us;
+@@ -186,2 +213,10 @@
+-  Frame frame = { now - paint_start, cpu_time (CLOCK_THREAD_CPUTIME_ID) - paint_cpu_start,
+-                  first_damage ? now - first_damage : 0 };
++  Frame frame = { .wall_us = now - paint_start,
++                  .cpu_us = cpu_time (CLOCK_THREAD_CPUTIME_ID) - paint_cpu_start,
++                  .damage_to_paint_us = first_damage ? now - first_damage : 0,
++                  .full_copies = full_copies - full_before_paint,
++                  .tile_copies = tile_copies - tiles_before_paint,
++                  .compactions = compactions - compactions_before_paint,
++                  .texture_appends = texture_appends - appends_before_paint,
++                  .previous_texture_appends = previous_appends,
++                  .copy_cpu_us = copy_cpu_us - copy_cpu_before_paint };
++  previous_appends = frame.texture_appends;
+@@ -221,3 +256,8 @@
+-      g_string_append_printf (
+-          json, "%s[%" G_GINT64_FORMAT ",%" G_GINT64_FORMAT ",%" G_GINT64_FORMAT "]", i ? "," : "",
+-          frame->wall_us, frame->cpu_us, frame->damage_to_paint_us);
++      g_string_append_printf (json,
++                              "%s[%" G_GINT64_FORMAT ",%" G_GINT64_FORMAT ",%" G_GINT64_FORMAT
++                              ",%" G_GUINT64_FORMAT ",%" G_GUINT64_FORMAT ",%" G_GUINT64_FORMAT
++                              ",%" G_GUINT64_FORMAT ",%" G_GUINT64_FORMAT ",%" G_GINT64_FORMAT "]",
++                              i ? "," : "", frame->wall_us, frame->cpu_us,
++                              frame->damage_to_paint_us, frame->full_copies, frame->tile_copies,
++                              frame->compactions, frame->texture_appends,
++                              frame->previous_texture_appends, frame->copy_cpu_us);
+@@ -256,0 +297 @@
++      compactions = texture_appends = previous_appends = 0;
+--- a/tests/meson.build
++++ b/tests/meson.build
+@@ -49 +49 @@
+-    '-Wl,--wrap=pirwa_frame_texture_rect'])
++    '-Wl,--wrap=pirwa_frame_texture_rect', '-Wl,--wrap=gtk_snapshot_append_texture'])

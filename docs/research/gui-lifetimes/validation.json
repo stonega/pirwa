@@ -1,0 +1,1478 @@
+{
+  "recorded_utc": "2026-11-16T08:30:49.871450+00:00",
+  "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+  "source_dirty": true,
+  "application_id": "io.github.pirwa.Pirwa",
+  "scope": "Private virtual GNOME, synthetic libvirt test driver; no existing guest mutations",
+  "settings_fix": {
+    "old_code_fails_deterministically": true,
+    "pre_fix_result": {
+      "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+      "source_dirty": true,
+      "gnome_shell": "GNOME Shell 51.1",
+      "shell_command": [
+        "gnome-shell",
+        "--headless",
+        "--wayland",
+        "--no-x11",
+        "--virtual-monitor",
+        "1280x800@60",
+        "--wayland-display",
+        "pirwa-qa-wayland"
+      ],
+      "display_kind": "virtual",
+      "graphics_environment": {},
+      "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
+      "scope": "Custom command with isolated session state; inspect the command's own results",
+      "repetitions": 1,
+      "cases": [
+        {
+          "name": "command",
+          "command": [
+            "env",
+            "GSK_RENDERER=cairo",
+            "./build-gui-review/tests/test-ui-lifetime",
+            "--cycles",
+            "1"
+          ],
+          "returncode": -6,
+          "elapsed_seconds": 20.65
+        }
+      ],
+      "passed": false,
+      "error": "command failed (-6); see /home/stone/Gnome/pirwa/build/qa/gui-edit-before-20261116",
+      "shell_exitcode": 0
+    },
+    "pre_fix_source_sha256": "7c45f93604eb5993219fb3da8c9020a6754ea81e43d15a9390f00f0883579aa8",
+    "pre_fix_fixture_sha256": "68d6c2a16108a4027fff13c05bb50428438ee98a2ab91c2a73b892a286ba2355",
+    "pre_fix_binary_sha256": "745a8304d052c19e3d74f8a1802a3c21beadffe8919fdde0d519724b206b3016",
+    "fixed_source_sha256": "7c45e6d70f54d3e9cefef79d6e5a5aab26ccf1df69796a592956e96c369f54f0",
+    "fixed_fixture_sha256": "58206764ca3ce519c3e1afc783dc92143fae66a4199488cd0f25cdb994f7f99f",
+    "connection_switch_to_same_uuid_independently_tested": false
+  },
+  "ownership": [
+    {
+      "variant": "normal",
+      "returncode": 0,
+      "graphics_environment": {},
+      "objects": {
+        "cycles": 32,
+        "held_reference_control": true,
+        "edit_refreshes": 16,
+        "edit_invalidations": 16,
+        "objects": [
+          {
+            "type": "GSettings",
+            "created": 96,
+            "finalized": 96
+          },
+          {
+            "type": "PirwaWindow",
+            "created": 32,
+            "finalized": 32
+          },
+          {
+            "type": "PirwaBackend",
+            "created": 64,
+            "finalized": 64
+          },
+          {
+            "type": "PirwaMachine",
+            "created": 64,
+            "finalized": 64
+          },
+          {
+            "type": "PirwaDisplay",
+            "created": 32,
+            "finalized": 32
+          },
+          {
+            "type": "PirwaConsole",
+            "created": 32,
+            "finalized": 32
+          },
+          {
+            "type": "SpiceSession",
+            "created": 32,
+            "finalized": 32
+          },
+          {
+            "type": "SpiceGstaudio",
+            "created": 32,
+            "finalized": 32
+          },
+          {
+            "type": "SpiceMainChannel",
+            "created": 32,
+            "finalized": 32
+          },
+          {
+            "type": "GtkSingleSelection",
+            "created": 32,
+            "finalized": 32
+          },
+          {
+            "type": "GtkFilterListModel",
+            "created": 32,
+            "finalized": 32
+          },
+          {
+            "type": "GtkCustomFilter",
+            "created": 32,
+            "finalized": 32
+          },
+          {
+            "type": "GListStore",
+            "created": 32,
+            "finalized": 32
+          },
+          {
+            "type": "AdwPreferencesDialog",
+            "created": 32,
+            "finalized": 32
+          },
+          {
+            "type": "PirwaCreateDialog",
+            "created": 32,
+            "finalized": 32
+          },
+          {
+            "type": "AdwDialog",
+            "created": 16,
+            "finalized": 16
+          },
+          {
+            "type": "AdwWindow",
+            "created": 16,
+            "finalized": 16
+          }
+        ]
+      }
+    },
+    {
+      "variant": "sanitizer",
+      "returncode": 0,
+      "graphics_environment": {
+        "VK_DRIVER_FILES": "/usr/share/vulkan/icd.d/intel_icd.x86_64.json"
+      },
+      "objects": {
+        "cycles": 32,
+        "held_reference_control": true,
+        "edit_refreshes": 16,
+        "edit_invalidations": 16,
+        "objects": [
+          {
+            "type": "GSettings",
+            "created": 96,
+            "finalized": 96
+          },
+          {
+            "type": "PirwaWindow",
+            "created": 32,
+            "finalized": 32
+          },
+          {
+            "type": "PirwaBackend",
+            "created": 64,
+            "finalized": 64
+          },
+          {
+            "type": "PirwaMachine",
+            "created": 64,
+            "finalized": 64
+          },
+          {
+            "type": "PirwaDisplay",
+            "created": 32,
+            "finalized": 32
+          },
+          {
+            "type": "PirwaConsole",
+            "created": 32,
+            "finalized": 32
+          },
+          {
+            "type": "SpiceSession",
+            "created": 32,
+            "finalized": 32
+          },
+          {
+            "type": "SpiceGstaudio",
+            "created": 32,
+            "finalized": 32
+          },
+          {
+            "type": "SpiceMainChannel",
+            "created": 32,
+            "finalized": 32
+          },
+          {
+            "type": "GtkSingleSelection",
+            "created": 32,
+            "finalized": 32
+          },
+          {
+            "type": "GtkFilterListModel",
+            "created": 32,
+            "finalized": 32
+          },
+          {
+            "type": "GtkCustomFilter",
+            "created": 32,
+            "finalized": 32
+          },
+          {
+            "type": "GListStore",
+            "created": 32,
+            "finalized": 32
+          },
+          {
+            "type": "AdwPreferencesDialog",
+            "created": 32,
+            "finalized": 32
+          },
+          {
+            "type": "PirwaCreateDialog",
+            "created": 32,
+            "finalized": 32
+          },
+          {
+            "type": "AdwDialog",
+            "created": 16,
+            "finalized": 16
+          },
+          {
+            "type": "AdwWindow",
+            "created": 16,
+            "finalized": 16
+          }
+        ]
+      }
+    }
+  ],
+  "pinned_input_manifest": {
+    "pinned/normal/test-ui-lifetime": "61fd2ec90866c3cf4db0c7914b803d4de0066e6dc5ee432f442aadab0dcb5a15",
+    "pinned/normal/gschemas.compiled": "05ebdd45e462f49348268c515ba11ab07e5316b2ddff9e7cbc0bfafe403bff15",
+    "pinned/sanitizer/test-ui-lifetime": "1df3d3ff2feede64446288d0c9f20742d8a11c8c1ade24f67dedfe4ab2e48969",
+    "pinned/sanitizer/gschemas.compiled": "05ebdd45e462f49348268c515ba11ab07e5316b2ddff9e7cbc0bfafe403bff15",
+    "source/src/pirwa-machine.c": "3874c8c27e9c3fd88dd69731c592a5bc3ed6297b20c9f77d77e76a3028abd902",
+    "source/src/pirwa-inventory.h": "549ebabd3a04fd381185deab06978055d622e6fd39bbac54b5b2c6caa0a9b804",
+    "source/src/pirwa-config.h": "bed38f80afd86996d5544a9907a2b48d47f1947642dea1d14d6db9807624e5a8",
+    "source/src/main.c": "3a92167e52b73db67ad8a703a9804a60a07df783ff983bb51b76571448863654",
+    "source/src/pirwa-backend.h": "9ea1592f45acf8c38db157e4210df860905b01cbbcd59221cc6ad7d67abb1db2",
+    "source/src/pirwa-machine.h": "c0dfaa631ef74fb163cab05b6e22cc25dd9792bd8817ddf89d45a7a245ce8411",
+    "source/src/pirwa-provision.h": "d9826cc3f48dcc1926820dfd7b98d9af4edc02353c32821d3cd64ac2975aceb0",
+    "source/src/pirwa-model.c": "2383ab0620a507c297e53ee715f625acd1abeeda932e0bc22db8e6e0ea61f94d",
+    "source/src/pirwa-model.h": "919dd6fcf72c86780c1c442063e18bc67eef0a8c6009d9cdaa1927bea90888d3",
+    "source/src/pirwa-boxes-dialog.h": "36fccca7274066a9289a608fdf6140cabebfdc3a36c4221af4fb0c243aca20a0",
+    "source/src/pirwa-window.h": "e764cbd1307547c74b4624a36e3a8ade1c9c9b3519faab973704c27dfeb8a496",
+    "source/src/pirwa-display.h": "7181f67d78751f0ba01ad6d491956ab1c74f8f6c366e827ce35ed6607fc6d142",
+    "source/src/pirwa-inventory.c": "e7c5e88bbd6aab26e98eef025fce6176625bddbae5a8f9bc58903c243106d36c",
+    "source/src/pirwa-console.h": "b0470c77756effb734fefc50799611ca698594b118d0b5bfe92c2d991c61f3f4",
+    "source/src/pirwa-usage.h": "4d863f2a0820d8867da38f6aff543f1f254fb4042cbd19b425dd22fb342d0550",
+    "source/src/pirwa-import.h": "fb30f61bcc10da9f8ac6c52da04024e29cd731533cc95ca37b4b9963ee88b81c",
+    "source/src/pirwa-boxes.c": "85f1fb16574bc57116363386388c41aa57586f03e2249398d51ecb68cb3bb160",
+    "source/src/pirwa-boxes.h": "e2ec79c2abb0d0f2bf9063fa0f66cde6ffdf235b5d3e00ca3d308647509085f7",
+    "source/src/pirwa-boxes-dialog.c": "f9bd14d2c88739d4b6b78f54e9e75a4f73ffdec9427f7f3bfbba428d2e463b9b",
+    "source/src/pirwa-import.c": "a6eb59558365a28764fce3f42b8e00cb160430ddfafabe366191ba2767be1fcd",
+    "source/src/pirwa-usage.c": "9199e3dcf56d5f61044d3ddf58a1ee856225128deb6adc9981ca6c93bfbd43d1",
+    "source/src/pirwa-libvirt.h": "6b20112325bc4afcda34654d4cc1c5ac9e2529045a7f1b7c004cac495120f739",
+    "source/src/pirwa-display.c": "b8c36fcee44e615a6bf3010ef4bcd63335d79d40c4e1c0c533f387f52b369038",
+    "source/src/pirwa-frame.c": "83863d6d451cbe76cc00c7a5290fd47cb6cf121c12e96e0a8de9c726ac10f7ea",
+    "source/src/pirwa-frame.h": "18155860a3a25564fd34d57f4888f12480a4219addf8b777f0d1fea977c20130",
+    "source/src/pirwa-create-dialog.h": "328f3a338adee425c41087a9abaf91d8d17d28e9e567ceff1326757c7ec80f7e",
+    "source/src/pirwa-create-dialog.c": "c28b3e9e955d39744264f5a181432e657ae32bcf37f1405160c88743ddd967a5",
+    "source/src/pirwa-preferences.h": "33f6a010dcdc533d7a3ce7ced90cd3214a51aed77e3dece668a3e234a00a7ec3",
+    "source/src/pirwa-config.c": "5c43a3739737615642ea8bb7791f63e5d8a4a8bfd4363f7b083949c8cdf26fa2",
+    "source/src/pirwa-backend.c": "d797faf0f63582b2671152fcc2e7f7369f965ad62a9950aaef853fc6b7ae8a97",
+    "source/src/pirwa-console.c": "01121b5b30728ec5c5000bd633e67c7dcc4571a2d9889a27478aff3a1af49e00",
+    "source/src/pirwa-proxy.h": "d72d07d950ac9ab2912112c98152ce9abfb42b107321e44314eb5cb35d7a11e5",
+    "source/src/pirwa-network.h": "e837b3f579d6c815bb38e105743d47b1c8ef46d4077d29c2478be48ca62310c2",
+    "source/src/pirwa-gateway.c": "89e1952f56c1c241811e75b108da74fc7a0d285809089f5629534436a225c3d3",
+    "source/src/pirwa-provision.c": "765e41dd0b8c697a30293b9b3e1ad73e9c8d1ae188687c8d8ec788dc0f2e8e58",
+    "source/src/pirwa-proxy.c": "09e5fd424793239096025092ad9ccc6077ce058b0aa911916bf131ddd7310454",
+    "source/src/pirwa-preferences.c": "ad10c87316e0a143e657f086cf3bb0fb5456bc3591384a359c5626ed595058da",
+    "source/src/pirwa-window.c": "7c45e6d70f54d3e9cefef79d6e5a5aab26ccf1df69796a592956e96c369f54f0",
+    "source/src/pirwa-network.c": "7ba491dbcd4eb8a087d80b91ae0026a853c7eb666741103415a4b768e4cbfc25",
+    "source/tests/benchmark-inventory.c": "187e446c0bd7b184396a60c7830b5b92028ded725091150e1565381ff24c4158",
+    "source/tests/benchmark-scale.c": "d7345715ef35257b7dd12af6115683500ff30e2b0ec6d765ee216591a54ff174",
+    "source/tests/test-kvm.c": "e524138f927e2b42cbf6ed24a4d2e467244d7daca022f03a7fc72b8c80ef6199",
+    "source/tests/test-model.c": "a8d92778c34ac6745d3146b4495549a47d517fcd4a4b55ce94dd6c5c921f8499",
+    "source/tests/test-provision.c": "77be4030d3b65c0b83a25e970a666734975a7cb34cf8e81c1720fd9f6c5ca3da",
+    "source/tests/qa-vm.c": "6a1bae787822df50eed08f37bcefde1d09a73c43a45755a21b983f8ddbc941e7",
+    "source/tests/test-inventory.c": "8b67c8e326bdaac3ddd68ecbd9f148a8adbf1f42cd6c34534a7857a2447a6bef",
+    "source/tests/test-usage.c": "b685a264cff9aa4f525526352caa2278dd163c0f147f7add16799dfaf96f037d",
+    "source/tests/test-boxes.c": "b019b900409e0dce89ddff52b3c3b0efa27149117ee6e01a448ff16c53e432e5",
+    "source/tests/test-import.c": "14faaf8c796e65ca21053fc9f93b2e88b09c40d606b6011a4098bf31c948a62c",
+    "source/tests/benchmark-console.c": "8e720a9c35e4da9d4cb0bcbeb0ea04d1ec02d976bbec69cd253b914674512633",
+    "source/tests/test-frame.c": "dca02ed66e4879645c219a2bae0557d35025f76f4d7c22ea461837cdbef78e6d",
+    "source/tests/benchmark-frame.c": "14268f5c4911036bcf4cde0ae6b8de03e265cfae30e67c884dabd2c0bab9aba8",
+    "source/tests/test-console-connect.c": "a1d2952345c1f94b7add81ef2690469e1b750a66bc573063cfea0a96835c5675",
+    "source/tests/benchmark-display-memory.c": "2709b3c1114664f8f0f5a2722e6abc2d45cbd1a1a22ae62265b53ba75d5da531",
+    "source/tests/benchmark-display.c": "d28a82d3a725664a7caba583ca7be8083245e065c836565dcfebcccf07605bff",
+    "source/tests/qa-frame-feedback.h": "556fb4c8c7f9c39bbbbc8da66b1b6bc826dd62eb3e2d39ae764496f335dc5c71",
+    "source/tests/qa-frame-feedback.c": "c9526c202fa1231cd4afe9c02d7b3d65cbefe807f6c4abd4ee8ca8404dc3a03c",
+    "source/tests/test-preferences.c": "b6032dd753f40249a4872dc63274fd466f4cd283e75d90ae9a7c6740b585864b",
+    "source/tests/test-create-ui.c": "a4028538b1586ba25a7f43cbddcf34c39bc7febc944495f6eb24002e4c5a4493",
+    "source/tests/test-backend-faults.c": "eb116e85f5b055a50faa5edba893fc3156492d0ca7d09d5de314ba8c0a959f2e",
+    "source/tests/test-backend.c": "bae5f138f9ed901084faecfa83c3d4f7b57a53ff7cffb251ad366f80aa467467",
+    "source/tests/test-config.c": "40d7bc2b21bec93083a04c1c4f2a036c95a234a5f2e73c66d165a0665324a5e3",
+    "source/tests/qa-guest-init.c": "c8cbf910a89c96f5a14b5422ec3cdd2a26581c282dbb2c77a45c9a3a62ccdd50",
+    "source/tests/test-backend-daemon.c": "e29bf0ccf2828368d82b40150540ea6c19e287b87a2de971ec4a34559a07abcc",
+    "source/tests/test-proxy.c": "2cf9bf18acb70f71573c66d1a7eea3f68173abe4bb3d30ef5ce6464b532e7ba7",
+    "source/tests/test-ui.c": "28626df08f55d1741443c76efd6af56bd71710299cc0eb8909bb4d43529232ab",
+    "source/tests/qa-application-profile.c": "7f5a00f543c616da67f844c78c4d74d80dc43b8940a1cdbd4d0bf0b55349cbcf",
+    "source/tests/test-backend-lifetime.c": "e825aa42eee6b081473be2804a57b26d251cfa0b847b729425aeda9b800b0680",
+    "source/tests/test-network.c": "80dfa9f6454b04b7a0bac77510cc02e88f02e94684c205285ab351da92c6a2e5",
+    "source/tests/test-network-start.c": "709f473ad7f1e54f3cfabf8f92969ce929c0d5b00e55b1e56aabb6412dcdd72a",
+    "source/tests/test-console-ui.c": "4cdfa0ea2fc27e603f45cf8879d2cfc2b5d28ac69a3fc2c36a2dfec3034b442d",
+    "source/tests/test-network-ui.c": "43fcf330fc7bfccd0c172b526a80dee14e196c849f0f07ed73caafc47aa79870",
+    "source/tests/test-ui-lifetime.c": "58206764ca3ce519c3e1afc783dc92143fae66a4199488cd0f25cdb994f7f99f",
+    "source/tests/meson.build": "972549e06c702e7a052c72872cf2d51cbffcb91e239a3d8365f383b76bfacb14",
+    "source/meson.build": "e89f6384f5657f52b3ef90b71802e46b9c31d0ec80800c79d2b42d7d42946027",
+    "source/src/meson.build": "d1047bf37babfb3beec873aca78b31a846cb64e162936b557cb30b9dd6c3870d",
+    "source/scripts/test-gnome.py": "0589c05140af66751c9ad9562a8f11c8b0029839e235b79cc922e54889458b78",
+    "source/data/io.github.pirwa.Pirwa.gschema.xml": "93b89b15fff231b637bfd5c9ca72b4c782c96fcf56a448e220d0a397f72629b0"
+  },
+  "pinned_source_drift_at_recording": [],
+  "desktop_matrices": {
+    "normal": {
+      "passed": true,
+      "cases": 10,
+      "graphics_environment": {}
+    },
+    "sanitizer": {
+      "passed": true,
+      "cases": 10,
+      "graphics_environment": {
+        "VK_DRIVER_FILES": "/usr/share/vulkan/icd.d/intel_icd.x86_64.json"
+      }
+    }
+  },
+  "headless": {
+    "normal": [
+      {
+        "name": "pirwa:desktop-file",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.06427645683288574
+      },
+      {
+        "name": "pirwa:appstream",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.06172037124633789
+      },
+      {
+        "name": "pirwa:usage",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.04813551902770996
+      },
+      {
+        "name": "pirwa:config",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.04422497749328613
+      },
+      {
+        "name": "pirwa:model",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.03576803207397461
+      },
+      {
+        "name": "pirwa:boxes",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.033626556396484375
+      },
+      {
+        "name": "pirwa:preferences",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.025365829467773438
+      },
+      {
+        "name": "pirwa:proxy-settings",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.023572921752929688
+      },
+      {
+        "name": "pirwa:backend",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.06054115295410156
+      },
+      {
+        "name": "pirwa:provision",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.04138684272766113
+      },
+      {
+        "name": "pirwa:backend-lifetime",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.057874441146850586
+      },
+      {
+        "name": "pirwa:network-definition",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.024853944778442383
+      },
+      {
+        "name": "pirwa:boxes-import",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.03631901741027832
+      },
+      {
+        "name": "pirwa:console-frame",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.04352736473083496
+      },
+      {
+        "name": "pirwa:network-start",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.04445958137512207
+      },
+      {
+        "name": "pirwa:ui-profile-guards",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.10218381881713867
+      },
+      {
+        "name": "pirwa:inventory",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.16796326637268066
+      },
+      {
+        "name": "pirwa:backend-faults",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.1890397071838379
+      },
+      {
+        "name": "pirwa:scale-1000",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.3309032917022705
+      },
+      {
+        "name": "pirwa:network-gateway",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 2.55265212059021
+      }
+    ],
+    "sanitizer": [
+      {
+        "name": "pirwa:desktop-file",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.09258651733398438
+      },
+      {
+        "name": "pirwa:appstream",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.0904989242553711
+      },
+      {
+        "name": "pirwa:usage",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.07264423370361328
+      },
+      {
+        "name": "pirwa:config",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.06986498832702637
+      },
+      {
+        "name": "pirwa:model",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.06021761894226074
+      },
+      {
+        "name": "pirwa:preferences",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.04584312438964844
+      },
+      {
+        "name": "pirwa:proxy-settings",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.04330921173095703
+      },
+      {
+        "name": "pirwa:console-frame",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.0569911003112793
+      },
+      {
+        "name": "pirwa:ui-profile-guards",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.1551046371459961
+      },
+      {
+        "name": "pirwa:boxes",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.27211451530456543
+      },
+      {
+        "name": "pirwa:network-definition",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.2662680149078369
+      },
+      {
+        "name": "pirwa:provision",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.3027505874633789
+      },
+      {
+        "name": "pirwa:backend",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.3762524127960205
+      },
+      {
+        "name": "pirwa:boxes-import",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.38327598571777344
+      },
+      {
+        "name": "pirwa:network-start",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.4605674743652344
+      },
+      {
+        "name": "pirwa:backend-lifetime",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.5117714405059814
+      },
+      {
+        "name": "pirwa:inventory",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.9518001079559326
+      },
+      {
+        "name": "pirwa:backend-faults",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 1.288628101348877
+      },
+      {
+        "name": "pirwa:scale-1000",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 1.7758052349090576
+      },
+      {
+        "name": "pirwa:network-gateway",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 2.6464810371398926
+      }
+    ]
+  },
+  "build_options": {
+    "normal": {
+      "buildtype": "debugoptimized",
+      "werror": true,
+      "pkg_config_path": [
+        "/home/stone/Gnome/pirwa/.cache/dev-sdk/usr/lib64/pkgconfig",
+        "/home/stone/Gnome/pirwa/.cache/dev-sdk/usr/share/pkgconfig"
+      ],
+      "b_sanitize": [],
+      "b_lundef": true,
+      "c_args": [],
+      "c_link_args": []
+    },
+    "sanitizer": {
+      "buildtype": "debugoptimized",
+      "werror": true,
+      "pkg_config_path": [
+        "/home/stone/Gnome/pirwa/.cache/dev-sdk/usr/lib64/pkgconfig",
+        "/home/stone/Gnome/pirwa/.cache/dev-sdk/usr/share/pkgconfig"
+      ],
+      "b_sanitize": [
+        "address",
+        "undefined"
+      ],
+      "b_lundef": false,
+      "c_args": [],
+      "c_link_args": [
+        "-L/home/stone/Gnome/pirwa/.cache/dev-sdk/usr/lib64"
+      ]
+    }
+  },
+  "execution_environment": {
+    "loader_path": "/home/stone/Gnome/pirwa/.cache/dev-sdk/usr/lib64",
+    "headless_ASAN_OPTIONS": "detect_leaks=1",
+    "desktop_ownership_ASAN_OPTIONS": "detect_leaks=0",
+    "heap_ASAN_OPTIONS": "detect_leaks=1",
+    "LSAN_OPTIONS": "suppressions=/home/stone/Gnome/pirwa/tests/lsan.supp:print_suppressions=1",
+    "DEBUGINFOD_URLS": "",
+    "heap_GSK_RENDERER": "cairo"
+  },
+  "heap_acceptance": "OPEN: expected nonzero processes retained; diagnostic runner success does not mean leak-free",
+  "heap_results": [
+    {
+      "cycles": 1,
+      "process_returncode": 1,
+      "summary": [
+        "SUMMARY: AddressSanitizer: 422576 byte(s) leaked in 11428 allocation(s)."
+      ],
+      "allocation_stacks": {
+        "fontconfig": {
+          "bytes": 422320,
+          "allocations": 11424
+        },
+        "gtk_color": {
+          "bytes": 256,
+          "allocations": 4
+        }
+      },
+      "all_observed_objects_finalized": true,
+      "edit_refreshes": 1,
+      "edit_invalidations": 1
+    },
+    {
+      "cycles": 8,
+      "process_returncode": 1,
+      "summary": [
+        "SUMMARY: AddressSanitizer: 424368 byte(s) leaked in 11456 allocation(s)."
+      ],
+      "allocation_stacks": {
+        "fontconfig": {
+          "bytes": 422320,
+          "allocations": 11424
+        },
+        "gtk_color": {
+          "bytes": 2048,
+          "allocations": 32
+        }
+      },
+      "all_observed_objects_finalized": true,
+      "edit_refreshes": 4,
+      "edit_invalidations": 4
+    },
+    {
+      "cycles": 32,
+      "process_returncode": 1,
+      "summary": [
+        "SUMMARY: AddressSanitizer: 430512 byte(s) leaked in 11552 allocation(s)."
+      ],
+      "allocation_stacks": {
+        "fontconfig": {
+          "bytes": 422320,
+          "allocations": 11424
+        },
+        "gtk_color": {
+          "bytes": 8192,
+          "allocations": 128
+        }
+      },
+      "all_observed_objects_finalized": true,
+      "edit_refreshes": 16,
+      "edit_invalidations": 16
+    }
+  ],
+  "independent_controls": {
+    "gtk_and_pirwa": [
+      {
+        "case": "gtk-default",
+        "command": [
+          "/home/stone/Gnome/pirwa/build/qa/leak-assessment-20261116/gtk-sanitize"
+        ],
+        "returncode": 1,
+        "summary": [
+          "SUMMARY: AddressSanitizer: 306347 byte(s) leaked in 7038 allocation(s)."
+        ]
+      },
+      {
+        "case": "pirwa-default",
+        "command": [
+          "/home/stone/Gnome/pirwa/build-release-review/tests/test-ui",
+          "--exercise"
+        ],
+        "returncode": 1,
+        "summary": [
+          "SUMMARY: AddressSanitizer: 423420 byte(s) leaked in 11444 allocation(s)."
+        ]
+      },
+      {
+        "case": "gtk-unaligned",
+        "command": [
+          "/home/stone/Gnome/pirwa/build/qa/leak-assessment-20261116/gtk-sanitize"
+        ],
+        "returncode": 1,
+        "summary": [
+          "SUMMARY: AddressSanitizer: 306347 byte(s) leaked in 7038 allocation(s)."
+        ]
+      },
+      {
+        "case": "pirwa-unaligned",
+        "command": [
+          "/home/stone/Gnome/pirwa/build-release-review/tests/test-ui",
+          "--exercise"
+        ],
+        "returncode": 1,
+        "summary": [
+          "SUMMARY: AddressSanitizer: 423420 byte(s) leaked in 11444 allocation(s)."
+        ]
+      }
+    ],
+    "gtk_accent": [
+      {
+        "cycles": 1,
+        "returncode": 1,
+        "summary": [
+          "SUMMARY: AddressSanitizer: 306407 byte(s) leaked in 7039 allocation(s)."
+        ],
+        "css": [
+          "Direct leak of 64 byte(s) in 1 object(s) allocated from:"
+        ]
+      },
+      {
+        "cycles": 32,
+        "returncode": 1,
+        "summary": [
+          "SUMMARY: AddressSanitizer: 308391 byte(s) leaked in 7070 allocation(s)."
+        ],
+        "css": [
+          "Direct leak of 2048 byte(s) in 32 object(s) allocated from:"
+        ]
+      }
+    ]
+  },
+  "dependency_versions": {
+    "gtk4": "4.24.1",
+    "libadwaita": "1.10.0",
+    "pango": "1.58.2",
+    "fontconfig": "2.18.3",
+    "gnome_shell": "51.1"
+  },
+  "gtk_sources": {
+    "installed_tag": "4.24.1",
+    "upstream_main_inspected": "278eeda31489417a425b7767ab191b3853f90d00",
+    "stable_branch_inspected": "aa434607ee6ae1076a082ec27d576f815a6d4b74",
+    "fixed_binary_tested": false,
+    "urls": [
+      "https://github.com/GNOME/gtk/blob/4.24.1/gtk/gtksettings.c#L999",
+      "https://github.com/GNOME/gtk/blob/4.24.1/gtk/gtkcsscolorvalue.c#L679",
+      "https://github.com/GNOME/gtk/blob/278eeda31489417a425b7767ab191b3853f90d00/gtk/gtksettings.c#L997"
+    ]
+  },
+  "clean_native": {
+    "passed": true,
+    "rootless": true,
+    "network_during_checks": "none",
+    "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+    "source_dirty": true,
+    "image_id": "e6441e8a7ebc287a3e4216344c4ac645d86b1960888914853c0448dff20e75b9",
+    "rpm_requested": true,
+    "last_stage": "complete",
+    "headless": {
+      "normal": [
+        {
+          "name": "pirwa:desktop-file",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.24593806266784668
+        },
+        {
+          "name": "pirwa:appstream",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.23978853225708008
+        },
+        {
+          "name": "pirwa:usage",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.21954035758972168
+        },
+        {
+          "name": "pirwa:config",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.21631526947021484
+        },
+        {
+          "name": "pirwa:model",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.20316290855407715
+        },
+        {
+          "name": "pirwa:preferences",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.18976044654846191
+        },
+        {
+          "name": "pirwa:proxy-settings",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.18659591674804688
+        },
+        {
+          "name": "pirwa:provision",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.2063429355621338
+        },
+        {
+          "name": "pirwa:backend",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.23817181587219238
+        },
+        {
+          "name": "pirwa:boxes",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.2083287239074707
+        },
+        {
+          "name": "pirwa:backend-lifetime",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.23257851600646973
+        },
+        {
+          "name": "pirwa:network-definition",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.20062637329101562
+        },
+        {
+          "name": "pirwa:console-frame",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.30133056640625
+        },
+        {
+          "name": "pirwa:boxes-import",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.30621862411499023
+        },
+        {
+          "name": "pirwa:network-start",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.31487131118774414
+        },
+        {
+          "name": "pirwa:ui-profile-guards",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.5274946689605713
+        },
+        {
+          "name": "pirwa:backend-faults",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.7417654991149902
+        },
+        {
+          "name": "pirwa:inventory",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.7717399597167969
+        },
+        {
+          "name": "pirwa:scale-1000",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.8815526962280273
+        },
+        {
+          "name": "pirwa:network-gateway",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 2.9815452098846436
+        }
+      ],
+      "sanitizer": [
+        {
+          "name": "pirwa:desktop-file",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.368605375289917
+        },
+        {
+          "name": "pirwa:appstream",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.45386528968811035
+        },
+        {
+          "name": "pirwa:usage",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.4410390853881836
+        },
+        {
+          "name": "pirwa:config",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.4394221305847168
+        },
+        {
+          "name": "pirwa:model",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.43198418617248535
+        },
+        {
+          "name": "pirwa:preferences",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.389786958694458
+        },
+        {
+          "name": "pirwa:proxy-settings",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.2963390350341797
+        },
+        {
+          "name": "pirwa:console-frame",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.4057307243347168
+        },
+        {
+          "name": "pirwa:ui-profile-guards",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 1.002638816833496
+        },
+        {
+          "name": "pirwa:boxes",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 1.6348206996917725
+        },
+        {
+          "name": "pirwa:network-definition",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 1.6025052070617676
+        },
+        {
+          "name": "pirwa:provision",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 1.7526917457580566
+        },
+        {
+          "name": "pirwa:backend",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 2.0620555877685547
+        },
+        {
+          "name": "pirwa:boxes-import",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 2.2384748458862305
+        },
+        {
+          "name": "pirwa:network-start",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 2.2968366146087646
+        },
+        {
+          "name": "pirwa:backend-lifetime",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 2.569485664367676
+        },
+        {
+          "name": "pirwa:inventory",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 2.998955726623535
+        },
+        {
+          "name": "pirwa:backend-faults",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 3.5209009647369385
+        },
+        {
+          "name": "pirwa:scale-1000",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 4.181725978851318
+        },
+        {
+          "name": "pirwa:network-gateway",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 3.9868671894073486
+        }
+      ]
+    },
+    "source_drift_since_snapshot": [
+      "README.md",
+      "docs/design/architecture.md",
+      "docs/release/v0.1.0-readiness.md",
+      "docs/research/gui-lifetimes/README.md"
+    ]
+  },
+  "raw_local_directory": "build/qa/gui-lifetimes-20261116",
+  "clean_native_local_directory": "build/qa/settings-fix-clean-20261116",
+  "source_archive_manifest": {
+    "tested/.clang-format": {
+      "sha256": "5dbf64889919577a7bbe047ebac70f0b1df1c329ec0b3711ffea7f38db224d13"
+    },
+    "tested/.editorconfig": {
+      "sha256": "faf9dd42993b57dd5870dda0deadf47e14ea97529884994a073f8fc58b984d2f"
+    },
+    "tested/.github/workflows/check.yml": {
+      "sha256": "4ae2e39ec4885be32c4b7b5ba1de06109dd552034c183f8595017ff9044b0bd9"
+    },
+    "tested/.gitignore": {
+      "sha256": "5d84442361fb5a72488848d8d8b4975836b02f9f95b45e7e050109dfffe7c558"
+    },
+    "tested/AGENTS.md": {
+      "sha256": "ff7a419e22d9da532bbe9c0f0b9af1a334ed9d84cc6462ef5d12b7e693de3f28"
+    },
+    "tested/COPYING": {
+      "sha256": "fb981668c18a279e285fc4d83fba1e836cc84dd4daa73c9697d3cfd2d8aca6e0"
+    },
+    "tested/README.md": {
+      "sha256": "3383a67d11f920938b2e215d975e14bc536729eae6360a047836d43b66499959"
+    },
+    "tested/data/io.github.pirwa.Pirwa-symbolic.svg": {
+      "sha256": "57b5b9eb43191e414821bb4013dc14871d912aa987a40c371e232dd25b479334"
+    },
+    "tested/data/io.github.pirwa.Pirwa.desktop": {
+      "sha256": "cd20d24fc8c43b40ae5a323467555ead563fee8cb2767cd7daba8393838e86cc"
+    },
+    "tested/data/io.github.pirwa.Pirwa.gschema.xml": {
+      "sha256": "93b89b15fff231b637bfd5c9ca72b4c782c96fcf56a448e220d0a397f72629b0"
+    },
+    "tested/data/io.github.pirwa.Pirwa.metainfo.xml": {
+      "sha256": "599de2f04e6d5755d05e5a66e9a0cf1bfa7dcf018ec7ad11012d46a07c70d3f6"
+    },
+    "tested/data/io.github.pirwa.Pirwa.png": {
+      "sha256": "f3b7ec62227ca8ae201dd6de01519e34b4bf7eb8bc51b2914535f81eaae08029"
+    },
+    "tested/data/io.github.pirwa.Pirwa.svg": {
+      "sha256": "701a485223e1c7fd19a5b9903cb0ac908fba3db3216c102fdbf8541f95cb50c5"
+    },
+    "tested/data/meson.build": {
+      "sha256": "3e79da24aed767ae4c7f601d5f84c94b767f1290f368c2623b93cada5fe36631"
+    },
+    "tested/data/pirwa.gresource.xml": {
+      "sha256": "64877cfe05479d9855eed7d39decd318405b2c26ebc59cbbb40b95eb18d4dd43"
+    },
+    "tested/meson.build": {
+      "sha256": "e89f6384f5657f52b3ef90b71802e46b9c31d0ec80800c79d2b42d7d42946027"
+    },
+    "tested/packaging/Containerfile.qa": {
+      "sha256": "34d85d78c647a454f3955c40e530c52a530e0e75d66ff9417febcaf8329c215b"
+    },
+    "tested/packaging/pirwa.spec": {
+      "sha256": "47bc28028cf5a8b0519f457fd63bc4fa9b54da3be8aa5b08f697d0ac9b0bfbc5"
+    },
+    "tested/po/LINGUAS": {
+      "sha256": "ddeb5b6d9ee9836541a0421310cda30641aab5aae3257c04a472af0186bffded"
+    },
+    "tested/po/POTFILES.in": {
+      "sha256": "662d5ec8599a3bfe2dca197887134ca412d18c0f32825f83a8c5e55888e4da2a"
+    },
+    "tested/po/README.md": {
+      "sha256": "451e1be443d7151fc760fff1a75553cc9fcddf64f7691c95ffe935ca84711051"
+    },
+    "tested/po/meson.build": {
+      "sha256": "8aa419861e006911b355e09defc18f500513487a0dcca0682df5adaa751531f0"
+    },
+    "tested/po/pirwa.pot": {
+      "sha256": "5256cb6a50026281e75654206bf5936fef284f8c106378d33dfbf036f2c44c36"
+    },
+    "tested/scripts/benchmark.sh": {
+      "sha256": "df086197ea91925dce361f5f8fcfb9a86112359d0f18eb04d3f1af0a902444b6"
+    },
+    "tested/scripts/check-clean-build.py": {
+      "sha256": "01ab382c389c2f5554f45fab0301c271540348b1260baa02b2f4f551d61b9e27"
+    },
+    "tested/scripts/check-native-build.sh": {
+      "sha256": "9a45f2b42a56783ca51b01309eb48667139634af19c8b43f29bdf6cce5b66e70"
+    },
+    "tested/scripts/console-session.py": {
+      "sha256": "515e1d5fdb25b6753720e05a15115a0aa09645a061fb41787f5c13c3b958aa61"
+    },
+    "tested/scripts/profile-console.py": {
+      "sha256": "26c36079b4cb30b4b40b04cf51b7bc747eed82c3423103a4178c0149626aa40a"
+    },
+    "tested/scripts/profile-display.py": {
+      "sha256": "04be731cc34e626193e8e66b75e4c4d9ad9f43cc7a4e360a73819bcb4689c3d1"
+    },
+    "tested/scripts/profile-guest.py": {
+      "sha256": "f9878660a0d61dfc7edbb14da8f360dadeeb9b9281255c15291776caa2257617"
+    },
+    "tested/scripts/profile-renderer-memory.py": {
+      "sha256": "8c7d74e3a2f650820a7707282299b5169ae3c8ff32d9877d1fb933e53fcfa311"
+    },
+    "tested/scripts/profile-ui.py": {
+      "sha256": "c615bfd96eaa24c61b0e166a5ccc6d8667c5ce4560d662a260bc0bda6dab8eab"
+    },
+    "tested/scripts/qa-display-scale.py": {
+      "sha256": "e38a4d261af7258e72e9be219a222096287df1847181b45333e43a43e5b3ea7d"
+    },
+    "tested/scripts/run-dev.sh": {
+      "sha256": "e9b57c6ff21ee39cb7b5f7dc9cb32499b6136dad919004ded126494c1db4f019"
+    },
+    "tested/scripts/test-gnome.py": {
+      "sha256": "0589c05140af66751c9ad9562a8f11c8b0029839e235b79cc922e54889458b78"
+    },
+    "tested/scripts/test-guest-recovery.py": {
+      "sha256": "b98a74fb5ceda23059c182ba2aa3292765a02772ec439b23e1505c5aeaaff426"
+    },
+    "tested/scripts/test-libvirt-daemon.py": {
+      "sha256": "9d17eb51a66cebf95e8ad53b3f2b420153d484deec365da4670aab985722b76b"
+    },
+    "tested/src/main.c": {
+      "sha256": "3a92167e52b73db67ad8a703a9804a60a07df783ff983bb51b76571448863654"
+    },
+    "tested/src/meson.build": {
+      "sha256": "d1047bf37babfb3beec873aca78b31a846cb64e162936b557cb30b9dd6c3870d"
+    },
+    "tested/src/pirwa-backend.c": {
+      "sha256": "d797faf0f63582b2671152fcc2e7f7369f965ad62a9950aaef853fc6b7ae8a97"
+    },
+    "tested/src/pirwa-backend.h": {
+      "sha256": "9ea1592f45acf8c38db157e4210df860905b01cbbcd59221cc6ad7d67abb1db2"
+    },
+    "tested/src/pirwa-boxes-dialog.c": {
+      "sha256": "f9bd14d2c88739d4b6b78f54e9e75a4f73ffdec9427f7f3bfbba428d2e463b9b"
+    },
+    "tested/src/pirwa-boxes-dialog.h": {
+      "sha256": "36fccca7274066a9289a608fdf6140cabebfdc3a36c4221af4fb0c243aca20a0"
+    },
+    "tested/src/pirwa-boxes.c": {
+      "sha256": "85f1fb16574bc57116363386388c41aa57586f03e2249398d51ecb68cb3bb160"
+    },
+    "tested/src/pirwa-boxes.h": {
+      "sha256": "e2ec79c2abb0d0f2bf9063fa0f66cde6ffdf235b5d3e00ca3d308647509085f7"
+    },
+    "tested/src/pirwa-config.c": {
+      "sha256": "5c43a3739737615642ea8bb7791f63e5d8a4a8bfd4363f7b083949c8cdf26fa2"
+    },
+    "tested/src/pirwa-config.h": {
+      "sha256": "bed38f80afd86996d5544a9907a2b48d47f1947642dea1d14d6db9807624e5a8"
+    },
+    "tested/src/pirwa-console.c": {
+      "sha256": "01121b5b30728ec5c5000bd633e67c7dcc4571a2d9889a27478aff3a1af49e00"
+    },
+    "tested/src/pirwa-console.h": {
+      "sha256": "b0470c77756effb734fefc50799611ca698594b118d0b5bfe92c2d991c61f3f4"
+    },
+    "tested/src/pirwa-create-dialog.c": {
+      "sha256": "c28b3e9e955d39744264f5a181432e657ae32bcf37f1405160c88743ddd967a5"
+    },
+    "tested/src/pirwa-create-dialog.h": {
+      "sha256": "328f3a338adee425c41087a9abaf91d8d17d28e9e567ceff1326757c7ec80f7e"
+    },
+    "tested/src/pirwa-display.c": {
+      "sha256": "b8c36fcee44e615a6bf3010ef4bcd63335d79d40c4e1c0c533f387f52b369038"
+    },
+    "tested/src/pirwa-display.h": {
+      "sha256": "7181f67d78751f0ba01ad6d491956ab1c74f8f6c366e827ce35ed6607fc6d142"
+    },
+    "tested/src/pirwa-frame.c": {
+      "sha256": "83863d6d451cbe76cc00c7a5290fd47cb6cf121c12e96e0a8de9c726ac10f7ea"
+    },
+    "tested/src/pirwa-frame.h": {
+      "sha256": "18155860a3a25564fd34d57f4888f12480a4219addf8b777f0d1fea977c20130"
+    },
+    "tested/src/pirwa-gateway.c": {
+      "sha256": "89e1952f56c1c241811e75b108da74fc7a0d285809089f5629534436a225c3d3"
+    },
+    "tested/src/pirwa-import.c": {
+      "sha256": "a6eb59558365a28764fce3f42b8e00cb160430ddfafabe366191ba2767be1fcd"
+    },
+    "tested/src/pirwa-import.h": {
+      "sha256": "fb30f61bcc10da9f8ac6c52da04024e29cd731533cc95ca37b4b9963ee88b81c"
+    },
+    "tested/src/pirwa-inventory.c": {
+      "sha256": "e7c5e88bbd6aab26e98eef025fce6176625bddbae5a8f9bc58903c243106d36c"
+    },
+    "tested/src/pirwa-inventory.h": {
+      "sha256": "549ebabd3a04fd381185deab06978055d622e6fd39bbac54b5b2c6caa0a9b804"
+    },
+    "tested/src/pirwa-libvirt.h": {
+      "sha256": "6b20112325bc4afcda34654d4cc1c5ac9e2529045a7f1b7c004cac495120f739"
+    },
+    "tested/src/pirwa-machine.c": {
+      "sha256": "3874c8c27e9c3fd88dd69731c592a5bc3ed6297b20c9f77d77e76a3028abd902"
+    },
+    "tested/src/pirwa-machine.h": {
+      "sha256": "c0dfaa631ef74fb163cab05b6e22cc25dd9792bd8817ddf89d45a7a245ce8411"
+    },
+    "tested/src/pirwa-model.c": {
+      "sha256": "2383ab0620a507c297e53ee715f625acd1abeeda932e0bc22db8e6e0ea61f94d"
+    },
+    "tested/src/pirwa-model.h": {
+      "sha256": "919dd6fcf72c86780c1c442063e18bc67eef0a8c6009d9cdaa1927bea90888d3"
+    },
+    "tested/src/pirwa-network.c": {
+      "sha256": "7ba491dbcd4eb8a087d80b91ae0026a853c7eb666741103415a4b768e4cbfc25"
+    },
+    "tested/src/pirwa-network.h": {
+      "sha256": "e837b3f579d6c815bb38e105743d47b1c8ef46d4077d29c2478be48ca62310c2"
+    },
+    "tested/src/pirwa-preferences.c": {
+      "sha256": "ad10c87316e0a143e657f086cf3bb0fb5456bc3591384a359c5626ed595058da"
+    },
+    "tested/src/pirwa-preferences.h": {
+      "sha256": "33f6a010dcdc533d7a3ce7ced90cd3214a51aed77e3dece668a3e234a00a7ec3"
+    },
+    "tested/src/pirwa-provision.c": {
+      "sha256": "765e41dd0b8c697a30293b9b3e1ad73e9c8d1ae188687c8d8ec788dc0f2e8e58"
+    },
+    "tested/src/pirwa-provision.h": {
+      "sha256": "d9826cc3f48dcc1926820dfd7b98d9af4edc02353c32821d3cd64ac2975aceb0"
+    },
+    "tested/src/pirwa-proxy.c": {
+      "sha256": "09e5fd424793239096025092ad9ccc6077ce058b0aa911916bf131ddd7310454"
+    },
+    "tested/src/pirwa-proxy.h": {
+      "sha256": "d72d07d950ac9ab2912112c98152ce9abfb42b107321e44314eb5cb35d7a11e5"
+    },
+    "tested/src/pirwa-usage.c": {
+      "sha256": "9199e3dcf56d5f61044d3ddf58a1ee856225128deb6adc9981ca6c93bfbd43d1"
+    },
+    "tested/src/pirwa-usage.h": {
+      "sha256": "4d863f2a0820d8867da38f6aff543f1f254fb4042cbd19b425dd22fb342d0550"
+    },
+    "tested/src/pirwa-window.c": {
+      "sha256": "7c45e6d70f54d3e9cefef79d6e5a5aab26ccf1df69796a592956e96c369f54f0"
+    },
+    "tested/src/pirwa-window.h": {
+      "sha256": "e764cbd1307547c74b4624a36e3a8ade1c9c9b3519faab973704c27dfeb8a496"
+    },
+    "tested/tests/benchmark-console.c": {
+      "sha256": "8e720a9c35e4da9d4cb0bcbeb0ea04d1ec02d976bbec69cd253b914674512633"
+    },
+    "tested/tests/benchmark-display-memory.c": {
+      "sha256": "2709b3c1114664f8f0f5a2722e6abc2d45cbd1a1a22ae62265b53ba75d5da531"
+    },
+    "tested/tests/benchmark-display.c": {
+      "sha256": "d28a82d3a725664a7caba583ca7be8083245e065c836565dcfebcccf07605bff"
+    },
+    "tested/tests/benchmark-frame.c": {
+      "sha256": "14268f5c4911036bcf4cde0ae6b8de03e265cfae30e67c884dabd2c0bab9aba8"
+    },
+    "tested/tests/benchmark-inventory.c": {
+      "sha256": "187e446c0bd7b184396a60c7830b5b92028ded725091150e1565381ff24c4158"
+    },
+    "tested/tests/benchmark-scale.c": {
+      "sha256": "d7345715ef35257b7dd12af6115683500ff30e2b0ec6d765ee216591a54ff174"
+    },
+    "tested/tests/fixtures/meson.build": {
+      "sha256": "9b057b0bd365af2c30674054e5b75f8f2f6bf936286c0baa4973574b62979086"
+    },
+    "tested/tests/fixtures/proxy.gschema.xml": {
+      "sha256": "deb18846d54b5506b818cb17d1908bbba694c4bdec33a5b9419a39bd3dbf9f89"
+    },
+    "tested/tests/fixtures/qa-channel-agent.py": {
+      "sha256": "070ceb62237f72af9844318b4c7ebfefc197b08ee795b8850a236635d38f59c1"
+    },
+    "tested/tests/fixtures/qa-display-workload.py": {
+      "sha256": "cfd314fda7b3d254fb1b79fb05c91991556ad6b1009e58923664309b9b19621a"
+    },
+    "tested/tests/fixtures/virt-viewer": {
+      "sha256": "606252c798657cfbe4dce233c6025a99baaac79b348f06a30b0a436126e32998"
+    },
+    "tested/tests/lsan.supp": {
+      "sha256": "2c3a67d8608604e1daabef37bcf9bd23918732befaed12c8fdf6f24642e6d9f8"
+    },
+    "tested/tests/meson.build": {
+      "sha256": "972549e06c702e7a052c72872cf2d51cbffcb91e239a3d8365f383b76bfacb14"
+    },
+    "tested/tests/qa-application-profile.c": {
+      "sha256": "7f5a00f543c616da67f844c78c4d74d80dc43b8940a1cdbd4d0bf0b55349cbcf"
+    },
+    "tested/tests/qa-frame-feedback.c": {
+      "sha256": "c9526c202fa1231cd4afe9c02d7b3d65cbefe807f6c4abd4ee8ca8404dc3a03c"
+    },
+    "tested/tests/qa-frame-feedback.h": {
+      "sha256": "556fb4c8c7f9c39bbbbc8da66b1b6bc826dd62eb3e2d39ae764496f335dc5c71"
+    },
+    "tested/tests/qa-guest-init-start.S": {
+      "sha256": "69a32859b1a60ecd2362f45b0249ce38b1072bd04c7b8680c5d8358433948912"
+    },
+    "tested/tests/qa-guest-init.c": {
+      "sha256": "c8cbf910a89c96f5a14b5422ec3cdd2a26581c282dbb2c77a45c9a3a62ccdd50"
+    },
+    "tested/tests/qa-vm.c": {
+      "sha256": "6a1bae787822df50eed08f37bcefde1d09a73c43a45755a21b983f8ddbc941e7"
+    },
+    "tested/tests/test-backend-daemon.c": {
+      "sha256": "e29bf0ccf2828368d82b40150540ea6c19e287b87a2de971ec4a34559a07abcc"
+    },
+    "tested/tests/test-backend-faults.c": {
+      "sha256": "eb116e85f5b055a50faa5edba893fc3156492d0ca7d09d5de314ba8c0a959f2e"
+    },
+    "tested/tests/test-backend-lifetime.c": {
+      "sha256": "e825aa42eee6b081473be2804a57b26d251cfa0b847b729425aeda9b800b0680"
+    },
+    "tested/tests/test-backend.c": {
+      "sha256": "bae5f138f9ed901084faecfa83c3d4f7b57a53ff7cffb251ad366f80aa467467"
+    },
+    "tested/tests/test-boxes.c": {
+      "sha256": "b019b900409e0dce89ddff52b3c3b0efa27149117ee6e01a448ff16c53e432e5"
+    },
+    "tested/tests/test-config.c": {
+      "sha256": "40d7bc2b21bec93083a04c1c4f2a036c95a234a5f2e73c66d165a0665324a5e3"
+    },
+    "tested/tests/test-console-connect.c": {
+      "sha256": "a1d2952345c1f94b7add81ef2690469e1b750a66bc573063cfea0a96835c5675"
+    },
+    "tested/tests/test-console-profile.py": {
+      "sha256": "465ee9e9b0fad6b406be2c8b1aca4076a33308374daf555009cc9a9e62389121"
+    },
+    "tested/tests/test-console-ui.c": {
+      "sha256": "4cdfa0ea2fc27e603f45cf8879d2cfc2b5d28ac69a3fc2c36a2dfec3034b442d"
+    },
+    "tested/tests/test-create-ui.c": {
+      "sha256": "a4028538b1586ba25a7f43cbddcf34c39bc7febc944495f6eb24002e4c5a4493"
+    },
+    "tested/tests/test-frame.c": {
+      "sha256": "dca02ed66e4879645c219a2bae0557d35025f76f4d7c22ea461837cdbef78e6d"
+    },
+    "tested/tests/test-import.c": {
+      "sha256": "14faaf8c796e65ca21053fc9f93b2e88b09c40d606b6011a4098bf31c948a62c"
+    },
+    "tested/tests/test-inventory.c": {
+      "sha256": "8b67c8e326bdaac3ddd68ecbd9f148a8adbf1f42cd6c34534a7857a2447a6bef"
+    },
+    "tested/tests/test-kvm.c": {
+      "sha256": "e524138f927e2b42cbf6ed24a4d2e467244d7daca022f03a7fc72b8c80ef6199"
+    },
+    "tested/tests/test-model.c": {
+      "sha256": "a8d92778c34ac6745d3146b4495549a47d517fcd4a4b55ce94dd6c5c921f8499"
+    },
+    "tested/tests/test-network-gateway.py": {
+      "sha256": "32161af6f432275d86bc52de7edb538c7f0eefc0b01e6dd0f26e1cc90fd628dc"
+    },
+    "tested/tests/test-network-start.c": {
+      "sha256": "709f473ad7f1e54f3cfabf8f92969ce929c0d5b00e55b1e56aabb6412dcdd72a"
+    },
+    "tested/tests/test-network-ui.c": {
+      "sha256": "43fcf330fc7bfccd0c172b526a80dee14e196c849f0f07ed73caafc47aa79870"
+    },
+    "tested/tests/test-network.c": {
+      "sha256": "80dfa9f6454b04b7a0bac77510cc02e88f02e94684c205285ab351da92c6a2e5"
+    },
+    "tested/tests/test-preferences.c": {
+      "sha256": "b6032dd753f40249a4872dc63274fd466f4cd283e75d90ae9a7c6740b585864b"
+    },
+    "tested/tests/test-provision.c": {
+      "sha256": "77be4030d3b65c0b83a25e970a666734975a7cb34cf8e81c1720fd9f6c5ca3da"
+    },
+    "tested/tests/test-proxy.c": {
+      "sha256": "2cf9bf18acb70f71573c66d1a7eea3f68173abe4bb3d30ef5ce6464b532e7ba7"
+    },
+    "tested/tests/test-ui-lifetime.c": {
+      "sha256": "58206764ca3ce519c3e1afc783dc92143fae66a4199488cd0f25cdb994f7f99f"
+    },
+    "tested/tests/test-ui-profile.py": {
+      "sha256": "ad725c4525ff10eb00119722b9d9beb3b919cb7f81beb7b10b49ed5429433dd9"
+    },
+    "tested/tests/test-ui.c": {
+      "sha256": "28626df08f55d1741443c76efd6af56bd71710299cc0eb8909bb4d43529232ab"
+    },
+    "tested/tests/test-usage.c": {
+      "sha256": "b685a264cff9aa4f525526352caa2278dd163c0f147f7add16799dfaf96f037d"
+    },
+    "diagnostics/gtk-accent-literal.c": {
+      "sha256": "580e929bcfc959a474ecc34e79488469ebf5337ac0921e1ae23d83796b66704d"
+    },
+    "diagnostics/gtk-accent.c": {
+      "sha256": "785e884d877d6032003b6faaacbffd63298945bf298d5cf170ff65833cea7d49"
+    },
+    "diagnostics/gtk-cache-cleanup.c": {
+      "sha256": "2752a1059fe9e51ab68f38e40d371c3af39749cc8f0104a87e4cc6d2fb81b0ea"
+    },
+    "diagnostics/gtk-cleanup.c": {
+      "sha256": "decab6640f2ea8f12fd22528b85c00943c8166c0f70260f57c81aa1fe5b0617c"
+    },
+    "diagnostics/accent-controls.py": {
+      "sha256": "88ddf91d91a26e9a80aecf1dedc652335da4d3f7a6af6386dfa1ff78fa343851"
+    },
+    "diagnostics/controls.py": {
+      "sha256": "5c55e4b1ae946239c9ad343a3a8ae18d9b9f4accd55fe2447fcbbe16f58293ff"
+    },
+    "diagnostics/final-lifetimes.py": {
+      "sha256": "d571d5381a7ff57efef751104cc0e67deddf0aed10b7b6d60e37a56ccf3acc2f"
+    },
+    "diagnostics/lsan-pinned-controls.py": {
+      "sha256": "acfadabc00b72211aa05d914f34771a91dce52e1de5fa8167bd6cb7f59da7fba"
+    },
+    "diagnostics/package-evidence.py": {
+      "sha256": "e6162baceaada9bb2202463a2115d4d0ad1866f2e5d4a59d3985ec406bfb214e"
+    },
+    "diagnostics/repeated-leaks.py": {
+      "sha256": "c2cd8dabaeec91a25022084e9b0cb2f3839125ec193964b4f2bf4b38a65abbed"
+    },
+    "diagnostics/settings-fix/final-lifetimes.py": {
+      "sha256": "d571d5381a7ff57efef751104cc0e67deddf0aed10b7b6d60e37a56ccf3acc2f"
+    },
+    "diagnostics/settings-fix/lsan-controls.py": {
+      "sha256": "acfadabc00b72211aa05d914f34771a91dce52e1de5fa8167bd6cb7f59da7fba"
+    },
+    "before-settings-fix/pirwa-window.c": {
+      "sha256": "7c45f93604eb5993219fb3da8c9020a6754ea81e43d15a9390f00f0883579aa8"
+    },
+    "before-settings-fix/test-ui-lifetime.c": {
+      "sha256": "68d6c2a16108a4027fff13c05bb50428438ee98a2ab91c2a73b892a286ba2355"
+    }
+  },
+  "artifacts": {
+    "raw-results.json.gz": {
+      "sha256": "4af993a9c17951368e41fa1ca6110994e557b0a7e438a74b9aa0a36b2e32fe22",
+      "bytes": 1399640
+    },
+    "sources.tar.gz": {
+      "sha256": "20750c0cc9e90207c0499c3f79c61e7dbcb8aabc49eb47541aa4fa033f9100db",
+      "bytes": 305315
+    }
+  },
+  "limitations": [
+    "Historical startup and Boxes step-4 timeout causes remain unproven",
+    "No physical input, screen-reader, guest audio/frames or real-host System authorization certification",
+    "No performance-budget acceptance from these correctness and allocation controls",
+    "No full GUI leak sign-off; no broad toolkit suppression or production renderer/CSS change",
+    "The source snapshot includes preserved concurrent preference and network UI work; final candidate review remains open"
+  ]
+}

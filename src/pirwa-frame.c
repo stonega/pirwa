@@ -14,6 +14,20 @@ pirwa_frame_valid (const SpiceDisplayPrimary *p)
   return p->stride >= p->width * (rgb32 ? 4 : 2);
 }
 
+cairo_rectangle_int_t
+pirwa_frame_monitor_area (const SpiceDisplayPrimary *primary,
+                          const SpiceDisplayMonitorConfig *monitor)
+{
+  if (!pirwa_frame_valid (primary))
+    return (cairo_rectangle_int_t){ 0 };
+  cairo_rectangle_int_t area = { 0, 0, primary->width, primary->height };
+  if (monitor && monitor->surface_id == 0 && monitor->width > 0 && monitor->height > 0
+      && (guint64)monitor->x + monitor->width <= (guint)primary->width
+      && (guint64)monitor->y + monitor->height <= (guint)primary->height)
+    area = (cairo_rectangle_int_t){ monitor->x, monitor->y, monitor->width, monitor->height };
+  return area;
+}
+
 GdkTexture *
 pirwa_frame_texture_rect (const SpiceDisplayPrimary *p, const cairo_rectangle_int_t *rect)
 {
@@ -37,26 +51,30 @@ pirwa_frame_texture (const SpiceDisplayPrimary *p, GdkTexture *previous, cairo_r
   gboolean rgb32 = p->format == SPICE_SURFACE_FMT_32_xRGB || p->format == SPICE_SURFACE_FMT_32_ARGB;
   gsize stride = (gsize)p->width * 4;
   guint8 *copy = g_malloc_n (stride, p->height);
-  for (int y = 0; y < p->height; y++)
-    {
-      const guint8 *source = p->data + (gsize)y * p->stride;
-      guint8 *row = copy + y * stride;
-      if (rgb32)
-        memcpy (row, source, stride);
-      else
-        for (int x = 0; x < p->width; x++)
-          {
-            guint16 pixel;
-            memcpy (&pixel, source + x * 2, 2);
-            guint red
-                = p->format == SPICE_SURFACE_FMT_16_565 ? (pixel >> 11) & 31 : (pixel >> 10) & 31;
-            guint green = (pixel >> 5) & (p->format == SPICE_SURFACE_FMT_16_565 ? 63 : 31);
-            row[x * 4] = (pixel & 31) * 255 / 31;
-            row[x * 4 + 1] = green * 255 / (p->format == SPICE_SURFACE_FMT_16_565 ? 63 : 31);
-            row[x * 4 + 2] = red * 255 / 31;
-            row[x * 4 + 3] = 255;
-          }
-    }
+  /* Let libc use its large-copy path for the usual packed RGB surface. */
+  if (rgb32 && (gsize)p->stride == stride)
+    memcpy (copy, p->data, stride * p->height);
+  else
+    for (int y = 0; y < p->height; y++)
+      {
+        const guint8 *source = p->data + (gsize)y * p->stride;
+        guint8 *row = copy + y * stride;
+        if (rgb32)
+          memcpy (row, source, stride);
+        else
+          for (int x = 0; x < p->width; x++)
+            {
+              guint16 pixel;
+              memcpy (&pixel, source + x * 2, 2);
+              guint red
+                  = p->format == SPICE_SURFACE_FMT_16_565 ? (pixel >> 11) & 31 : (pixel >> 10) & 31;
+              guint green = (pixel >> 5) & (p->format == SPICE_SURFACE_FMT_16_565 ? 63 : 31);
+              row[x * 4] = (pixel & 31) * 255 / 31;
+              row[x * 4 + 1] = green * 255 / (p->format == SPICE_SURFACE_FMT_16_565 ? 63 : 31);
+              row[x * 4 + 2] = red * 255 / 31;
+              row[x * 4 + 3] = 255;
+            }
+      }
   /* SPICE owns and mutates primary memory. A texture must keep its own immutable
    * snapshot; the previous texture may still be in use by the render thread. */
   g_autoptr (GBytes) bytes = g_bytes_new_take (copy, stride * p->height);

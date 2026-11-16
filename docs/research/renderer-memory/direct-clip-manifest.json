@@ -1,0 +1,152 @@
+{
+  "scope": "Shared production GTK display renderer; synthetic xRGB framebuffer. Frame-clock spans include the Update phase and end at after-paint; they exclude compositor presentation/GPU completion. Total process CPU includes synthetic pixel generation; its main-thread CPU is also recorded per update. No SPICE decoding, guest workload or libvirt is measured.",
+  "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+  "source_dirty": true,
+  "source_sha256": {
+    "src/pirwa-display.c": "2b121efb057bde7fa52dd0066f486c883af12624a151215630e84f2a8cd862f4",
+    "src/pirwa-display.h": "3665b0622c62de2d7cad19f063d5b3e7aabb51fd7689ffdf6ab3108801bfa897",
+    "src/pirwa-frame.c": "0c319d33e13230c94b62b71df10be4e7f935e378af3286fd20ed59698d3e122c",
+    "src/pirwa-frame.h": "cfa5c1f641a14d9397cd3a3c4c98b459b2a60c442498788d46bcf6791b16d7e3",
+    "tests/benchmark-display.c": "e5f09740d9c4057a5ab01082c55effe31d2cdf7a16b104d5fedc9e1e3eb7ea6b"
+  },
+  "binary_sha256": "7c5920c79b14673f7a0a76fc0e8842223c559f09906421d963e19c5875a0ef7c",
+  "compared_binaries": {
+    "current": {
+      "path": "/home/stone/Gnome/pirwa/build/qa/renderer-memory/optimized/tests/benchmark-display",
+      "sha256": "7c5920c79b14673f7a0a76fc0e8842223c559f09906421d963e19c5875a0ef7c"
+    },
+    "baseline": {
+      "path": "/home/stone/Gnome/pirwa/build/qa/renderer-memory/optimized/baseline",
+      "sha256": "c2f13fa943422094f59b4e9abcbff49cea0a43b9726caed08d5ea63688a41b42"
+    }
+  },
+  "qa_runtime_directory": "/tmp/pirwa-gnome-0_yn9_k8/runtime",
+  "platform": "Linux-7.2.15-300.fc45.x86_64-x86_64-with-glibc2.44",
+  "distribution": "Fedora Linux 45 (Workstation Edition)",
+  "cpu_model": "Intel(R) Core(TM) Ultra 9 185H",
+  "allowed_cpus": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21
+  ],
+  "power_profile": "balanced",
+  "requested_renderer": "default",
+  "requested_backend": "wayland",
+  "requested_a11y": "test",
+  "packages": [
+    "gtk4-4.24.1-1.fc45.x86_64",
+    "glib2-2.90.1-1.fc45.x86_64",
+    "spice-glib-0.43-5.fc45.x86_64",
+    "gnome-shell-51.1-1.fc45.x86_64",
+    "mutter-51.1-1.fc45.x86_64",
+    "mesa-dri-drivers-26.2.6-1.fc45.x86_64"
+  ],
+  "host_load_at_start": [
+    9.873046875,
+    9.22412109375,
+    9.9609375
+  ],
+  "frames_per_run": 60,
+  "host_load_at_end": [
+    30.892578125,
+    20.17236328125,
+    14.2080078125
+  ],
+  "frozen_sources": {
+    "source_sha256": {
+      "pirwa-display.h": "3665b0622c62de2d7cad19f063d5b3e7aabb51fd7689ffdf6ab3108801bfa897",
+      "pirwa-frame.h": "cfa5c1f641a14d9397cd3a3c4c98b459b2a60c442498788d46bcf6791b16d7e3",
+      "pirwa-frame.c": "0c319d33e13230c94b62b71df10be4e7f935e378af3286fd20ed59698d3e122c",
+      "config.h": "3caf75ae3d7f7ac1838dfa6d7995adb260764318d1ede8b2a15881d45d27e508",
+      "display-flat.c": "7374a2403284434a671809fbcb62a2cc29eabe3939edb7d2c1cd30f859d40b4f",
+      "display-mask.c": "bd7f145b089df394972ac0a0c5e1daf4ac006e2b3d5f9d9ff23ca683da8bc829",
+      "display-direct.c": "2b121efb057bde7fa52dd0066f486c883af12624a151215630e84f2a8cd862f4",
+      "benchmark-display.c": "e5f09740d9c4057a5ab01082c55effe31d2cdf7a16b104d5fedc9e1e3eb7ea6b",
+      "benchmark-display-memory.c": "ee65187d57958ce12c0cb8ef012877167bd97a32a95c841f7aae0cb03c35954c"
+    },
+    "flags": [
+      "-O3",
+      "-g",
+      "-std=c17",
+      "-I/home/stone/Gnome/pirwa/build/qa/renderer-memory/optimized/source"
+    ],
+    "dependency_flags": [
+      "-I/usr/include/gtk-4.0",
+      "-I/usr/include/pango-1.0",
+      "-I/usr/include/fribidi",
+      "-I/usr/include/harfbuzz",
+      "-I/usr/include/gdk-pixbuf-2.0",
+      "-I/usr/include/glycin-2",
+      "-I/usr/include/cairo",
+      "-I/usr/include/libxml2",
+      "-I/usr/include/freetype2",
+      "-I/usr/include/libpng16",
+      "-I/usr/include/pixman-1",
+      "-I/usr/include/graphene-1.0",
+      "-I/usr/lib64/graphene-1.0/include",
+      "-mfpmath=sse",
+      "-msse",
+      "-msse2",
+      "-I/tmp/pirwa-build-deps.ihjR8B/usr/include/spice-client-glib-2.0",
+      "-I/tmp/pirwa-build-deps.ihjR8B/usr/include/spice-1",
+      "-I/usr/include/glib-2.0",
+      "-I/usr/lib64/glib-2.0/include",
+      "-DWITH_GZFILEOP",
+      "-I/usr/include/libmount",
+      "-I/usr/include/blkid",
+      "-I/usr/include/sysprof-6",
+      "-pthread",
+      "-lgtk-4",
+      "-lpangocairo-1.0",
+      "-lpango-1.0",
+      "-lgdk_pixbuf-2.0",
+      "-lcairo-gobject",
+      "-lcairo",
+      "-lharfbuzz",
+      "-lvulkan",
+      "-lgraphene-1.0",
+      "-L/tmp/pirwa-build-deps.ihjR8B/usr/lib64",
+      "-lspice-client-glib-2.0",
+      "-lgio-2.0",
+      "-lgobject-2.0",
+      "-lglib-2.0"
+    ],
+    "binaries": {
+      "masked": {
+        "path": "/home/stone/Gnome/pirwa/build/qa/renderer-memory/optimized/baseline",
+        "sha256": "c2f13fa943422094f59b4e9abcbff49cea0a43b9726caed08d5ea63688a41b42"
+      },
+      "direct": {
+        "path": "/home/stone/Gnome/pirwa/build/qa/renderer-memory/optimized/tests/benchmark-display",
+        "sha256": "7c5920c79b14673f7a0a76fc0e8842223c559f09906421d963e19c5875a0ef7c"
+      },
+      "trace-flat": {
+        "path": "/home/stone/Gnome/pirwa/build/qa/renderer-memory/optimized/trace-flat",
+        "sha256": "42b2246bb3dd6a63f02f8a7c1e95a9be5b7ffe0254e10b1980f66366d459a82a"
+      },
+      "trace-mask": {
+        "path": "/home/stone/Gnome/pirwa/build/qa/renderer-memory/optimized/trace-mask",
+        "sha256": "c18c1daf096de33d2b86726f24f019fe8a8bb8cfb8abe2975735e6faa166a895"
+      }
+    }
+  }
+}

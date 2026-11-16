@@ -1,0 +1,86 @@
+{
+  "quantile": "Nearest-rank p95 pooled across same-workload/variant trials. CPU is median of trial process means. Presentation includes only complete presented results with positive before-paint and presentation >= before-paint.",
+  "scope": "Synthetic GTK renderer in a GNOME virtual monitor. Before-paint to compositor feedback is not physical latency, guest latency or GPU execution time. Host pressure is retained per trial.",
+  "groups": [
+    {
+      "mode": "invalidate-full",
+      "variant": "baseline",
+      "trials": 2,
+      "paint_updates": 120,
+      "feedback_results": {
+        "presented": 118,
+        "outstanding": 2
+      },
+      "accepted_presentations": 118,
+      "before_paint_to_presentation_p95_ms": 50.479,
+      "before_paint_to_presentation_median_ms": 40.623,
+      "paint_wall_p95_ms": 42.63,
+      "cpu_percent_one_core_median": 83.682252,
+      "max_channel_error": 0,
+      "per_trial_before_paint_to_presentation_p95_ms": [
+        57.75,
+        47.672
+      ]
+    },
+    {
+      "mode": "invalidate-full",
+      "variant": "current",
+      "trials": 2,
+      "paint_updates": 120,
+      "feedback_results": {
+        "presented": 118,
+        "outstanding": 2
+      },
+      "accepted_presentations": 118,
+      "before_paint_to_presentation_p95_ms": 33.504,
+      "before_paint_to_presentation_median_ms": 26.951,
+      "paint_wall_p95_ms": 27.277,
+      "cpu_percent_one_core_median": 81.1375125,
+      "max_channel_error": 1,
+      "per_trial_before_paint_to_presentation_p95_ms": [
+        33.504,
+        33.591
+      ]
+    },
+    {
+      "mode": "small",
+      "variant": "baseline",
+      "trials": 2,
+      "paint_updates": 120,
+      "feedback_results": {
+        "presented": 118,
+        "outstanding": 2
+      },
+      "accepted_presentations": 118,
+      "before_paint_to_presentation_p95_ms": 17.013,
+      "before_paint_to_presentation_median_ms": 16.5095,
+      "paint_wall_p95_ms": 1.386,
+      "cpu_percent_one_core_median": 6.393605,
+      "max_channel_error": 0,
+      "per_trial_before_paint_to_presentation_p95_ms": [
+        16.869,
+        17.048
+      ]
+    },
+    {
+      "mode": "small",
+      "variant": "current",
+      "trials": 2,
+      "paint_updates": 120,
+      "feedback_results": {
+        "presented": 118,
+        "outstanding": 2
+      },
+      "accepted_presentations": 118,
+      "before_paint_to_presentation_p95_ms": 17.099,
+      "before_paint_to_presentation_median_ms": 16.4595,
+      "paint_wall_p95_ms": 1.786,
+      "cpu_percent_one_core_median": 7.0737705,
+      "max_channel_error": 1,
+      "per_trial_before_paint_to_presentation_p95_ms": [
+        17.228,
+        17.099
+      ]
+    }
+  ]
+}

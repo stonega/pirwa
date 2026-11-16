@@ -1,0 +1,975 @@
+{
+  "recorded_utc": "2026-11-15T04:19:00.253221+00:00",
+  "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+  "source_dirty": true,
+  "status": "five-live-daemon-checks-passed-in-both-builds",
+  "scope": "Real private virtqemud transport, empty inventory, Unix socket denial; no running guest, default socket activation, system polkit or GTK acceptance.",
+  "runs": {
+    "normal": {
+      "passed": true,
+      "checks": [
+        "startup-unavailable-automatic-recovery",
+        "graceful-restart-automatic-recovery",
+        "crash-restart-automatic-recovery",
+        "socket-permission-denial-automatic-recovery",
+        "main-loop-and-stop-during-real-backoff"
+      ],
+      "scope": "Private unprivileged virtqemud; no domain, disk or network creation; actual transport and production retry delays",
+      "binary_sha256": "f2d54031c7e60d45d60ca1a9c17bd0d47dec789b8a1282ee64dc859d2d6506e6",
+      "source_sha256": {
+        "src/pirwa-machine.c": "3874c8c27e9c3fd88dd69731c592a5bc3ed6297b20c9f77d77e76a3028abd902",
+        "src/pirwa-inventory.h": "549ebabd3a04fd381185deab06978055d622e6fd39bbac54b5b2c6caa0a9b804",
+        "src/pirwa-config.h": "bed38f80afd86996d5544a9907a2b48d47f1947642dea1d14d6db9807624e5a8",
+        "src/main.c": "3a92167e52b73db67ad8a703a9804a60a07df783ff983bb51b76571448863654",
+        "src/pirwa-backend.h": "9ea1592f45acf8c38db157e4210df860905b01cbbcd59221cc6ad7d67abb1db2",
+        "src/pirwa-machine.h": "c0dfaa631ef74fb163cab05b6e22cc25dd9792bd8817ddf89d45a7a245ce8411",
+        "src/pirwa-provision.h": "d9826cc3f48dcc1926820dfd7b98d9af4edc02353c32821d3cd64ac2975aceb0",
+        "src/pirwa-model.c": "2383ab0620a507c297e53ee715f625acd1abeeda932e0bc22db8e6e0ea61f94d",
+        "src/pirwa-model.h": "919dd6fcf72c86780c1c442063e18bc67eef0a8c6009d9cdaa1927bea90888d3",
+        "src/pirwa-boxes-dialog.h": "36fccca7274066a9289a608fdf6140cabebfdc3a36c4221af4fb0c243aca20a0",
+        "src/pirwa-window.h": "e764cbd1307547c74b4624a36e3a8ade1c9c9b3519faab973704c27dfeb8a496",
+        "src/pirwa-display.h": "7181f67d78751f0ba01ad6d491956ab1c74f8f6c366e827ce35ed6607fc6d142",
+        "src/pirwa-inventory.c": "e7c5e88bbd6aab26e98eef025fce6176625bddbae5a8f9bc58903c243106d36c",
+        "src/pirwa-console.h": "b0470c77756effb734fefc50799611ca698594b118d0b5bfe92c2d991c61f3f4",
+        "src/pirwa-usage.h": "4d863f2a0820d8867da38f6aff543f1f254fb4042cbd19b425dd22fb342d0550",
+        "src/pirwa-import.h": "fb30f61bcc10da9f8ac6c52da04024e29cd731533cc95ca37b4b9963ee88b81c",
+        "src/pirwa-boxes.c": "85f1fb16574bc57116363386388c41aa57586f03e2249398d51ecb68cb3bb160",
+        "src/pirwa-boxes.h": "e2ec79c2abb0d0f2bf9063fa0f66cde6ffdf235b5d3e00ca3d308647509085f7",
+        "src/pirwa-boxes-dialog.c": "f9bd14d2c88739d4b6b78f54e9e75a4f73ffdec9427f7f3bfbba428d2e463b9b",
+        "src/pirwa-import.c": "a6eb59558365a28764fce3f42b8e00cb160430ddfafabe366191ba2767be1fcd",
+        "src/pirwa-usage.c": "9199e3dcf56d5f61044d3ddf58a1ee856225128deb6adc9981ca6c93bfbd43d1",
+        "src/pirwa-libvirt.h": "6b20112325bc4afcda34654d4cc1c5ac9e2529045a7f1b7c004cac495120f739",
+        "src/pirwa-display.c": "e24db560976c2f8fb188d7f6e6a55bde994786f25494ca4d3a14f61b2af96425",
+        "src/pirwa-frame.c": "83863d6d451cbe76cc00c7a5290fd47cb6cf121c12e96e0a8de9c726ac10f7ea",
+        "src/pirwa-frame.h": "18155860a3a25564fd34d57f4888f12480a4219addf8b777f0d1fea977c20130",
+        "src/pirwa-create-dialog.h": "328f3a338adee425c41087a9abaf91d8d17d28e9e567ceff1326757c7ec80f7e",
+        "src/pirwa-create-dialog.c": "c28b3e9e955d39744264f5a181432e657ae32bcf37f1405160c88743ddd967a5",
+        "src/pirwa-preferences.h": "97f7deb707624737ab20941295b54e30ae984a8d81ce876431741ecddc7cf490",
+        "src/pirwa-preferences.c": "3f8ad49c6683d00a287726c036b9410cdedd9cb6689053b05e444080ae02f53a",
+        "src/pirwa-window.c": "b3af0a1a7e4fbdf9aecddee6a61d4fa2bf15aba4d0b9662740e8e1f5e7002236",
+        "src/pirwa-provision.c": "e28d48576ccee0135750f3ae0523eec4364507eed3b4cf27a741d0799ce39317",
+        "src/pirwa-config.c": "5c43a3739737615642ea8bb7791f63e5d8a4a8bfd4363f7b083949c8cdf26fa2",
+        "src/pirwa-backend.c": "927871efae0f520bbdbcc6118845c64fab5477ee63d482897caba407d92c5eaa",
+        "src/pirwa-console.c": "1667cf9dba4f25e4820f17b7532f9b9a3141d9d380b1a4b1c23ed93cc0952de3",
+        "tests/benchmark-inventory.c": "187e446c0bd7b184396a60c7830b5b92028ded725091150e1565381ff24c4158",
+        "tests/benchmark-scale.c": "d7345715ef35257b7dd12af6115683500ff30e2b0ec6d765ee216591a54ff174",
+        "tests/test-kvm.c": "e524138f927e2b42cbf6ed24a4d2e467244d7daca022f03a7fc72b8c80ef6199",
+        "tests/test-model.c": "a8d92778c34ac6745d3146b4495549a47d517fcd4a4b55ce94dd6c5c921f8499",
+        "tests/test-provision.c": "77be4030d3b65c0b83a25e970a666734975a7cb34cf8e81c1720fd9f6c5ca3da",
+        "tests/qa-vm.c": "6a1bae787822df50eed08f37bcefde1d09a73c43a45755a21b983f8ddbc941e7",
+        "tests/test-inventory.c": "8b67c8e326bdaac3ddd68ecbd9f148a8adbf1f42cd6c34534a7857a2447a6bef",
+        "tests/test-usage.c": "b685a264cff9aa4f525526352caa2278dd163c0f147f7add16799dfaf96f037d",
+        "tests/test-boxes.c": "b019b900409e0dce89ddff52b3c3b0efa27149117ee6e01a448ff16c53e432e5",
+        "tests/test-import.c": "14faaf8c796e65ca21053fc9f93b2e88b09c40d606b6011a4098bf31c948a62c",
+        "tests/benchmark-console.c": "8e720a9c35e4da9d4cb0bcbeb0ea04d1ec02d976bbec69cd253b914674512633",
+        "tests/test-frame.c": "dca02ed66e4879645c219a2bae0557d35025f76f4d7c22ea461837cdbef78e6d",
+        "tests/benchmark-frame.c": "14268f5c4911036bcf4cde0ae6b8de03e265cfae30e67c884dabd2c0bab9aba8",
+        "tests/test-console-connect.c": "1419e3915eec7202ce1d394a981799573314daef2923eb37139209965240ed4c",
+        "tests/benchmark-display-memory.c": "2709b3c1114664f8f0f5a2722e6abc2d45cbd1a1a22ae62265b53ba75d5da531",
+        "tests/benchmark-display.c": "d28a82d3a725664a7caba583ca7be8083245e065c836565dcfebcccf07605bff",
+        "tests/qa-frame-feedback.h": "9c40c0fc9ae030d353f13f391986455ebd1eaa5840249299da5b9667912728cd",
+        "tests/qa-frame-feedback.c": "4e1a472d882dc4e380f266a2fe00fae223e44021ebc7ab5d5073afb2747b2463",
+        "tests/test-preferences.c": "20d21b75ee88053d9df7b37fc7b2b7e9eae319557ed700db48b3f31bbc430584",
+        "tests/test-console-ui.c": "8615dd6341e14f81f5a8be54648718753a2186dc713698c77bff2b74ba5e5d11",
+        "tests/test-create-ui.c": "a4028538b1586ba25a7f43cbddcf34c39bc7febc944495f6eb24002e4c5a4493",
+        "tests/test-ui.c": "ecad43e867fb02d7e81b720ccc59479270b67b26cd34fe37adad11c9d9bff75a",
+        "tests/test-backend-faults.c": "152ecb4bb55873a70c32608864ff33790c68280e078a73326b6ed794d87a2574",
+        "tests/test-backend.c": "bae5f138f9ed901084faecfa83c3d4f7b57a53ff7cffb251ad366f80aa467467",
+        "tests/test-config.c": "40d7bc2b21bec93083a04c1c4f2a036c95a234a5f2e73c66d165a0665324a5e3",
+        "tests/test-backend-daemon.c": "82eb8040dc011f6dd60fede2716d086a456c151d97c01f7e2bb050427d35499e",
+        "scripts/test-libvirt-daemon.py": "bd569391a424e2090c34596af12e43bbe5e00e38c9e32fb348730d61019e34dd"
+      },
+      "virtqemud_version": "virtqemud (libvirt) 12.6.0",
+      "client_exitcode": 0,
+      "events": [
+        {
+          "event": "ready",
+          "observed_monotonic": 362019.408427623
+        },
+        {
+          "event": "reply",
+          "id": 1,
+          "serial": 1,
+          "ok": false,
+          "cancelled": false,
+          "message": "Cannot connect to libvirt: Failed to connect socket to '/tmp/pirwa-libvirt-9ycnm814/runtime/libvirt/virtqemud-sock': No such file or directory",
+          "observed_monotonic": 362019.410746227
+        },
+        {
+          "event": "inventory",
+          "id": 0,
+          "serial": 2,
+          "ok": true,
+          "machines": 0,
+          "host": true,
+          "pools": true,
+          "observed_monotonic": 362020.415837371
+        },
+        {
+          "event": "error",
+          "id": 0,
+          "serial": 3,
+          "ok": false,
+          "cancelled": false,
+          "message": "Cannot connect to libvirt: Failed to connect socket to '/tmp/pirwa-libvirt-9ycnm814/runtime/libvirt/virtqemud-sock': No such file or directory",
+          "observed_monotonic": 362020.426580934
+        },
+        {
+          "event": "inventory",
+          "id": 0,
+          "serial": 4,
+          "ok": true,
+          "machines": 0,
+          "host": true,
+          "pools": true,
+          "observed_monotonic": 362021.424218474
+        },
+        {
+          "event": "error",
+          "id": 0,
+          "serial": 5,
+          "ok": false,
+          "cancelled": false,
+          "message": "Cannot connect to libvirt: Failed to connect socket to '/tmp/pirwa-libvirt-9ycnm814/runtime/libvirt/virtqemud-sock': Connection refused",
+          "observed_monotonic": 362021.426744018
+        },
+        {
+          "event": "inventory",
+          "id": 0,
+          "serial": 6,
+          "ok": true,
+          "machines": 0,
+          "host": true,
+          "pools": true,
+          "observed_monotonic": 362022.431511325
+        },
+        {
+          "event": "reply",
+          "id": 2,
+          "serial": 7,
+          "ok": false,
+          "cancelled": false,
+          "message": "Cannot connect to libvirt: Failed to connect socket to '/tmp/pirwa-libvirt-9ycnm814/runtime/libvirt/virtqemud-sock': Permission denied",
+          "observed_monotonic": 362022.4326899
+        },
+        {
+          "event": "inventory",
+          "id": 0,
+          "serial": 8,
+          "ok": true,
+          "machines": 0,
+          "host": true,
+          "pools": true,
+          "observed_monotonic": 362023.441486134
+        },
+        {
+          "event": "error",
+          "id": 0,
+          "serial": 9,
+          "ok": false,
+          "cancelled": false,
+          "message": "Cannot connect to libvirt: Failed to connect socket to '/tmp/pirwa-libvirt-9ycnm814/runtime/libvirt/virtqemud-sock': No such file or directory",
+          "observed_monotonic": 362023.44766994
+        },
+        {
+          "event": "pong",
+          "observed_monotonic": 362023.448164399
+        },
+        {
+          "event": "stopped",
+          "observed_monotonic": 362023.448336347
+        },
+        {
+          "event": "reply",
+          "id": 3,
+          "serial": 0,
+          "ok": false,
+          "cancelled": true,
+          "message": "Connection closed",
+          "observed_monotonic": 362023.448434312
+        },
+        {
+          "event": "joined",
+          "observed_monotonic": 362023.448562556
+        }
+      ],
+      "daemon_generations": [
+        {
+          "pid": 3496195,
+          "command": [
+            "virtqemud",
+            "--config",
+            "/tmp/pirwa-libvirt-9ycnm814/config/libvirt/virtqemud.conf",
+            "--pid-file",
+            "/tmp/pirwa-libvirt-9ycnm814/runtime/daemon.pid"
+          ],
+          "exitcode": 0,
+          "crash_requested": false
+        },
+        {
+          "pid": 3496328,
+          "command": [
+            "virtqemud",
+            "--config",
+            "/tmp/pirwa-libvirt-9ycnm814/config/libvirt/virtqemud.conf",
+            "--pid-file",
+            "/tmp/pirwa-libvirt-9ycnm814/runtime/daemon.pid"
+          ],
+          "exitcode": -9,
+          "crash_requested": true
+        },
+        {
+          "pid": 3496594,
+          "command": [
+            "virtqemud",
+            "--config",
+            "/tmp/pirwa-libvirt-9ycnm814/config/libvirt/virtqemud.conf",
+            "--pid-file",
+            "/tmp/pirwa-libvirt-9ycnm814/runtime/daemon.pid"
+          ],
+          "exitcode": 0,
+          "crash_requested": false
+        }
+      ],
+      "process_cleanup": {
+        "signalled": [],
+        "remaining": {}
+      },
+      "private_domain_files": [],
+      "private_storage_files": [],
+      "private_root_removed": true,
+      "client_stderr": "libvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-libvirt-9ycnm814/runtime/libvirt/virtqemud-sock': No such file or directory\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-libvirt-9ycnm814/runtime/libvirt/virtstoraged-sock': No such file or directory\nlibvirt: XML-RPC error : internal error: client socket is closed\nlibvirt: XML-RPC error : internal error: client socket is closed\nlibvirt: XML-RPC error : internal error: client socket is closed\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-libvirt-9ycnm814/runtime/libvirt/virtqemud-sock': No such file or directory\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-libvirt-9ycnm814/runtime/libvirt/virtstoraged-sock': No such file or directory\nlibvirt: XML-RPC error : internal error: client socket is closed\nlibvirt: XML-RPC error : internal error: client socket is closed\nlibvirt: XML-RPC error : internal error: client socket is closed\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-libvirt-9ycnm814/runtime/libvirt/virtqemud-sock': Connection refused\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-libvirt-9ycnm814/runtime/libvirt/virtstoraged-sock': No such file or directory\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-libvirt-9ycnm814/runtime/libvirt/virtqemud-sock': Permission denied\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-libvirt-9ycnm814/runtime/libvirt/virtstoraged-sock': No such file or directory\nlibvirt: XML-RPC error : internal error: client socket is closed\nlibvirt: XML-RPC error : internal error: client socket is closed\nlibvirt: XML-RPC error : internal error: client socket is closed\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-libvirt-9ycnm814/runtime/libvirt/virtqemud-sock': No such file or directory\n",
+      "daemon_logs": {
+        "daemon-0.log": "",
+        "daemon-1.log": "",
+        "daemon-2.log": ""
+      }
+    },
+    "sanitizer": {
+      "passed": true,
+      "checks": [
+        "startup-unavailable-automatic-recovery",
+        "graceful-restart-automatic-recovery",
+        "crash-restart-automatic-recovery",
+        "socket-permission-denial-automatic-recovery",
+        "main-loop-and-stop-during-real-backoff"
+      ],
+      "scope": "Private unprivileged virtqemud; no domain, disk or network creation; actual transport and production retry delays",
+      "binary_sha256": "e0d40a9c2f2fb84eeaa957203d28e88442c9d2c204ba04b5ab92cbb19cf5d8d1",
+      "source_sha256": {
+        "src/pirwa-machine.c": "3874c8c27e9c3fd88dd69731c592a5bc3ed6297b20c9f77d77e76a3028abd902",
+        "src/pirwa-inventory.h": "549ebabd3a04fd381185deab06978055d622e6fd39bbac54b5b2c6caa0a9b804",
+        "src/pirwa-config.h": "bed38f80afd86996d5544a9907a2b48d47f1947642dea1d14d6db9807624e5a8",
+        "src/main.c": "3a92167e52b73db67ad8a703a9804a60a07df783ff983bb51b76571448863654",
+        "src/pirwa-backend.h": "9ea1592f45acf8c38db157e4210df860905b01cbbcd59221cc6ad7d67abb1db2",
+        "src/pirwa-machine.h": "c0dfaa631ef74fb163cab05b6e22cc25dd9792bd8817ddf89d45a7a245ce8411",
+        "src/pirwa-provision.h": "d9826cc3f48dcc1926820dfd7b98d9af4edc02353c32821d3cd64ac2975aceb0",
+        "src/pirwa-model.c": "2383ab0620a507c297e53ee715f625acd1abeeda932e0bc22db8e6e0ea61f94d",
+        "src/pirwa-model.h": "919dd6fcf72c86780c1c442063e18bc67eef0a8c6009d9cdaa1927bea90888d3",
+        "src/pirwa-boxes-dialog.h": "36fccca7274066a9289a608fdf6140cabebfdc3a36c4221af4fb0c243aca20a0",
+        "src/pirwa-window.h": "e764cbd1307547c74b4624a36e3a8ade1c9c9b3519faab973704c27dfeb8a496",
+        "src/pirwa-display.h": "7181f67d78751f0ba01ad6d491956ab1c74f8f6c366e827ce35ed6607fc6d142",
+        "src/pirwa-inventory.c": "e7c5e88bbd6aab26e98eef025fce6176625bddbae5a8f9bc58903c243106d36c",
+        "src/pirwa-console.h": "b0470c77756effb734fefc50799611ca698594b118d0b5bfe92c2d991c61f3f4",
+        "src/pirwa-usage.h": "4d863f2a0820d8867da38f6aff543f1f254fb4042cbd19b425dd22fb342d0550",
+        "src/pirwa-import.h": "fb30f61bcc10da9f8ac6c52da04024e29cd731533cc95ca37b4b9963ee88b81c",
+        "src/pirwa-boxes.c": "85f1fb16574bc57116363386388c41aa57586f03e2249398d51ecb68cb3bb160",
+        "src/pirwa-boxes.h": "e2ec79c2abb0d0f2bf9063fa0f66cde6ffdf235b5d3e00ca3d308647509085f7",
+        "src/pirwa-boxes-dialog.c": "f9bd14d2c88739d4b6b78f54e9e75a4f73ffdec9427f7f3bfbba428d2e463b9b",
+        "src/pirwa-import.c": "a6eb59558365a28764fce3f42b8e00cb160430ddfafabe366191ba2767be1fcd",
+        "src/pirwa-usage.c": "9199e3dcf56d5f61044d3ddf58a1ee856225128deb6adc9981ca6c93bfbd43d1",
+        "src/pirwa-libvirt.h": "6b20112325bc4afcda34654d4cc1c5ac9e2529045a7f1b7c004cac495120f739",
+        "src/pirwa-display.c": "e24db560976c2f8fb188d7f6e6a55bde994786f25494ca4d3a14f61b2af96425",
+        "src/pirwa-frame.c": "83863d6d451cbe76cc00c7a5290fd47cb6cf121c12e96e0a8de9c726ac10f7ea",
+        "src/pirwa-frame.h": "18155860a3a25564fd34d57f4888f12480a4219addf8b777f0d1fea977c20130",
+        "src/pirwa-create-dialog.h": "328f3a338adee425c41087a9abaf91d8d17d28e9e567ceff1326757c7ec80f7e",
+        "src/pirwa-create-dialog.c": "c28b3e9e955d39744264f5a181432e657ae32bcf37f1405160c88743ddd967a5",
+        "src/pirwa-preferences.h": "97f7deb707624737ab20941295b54e30ae984a8d81ce876431741ecddc7cf490",
+        "src/pirwa-preferences.c": "3f8ad49c6683d00a287726c036b9410cdedd9cb6689053b05e444080ae02f53a",
+        "src/pirwa-window.c": "b3af0a1a7e4fbdf9aecddee6a61d4fa2bf15aba4d0b9662740e8e1f5e7002236",
+        "src/pirwa-provision.c": "e28d48576ccee0135750f3ae0523eec4364507eed3b4cf27a741d0799ce39317",
+        "src/pirwa-config.c": "5c43a3739737615642ea8bb7791f63e5d8a4a8bfd4363f7b083949c8cdf26fa2",
+        "src/pirwa-backend.c": "927871efae0f520bbdbcc6118845c64fab5477ee63d482897caba407d92c5eaa",
+        "src/pirwa-console.c": "2074d02c378e7c0cb368411cefbf312f520e904b0796652a506b0cca183e6b64",
+        "tests/benchmark-inventory.c": "187e446c0bd7b184396a60c7830b5b92028ded725091150e1565381ff24c4158",
+        "tests/benchmark-scale.c": "d7345715ef35257b7dd12af6115683500ff30e2b0ec6d765ee216591a54ff174",
+        "tests/test-kvm.c": "e524138f927e2b42cbf6ed24a4d2e467244d7daca022f03a7fc72b8c80ef6199",
+        "tests/test-model.c": "a8d92778c34ac6745d3146b4495549a47d517fcd4a4b55ce94dd6c5c921f8499",
+        "tests/test-provision.c": "77be4030d3b65c0b83a25e970a666734975a7cb34cf8e81c1720fd9f6c5ca3da",
+        "tests/qa-vm.c": "6a1bae787822df50eed08f37bcefde1d09a73c43a45755a21b983f8ddbc941e7",
+        "tests/test-inventory.c": "8b67c8e326bdaac3ddd68ecbd9f148a8adbf1f42cd6c34534a7857a2447a6bef",
+        "tests/test-usage.c": "b685a264cff9aa4f525526352caa2278dd163c0f147f7add16799dfaf96f037d",
+        "tests/test-boxes.c": "b019b900409e0dce89ddff52b3c3b0efa27149117ee6e01a448ff16c53e432e5",
+        "tests/test-import.c": "14faaf8c796e65ca21053fc9f93b2e88b09c40d606b6011a4098bf31c948a62c",
+        "tests/benchmark-console.c": "8e720a9c35e4da9d4cb0bcbeb0ea04d1ec02d976bbec69cd253b914674512633",
+        "tests/test-frame.c": "dca02ed66e4879645c219a2bae0557d35025f76f4d7c22ea461837cdbef78e6d",
+        "tests/benchmark-frame.c": "14268f5c4911036bcf4cde0ae6b8de03e265cfae30e67c884dabd2c0bab9aba8",
+        "tests/test-console-connect.c": "6b2cff2164398b6c9a2898eeeb916ad3355450c8d6bdfa2e7442530d0a4c2ccb",
+        "tests/benchmark-display-memory.c": "2709b3c1114664f8f0f5a2722e6abc2d45cbd1a1a22ae62265b53ba75d5da531",
+        "tests/benchmark-display.c": "d28a82d3a725664a7caba583ca7be8083245e065c836565dcfebcccf07605bff",
+        "tests/qa-frame-feedback.h": "9c40c0fc9ae030d353f13f391986455ebd1eaa5840249299da5b9667912728cd",
+        "tests/qa-frame-feedback.c": "4e1a472d882dc4e380f266a2fe00fae223e44021ebc7ab5d5073afb2747b2463",
+        "tests/test-preferences.c": "20d21b75ee88053d9df7b37fc7b2b7e9eae319557ed700db48b3f31bbc430584",
+        "tests/test-console-ui.c": "8615dd6341e14f81f5a8be54648718753a2186dc713698c77bff2b74ba5e5d11",
+        "tests/test-create-ui.c": "a4028538b1586ba25a7f43cbddcf34c39bc7febc944495f6eb24002e4c5a4493",
+        "tests/test-ui.c": "ecad43e867fb02d7e81b720ccc59479270b67b26cd34fe37adad11c9d9bff75a",
+        "tests/test-backend-faults.c": "152ecb4bb55873a70c32608864ff33790c68280e078a73326b6ed794d87a2574",
+        "tests/test-backend.c": "bae5f138f9ed901084faecfa83c3d4f7b57a53ff7cffb251ad366f80aa467467",
+        "tests/test-config.c": "40d7bc2b21bec93083a04c1c4f2a036c95a234a5f2e73c66d165a0665324a5e3",
+        "tests/test-backend-daemon.c": "82eb8040dc011f6dd60fede2716d086a456c151d97c01f7e2bb050427d35499e",
+        "scripts/test-libvirt-daemon.py": "bd569391a424e2090c34596af12e43bbe5e00e38c9e32fb348730d61019e34dd"
+      },
+      "virtqemud_version": "virtqemud (libvirt) 12.6.0",
+      "client_exitcode": 0,
+      "events": [
+        {
+          "event": "ready",
+          "observed_monotonic": 362073.061482119
+        },
+        {
+          "event": "reply",
+          "id": 1,
+          "serial": 1,
+          "ok": false,
+          "cancelled": false,
+          "message": "Cannot connect to libvirt: Failed to connect socket to '/tmp/pirwa-libvirt-gy9aoeiy/runtime/libvirt/virtqemud-sock': No such file or directory",
+          "observed_monotonic": 362073.076362543
+        },
+        {
+          "event": "inventory",
+          "id": 0,
+          "serial": 2,
+          "ok": true,
+          "machines": 0,
+          "host": true,
+          "pools": true,
+          "observed_monotonic": 362074.082821349
+        },
+        {
+          "event": "error",
+          "id": 0,
+          "serial": 3,
+          "ok": false,
+          "cancelled": false,
+          "message": "Cannot connect to libvirt: Failed to connect socket to '/tmp/pirwa-libvirt-gy9aoeiy/runtime/libvirt/virtqemud-sock': No such file or directory",
+          "observed_monotonic": 362074.087366508
+        },
+        {
+          "event": "inventory",
+          "id": 0,
+          "serial": 4,
+          "ok": true,
+          "machines": 0,
+          "host": true,
+          "pools": true,
+          "observed_monotonic": 362075.092603777
+        },
+        {
+          "event": "error",
+          "id": 0,
+          "serial": 5,
+          "ok": false,
+          "cancelled": false,
+          "message": "Cannot connect to libvirt: Failed to connect socket to '/tmp/pirwa-libvirt-gy9aoeiy/runtime/libvirt/virtqemud-sock': No such file or directory",
+          "observed_monotonic": 362075.096881841
+        },
+        {
+          "event": "inventory",
+          "id": 0,
+          "serial": 6,
+          "ok": true,
+          "machines": 0,
+          "host": true,
+          "pools": true,
+          "observed_monotonic": 362076.10437732
+        },
+        {
+          "event": "reply",
+          "id": 2,
+          "serial": 7,
+          "ok": false,
+          "cancelled": false,
+          "message": "Cannot connect to libvirt: Failed to connect socket to '/tmp/pirwa-libvirt-gy9aoeiy/runtime/libvirt/virtqemud-sock': Permission denied",
+          "observed_monotonic": 362076.106520505
+        },
+        {
+          "event": "inventory",
+          "id": 0,
+          "serial": 8,
+          "ok": true,
+          "machines": 0,
+          "host": true,
+          "pools": true,
+          "observed_monotonic": 362077.111205106
+        },
+        {
+          "event": "error",
+          "id": 0,
+          "serial": 9,
+          "ok": false,
+          "cancelled": false,
+          "message": "Cannot connect to libvirt: Failed to connect socket to '/tmp/pirwa-libvirt-gy9aoeiy/runtime/libvirt/virtqemud-sock': No such file or directory",
+          "observed_monotonic": 362077.117140479
+        },
+        {
+          "event": "pong",
+          "observed_monotonic": 362077.117426122
+        },
+        {
+          "event": "stopped",
+          "observed_monotonic": 362077.117591622
+        },
+        {
+          "event": "reply",
+          "id": 3,
+          "serial": 0,
+          "ok": false,
+          "cancelled": true,
+          "message": "Connection closed",
+          "observed_monotonic": 362077.117756198
+        },
+        {
+          "event": "joined",
+          "observed_monotonic": 362077.117895172
+        }
+      ],
+      "daemon_generations": [
+        {
+          "pid": 3501393,
+          "command": [
+            "virtqemud",
+            "--config",
+            "/tmp/pirwa-libvirt-gy9aoeiy/config/libvirt/virtqemud.conf",
+            "--pid-file",
+            "/tmp/pirwa-libvirt-gy9aoeiy/runtime/daemon.pid"
+          ],
+          "exitcode": 0,
+          "crash_requested": false
+        },
+        {
+          "pid": 3501442,
+          "command": [
+            "virtqemud",
+            "--config",
+            "/tmp/pirwa-libvirt-gy9aoeiy/config/libvirt/virtqemud.conf",
+            "--pid-file",
+            "/tmp/pirwa-libvirt-gy9aoeiy/runtime/daemon.pid"
+          ],
+          "exitcode": -9,
+          "crash_requested": true
+        },
+        {
+          "pid": 3501632,
+          "command": [
+            "virtqemud",
+            "--config",
+            "/tmp/pirwa-libvirt-gy9aoeiy/config/libvirt/virtqemud.conf",
+            "--pid-file",
+            "/tmp/pirwa-libvirt-gy9aoeiy/runtime/daemon.pid"
+          ],
+          "exitcode": 0,
+          "crash_requested": false
+        }
+      ],
+      "process_cleanup": {
+        "signalled": [],
+        "remaining": {}
+      },
+      "private_domain_files": [],
+      "private_storage_files": [],
+      "private_root_removed": true,
+      "client_stderr": "libvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-libvirt-gy9aoeiy/runtime/libvirt/virtqemud-sock': No such file or directory\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-libvirt-gy9aoeiy/runtime/libvirt/virtstoraged-sock': No such file or directory\nlibvirt: XML-RPC error : internal error: client socket is closed\nlibvirt: XML-RPC error : internal error: client socket is closed\nlibvirt: XML-RPC error : internal error: client socket is closed\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-libvirt-gy9aoeiy/runtime/libvirt/virtqemud-sock': No such file or directory\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-libvirt-gy9aoeiy/runtime/libvirt/virtstoraged-sock': No such file or directory\nlibvirt: XML-RPC error : internal error: client socket is closed\nlibvirt: XML-RPC error : internal error: client socket is closed\nlibvirt: XML-RPC error : internal error: client socket is closed\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-libvirt-gy9aoeiy/runtime/libvirt/virtqemud-sock': No such file or directory\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-libvirt-gy9aoeiy/runtime/libvirt/virtstoraged-sock': No such file or directory\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-libvirt-gy9aoeiy/runtime/libvirt/virtqemud-sock': Permission denied\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-libvirt-gy9aoeiy/runtime/libvirt/virtstoraged-sock': No such file or directory\nlibvirt: XML-RPC error : internal error: client socket is closed\nlibvirt: XML-RPC error : internal error: client socket is closed\nlibvirt: XML-RPC error : internal error: client socket is closed\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-libvirt-gy9aoeiy/runtime/libvirt/virtqemud-sock': No such file or directory\n",
+      "daemon_logs": {
+        "daemon-0.log": "",
+        "daemon-1.log": "",
+        "daemon-2.log": ""
+      }
+    },
+    "interrupted": {
+      "passed": false,
+      "checks": [
+        "startup-unavailable-automatic-recovery"
+      ],
+      "scope": "Private unprivileged virtqemud; no domain, disk or network creation; actual transport and production retry delays",
+      "binary_sha256": "f2d54031c7e60d45d60ca1a9c17bd0d47dec789b8a1282ee64dc859d2d6506e6",
+      "source_sha256": {
+        "src/pirwa-machine.c": "3874c8c27e9c3fd88dd69731c592a5bc3ed6297b20c9f77d77e76a3028abd902",
+        "src/pirwa-inventory.h": "549ebabd3a04fd381185deab06978055d622e6fd39bbac54b5b2c6caa0a9b804",
+        "src/pirwa-config.h": "bed38f80afd86996d5544a9907a2b48d47f1947642dea1d14d6db9807624e5a8",
+        "src/main.c": "3a92167e52b73db67ad8a703a9804a60a07df783ff983bb51b76571448863654",
+        "src/pirwa-backend.h": "9ea1592f45acf8c38db157e4210df860905b01cbbcd59221cc6ad7d67abb1db2",
+        "src/pirwa-machine.h": "c0dfaa631ef74fb163cab05b6e22cc25dd9792bd8817ddf89d45a7a245ce8411",
+        "src/pirwa-provision.h": "d9826cc3f48dcc1926820dfd7b98d9af4edc02353c32821d3cd64ac2975aceb0",
+        "src/pirwa-model.c": "2383ab0620a507c297e53ee715f625acd1abeeda932e0bc22db8e6e0ea61f94d",
+        "src/pirwa-model.h": "919dd6fcf72c86780c1c442063e18bc67eef0a8c6009d9cdaa1927bea90888d3",
+        "src/pirwa-boxes-dialog.h": "36fccca7274066a9289a608fdf6140cabebfdc3a36c4221af4fb0c243aca20a0",
+        "src/pirwa-window.h": "e764cbd1307547c74b4624a36e3a8ade1c9c9b3519faab973704c27dfeb8a496",
+        "src/pirwa-display.h": "7181f67d78751f0ba01ad6d491956ab1c74f8f6c366e827ce35ed6607fc6d142",
+        "src/pirwa-inventory.c": "e7c5e88bbd6aab26e98eef025fce6176625bddbae5a8f9bc58903c243106d36c",
+        "src/pirwa-console.h": "b0470c77756effb734fefc50799611ca698594b118d0b5bfe92c2d991c61f3f4",
+        "src/pirwa-usage.h": "4d863f2a0820d8867da38f6aff543f1f254fb4042cbd19b425dd22fb342d0550",
+        "src/pirwa-import.h": "fb30f61bcc10da9f8ac6c52da04024e29cd731533cc95ca37b4b9963ee88b81c",
+        "src/pirwa-boxes.c": "85f1fb16574bc57116363386388c41aa57586f03e2249398d51ecb68cb3bb160",
+        "src/pirwa-boxes.h": "e2ec79c2abb0d0f2bf9063fa0f66cde6ffdf235b5d3e00ca3d308647509085f7",
+        "src/pirwa-boxes-dialog.c": "f9bd14d2c88739d4b6b78f54e9e75a4f73ffdec9427f7f3bfbba428d2e463b9b",
+        "src/pirwa-import.c": "a6eb59558365a28764fce3f42b8e00cb160430ddfafabe366191ba2767be1fcd",
+        "src/pirwa-usage.c": "9199e3dcf56d5f61044d3ddf58a1ee856225128deb6adc9981ca6c93bfbd43d1",
+        "src/pirwa-libvirt.h": "6b20112325bc4afcda34654d4cc1c5ac9e2529045a7f1b7c004cac495120f739",
+        "src/pirwa-display.c": "e24db560976c2f8fb188d7f6e6a55bde994786f25494ca4d3a14f61b2af96425",
+        "src/pirwa-frame.c": "83863d6d451cbe76cc00c7a5290fd47cb6cf121c12e96e0a8de9c726ac10f7ea",
+        "src/pirwa-frame.h": "18155860a3a25564fd34d57f4888f12480a4219addf8b777f0d1fea977c20130",
+        "src/pirwa-create-dialog.h": "328f3a338adee425c41087a9abaf91d8d17d28e9e567ceff1326757c7ec80f7e",
+        "src/pirwa-create-dialog.c": "c28b3e9e955d39744264f5a181432e657ae32bcf37f1405160c88743ddd967a5",
+        "src/pirwa-preferences.h": "97f7deb707624737ab20941295b54e30ae984a8d81ce876431741ecddc7cf490",
+        "src/pirwa-preferences.c": "3f8ad49c6683d00a287726c036b9410cdedd9cb6689053b05e444080ae02f53a",
+        "src/pirwa-window.c": "b3af0a1a7e4fbdf9aecddee6a61d4fa2bf15aba4d0b9662740e8e1f5e7002236",
+        "src/pirwa-provision.c": "e28d48576ccee0135750f3ae0523eec4364507eed3b4cf27a741d0799ce39317",
+        "src/pirwa-config.c": "5c43a3739737615642ea8bb7791f63e5d8a4a8bfd4363f7b083949c8cdf26fa2",
+        "src/pirwa-backend.c": "927871efae0f520bbdbcc6118845c64fab5477ee63d482897caba407d92c5eaa",
+        "src/pirwa-console.c": "2074d02c378e7c0cb368411cefbf312f520e904b0796652a506b0cca183e6b64",
+        "tests/benchmark-inventory.c": "187e446c0bd7b184396a60c7830b5b92028ded725091150e1565381ff24c4158",
+        "tests/benchmark-scale.c": "d7345715ef35257b7dd12af6115683500ff30e2b0ec6d765ee216591a54ff174",
+        "tests/test-kvm.c": "e524138f927e2b42cbf6ed24a4d2e467244d7daca022f03a7fc72b8c80ef6199",
+        "tests/test-model.c": "a8d92778c34ac6745d3146b4495549a47d517fcd4a4b55ce94dd6c5c921f8499",
+        "tests/test-provision.c": "77be4030d3b65c0b83a25e970a666734975a7cb34cf8e81c1720fd9f6c5ca3da",
+        "tests/qa-vm.c": "6a1bae787822df50eed08f37bcefde1d09a73c43a45755a21b983f8ddbc941e7",
+        "tests/test-inventory.c": "8b67c8e326bdaac3ddd68ecbd9f148a8adbf1f42cd6c34534a7857a2447a6bef",
+        "tests/test-usage.c": "b685a264cff9aa4f525526352caa2278dd163c0f147f7add16799dfaf96f037d",
+        "tests/test-boxes.c": "b019b900409e0dce89ddff52b3c3b0efa27149117ee6e01a448ff16c53e432e5",
+        "tests/test-import.c": "14faaf8c796e65ca21053fc9f93b2e88b09c40d606b6011a4098bf31c948a62c",
+        "tests/benchmark-console.c": "8e720a9c35e4da9d4cb0bcbeb0ea04d1ec02d976bbec69cd253b914674512633",
+        "tests/test-frame.c": "dca02ed66e4879645c219a2bae0557d35025f76f4d7c22ea461837cdbef78e6d",
+        "tests/benchmark-frame.c": "14268f5c4911036bcf4cde0ae6b8de03e265cfae30e67c884dabd2c0bab9aba8",
+        "tests/test-console-connect.c": "6b2cff2164398b6c9a2898eeeb916ad3355450c8d6bdfa2e7442530d0a4c2ccb",
+        "tests/benchmark-display-memory.c": "2709b3c1114664f8f0f5a2722e6abc2d45cbd1a1a22ae62265b53ba75d5da531",
+        "tests/benchmark-display.c": "d28a82d3a725664a7caba583ca7be8083245e065c836565dcfebcccf07605bff",
+        "tests/qa-frame-feedback.h": "9c40c0fc9ae030d353f13f391986455ebd1eaa5840249299da5b9667912728cd",
+        "tests/qa-frame-feedback.c": "4e1a472d882dc4e380f266a2fe00fae223e44021ebc7ab5d5073afb2747b2463",
+        "tests/test-preferences.c": "20d21b75ee88053d9df7b37fc7b2b7e9eae319557ed700db48b3f31bbc430584",
+        "tests/test-console-ui.c": "8615dd6341e14f81f5a8be54648718753a2186dc713698c77bff2b74ba5e5d11",
+        "tests/test-create-ui.c": "a4028538b1586ba25a7f43cbddcf34c39bc7febc944495f6eb24002e4c5a4493",
+        "tests/test-ui.c": "ecad43e867fb02d7e81b720ccc59479270b67b26cd34fe37adad11c9d9bff75a",
+        "tests/test-backend-faults.c": "152ecb4bb55873a70c32608864ff33790c68280e078a73326b6ed794d87a2574",
+        "tests/test-backend.c": "bae5f138f9ed901084faecfa83c3d4f7b57a53ff7cffb251ad366f80aa467467",
+        "tests/test-config.c": "40d7bc2b21bec93083a04c1c4f2a036c95a234a5f2e73c66d165a0665324a5e3",
+        "tests/test-backend-daemon.c": "82eb8040dc011f6dd60fede2716d086a456c151d97c01f7e2bb050427d35499e",
+        "scripts/test-libvirt-daemon.py": "bd569391a424e2090c34596af12e43bbe5e00e38c9e32fb348730d61019e34dd"
+      },
+      "virtqemud_version": "virtqemud (libvirt) 12.6.0",
+      "error": "Interrupted by signal 15",
+      "client_exitcode": 0,
+      "events": [
+        {
+          "event": "ready",
+          "observed_monotonic": 362095.504829904
+        },
+        {
+          "event": "reply",
+          "id": 1,
+          "serial": 1,
+          "ok": false,
+          "cancelled": false,
+          "message": "Cannot connect to libvirt: Failed to connect socket to '/tmp/pirwa-libvirt-bxzdyrvm/runtime/libvirt/virtqemud-sock': No such file or directory",
+          "observed_monotonic": 362095.508116413
+        },
+        {
+          "event": "inventory",
+          "id": 0,
+          "serial": 2,
+          "ok": true,
+          "machines": 0,
+          "host": true,
+          "pools": true,
+          "observed_monotonic": 362096.512326718
+        },
+        {
+          "event": "error",
+          "id": 0,
+          "serial": 3,
+          "ok": false,
+          "cancelled": false,
+          "message": "Cannot connect to libvirt: Failed to connect socket to '/tmp/pirwa-libvirt-bxzdyrvm/runtime/libvirt/virtqemud-sock': No such file or directory",
+          "observed_monotonic": 362096.517734088
+        },
+        {
+          "event": "joined",
+          "observed_monotonic": 362096.517847917
+        }
+      ],
+      "daemon_generations": [
+        {
+          "pid": 3502712,
+          "command": [
+            "virtqemud",
+            "--config",
+            "/tmp/pirwa-libvirt-bxzdyrvm/config/libvirt/virtqemud.conf",
+            "--pid-file",
+            "/tmp/pirwa-libvirt-bxzdyrvm/runtime/daemon.pid"
+          ],
+          "exitcode": 0,
+          "crash_requested": false
+        }
+      ],
+      "process_cleanup": {
+        "signalled": [],
+        "remaining": {}
+      },
+      "private_domain_files": [],
+      "private_storage_files": [],
+      "private_root_removed": true,
+      "client_stderr": "libvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-libvirt-bxzdyrvm/runtime/libvirt/virtqemud-sock': No such file or directory\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-libvirt-bxzdyrvm/runtime/libvirt/virtstoraged-sock': No such file or directory\nlibvirt: XML-RPC error : internal error: client socket is closed\nlibvirt: XML-RPC error : internal error: client socket is closed\nlibvirt: XML-RPC error : internal error: client socket is closed\nlibvirt: XML-RPC error : Failed to connect socket to '/tmp/pirwa-libvirt-bxzdyrvm/runtime/libvirt/virtqemud-sock': No such file or directory\n",
+      "daemon_logs": {
+        "daemon-0.log": ""
+      }
+    }
+  },
+  "headless": {
+    "normal": [
+      {
+        "name": "pirwa:desktop-file",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.05534505844116211,
+        "stdout": "",
+        "command": [
+          "/usr/bin/desktop-file-validate",
+          "/home/stone/Gnome/pirwa/data/io.github.pirwa.Pirwa.desktop"
+        ]
+      },
+      {
+        "name": "pirwa:appstream",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.05111289024353027,
+        "stdout": "I: io.github.pirwa.Pirwa:~: url-homepage-missing\n\n\u2714 Validation was successful: infos: 1, pedantic: 2\n",
+        "command": [
+          "/usr/bin/appstreamcli",
+          "validate",
+          "--no-net",
+          "--override",
+          "url-homepage-missing=info",
+          "/home/stone/Gnome/pirwa/data/io.github.pirwa.Pirwa.metainfo.xml"
+        ]
+      },
+      {
+        "name": "pirwa:usage",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.035138845443725586,
+        "stdout": "TAP version 14\n# random seed: R02S1be4924f663458e024bd06bd074b8069\n1..5\n# Start of usage tests\nok 1 /usage/cpu-units\nok 2 /usage/missing-and-reset\nok 3 /usage/network-rates\nok 4 /usage/network-baselines\nok 5 /usage/network-stats\n# End of usage tests\n",
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-usage"
+        ]
+      },
+      {
+        "name": "pirwa:config",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.03187847137451172,
+        "stdout": "TAP version 14\n# random seed: R02Sc3ee3c58c0b0ee57cc7bedc75d6070b0\n1..9\n# Start of config tests\nok 1 /config/os-metadata\nok 2 /config/graphics-index\nok 3 /config/embedded-graphics\nok 4 /config/creation-graphics\nok 5 /config/roundtrip-and-eject\nok 6 /config/media\nok 7 /config/media-tray\nok 8 /config/validation\nok 9 /config/qcow2\n# End of config tests\n",
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-config"
+        ]
+      },
+      {
+        "name": "pirwa:model",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.020857572555541992,
+        "stdout": "TAP version 14\n# random seed: R02S15ee5431db7c50d8994be52d69a498bd\n1..2\n# Start of model tests\nok 1 /model/os-title-and-fallback\nok 2 /model/late-delivery-and-stable-identity\n# End of model tests\n",
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-model"
+        ]
+      },
+      {
+        "name": "pirwa:provision",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.025699853897094727,
+        "stdout": "TAP version 14\n# random seed: R02S31819d37e2c3a3b0daa99e81cb35d5b0\n1..5\n# Start of provision tests\nok 1 /provision/references-and-missing-media\nok 2 /provision/rollback-inactive\nok 3 /provision/rollback-running\nok 4 /provision/rollback-shared\nok 5 /provision/cancel-before-remove\n# End of provision tests\n",
+        "stderr": "libvirt: Test Driver error : Storage volume not found: no storage vol with matching name 'pirwa-11111111-1111-4111-8111-111111111111.qcow2'\nlibvirt: Test Driver error : Storage volume not found: no storage vol with matching name 'pirwa-11111111-1111-4111-8111-111111111111.qcow2'\n",
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-provision"
+        ]
+      },
+      {
+        "name": "pirwa:preferences",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.008689165115356445,
+        "stdout": "TAP version 14\n# random seed: R02S6f6457a7941f572c05ddc045eed673a3\n# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation memory (GMemorySettingsBackend) for \u2018gsettings-backend\u2019\n",
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-preferences"
+        ]
+      },
+      {
+        "name": "pirwa:backend",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.04556393623352051,
+        "stdout": "TAP version 14\n# random seed: R02S62f70b0ee6f82ccc6492e83c3544456e\n1..10\n# Start of backend tests\n# DEBUG: Add timeout 0x7fd5000653f0 -1 0x7fd507127b80 0x7fd50005ec10 1\n# \n# DEBUG: Update timeout 0x7fd5000653f0 1 0\n# \n# DEBUG: Dispatch timeout 0x7fd5000653f0 0x7fd507127b80 1 0x7fd50005ec10\n# \n# DEBUG: Update timeout 0x7fd5000653f0 1 -1\n# \nok 1 /backend/usage\n# DEBUG: Remove timeout 0x7fd5000653f0 1\n# \nok 2 /backend/socket-ownership\n# DEBUG: Add timeout 0x7fd500000da0 -1 0x7fd507127b80 0x7fd5000655b0 2\n# \n# DEBUG: Remove timeout 0x7fd500000da0 2\n# \nok 3 /backend/native-console\n# DEBUG: Add timeout 0x7fd50000ed70 -1 0x7fd507127b80 0x7fd5000743c0 3\n# \n# DEBUG: Update timeout 0x7fd50000ed70 3 0\n# \n# DEBUG: Dispatch timeout 0x7fd50000ed70 0x7fd507127b80 3 0x7fd5000743c0\n# \n# DEBUG: Update timeout 0x7fd50000ed70 3 -1\n# \n# DEBUG: Update timeout 0x7fd50000ed70 3 0\n# \n# DEBUG: Dispatch timeout 0x7fd50000ed70 0x7fd507127b80 3 0x7fd5000743c0\n# \n# DEBUG: Update timeout 0x7fd50000ed70 3 -1\n# \n# DEBUG: Update timeout 0x7fd50000ed70 3 0\n# \n# DEBUG: Dispatch timeout 0x7fd50000ed70 0x7fd507127b80 3 0x7fd5000743c0\n# \n# DEBUG: Update timeout 0x7fd50000ed70 3 -1\n# \n# DEBUG: Remove timeout 0x7fd50000ed70 3\n# \n# DEBUG: Add timeout 0x7fd500024a70 -1 0x7fd507127b80 0x7fd500062950 4\n# \n# DEBUG: Update timeout 0x7fd500024a70 4 0\n# \n# DEBUG: Dispatch timeout 0x7fd500024a70 0x7fd507127b80 4 0x7fd500062950\n# \n# DEBUG: Update timeout 0x7fd500024a70 4 -1\n# \n# DEBUG: Update timeout 0x7fd500024a70 4 0\n# \n# DEBUG: Dispatch timeout 0x7fd500024a70 0x7fd507127b80 4 0x7fd500062950\n# \n# DEBUG: Update timeout 0x7fd500024a70 4 -1\n# \n# DEBUG: Update timeout 0x7fd500024a70 4 0\n# \n# DEBUG: Dispatch timeout 0x7fd500024a70 0x7fd507127b80 4 0x7fd500062950\n# \n# DEBUG: Update timeout 0x7fd500024a70 4 -1\n# \n# DEBUG: Remove timeout 0x7fd500024a70 4\n# \n# DEBUG: Add timeout 0x7fd500065e60 -1 0x7fd507127b80 0x7fd500062950 5\n# \n# DEBUG: Update timeout 0x7fd500065e60 5 0\n# \n# DEBUG: Dispatch timeout 0x7fd500065e60 0x7fd507127b80 5 0x7fd500062950\n# \n# DEBUG: Update timeout 0x7fd500065e60 5 -1\n# \n# DEBUG: Update timeout 0x7fd500065e60 5 0\n# \n# DEBUG: Dispatch timeout 0x7fd500065e60 0x7fd507127b80 5 0x7fd500062950\n# \n# DEBUG: Update timeout 0x7fd500065e60 5 -1\n# \n# DEBUG: Remove timeout 0x7fd500065e60 5\n# \nok 4 /backend/media\n# DEBUG: Add timeout 0x7fd50001cdd0 -1 0x7fd507127b80 0x7fd50006a8a0 6\n# \n# DEBUG: Update timeout 0x7fd50001cdd0 6 0\n# \n# DEBUG: Dispatch timeout 0x7fd50001cdd0 0x7fd507127b80 6 0x7fd50006a8a0\n# \n# DEBUG: Update timeout 0x7fd50001cdd0 6 -1\n# \n# DEBUG: Update timeout 0x7fd50001cdd0 6 0\n# \n# DEBUG: Dispatch timeout 0x7fd50001cdd0 0x7fd507127b80 6 0x7fd50006a8a0\n# \n# DEBUG: Update timeout 0x7fd50001cdd0 6 -1\n# \n# DEBUG: Update timeout 0x7fd50001cdd0 6 0\n# \n# DEBUG: Dispatch timeout 0x7fd50001cdd0 0x7fd507127b80 6 0x7fd50006a8a0\n# \n# DEBUG: Update timeout 0x7fd50001cdd0 6 -1\n# \n# DEBUG: Update timeout 0x7fd50001cdd0 6 0\n# \n# DEBUG: Dispatch timeout 0x7fd50001cdd0 0x7fd507127b80 6 0x7fd50006a8a0\n# \n# DEBUG: Update timeout 0x7fd50001cdd0 6 -1\n# \n# DEBUG: Update timeout 0x7fd50001cdd0 6 0\n# \n# DEBUG: Dispatch timeout 0x7fd50001cdd0 0x7fd507127b80 6 0x7fd50006a8a0\n# \n# DEBUG: Update timeout 0x7fd50001cdd0 6 -1\n# \n# DEBUG: Update timeout 0x7fd50001cdd0 6 0\n# \n# DEBUG: Dispatch timeout 0x7fd50001cdd0 0x7fd507127b80 6 0x7fd50006a8a0\n# \n# DEBUG: Update timeout 0x7fd50001cdd0 6 -1\n# \n# DEBUG: Update timeout 0x7fd50001cdd0 6 0\n# \n# DEBUG: Dispatch timeout 0x7fd50001cdd0 0x7fd507127b80 6 0x7fd50006a8a0\n# \n# DEBUG: Update timeout 0x7fd50001cdd0 6 -1\n# \nok 5 /backend/controls-and-ownership\n# DEBUG: Remove timeout 0x7fd50001cdd0 6\n# \nok 6 /backend/cancellation-and-stop\n# DEBUG: Add timeout 0x7fd5000752c0 -1 0x7fd507127b80 0x7fd500079c00 7\n# \n# DEBUG: Remove timeout 0x7fd5000752c0 7\n# \n# DEBUG: Add timeout 0x7fd500062eb0 -1 0x7fd507127b80 0x7fd5000618c0 8\n# \n# DEBUG: Remove timeout 0x7fd500062eb0 8\n# \nok 7 /backend/reconnect-and-missing\n# DEBUG: Add timeout 0x7fd500075180 -1 0x7fd507127b80 0x7fd500079c00 9\n# \n# DEBUG: Update timeout 0x7fd500075180 9 0\n# \n# DEBUG: Dispatch timeout 0x7fd500075180 0x7fd507127b80 9 0x7fd500079c00\n# \n# DEBUG: Update timeout 0x7fd500075180 9 -1\n# \nok 8 /backend/lifecycle-events\n# DEBUG: Remove timeout 0x7fd500075180 9\n# \n# DEBUG: Add timeout 0x7fd500062960 -1 0x7fd507127b80 0x7fd5000743c0 10\n# \n# DEBUG: Remove timeout 0x7fd500062960 10\n# \nok 9 /backend/stop-in-flight\n# DEBUG: Add timeout 0x7fd5000628b0 -1 0x7fd507127b80 0x7fd500073e30 11\n# \n# DEBUG: Remove timeout 0x7fd5000628b0 11\n# \nok 10 /backend/result-order-and-progress\n# End of backend tests\n",
+        "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Test Driver error : Domain not found\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-backend"
+        ]
+      },
+      {
+        "name": "pirwa:console-frame",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.034700870513916016,
+        "stdout": "TAP version 14\n# random seed: R02S734e4cd72a71cb88190c32cb04de3c90\n1..7\n# Start of console tests\nok 1 /console/owned-pixels-and-damage\nok 2 /console/formats-and-bounds\nok 3 /console/input-mapping\nok 4 /console/alpha\nok 5 /console/crop-and-ownership\nok 6 /console/contiguous-rgb-and-alpha\nok 7 /console/monitor-padding\n# End of console tests\n",
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-frame"
+        ]
+      },
+      {
+        "name": "pirwa:boxes",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.0386660099029541,
+        "stdout": "TAP version 14\n# random seed: R02S39c71f4ca7d8daff6bf73f6630b30e28\n1..8\n# Start of boxes tests\nok 1 /boxes/native-library\nok 2 /boxes/not-installed-with-leftover-data\nok 3 /boxes/empty-library\nok 4 /boxes/flatpak-read-only-discovery\nok 5 /boxes/one-time-preference\nok 6 /boxes/offline-socket-preference\nok 7 /boxes/cancellation\nok 8 /boxes/main-thread-callback\n# End of boxes tests\n",
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-boxes"
+        ]
+      },
+      {
+        "name": "pirwa:boxes-import",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.047080039978027344,
+        "stdout": "TAP version 14\n# random seed: R02S3eb28d968520622d28d4d68815081cdf\n1..8\n# Start of import tests\nok 1 /import/copy-independent-machine\nok 2 /import/reject-running\nok 3 /import/cancel-and-rollback\nok 4 /import/reject-changed-source\nok 5 /import/upload-failure-rolls-back\nok 6 /import/reject-internal-snapshots\nok 7 /import/reject-unsupported-devices\nok 8 /import/firmware-no-overwrite-or-symlink\n# End of import tests\n",
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-import"
+        ]
+      },
+      {
+        "name": "pirwa:inventory",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.19062471389770508,
+        "stdout": "TAP version 14\n# random seed: R02S1b1b6d582b84874ef810e6c1adf0072d\n1..4\n# Start of inventory tests\n# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation gvfs (GDaemonVfs) for \u2018gio-vfs\u2019\nok 1 /inventory/os-names-and-cache\nok 2 /inventory/discovery\nok 3 /inventory/cancelled\nok 4 /inventory/connection-failure\n# End of inventory tests\n",
+        "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: XML-RPC error : Failed to connect socket to '/var/run/libvirt/virtpirwa-unsupportedd-sock-ro': No such file or directory\n",
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-inventory"
+        ]
+      },
+      {
+        "name": "pirwa:backend-faults",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.20520949363708496,
+        "stdout": "TAP version 14\n# random seed: R02Sd2c97f8b0065b32cd6195e0c3ebec01a\n1..7\n# Start of backend-faults tests\nok 1 /backend-faults/startup-recovery-metadata\nok 2 /backend-faults/retry-budget-and-manual-reconnect\nok 3 /backend-faults/cancelled-work-keeps-budget\nok 4 /backend-faults/close-notification\nok 5 /backend-faults/permission-denied\nok 6 /backend-faults/transport-lost-no-replay\nok 7 /backend-faults/blocked-inventory-stop\n# End of backend-faults tests\n",
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/test-backend-faults"
+        ]
+      },
+      {
+        "name": "pirwa:scale-1000",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.31392955780029297,
+        "stdout": "{\"driver\":\"test:///default\",\"method\":\"persistent_bulk\",\"domains\":1000,\"p50_ms\":7.348,\"p95_ms\":8.923,\"raw_us\":[7703,7256,7289,7653,7432,7259,7266,7648,7425,7283,7271,7211,7989,8175,8923,12299,8811,7412,7348,7723,7269,7313,7267,7329,7238]}\n",
+        "command": [
+          "/home/stone/Gnome/pirwa/build/tests/benchmark-scale",
+          "1000"
+        ]
+      }
+    ],
+    "sanitizer": [
+      {
+        "name": "pirwa:desktop-file",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.06459307670593262,
+        "stdout": "",
+        "command": [
+          "/usr/bin/desktop-file-validate",
+          "/home/stone/Gnome/pirwa/data/io.github.pirwa.Pirwa.desktop"
+        ]
+      },
+      {
+        "name": "pirwa:appstream",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.05916762351989746,
+        "stdout": "I: io.github.pirwa.Pirwa:~: url-homepage-missing\n\n\u2714 Validation was successful: infos: 1, pedantic: 2\n",
+        "command": [
+          "/usr/bin/appstreamcli",
+          "validate",
+          "--no-net",
+          "--override",
+          "url-homepage-missing=info",
+          "/home/stone/Gnome/pirwa/data/io.github.pirwa.Pirwa.metainfo.xml"
+        ]
+      },
+      {
+        "name": "pirwa:usage",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.041309356689453125,
+        "stdout": "TAP version 14\n# random seed: R02S26ce4ef27084f4d124ffffd595ba8a59\n1..5\n# Start of usage tests\nok 1 /usage/cpu-units\nok 2 /usage/missing-and-reset\nok 3 /usage/network-rates\nok 4 /usage/network-baselines\nok 5 /usage/network-stats\n# End of usage tests\n",
+        "command": [
+          "/home/stone/Gnome/pirwa/build-sanitize/tests/test-usage"
+        ]
+      },
+      {
+        "name": "pirwa:model",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.027087688446044922,
+        "stdout": "TAP version 14\n# random seed: R02S0d3f710983d77244edf5e02eba5cfff0\n1..2\n# Start of model tests\nok 1 /model/os-title-and-fallback\nok 2 /model/late-delivery-and-stable-identity\n# End of model tests\n",
+        "command": [
+          "/home/stone/Gnome/pirwa/build-sanitize/tests/test-model"
+        ]
+      },
+      {
+        "name": "pirwa:preferences",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.018616676330566406,
+        "stdout": "TAP version 14\n# random seed: R02S3c83261613809873c569f326b61189e3\n# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation memory (GMemorySettingsBackend) for \u2018gsettings-backend\u2019\n",
+        "command": [
+          "/home/stone/Gnome/pirwa/build-sanitize/tests/test-preferences"
+        ]
+      },
+      {
+        "name": "pirwa:config",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.055788278579711914,
+        "stdout": "TAP version 14\n# random seed: R02Sa5254e25d424bbe62b5c9459b18921af\n1..9\n# Start of config tests\nok 1 /config/os-metadata\nok 2 /config/graphics-index\nok 3 /config/embedded-graphics\nok 4 /config/creation-graphics\nok 5 /config/roundtrip-and-eject\nok 6 /config/media\nok 7 /config/media-tray\nok 8 /config/validation\nok 9 /config/qcow2\n# End of config tests\n",
+        "command": [
+          "/home/stone/Gnome/pirwa/build-sanitize/tests/test-config"
+        ]
+      },
+      {
+        "name": "pirwa:console-frame",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.08079934120178223,
+        "stdout": "TAP version 14\n# random seed: R02Se9e9361a86a04196aff1839af6a55e5b\n1..7\n# Start of console tests\nok 1 /console/owned-pixels-and-damage\nok 2 /console/formats-and-bounds\nok 3 /console/input-mapping\nok 4 /console/alpha\nok 5 /console/crop-and-ownership\nok 6 /console/contiguous-rgb-and-alpha\nok 7 /console/monitor-padding\n# End of console tests\n",
+        "command": [
+          "/home/stone/Gnome/pirwa/build-sanitize/tests/test-frame"
+        ]
+      },
+      {
+        "name": "pirwa:boxes",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.09025764465332031,
+        "stdout": "TAP version 14\n# random seed: R02S2b93a0a3259ddfe05d8584f641cbb888\n1..8\n# Start of boxes tests\nok 1 /boxes/native-library\nok 2 /boxes/not-installed-with-leftover-data\nok 3 /boxes/empty-library\nok 4 /boxes/flatpak-read-only-discovery\nok 5 /boxes/one-time-preference\nok 6 /boxes/offline-socket-preference\nok 7 /boxes/cancellation\nok 8 /boxes/main-thread-callback\n# End of boxes tests\n",
+        "command": [
+          "/home/stone/Gnome/pirwa/build-sanitize/tests/test-boxes"
+        ]
+      },
+      {
+        "name": "pirwa:provision",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.10967659950256348,
+        "stdout": "TAP version 14\n# random seed: R02S109c103abf7a7dd1f122e4061a086b8d\n1..5\n# Start of provision tests\nok 1 /provision/references-and-missing-media\nok 2 /provision/rollback-inactive\nok 3 /provision/rollback-running\nok 4 /provision/rollback-shared\nok 5 /provision/cancel-before-remove\n# End of provision tests\n",
+        "stderr": "libvirt: Test Driver error : Storage volume not found: no storage vol with matching name 'pirwa-11111111-1111-4111-8111-111111111111.qcow2'\nlibvirt: Test Driver error : Storage volume not found: no storage vol with matching name 'pirwa-11111111-1111-4111-8111-111111111111.qcow2'\n",
+        "command": [
+          "/home/stone/Gnome/pirwa/build-sanitize/tests/test-provision"
+        ]
+      },
+      {
+        "name": "pirwa:backend",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.19657278060913086,
+        "stdout": "TAP version 14\n# random seed: R02S1b2fbe35c82f8293986f60b610a3d5a4\n1..10\n# Start of backend tests\n# DEBUG: Add timeout 0x7c1121ffae90 -1 0x7fd125727b80 0x7c8121fedf10 1\n# \n# DEBUG: Update timeout 0x7c1121ffae90 1 0\n# \n# DEBUG: Dispatch timeout 0x7c1121ffae90 0x7fd125727b80 1 0x7c8121fedf10\n# \n# DEBUG: Update timeout 0x7c1121ffae90 1 -1\n# \nok 1 /backend/usage\n# DEBUG: Remove timeout 0x7c1121ffae90 1\n# \nok 2 /backend/socket-ownership\n# DEBUG: Add timeout 0x7c1122000d50 -1 0x7fd125727b80 0x7c8121ff3c90 2\n# \n# DEBUG: Remove timeout 0x7c1122000d50 2\n# \nok 3 /backend/native-console\n# DEBUG: Add timeout 0x7c11220082d0 -1 0x7fd125727b80 0x7c8121ff6b50 3\n# \n# DEBUG: Update timeout 0x7c11220082d0 3 0\n# \n# DEBUG: Dispatch timeout 0x7c11220082d0 0x7fd125727b80 3 0x7c8121ff6b50\n# \n# DEBUG: Update timeout 0x7c11220082d0 3 -1\n# \n# DEBUG: Update timeout 0x7c11220082d0 3 0\n# \n# DEBUG: Dispatch timeout 0x7c11220082d0 0x7fd125727b80 3 0x7c8121ff6b50\n# \n# DEBUG: Update timeout 0x7c11220082d0 3 -1\n# \n# DEBUG: Update timeout 0x7c11220082d0 3 0\n# \n# DEBUG: Dispatch timeout 0x7c11220082d0 0x7fd125727b80 3 0x7c8121ff6b50\n# \n# DEBUG: Update timeout 0x7c11220082d0 3 -1\n# \n# DEBUG: Remove timeout 0x7c11220082d0 3\n# \n# DEBUG: Add timeout 0x7c112201bdd0 -1 0x7fd125727b80 0x7c8122003780 4\n# \n# DEBUG: Update timeout 0x7c112201bdd0 4 0\n# \n# DEBUG: Dispatch timeout 0x7c112201bdd0 0x7fd125727b80 4 0x7c8122003780\n# \n# DEBUG: Update timeout 0x7c112201bdd0 4 -1\n# \n# DEBUG: Update timeout 0x7c112201bdd0 4 0\n# \n# DEBUG: Dispatch timeout 0x7c112201bdd0 0x7fd125727b80 4 0x7c8122003780\n# \n# DEBUG: Update timeout 0x7c112201bdd0 4 -1\n# \n# DEBUG: Update timeout 0x7c112201bdd0 4 0\n# \n# DEBUG: Dispatch timeout 0x7c112201bdd0 0x7fd125727b80 4 0x7c8122003780\n# \n# DEBUG: Update timeout 0x7c112201bdd0 4 -1\n# \n# DEBUG: Remove timeout 0x7c112201bdd0 4\n# \n# DEBUG: Add timeout 0x7c112202f310 -1 0x7fd125727b80 0x7c81220103b0 5\n# \n# DEBUG: Update timeout 0x7c112202f310 5 0\n# \n# DEBUG: Dispatch timeout 0x7c112202f310 0x7fd125727b80 5 0x7c81220103b0\n# \n# DEBUG: Update timeout 0x7c112202f310 5 -1\n# \n# DEBUG: Update timeout 0x7c112202f310 5 0\n# \n# DEBUG: Dispatch timeout 0x7c112202f310 0x7fd125727b80 5 0x7c81220103b0\n# \n# DEBUG: Update timeout 0x7c112202f310 5 -1\n# \n# DEBUG: Remove timeout 0x7c112202f310 5\n# \nok 4 /backend/media\n# DEBUG: Add timeout 0x7c1122043e90 -1 0x7fd125727b80 0x7c81220196d0 6\n# \n# DEBUG: Update timeout 0x7c1122043e90 6 0\n# \n# DEBUG: Dispatch timeout 0x7c1122043e90 0x7fd125727b80 6 0x7c81220196d0\n# \n# DEBUG: Update timeout 0x7c1122043e90 6 -1\n# \n# DEBUG: Update timeout 0x7c1122043e90 6 0\n# \n# DEBUG: Dispatch timeout 0x7c1122043e90 0x7fd125727b80 6 0x7c81220196d0\n# \n# DEBUG: Update timeout 0x7c1122043e90 6 -1\n# \n# DEBUG: Update timeout 0x7c1122043e90 6 0\n# \n# DEBUG: Dispatch timeout 0x7c1122043e90 0x7fd125727b80 6 0x7c81220196d0\n# \n# DEBUG: Update timeout 0x7c1122043e90 6 -1\n# \n# DEBUG: Update timeout 0x7c1122043e90 6 0\n# \n# DEBUG: Dispatch timeout 0x7c1122043e90 0x7fd125727b80 6 0x7c81220196d0\n# \n# DEBUG: Update timeout 0x7c1122043e90 6 -1\n# \n# DEBUG: Update timeout 0x7c1122043e90 6 0\n# \n# DEBUG: Dispatch timeout 0x7c1122043e90 0x7fd125727b80 6 0x7c81220196d0\n# \n# DEBUG: Update timeout 0x7c1122043e90 6 -1\n# \n# DEBUG: Update timeout 0x7c1122043e90 6 0\n# \n# DEBUG: Dispatch timeout 0x7c1122043e90 0x7fd125727b80 6 0x7c81220196d0\n# \n# DEBUG: Update timeout 0x7c1122043e90 6 -1\n# \n# DEBUG: Update timeout 0x7c1122043e90 6 0\n# \n# DEBUG: Dispatch timeout 0x7c1122043e90 0x7fd125727b80 6 0x7c81220196d0\n# \n# DEBUG: Update timeout 0x7c1122043e90 6 -1\n# \n# DEBUG: Remove timeout 0x7c1122043e90 6\n# \nok 5 /backend/controls-and-ownership\nok 6 /backend/cancellation-and-stop\n# DEBUG: Add timeout 0x7c112205b550 -1 0x7fd125727b80 0x7c8122031a90 7\n# \n# DEBUG: Remove timeout 0x7c112205b550 7\n# \n# DEBUG: Add timeout 0x7c1122065c90 -1 0x7fd125727b80 0x7c8122035920 8\n# \n# DEBUG: Remove timeout 0x7c1122065c90 8\n# \nok 7 /backend/reconnect-and-missing\n# DEBUG: Add timeout 0x7c1122071cd0 -1 0x7fd125727b80 0x7c8122039860 9\n# \n# DEBUG: Update timeout 0x7c1122071cd0 9 0\n# \n# DEBUG: Dispatch timeout 0x7c1122071cd0 0x7fd125727b80 9 0x7c8122039860\n# \n# DEBUG: Update timeout 0x7c1122071cd0 9 -1\n# \nok 8 /backend/lifecycle-events\n# DEBUG: Remove timeout 0x7c1122071cd0 9\n# \n# DEBUG: Add timeout 0x7c1122072910 -1 0x7fd125727b80 0x7c812203d900 10\n# \n# DEBUG: Remove timeout 0x7c1122072910 10\n# \nok 9 /backend/stop-in-flight\n# DEBUG: Add timeout 0x7c112207c7d0 -1 0x7fd125727b80 0x7c812203de80 11\n# \n# DEBUG: Remove timeout 0x7c112207c7d0 11\n# \nok 10 /backend/result-order-and-progress\n# End of backend tests\n",
+        "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : this function is not supported by the connection driver: virDomainOpenGraphicsFD\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Test Driver error : Domain not found\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n",
+        "command": [
+          "/home/stone/Gnome/pirwa/build-sanitize/tests/test-backend"
+        ]
+      },
+      {
+        "name": "pirwa:boxes-import",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.18515849113464355,
+        "stdout": "TAP version 14\n# random seed: R02S97c03d60a4bef1f4762c56e022fd1a08\n1..8\n# Start of import tests\nok 1 /import/copy-independent-machine\nok 2 /import/reject-running\nok 3 /import/cancel-and-rollback\nok 4 /import/reject-changed-source\nok 5 /import/upload-failure-rolls-back\nok 6 /import/reject-internal-snapshots\nok 7 /import/reject-unsupported-devices\nok 8 /import/firmware-no-overwrite-or-symlink\n# End of import tests\n",
+        "command": [
+          "/home/stone/Gnome/pirwa/build-sanitize/tests/test-import"
+        ]
+      },
+      {
+        "name": "pirwa:backend-faults",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.45978879928588867,
+        "stdout": "TAP version 14\n# random seed: R02S60207eb8d3f6ec36c7e921e724af65de\n1..7\n# Start of backend-faults tests\nok 1 /backend-faults/startup-recovery-metadata\nok 2 /backend-faults/retry-budget-and-manual-reconnect\nok 3 /backend-faults/cancelled-work-keeps-budget\nok 4 /backend-faults/close-notification\nok 5 /backend-faults/permission-denied\nok 6 /backend-faults/transport-lost-no-replay\nok 7 /backend-faults/blocked-inventory-stop\n# End of backend-faults tests\n",
+        "command": [
+          "/home/stone/Gnome/pirwa/build-sanitize/tests/test-backend-faults"
+        ]
+      },
+      {
+        "name": "pirwa:inventory",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.6140367984771729,
+        "stdout": "TAP version 14\n# random seed: R02S551ec67899de2450b9a18a12e1b72643\n1..4\n# Start of inventory tests\n# GLib-GIO-DEBUG: _g_io_module_get_default: Found default implementation local (GLocalVfs) for \u2018gio-vfs\u2019\nok 1 /inventory/os-names-and-cache\n# slow test /inventory/os-names-and-cache executed in 0.53 secs\nok 2 /inventory/discovery\nok 3 /inventory/cancelled\nok 4 /inventory/connection-failure\n# End of inventory tests\n",
+        "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: XML-RPC error : Failed to connect socket to '/var/run/libvirt/virtpirwa-unsupportedd-sock-ro': No such file or directory\n",
+        "command": [
+          "/home/stone/Gnome/pirwa/build-sanitize/tests/test-inventory"
+        ]
+      },
+      {
+        "name": "pirwa:scale-1000",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 1.4519436359405518,
+        "stdout": "{\"driver\":\"test:///default\",\"method\":\"persistent_bulk\",\"domains\":1000,\"p50_ms\":22.503,\"p95_ms\":33.150,\"raw_us\":[23714,22404,22832,22276,22549,33150,34693,24371,21951,21883,22503,22410,22084,22411,22803,22107,22357,22975,22107,22811,22379,23242,22236,22795,22757]}\n",
+        "command": [
+          "/home/stone/Gnome/pirwa/build-sanitize/tests/benchmark-scale",
+          "1000"
+        ]
+      }
+    ]
+  },
+  "opt_in_guards": [
+    {
+      "command": [
+        "build/tests/test-backend-daemon"
+      ],
+      "returncode": 77,
+      "stderr": "Use PIRWA_RUN_DAEMON_TESTS=1 scripts/test-libvirt-daemon.py as a regular user.\n"
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/test-libvirt-daemon.py",
+        "--output",
+        "build/qa/daemon-guard-must-not-exist"
+      ],
+      "returncode": 2,
+      "stderr": "usage: test-libvirt-daemon.py [-h] [--build BUILD] [--output OUTPUT]\ntest-libvirt-daemon.py: error: Use PIRWA_RUN_DAEMON_TESTS=1 as a regular user; no root is needed\n"
+    }
+  ],
+  "commands": [
+    "meson setup build --reconfigure",
+    "meson compile -C build -j 2 test-backend-daemon",
+    "PIRWA_RUN_DAEMON_TESTS=1 python3 scripts/test-libvirt-daemon.py --build build --output build/qa/libvirt-daemon-normal-final",
+    "PIRWA_RUN_DAEMON_TESTS=1 LD_LIBRARY_PATH=<matching extracted GCC runtime> ASAN_OPTIONS=detect_leaks=0 python3 scripts/test-libvirt-daemon.py --build build-sanitize --output build/qa/libvirt-daemon-sanitizer",
+    "Send SIGTERM to a separate fixture launcher after startup recovery; expect a failed/interrupted report with successful cleanup.",
+    "env -i PATH=/usr/bin:/bin LANG=C.UTF-8 meson test -C build --no-rebuild --print-errorlogs",
+    "env -i PATH=/usr/bin:/bin LANG=C.UTF-8 LD_LIBRARY_PATH=<matching extracted GCC runtime> ASAN_OPTIONS=detect_leaks=0 meson test -C build-sanitize --no-rebuild --print-errorlogs"
+  ],
+  "runner_sha256": {
+    "scripts/test-libvirt-daemon.py": "bd569391a424e2090c34596af12e43bbe5e00e38c9e32fb348730d61019e34dd",
+    "tests/test-backend-daemon.c": "82eb8040dc011f6dd60fede2716d086a456c151d97c01f7e2bb050427d35499e",
+    "tests/meson.build": "268bbcec04ec7ef8058aa697a255184365eb9b2ad159239858727eb77227c4f7"
+  },
+  "environment_recording": "Child daemons receive only an explicit PATH, locale, LIBVIRT_AUTOSTART and private XDG directories. The client additionally receives fixture markers and optional runtime/sanitizer settings. Meson process environments are omitted.",
+  "application_changes": false,
+  "new_application_dependencies": [],
+  "limits": [
+    "An empty private daemon validates connection recovery, not running-guest durability or storage recovery.",
+    "Socket filesystem permissions were denied; polkit and default socket activation were not tested.",
+    "The client uses the production backend without GTK. Existing dialog/startup mapping failures remain open.",
+    "ASan/UBSan used detect_leaks=0 for the previously documented third-party findings. Leak freedom is not claimed.",
+    "No timing or guest-throughput improvement is claimed."
+  ]
+}

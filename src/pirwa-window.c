@@ -1,17 +1,20 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 #include "pirwa-window.h"
 #include "config.h"
+#include "pirwa-avatar.h"
 #include "pirwa-backend.h"
 #include "pirwa-boxes-dialog.h"
 #include "pirwa-console.h"
-#include "pirwa-icons.h"
+#include "pirwa-create-dialog.h"
 #include "pirwa-model.h"
+#include "pirwa-preferences.h"
 #include <glib/gi18n.h>
 
 struct _PirwaWindow
 {
   AdwApplicationWindow parent_instance;
   PirwaBackend *backend;
+  GSettings *preferences;
   GCancellable *lifetime;
   GCancellable *operation_cancel;
   GCancellable *detail_cancel;
@@ -32,10 +35,13 @@ struct _PirwaWindow
   GtkPicture *preview;
   GtkLabel *header_state;
   AdwStatusPage *viewer_status;
+  GtkWidget *avatar;
   PirwaConsole *console;
   GtkWidget *machine_controls;
   GtkWidget *start_button;
   GtkWidget *shutdown_button;
+  GtkWidget *eject_button;
+  GtkLabel *media_name;
   GtkWidget *restart_button;
   GtkWidget *pause_button;
   GtkWidget *resume_button;
@@ -44,11 +50,14 @@ struct _PirwaWindow
   AdwToastOverlay *toasts;
   AdwStatusPage *error_page;
   GtkLabel *name;
+  GtkProgressBar *start_progress;
+  guint start_progress_source;
+  char *starting_uuid;
   GtkLabel *state;
   GtkLabel *resources;
-  GtkInscription *status;
-  GtkInscription *usage;
-  GtkInscription *network;
+  GtkLabel *header_resources;
+  GtkLabel *usage;
+  GtkLabel *network;
   GtkLabel *stage;
   GtkProgressBar *progress;
   GtkWidget *operation_bar;
@@ -58,6 +67,7 @@ struct _PirwaWindow
   GStrv pools;
   char *search_text;
   PirwaDetails *details;
+  char *edit_uuid;
   gboolean busy;
   gboolean updating;
   gboolean connected;
@@ -83,6 +93,7 @@ static void open_connection_with_request (PirwaWindow *self, const char *uri,
                                           const PirwaRequest *request, AdwDialog *dialog);
 static void start_boxes_scan (PirwaWindow *self, gboolean automatic);
 static void offer_boxes (PirwaWindow *self);
+static void show_preferences (PirwaWindow *self);
 
 static gboolean
 window_is_open (PirwaWindow *self)
@@ -94,6 +105,15 @@ static PirwaMachine *
 selected (PirwaWindow *self)
 {
   return self->selection ? gtk_single_selection_get_selected_item (self->selection) : NULL;
+}
+
+static void
+remember_selection (PirwaWindow *self)
+{
+  PirwaMachine *machine = selected (self);
+  if (window_is_open (self) && self->connected && machine)
+    pirwa_preferences_set_selected_machine (
+        self->preferences, pirwa_backend_get_uri (self->backend), pirwa_machine_get_uuid (machine));
 }
 
 static void update_usage (PirwaWindow *self);
@@ -163,9 +183,9 @@ show_usage (PirwaWindow *self, const PirwaUsage *usage)
   else
     ram = g_strdup (_ ("unavailable"));
   g_autofree char *text = g_strdup_printf (_ ("CPU %s · RAM %s"), cpu, ram);
-  gtk_inscription_set_text (self->usage, text);
+  gtk_label_set_text (self->usage, text);
   g_autofree char *network = network_usage_text (&self->previous_usage, usage);
-  gtk_inscription_set_text (self->network, network);
+  gtk_label_set_text (self->network, network);
   self->previous_usage = *usage;
 }
 
@@ -194,8 +214,8 @@ usage_done (GObject *source, GAsyncResult *result, gpointer data)
           else if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
             {
               self->usage_failed = TRUE;
-              gtk_inscription_set_text (self->usage, _ ("Usage unavailable"));
-              gtk_inscription_set_text (self->network, _ ("NET unavailable"));
+              gtk_label_set_text (self->usage, _ ("Usage unavailable"));
+              gtk_label_set_text (self->network, _ ("NET unavailable"));
             }
         }
       update_usage (self);
@@ -235,8 +255,8 @@ update_usage (PirwaWindow *self)
     {
       reset_usage (self);
       self->usage_uuid = g_strdup (uuid);
-      gtk_inscription_set_text (self->usage, _ ("Sampling usage…"));
-      gtk_inscription_set_text (self->network, _ ("NET …"));
+      gtk_label_set_text (self->usage, _ ("Sampling usage…"));
+      gtk_label_set_text (self->network, _ ("NET …"));
     }
   gtk_widget_set_visible (GTK_WIDGET (self->usage), running);
   gtk_widget_set_visible (GTK_WIDGET (self->network), running);
@@ -318,6 +338,8 @@ update_console (PirwaWindow *self)
   PirwaMachine *machine = selected (self);
   const char *uri = self->backend ? pirwa_backend_get_uri (self->backend) : NULL;
   const char *uuid = machine ? pirwa_machine_get_uuid (machine) : NULL;
+  int state = machine ? pirwa_machine_get_state_code (machine) : 0;
+  gboolean stopped = state == 5 || state == 6;
   if (self->console
       && (!self->connected || !machine || !pirwa_console_matches (self->console, uri, uuid)))
     clear_console (self);
@@ -325,7 +347,6 @@ update_console (PirwaWindow *self)
     {
       PirwaConsole *detached
           = pirwa_console_find_detached (gtk_window_get_application (GTK_WINDOW (self)), uri, uuid);
-      int state = pirwa_machine_get_state_code (machine);
       if (detached)
         self->console = g_object_ref (detached);
       else if (self->details && self->details->native_console && (state == 1 || state == 3))
@@ -339,7 +360,8 @@ update_console (PirwaWindow *self)
                                  self, 0);
     }
   gboolean detached = self->console && pirwa_console_is_detached (self->console);
-  gtk_stack_set_visible_child_name (self->viewer_stack, detached        ? "detached"
+  gtk_stack_set_visible_child_name (self->viewer_stack, stopped         ? "status"
+                                                        : detached      ? "detached"
                                                         : self->console ? "viewer"
                                                                         : "status");
   gtk_picture_set_paintable (self->preview,
@@ -356,21 +378,24 @@ update_actions (PirwaWindow *self)
     return;
   PirwaMachine *machine = selected (self);
   int state = machine ? pirwa_machine_get_state_code (machine) : 0;
-  gboolean ready = machine && !self->busy && self->connected && !self->boxes_loading;
+  gboolean ready = machine && !self->busy && self->connected;
   gboolean stopped = state == 5 || state == 6;
+  pirwa_avatar_set_running (self->avatar, machine && state == 1);
   set_action (self, "start", ready && stopped);
   set_action (self, "shutdown", ready && state == 1);
+  gboolean have_media = machine && self->details && self->details->media_source;
+  set_action (self, "eject", ready && have_media && (stopped || state == 1 || state == 3));
   set_action (self, "reboot", ready && state == 1);
   set_action (self, "pause", ready && state == 1);
   set_action (self, "resume", ready && state == 3);
   set_action (self, "force-stop", ready && state != 5 && state != 6 && state != 0);
   set_action (self, "console", ready && (state == 1 || state == 3));
-  set_action (self, "edit", ready && stopped && self->details != NULL);
+  set_action (self, "edit", ready && self->details != NULL);
   set_action (self, "remove", ready && stopped && self->details != NULL);
-  set_action (self, "machine-edit", ready && stopped && self->details != NULL);
+  set_action (self, "machine-edit", ready && self->details != NULL);
   set_action (self, "machine-remove", ready && stopped && self->details != NULL);
   set_action (self, "machine-force-stop", ready && state != 5 && state != 6 && state != 0);
-  set_action (self, "new", !self->busy && self->connected && !self->boxes_loading);
+  set_action (self, "new", !self->busy && self->connected);
   set_action (self, "import-boxes",
               !self->busy && !self->boxes_loading && !self->boxes_remembering
                   && !adw_application_window_get_visible_dialog (ADW_APPLICATION_WINDOW (self)));
@@ -380,27 +405,52 @@ update_actions (PirwaWindow *self)
   gtk_widget_set_sensitive (self->connections, !self->busy);
   if (machine)
     {
+      g_autofree char *preset = pirwa_preferences_get_machine_avatar (
+          self->preferences, pirwa_backend_get_uri (self->backend),
+          pirwa_machine_get_uuid (machine));
+      pirwa_avatar_set_preset (self->avatar, preset);
       gtk_label_set_text (self->name, pirwa_machine_get_title (machine));
       gtk_label_set_text (self->state, pirwa_machine_get_state (machine));
       gtk_label_set_text (self->header_state, pirwa_machine_get_state (machine));
       adw_status_page_set_description (
-          self->viewer_status, stopped ? _ ("Start this machine to view its display.")
+          self->viewer_status, stopped ? NULL
                                : self->details && !self->details->native_console
                                    ? _ ("Open this machine’s display with an external viewer.")
                                    : _ ("Preparing the machine’s display…"));
     }
   else
     {
+      pirwa_avatar_set_preset (self->avatar, NULL);
       gtk_label_set_text (self->name, _ ("Select a Virtual Machine"));
       gtk_label_set_text (self->state, _ ("Choose a machine to view its controls."));
       gtk_label_set_text (self->resources, "");
       gtk_label_set_text (self->header_state, "");
       adw_status_page_set_description (self->viewer_status, NULL);
     }
-  gtk_widget_set_visible (self->machine_controls, machine != NULL);
-  gtk_widget_set_visible (GTK_WIDGET (self->header_state), machine != NULL);
-  gtk_widget_set_visible (self->start_button, stopped || !machine);
+  gtk_widget_set_visible (GTK_WIDGET (self->state), state != 5);
+  gtk_widget_set_visible (self->machine_controls, machine != NULL && !stopped);
+  gtk_widget_set_visible (
+      GTK_WIDGET (self->start_progress),
+      self->busy && machine && self->starting_uuid
+          && g_str_equal (self->starting_uuid, pirwa_machine_get_uuid (machine)));
+  gtk_widget_set_visible (GTK_WIDGET (self->header_resources),
+                          self->connected && machine != NULL && !stopped);
+  gtk_widget_set_visible (GTK_WIDGET (self->header_state),
+                          machine != NULL && state != 1 && !stopped);
+  gtk_widget_set_visible (self->start_button, stopped);
   gtk_widget_set_visible (self->shutdown_button, state == 1);
+  gtk_widget_set_visible (self->eject_button, have_media);
+  if (have_media)
+    {
+      g_autofree char *name = g_filename_display_basename (self->details->media_source);
+      g_autofree char *label = g_strdup_printf (_ ("Eject %s"), name);
+      gtk_label_set_text (self->media_name, name);
+      gtk_widget_set_tooltip_text (self->eject_button, label);
+      gtk_accessible_update_property (GTK_ACCESSIBLE (self->eject_button),
+                                      GTK_ACCESSIBLE_PROPERTY_LABEL, label, -1);
+    }
+  else
+    gtk_label_set_text (self->media_name, "");
   gtk_widget_set_visible (self->restart_button, state == 1);
   gtk_widget_set_visible (self->pause_button, state == 1);
   gtk_widget_set_visible (self->resume_button, state == 3);
@@ -430,8 +480,40 @@ search_changed (GtkSearchEntry *entry, PirwaWindow *self)
 }
 
 static void
+search_mode_changed (GtkSearchBar *bar, GParamSpec *spec, PirwaWindow *self)
+{
+  (void)spec;
+  if (window_is_open (self) && self->list && !gtk_search_bar_get_search_mode (bar)
+      && gtk_widget_get_mapped (GTK_WIDGET (self))
+      && !adw_application_window_get_visible_dialog (ADW_APPLICATION_WINDOW (self)))
+    gtk_widget_grab_focus (self->list);
+}
+
+static void
+row_avatar_changed (GSettings *settings, const char *key, GtkWidget *row)
+{
+  (void)key;
+  GtkWidget *menu = g_object_get_data (G_OBJECT (row), "menu");
+  const char *uuid = g_object_get_data (G_OBJECT (menu), "machine-uuid");
+  const char *uri = g_object_get_data (G_OBJECT (row), "avatar-uri");
+  if (!uuid || !uri)
+    return;
+  g_autofree char *preset = pirwa_preferences_get_machine_avatar (settings, uri, uuid);
+  pirwa_avatar_set_preset (g_object_get_data (G_OBJECT (row), "avatar"), preset);
+}
+
+static void
+avatars_changed (GSettings *settings, const char *key, PirwaWindow *self)
+{
+  (void)settings;
+  (void)key;
+  update_actions (self);
+}
+
+static void
 row_changed (PirwaMachine *machine, GtkWidget *row)
 {
+  row_avatar_changed (g_object_get_data (G_OBJECT (row), "avatar-preferences"), NULL, row);
   const char *title = pirwa_machine_get_title (machine);
   const char *name = pirwa_machine_get_name (machine);
   g_autofree char *subtitle
@@ -439,7 +521,12 @@ row_changed (PirwaMachine *machine, GtkWidget *row)
             ? g_strdup (pirwa_machine_get_state (machine))
             : g_strdup_printf (_ ("%s · %s"), pirwa_machine_get_state (machine), name);
   gtk_label_set_text (g_object_get_data (G_OBJECT (row), "name"), title);
-  gtk_label_set_text (g_object_get_data (G_OBJECT (row), "state"), subtitle);
+  GtkWidget *state = g_object_get_data (G_OBJECT (row), "state");
+  gboolean running = pirwa_machine_get_state_code (machine) == 1;
+  pirwa_avatar_set_running (g_object_get_data (G_OBJECT (row), "avatar"), running);
+  gtk_label_set_text (GTK_LABEL (state), subtitle);
+  gtk_widget_remove_css_class (state, running ? "dim-label" : "success");
+  gtk_widget_add_css_class (state, running ? "success" : "dim-label");
   GtkWidget *menu = g_object_get_data (G_OBJECT (row), "menu");
   g_autofree char *label = g_strdup_printf (_ ("Options for %s"), name);
   gtk_widget_set_tooltip_text (menu, label);
@@ -459,10 +546,31 @@ row_menu_opened (GtkMenuButton *button, GParamSpec *spec, GtkListItem *item)
 }
 
 static void
+create_row_menu (GtkMenuButton *button, gpointer data)
+{
+  (void)data;
+  const char *uuid = g_object_get_data (G_OBJECT (button), "machine-uuid");
+  if (!uuid)
+    return;
+  g_autoptr (GMenu) menu = g_menu_new ();
+  const char *labels[] = { _ ("Settings"), _ ("Remove"), _ ("Force Stop") };
+  const char *actions[] = { "win.machine-edit", "win.machine-remove", "win.machine-force-stop" };
+  for (guint i = 0; i < G_N_ELEMENTS (labels); i++)
+    {
+      g_autoptr (GMenuItem) entry = g_menu_item_new (labels[i], NULL);
+      g_menu_item_set_action_and_target (entry, actions[i], "s", uuid);
+      g_menu_append_item (menu, entry);
+    }
+  gtk_menu_button_set_menu_model (button, G_MENU_MODEL (menu));
+  gtk_widget_add_css_class (GTK_WIDGET (gtk_menu_button_get_popover (button)),
+                            "pirwa-machine-actions");
+}
+
+static void
 factory_setup (GtkSignalListItemFactory *factory, GtkListItem *item, gpointer data)
 {
   (void)factory;
-  (void)data;
+  PirwaWindow *self = data;
   GtkWidget *row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 12);
   GtkWidget *labels = gtk_box_new (GTK_ORIENTATION_VERTICAL, 4);
   GtkWidget *name = gtk_label_new (NULL);
@@ -478,19 +586,27 @@ factory_setup (GtkSignalListItemFactory *factory, GtkListItem *item, gpointer da
   gtk_widget_add_css_class (name, "heading");
   gtk_widget_add_css_class (state, "dim-label");
   gtk_widget_set_hexpand (labels, TRUE);
-  gtk_box_append (GTK_BOX (row), gtk_image_new_from_icon_name ("computer-symbolic"));
+  GtkWidget *avatar = pirwa_avatar_new (NULL, 40);
+  gtk_box_append (GTK_BOX (row), avatar);
   gtk_box_append (GTK_BOX (labels), name);
   gtk_box_append (GTK_BOX (labels), state);
   gtk_box_append (GTK_BOX (row), labels);
   GtkWidget *menu = gtk_menu_button_new ();
+  gtk_widget_add_css_class (menu, "pirwa-machine-menu");
   gtk_menu_button_set_icon_name (GTK_MENU_BUTTON (menu), "view-more-symbolic");
   gtk_menu_button_set_has_frame (GTK_MENU_BUTTON (menu), FALSE);
+  gtk_menu_button_set_create_popup_func (GTK_MENU_BUTTON (menu), create_row_menu, NULL, NULL);
   gtk_widget_set_valign (menu, GTK_ALIGN_CENTER);
   g_signal_connect_object (menu, "notify::active", G_CALLBACK (row_menu_opened), item, 0);
   gtk_box_append (GTK_BOX (row), menu);
   g_object_set_data (G_OBJECT (row), "name", name);
   g_object_set_data (G_OBJECT (row), "state", state);
   g_object_set_data (G_OBJECT (row), "menu", menu);
+  g_object_set_data (G_OBJECT (row), "avatar", avatar);
+  g_object_set_data_full (G_OBJECT (row), "avatar-preferences", g_object_ref (self->preferences),
+                          g_object_unref);
+  g_signal_connect_object (self->preferences, "changed::machine-avatars",
+                           G_CALLBACK (row_avatar_changed), row, 0);
   gtk_list_item_set_child (item, row);
 }
 
@@ -498,19 +614,15 @@ static void
 factory_bind (GtkSignalListItemFactory *factory, GtkListItem *item, gpointer data)
 {
   (void)factory;
-  (void)data;
+  PirwaWindow *self = data;
   PirwaMachine *machine = gtk_list_item_get_item (item);
   GtkWidget *row = gtk_list_item_get_child (item);
-  g_autoptr (GMenu) menu = g_menu_new ();
-  const char *labels[] = { _ ("Settings"), _ ("Remove"), _ ("Force Stop") };
-  const char *actions[] = { "win.machine-edit", "win.machine-remove", "win.machine-force-stop" };
-  for (guint i = 0; i < G_N_ELEMENTS (labels); i++)
-    {
-      g_autoptr (GMenuItem) entry = g_menu_item_new (labels[i], NULL);
-      g_menu_item_set_action_and_target (entry, actions[i], "s", pirwa_machine_get_uuid (machine));
-      g_menu_append_item (menu, entry);
-    }
-  gtk_menu_button_set_menu_model (g_object_get_data (G_OBJECT (row), "menu"), G_MENU_MODEL (menu));
+  GtkMenuButton *menu = g_object_get_data (G_OBJECT (row), "menu");
+  /* Build the popover only when opened, including for recycled list items. */
+  g_object_set_data_full (G_OBJECT (menu), "machine-uuid",
+                          g_strdup (pirwa_machine_get_uuid (machine)), g_free);
+  g_object_set_data_full (G_OBJECT (row), "avatar-uri",
+                          g_strdup (pirwa_backend_get_uri (self->backend)), g_free);
   row_changed (machine, row);
   g_signal_connect_object (machine, "changed", G_CALLBACK (row_changed), row, 0);
   g_object_set_data_full (G_OBJECT (item), "machine", g_object_ref (machine), g_object_unref);
@@ -523,7 +635,10 @@ factory_unbind (GtkSignalListItemFactory *factory, GtkListItem *item, gpointer d
   (void)factory;
   (void)data;
   PirwaMachine *machine = g_object_get_data (G_OBJECT (item), "machine");
-  gtk_menu_button_popdown (g_object_get_data (G_OBJECT (gtk_list_item_get_child (item)), "menu"));
+  GtkMenuButton *menu = g_object_get_data (G_OBJECT (gtk_list_item_get_child (item)), "menu");
+  gtk_menu_button_popdown (menu);
+  gtk_menu_button_set_menu_model (menu, NULL);
+  g_object_set_data (G_OBJECT (menu), "machine-uuid", NULL);
   if (machine)
     g_signal_handlers_disconnect_by_data (machine, gtk_list_item_get_child (item));
   g_object_set_data (G_OBJECT (item), "machine", NULL);
@@ -535,7 +650,10 @@ apply_inventory (PirwaWindow *self, PirwaReply *reply)
   if (!reply->machines)
     return;
   PirwaMachine *current = selected (self);
-  g_autofree char *selected_uuid = current ? g_strdup (pirwa_machine_get_uuid (current)) : NULL;
+  g_autofree char *selected_uuid
+      = current ? g_strdup (pirwa_machine_get_uuid (current))
+                : pirwa_preferences_get_selected_machine (self->preferences,
+                                                          pirwa_backend_get_uri (self->backend));
   self->updating = TRUE;
   if (!pirwa_model_apply (self->machines, &self->snapshot_serial, reply->serial, reply->machines))
     {
@@ -544,11 +662,12 @@ apply_inventory (PirwaWindow *self, PirwaReply *reply)
     }
   self->connected = TRUE;
   gtk_filter_changed (GTK_FILTER (self->filter), GTK_FILTER_CHANGE_DIFFERENT);
+  GListModel *model = gtk_single_selection_get_model (self->selection);
+  guint count = g_list_model_get_n_items (model);
+  guint position = count ? 0 : GTK_INVALID_LIST_POSITION;
   if (selected_uuid)
     {
-      guint position = GTK_INVALID_LIST_POSITION;
-      GListModel *model = gtk_single_selection_get_model (self->selection);
-      for (guint i = 0; i < g_list_model_get_n_items (model); i++)
+      for (guint i = 0; i < count; i++)
         {
           g_autoptr (PirwaMachine) machine = g_list_model_get_item (model, i);
           if (g_str_equal (selected_uuid, pirwa_machine_get_uuid (machine)))
@@ -557,23 +676,23 @@ apply_inventory (PirwaWindow *self, PirwaReply *reply)
               break;
             }
         }
-      gtk_single_selection_set_selected (self->selection, position);
     }
+  gtk_single_selection_set_selected (self->selection, position);
   self->updating = FALSE;
+  remember_selection (self);
   if (reply->pools)
     {
       g_strfreev (self->pools);
       self->pools = g_strdupv (reply->pools);
     }
-  if (reply->host)
-    gtk_inscription_set_text (self->status, reply->host);
   gboolean initial = g_strcmp0 (gtk_stack_get_visible_child_name (self->stack), "loading") == 0;
   gtk_stack_set_visible_child_name (self->stack, reply->machines->len ? "machines" : "empty");
   /* Open on the collection for keyboard navigation. Focusing search here
    * would animate an unused text cursor throughout the initial idle period. */
   if (initial && reply->machines->len)
     gtk_widget_grab_focus (self->list);
-  if (!selected (self))
+  PirwaMachine *machine = selected (self);
+  if (!machine || g_strcmp0 (selected_uuid, pirwa_machine_get_uuid (machine)))
     g_clear_pointer (&self->details, pirwa_details_free);
   update_actions (self);
 }
@@ -594,7 +713,11 @@ static void
 backend_inventory (PirwaBackend *backend, PirwaReply *reply, PirwaWindow *self)
 {
   if (backend == self->backend && window_is_open (self))
-    apply_inventory (self, reply);
+    {
+      apply_inventory (self, reply);
+      if (!self->busy)
+        load_details (self);
+    }
 }
 
 static void
@@ -664,6 +787,27 @@ viewer_done (GObject *source, GAsyncResult *result, gpointer data)
 }
 
 static void
+start_error_response (AdwAlertDialog *dialog, const char *response, PirwaWindow *self)
+{
+  (void)dialog;
+  if (g_str_equal (response, "preferences") && window_is_open (self))
+    show_preferences (self);
+}
+
+static void
+show_start_error (PirwaWindow *self, const GError *error)
+{
+  AdwDialog *dialog = adw_alert_dialog_new (_ ("Could Not Start Virtual Machine"), error->message);
+  adw_alert_dialog_add_response (ADW_ALERT_DIALOG (dialog), "close", _ ("Close"));
+  if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED))
+    adw_alert_dialog_add_response (ADW_ALERT_DIALOG (dialog), "preferences", _ ("Preferences"));
+  adw_alert_dialog_set_default_response (ADW_ALERT_DIALOG (dialog), "close");
+  adw_alert_dialog_set_close_response (ADW_ALERT_DIALOG (dialog), "close");
+  g_signal_connect_object (dialog, "response", G_CALLBACK (start_error_response), self, 0);
+  adw_dialog_present (dialog, GTK_WIDGET (self));
+}
+
+static void
 request_done (GObject *source, GAsyncResult *result, gpointer data)
 {
   RequestContext *context = data;
@@ -683,6 +827,7 @@ request_done (GObject *source, GAsyncResult *result, gpointer data)
           context_free (context);
           return;
         }
+      g_clear_pointer (&self->edit_uuid, g_free);
       PirwaMachine *machine = selected (self);
       if (reply && machine && g_strcmp0 (context->uuid, pirwa_machine_get_uuid (machine)) == 0)
         {
@@ -697,11 +842,16 @@ request_done (GObject *source, GAsyncResult *result, gpointer data)
             show_form (self, TRUE);
         }
       else if (error && !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
-        toast (self, error->message);
+        {
+          gtk_label_set_text (self->resources, _ ("Resources unavailable"));
+          toast (self, error->message);
+        }
       context_free (context);
       return;
     }
   self->busy = FALSE;
+  g_clear_handle_id (&self->start_progress_source, g_source_remove);
+  g_clear_pointer (&self->starting_uuid, g_free);
   gtk_widget_set_visible (self->operation_bar, FALSE);
   if (context->dialog)
     {
@@ -722,7 +872,10 @@ request_done (GObject *source, GAsyncResult *result, gpointer data)
     {
       if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
         {
-          toast (self, error->message);
+          if (context->operation == PIRWA_START)
+            show_start_error (self, error);
+          else
+            toast (self, error->message);
           if (context->operation <= PIRWA_RECONNECT)
             backend_error (self->backend, pirwa_backend_result_serial (result), error->message,
                            self);
@@ -742,6 +895,16 @@ request_done (GObject *source, GAsyncResult *result, gpointer data)
     }
   else
     {
+      if ((context->operation == PIRWA_EDIT || context->operation == PIRWA_CREATE)
+          && context->dialog)
+        {
+          const char *uri = g_object_get_data (G_OBJECT (context->dialog), "avatar-uri");
+          const char *preset = g_object_get_data (G_OBJECT (context->dialog), "avatar-id");
+          const char *uuid = context->operation == PIRWA_CREATE ? reply->uuid : context->uuid;
+          if (uri && uuid
+              && !pirwa_preferences_set_machine_avatar (self->preferences, uri, uuid, preset))
+            toast (self, _ ("The machine icon could not be saved."));
+        }
       if (context->dialog)
         adw_dialog_close (context->dialog);
       if (context->operation == PIRWA_SHUTDOWN)
@@ -777,6 +940,8 @@ request_done (GObject *source, GAsyncResult *result, gpointer data)
         load_details (self);
     }
   update_actions (self);
+  if (context->operation == PIRWA_EJECT && !reply)
+    load_details (self);
   gboolean refresh_after_import
       = context->operation == PIRWA_IMPORT_BOXES && !reply && !self->connected;
   context_free (context);
@@ -788,6 +953,15 @@ request_done (GObject *source, GAsyncResult *result, gpointer data)
   offer_boxes (self);
 }
 
+static gboolean
+pulse_start_progress (gpointer data)
+{
+  PirwaWindow *self = data;
+  if (gtk_widget_get_mapped (GTK_WIDGET (self->start_progress)))
+    gtk_progress_bar_pulse (self->start_progress);
+  return G_SOURCE_CONTINUE;
+}
+
 static void
 submit (PirwaWindow *self, const PirwaRequest *request, AdwDialog *dialog)
 {
@@ -796,7 +970,15 @@ submit (PirwaWindow *self, const PirwaRequest *request, AdwDialog *dialog)
   self->busy = TRUE;
   g_clear_object (&self->operation_cancel);
   self->operation_cancel = g_cancellable_new ();
-  gtk_widget_set_visible (self->operation_bar, TRUE);
+  gtk_widget_set_visible (self->operation_bar, request->operation > PIRWA_RECONNECT
+                                                   && request->operation != PIRWA_START);
+  if (request->operation == PIRWA_START)
+    {
+      self->starting_uuid = g_strdup (request->uuid);
+      gtk_progress_bar_set_fraction (self->start_progress, 0);
+      gtk_progress_bar_pulse (self->start_progress);
+      self->start_progress_source = g_timeout_add (100, pulse_start_progress, self);
+    }
   gtk_progress_bar_set_fraction (self->progress, 0);
   gtk_label_set_text (self->stage, _ ("Working…"));
   if (dialog)
@@ -845,8 +1027,18 @@ request_details (PirwaWindow *self, gboolean edit_after)
   g_clear_object (&self->detail_cancel);
   g_clear_pointer (&self->details, pirwa_details_free);
   PirwaMachine *machine = selected (self);
+  const char *uuid = machine ? pirwa_machine_get_uuid (machine) : NULL;
+  /* A same-machine inventory refresh can replace an in-flight Settings read.
+   * Carry the explicit opening request into that replacement, but never to a
+   * different selection. Connection changes clear it independently. */
+  if (edit_after || g_strcmp0 (self->edit_uuid, uuid) != 0)
+    {
+      g_clear_pointer (&self->edit_uuid, g_free);
+      self->edit_uuid = edit_after ? g_strdup (uuid) : NULL;
+    }
   if (!machine || !window_is_open (self) || !self->connected)
     {
+      g_clear_pointer (&self->edit_uuid, g_free);
       update_actions (self);
       return;
     }
@@ -855,7 +1047,7 @@ request_details (PirwaWindow *self, gboolean edit_after)
   context->window = g_object_ref (self);
   context->operation = PIRWA_DETAILS;
   context->detail_serial = self->detail_serial;
-  context->edit_after = edit_after;
+  context->edit_after = self->edit_uuid != NULL;
   context->uuid = g_strdup (pirwa_machine_get_uuid (machine));
   PirwaRequest request = { .operation = PIRWA_DETAILS, .uuid = context->uuid };
   gtk_label_set_text (self->resources, _ ("Loading resources…"));
@@ -874,8 +1066,10 @@ selection_changed (GObject *object, GParamSpec *spec, PirwaWindow *self)
 {
   (void)object;
   (void)spec;
-  if (!self->updating)
-    load_details (self);
+  if (self->updating)
+    return;
+  remember_selection (self);
+  load_details (self);
   update_actions (self);
 }
 
@@ -949,8 +1143,8 @@ show_preferences (PirwaWindow *self)
 {
   AdwDialog *dialog = adw_preferences_dialog_new ();
   adw_dialog_set_title (dialog, _ ("Preferences"));
-  adw_dialog_set_content_width (dialog, 480);
-  adw_dialog_set_content_height (dialog, 360);
+  adw_dialog_set_content_width (dialog, 560);
+  adw_dialog_set_content_height (dialog, 600);
   AdwPreferencesPage *page = ADW_PREFERENCES_PAGE (adw_preferences_page_new ());
   adw_preferences_page_set_title (page, _ ("General"));
   adw_preferences_page_set_icon_name (page, "preferences-system-symbolic");
@@ -971,6 +1165,29 @@ show_preferences (PirwaWindow *self)
   g_signal_connect (style, "notify::selected", G_CALLBACK (appearance_changed), NULL);
   adw_preferences_group_add (group, GTK_WIDGET (style));
   adw_preferences_page_add (page, group);
+  AdwPreferencesGroup *display = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
+  adw_preferences_group_set_title (display, _ ("Viewer"));
+  AdwSwitchRow *resize = ADW_SWITCH_ROW (adw_switch_row_new ());
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (resize),
+                                 _ ("Automatically adjust guest resolution"));
+  adw_action_row_set_subtitle (ADW_ACTION_ROW (resize),
+                               _ ("Match the guest resolution to the viewer when resizing. "
+                                  "Requires a SPICE guest agent."));
+  g_autoptr (GSettings) preferences = pirwa_preferences_new ();
+  g_settings_bind (preferences, "auto-resize-display", resize, "active", G_SETTINGS_BIND_DEFAULT);
+  adw_preferences_group_add (display, GTK_WIDGET (resize));
+  adw_preferences_page_add (page, display);
+  AdwPreferencesGroup *network = ADW_PREFERENCES_GROUP (adw_preferences_group_new ());
+  adw_preferences_group_set_title (network, _ ("Network"));
+  AdwSwitchRow *proxy = ADW_SWITCH_ROW (adw_switch_row_new ());
+  adw_preferences_row_set_title (ADW_PREFERENCES_ROW (proxy), _ ("Use host proxy"));
+  adw_action_row_set_subtitle (
+      ADW_ACTION_ROW (proxy),
+      _ ("Use the manual desktop proxy for Session machines without guest setup. "
+         "Applies on the next start. Supports IPv4 TCP and DNS; other UDP is blocked."));
+  g_settings_bind (preferences, "use-host-proxy", proxy, "active", G_SETTINGS_BIND_DEFAULT);
+  adw_preferences_group_add (network, GTK_WIDGET (proxy));
+  adw_preferences_page_add (page, network);
   adw_preferences_dialog_add (ADW_PREFERENCES_DIALOG (dialog), page);
   adw_dialog_present (dialog, GTK_WIDGET (self));
 }
@@ -1063,6 +1280,19 @@ action_activated (GSimpleAction *action, GVariant *parameter, gpointer data)
       confirm_operation (self, PIRWA_FORCE_STOP);
       return;
     }
+  if (g_str_equal (name, "eject"))
+    {
+      PirwaMachine *machine = selected (self);
+      if (machine && self->details && self->details->media_source)
+        {
+          PirwaRequest request = { .operation = PIRWA_EJECT,
+                                   .uuid = pirwa_machine_get_uuid (machine),
+                                   .media_source = self->details->media_source,
+                                   .media_target = self->details->media_target };
+          submit (self, &request, NULL);
+        }
+      return;
+    }
   const char *names[] = { "refresh", "start", "shutdown", "reboot", "pause", "resume", "console" };
   const PirwaOperation operations[] = { PIRWA_RECONNECT, PIRWA_START,  PIRWA_SHUTDOWN, PIRWA_REBOOT,
                                         PIRWA_PAUSE,     PIRWA_RESUME, PIRWA_CONSOLE };
@@ -1084,17 +1314,16 @@ typedef struct
   PirwaWindow *window;
   AdwDialog *dialog;
   AdwEntryRow *name;
-  AdwEntryRow *source;
-  AdwComboRow *pool;
   AdwSpinRow *cpus;
   AdwSpinRow *memory;
-  AdwSpinRow *disk;
-  GtkCheckButton *import;
   GtkCheckButton *eject;
-  GtkCheckButton *bios;
+  GtkWidget *avatar_picker;
   GtkLabel *error;
   char *uuid;
-  GStrv pools;
+  char *uri;
+  char *original_name;
+  guint original_cpus;
+  guint original_memory;
 } Form;
 
 static void
@@ -1103,57 +1332,23 @@ form_free (gpointer data)
   Form *form = data;
   g_object_unref (form->window);
   g_free (form->uuid);
-  g_strfreev (form->pools);
+  g_free (form->uri);
+  g_free (form->original_name);
   g_free (form);
-}
-
-static void
-file_chosen (GObject *source, GAsyncResult *result, gpointer data)
-{
-  g_autoptr (AdwDialog) dialog = data;
-  Form *form = g_object_get_data (G_OBJECT (dialog), "form");
-  g_autoptr (GError) error = NULL;
-  g_autoptr (GFile) file = gtk_file_dialog_open_finish (GTK_FILE_DIALOG (source), result, &error);
-  if (file)
-    {
-      g_autofree char *path = g_file_get_path (file);
-      if (path)
-        gtk_editable_set_text (GTK_EDITABLE (form->source), path);
-    }
-  else if (!g_error_matches (error, GTK_DIALOG_ERROR, GTK_DIALOG_ERROR_DISMISSED)
-           && !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
-    gtk_label_set_text (form->error, error->message);
-}
-
-static void
-choose_source (GtkButton *button, Form *form)
-{
-  (void)button;
-  g_autoptr (GtkFileDialog) dialog = gtk_file_dialog_new ();
-  gtk_file_dialog_set_title (dialog, _ ("Select ISO or qcow2 Image"));
-  gtk_file_dialog_open (dialog, GTK_WINDOW (form->window), form->window->lifetime, file_chosen,
-                        g_object_ref (form->dialog));
 }
 
 static void
 form_apply (GtkButton *button, Form *form)
 {
   (void)button;
-  PirwaRequest request
-      = { .operation = form->uuid ? PIRWA_EDIT : PIRWA_CREATE, .uuid = form->uuid };
+  if (!window_is_open (form->window) || form->window->busy)
+    return;
+  PirwaRequest request = { .operation = PIRWA_EDIT, .uuid = form->uuid };
   request.options.name = (char *)gtk_editable_get_text (GTK_EDITABLE (form->name));
   request.options.cpus = adw_spin_row_get_value (form->cpus);
   request.options.memory_mb = adw_spin_row_get_value (form->memory);
-  request.options.disk_gb = form->disk ? adw_spin_row_get_value (form->disk) : 4;
+  request.options.disk_gb = 4;
   request.eject = form->eject && gtk_check_button_get_active (form->eject);
-  if (form->source)
-    {
-      request.options.source = (char *)gtk_editable_get_text (GTK_EDITABLE (form->source));
-      request.options.import_image = gtk_check_button_get_active (form->import);
-      request.options.legacy_bios = gtk_check_button_get_active (form->bios);
-      guint index = adw_combo_row_get_selected (form->pool);
-      request.options.pool = form->pools[index];
-    }
   g_autoptr (GError) error = NULL;
   if (!pirwa_config_validate (&request.options, &error))
     {
@@ -1161,6 +1356,35 @@ form_apply (GtkButton *button, Form *form)
       gtk_widget_set_visible (GTK_WIDGET (form->error), TRUE);
       return;
     }
+  const char *preset = pirwa_avatar_picker_get_preset (form->avatar_picker);
+  g_autofree char *previous
+      = pirwa_preferences_get_machine_avatar (form->window->preferences, form->uri, form->uuid);
+  gboolean avatar_changed
+      = g_strcmp0 (previous, g_str_equal (preset, "generic") ? NULL : preset) != 0;
+  if ((avatar_changed && !g_settings_is_writable (form->window->preferences, "machine-avatars"))
+      || g_strcmp0 (form->uri, pirwa_backend_get_uri (form->window->backend)) != 0)
+    {
+      gtk_label_set_text (form->error, _ ("The machine icon could not be saved."));
+      gtk_widget_set_visible (GTK_WIDGET (form->error), TRUE);
+      return;
+    }
+  if (g_str_equal (request.options.name, form->original_name)
+      && request.options.cpus == form->original_cpus
+      && request.options.memory_mb == form->original_memory && !request.eject)
+    {
+      if (pirwa_preferences_set_machine_avatar (form->window->preferences, form->uri, form->uuid,
+                                                preset))
+        adw_dialog_close (form->dialog);
+      else
+        {
+          gtk_label_set_text (form->error, _ ("The machine icon could not be saved."));
+          gtk_widget_set_visible (GTK_WIDGET (form->error), TRUE);
+        }
+      return;
+    }
+  /* Commit the local choice only after the VM edit succeeds. */
+  g_object_set_data_full (G_OBJECT (form->dialog), "avatar-uri", g_strdup (form->uri), g_free);
+  g_object_set_data_full (G_OBJECT (form->dialog), "avatar-id", g_strdup (preset), g_free);
   submit (form->window, &request, form->dialog);
 }
 
@@ -1186,15 +1410,49 @@ spin_row (GtkWidget *group, const char *title, double value, double lower, doubl
 }
 
 static void
+create_requested (PirwaCreateDialog *dialog, PirwaCreate *options, PirwaWindow *self)
+{
+  g_object_set_data_full (G_OBJECT (dialog), "avatar-uri",
+                          g_strdup (pirwa_backend_get_uri (self->backend)), g_free);
+  g_object_set_data_full (G_OBJECT (dialog), "avatar-id",
+                          g_strdup (pirwa_create_dialog_get_avatar (dialog)), g_free);
+  PirwaRequest request = { .operation = PIRWA_CREATE, .options = *options };
+  submit (self, &request, ADW_DIALOG (dialog));
+}
+
+static void
+create_cancelled (PirwaCreateDialog *dialog, PirwaWindow *self)
+{
+  (void)dialog;
+  cancel_operation (NULL, self);
+}
+
+static void
 show_form (PirwaWindow *self, gboolean edit)
 {
   if (self->busy || (edit && !self->details))
     return;
+  if (!edit)
+    {
+      AdwDialog *dialog = pirwa_create_dialog_new (
+          (const char *const *)self->pools,
+          g_str_equal (pirwa_backend_get_uri (self->backend), "qemu:///session"));
+      g_signal_connect_object (dialog, "create-requested", G_CALLBACK (create_requested), self, 0);
+      g_signal_connect_object (dialog, "cancel-requested", G_CALLBACK (create_cancelled), self, 0);
+      adw_dialog_present (dialog, GTK_WIDGET (self));
+      return;
+    }
   Form *form = g_new0 (Form, 1);
   form->window = g_object_ref (self);
+  form->uuid = g_strdup (pirwa_machine_get_uuid (selected (self)));
+  form->uri = g_strdup (pirwa_backend_get_uri (self->backend));
+  form->original_name = g_strdup (self->details->name);
+  form->original_cpus = self->details->cpus;
+  form->original_memory = self->details->memory_mb;
+  int state = pirwa_machine_get_state_code (selected (self));
+  gboolean stopped = state == 5 || state == 6;
   form->dialog = adw_dialog_new ();
-  adw_dialog_set_title (form->dialog,
-                        edit ? _ ("Virtual Machine Settings") : _ ("New Virtual Machine"));
+  adw_dialog_set_title (form->dialog, _ ("Virtual Machine Settings"));
   adw_dialog_set_content_width (form->dialog, 640);
   adw_dialog_set_content_height (form->dialog, 600);
   GtkWidget *toolbar = adw_toolbar_view_new ();
@@ -1210,76 +1468,33 @@ show_form (PirwaWindow *self, gboolean edit)
   gtk_scrolled_window_set_child (GTK_SCROLLED_WINDOW (scrolled), box);
   adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (toolbar), header);
   adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar), scrolled);
+  GtkWidget *appearance = adw_preferences_group_new ();
+  adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (appearance), _ ("Machine Icon"));
+  g_autofree char *preset
+      = pirwa_preferences_get_machine_avatar (self->preferences, form->uri, form->uuid);
+  form->avatar_picker = pirwa_avatar_picker_new (preset);
+  gtk_widget_set_sensitive (form->avatar_picker,
+                            g_settings_is_writable (self->preferences, "machine-avatars"));
+  adw_preferences_group_add (ADW_PREFERENCES_GROUP (appearance), form->avatar_picker);
+  gtk_box_append (GTK_BOX (box), appearance);
   GtkWidget *group = adw_preferences_group_new ();
   adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (group), _ ("Resources"));
-  if (!edit)
+  if (!stopped)
     adw_preferences_group_set_description (ADW_PREFERENCES_GROUP (group),
-                                           _ ("The virtual machine starts after creation."));
+                                           _ ("Power off the machine to change its resources."));
+  gtk_widget_set_sensitive (group, stopped);
   gtk_box_append (GTK_BOX (box), group);
   form->name = ADW_ENTRY_ROW (adw_entry_row_new ());
   adw_preferences_row_set_title (ADW_PREFERENCES_ROW (form->name), _ ("Name"));
-  gtk_editable_set_text (GTK_EDITABLE (form->name),
-                         edit ? self->details->name : _ ("New Virtual Machine"));
+  gtk_editable_set_text (GTK_EDITABLE (form->name), self->details->name);
   adw_preferences_group_add (ADW_PREFERENCES_GROUP (group), GTK_WIDGET (form->name));
-  form->cpus = spin_row (group, _ ("Virtual CPUs"), edit ? self->details->cpus : 2, 1, 64, 1);
-  form->memory = spin_row (group, _ ("Memory (MiB)"), edit ? self->details->memory_mb : 2048, 256,
-                           262144, 256);
-  if (edit)
+  form->cpus = spin_row (group, _ ("Virtual CPUs"), self->details->cpus, 1, 64, 1);
+  form->memory = spin_row (group, _ ("Memory (MiB)"), self->details->memory_mb, 256, 262144, 256);
+  if (stopped && self->details->has_cdrom)
     {
-      form->uuid = g_strdup (pirwa_machine_get_uuid (selected (self)));
-      if (self->details->has_cdrom)
-        {
-          form->eject
-              = GTK_CHECK_BUTTON (gtk_check_button_new_with_label (_ ("Eject installation media")));
-          gtk_box_append (GTK_BOX (box), GTK_WIDGET (form->eject));
-        }
-    }
-  else
-    {
-      form->disk = spin_row (group, _ ("Disk capacity (GiB)"), 32, 4, 2048, 1);
-      GtkWidget *media_group = adw_preferences_group_new ();
-      adw_preferences_group_set_title (ADW_PREFERENCES_GROUP (media_group),
-                                       _ ("Installation Media"));
-      gtk_box_append (GTK_BOX (box), media_group);
-      form->source = ADW_ENTRY_ROW (adw_entry_row_new ());
-      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (form->source),
-                                     _ ("Local ISO or qcow2 path"));
-      GtkWidget *browse = gtk_button_new_from_icon_name ("document-open-symbolic");
-      gtk_widget_set_valign (browse, GTK_ALIGN_CENTER);
-      gtk_widget_set_tooltip_text (browse, _ ("Choose a file"));
-      adw_entry_row_add_suffix (form->source, browse);
-      g_signal_connect (browse, "clicked", G_CALLBACK (choose_source), form);
-      adw_preferences_group_add (ADW_PREFERENCES_GROUP (media_group), GTK_WIDGET (form->source));
-      form->import = GTK_CHECK_BUTTON (
-          gtk_check_button_new_with_label (_ ("Import a standalone qcow2 image")));
-      gtk_box_append (GTK_BOX (box), GTK_WIDGET (form->import));
-      form->bios = GTK_CHECK_BUTTON (
-          gtk_check_button_new_with_label (_ ("Use legacy BIOS instead of UEFI")));
-      gtk_box_append (GTK_BOX (box), GTK_WIDGET (form->bios));
-      GtkWidget *hint
-          = gtk_label_new (_ ("Import copies the source into a new owned volume and uses its "
-                              "virtual capacity. The original image stays unchanged."));
-      gtk_label_set_wrap (GTK_LABEL (hint), TRUE);
-      gtk_widget_add_css_class (hint, "dim-label");
-      gtk_box_append (GTK_BOX (box), hint);
-      GPtrArray *pools = g_ptr_array_new_with_free_func (g_free);
-      if (g_str_equal (pirwa_backend_get_uri (self->backend), "qemu:///session"))
-        g_ptr_array_add (pools, g_strdup ("pirwa"));
-      for (guint i = 0; self->pools && self->pools[i]; i++)
-        if (!g_str_equal (self->pools[i], "pirwa") || pools->len == 0)
-          g_ptr_array_add (pools, g_strdup (self->pools[i]));
-      if (pools->len == 0)
-        g_ptr_array_add (pools, g_strdup (""));
-      g_ptr_array_add (pools, NULL);
-      form->pools = (GStrv)g_ptr_array_free (pools, FALSE);
-      form->pool = ADW_COMBO_ROW (adw_combo_row_new ());
-      adw_preferences_row_set_title (ADW_PREFERENCES_ROW (form->pool),
-                                     _ ("Directory storage pool"));
-      adw_preferences_row_set_use_markup (ADW_PREFERENCES_ROW (form->pool), FALSE);
-      GtkStringList *model = gtk_string_list_new ((const char *const *)form->pools);
-      adw_combo_row_set_model (form->pool, G_LIST_MODEL (model));
-      g_object_unref (model);
-      adw_preferences_group_add (ADW_PREFERENCES_GROUP (media_group), GTK_WIDGET (form->pool));
+      form->eject
+          = GTK_CHECK_BUTTON (gtk_check_button_new_with_label (_ ("Eject installation media")));
+      gtk_box_append (GTK_BOX (box), GTK_WIDGET (form->eject));
     }
   form->error = GTK_LABEL (gtk_label_new (NULL));
   gtk_label_set_wrap (form->error, TRUE);
@@ -1308,7 +1523,7 @@ show_form (PirwaWindow *self, gboolean edit)
   GtkWidget *cancel = gtk_button_new_with_label (_ ("Cancel"));
   g_signal_connect (cancel, "clicked", G_CALLBACK (form_cancel), form);
   adw_header_bar_pack_start (ADW_HEADER_BAR (header), cancel);
-  GtkWidget *apply = gtk_button_new_with_label (edit ? _ ("Save Changes") : _ ("Create"));
+  GtkWidget *apply = gtk_button_new_with_label (_ ("Save Changes"));
   gtk_widget_add_css_class (apply, "suggested-action");
   gtk_widget_set_halign (apply, GTK_ALIGN_END);
   g_signal_connect (apply, "clicked", G_CALLBACK (form_apply), form);
@@ -1451,6 +1666,7 @@ static void
 open_connection_with_request (PirwaWindow *self, const char *uri, const PirwaRequest *request,
                               AdwDialog *dialog)
 {
+  g_clear_pointer (&self->edit_uuid, g_free);
   reset_usage (self);
   clear_console (self);
   self->connected = FALSE;
@@ -1495,6 +1711,9 @@ connection_changed (GtkDropDown *dropdown, GParamSpec *spec, PirwaWindow *self)
 static void
 cancel_window_work (PirwaWindow *self)
 {
+  g_clear_pointer (&self->edit_uuid, g_free);
+  g_clear_handle_id (&self->start_progress_source, g_source_remove);
+  g_clear_pointer (&self->starting_uuid, g_free);
   reset_usage (self);
   clear_console (self);
   if (self->operation_cancel)
@@ -1532,6 +1751,7 @@ pirwa_window_dispose (GObject *object)
   g_clear_object (&self->operation_cancel);
   g_clear_object (&self->detail_cancel);
   g_clear_object (&self->usage_cancel);
+  g_clear_object (&self->preferences);
   g_clear_object (&self->selection);
   g_clear_object (&self->machines);
   G_OBJECT_CLASS (pirwa_window_parent_class)->dispose (object);
@@ -1542,6 +1762,7 @@ pirwa_window_finalize (GObject *object)
 {
   PirwaWindow *self = PIRWA_WINDOW (object);
   g_free (self->search_text);
+  g_free (self->edit_uuid);
   g_strfreev (self->pools);
   pirwa_details_free (self->details);
   pirwa_boxes_paths_free (self->boxes_paths);
@@ -1552,7 +1773,6 @@ pirwa_window_finalize (GObject *object)
 static void
 pirwa_window_class_init (PirwaWindowClass *klass)
 {
-  pirwa_icons_register_resource ();
   G_OBJECT_CLASS (klass)->dispose = pirwa_window_dispose;
   G_OBJECT_CLASS (klass)->finalize = pirwa_window_finalize;
 }
@@ -1588,13 +1808,25 @@ connection_bind (GtkSignalListItemFactory *factory, GtkListItem *item, gpointer 
 }
 
 static void
+measure_header_reading (GtkWidget *widget, GtkOrientation orientation, int for_size, int *minimum,
+                        int *natural, int *minimum_baseline, int *natural_baseline)
+{
+  GTK_WIDGET_GET_CLASS (widget)->measure (widget, orientation, for_size, minimum, natural,
+                                          minimum_baseline, natural_baseline);
+  /* GtkLabel normally reserves an ellipsis. Readings may disappear entirely
+   * when large text leaves room only for the machine controls. */
+  if (orientation == GTK_ORIENTATION_HORIZONTAL)
+    *minimum = 0;
+}
+
+static void
 pirwa_window_init (PirwaWindow *self)
 {
   GdkDisplay *display = gtk_widget_get_display (GTK_WIDGET (self));
   if (!g_object_get_data (G_OBJECT (display), "pirwa-collection-styles"))
     {
       gtk_icon_theme_add_resource_path (gtk_icon_theme_get_for_display (display),
-                                        "/io/github/pirwa/Pirwa/icons");
+                                        "/io/github/stonega/Pirwa/icons");
       g_autoptr (GtkCssProvider) provider = gtk_css_provider_new ();
       gtk_css_provider_load_from_string (provider,
                                          "paned.pirwa-machines > separator {"
@@ -1603,20 +1835,31 @@ pirwa_window_init (PirwaWindow *self)
                                          " color: @sidebar_fg_color; }"
                                          ".pirwa-sidebar:backdrop {"
                                          " background-color: @sidebar_backdrop_color; }"
+                                         ".pirwa-machine-menu { opacity: 0; }"
+                                         "row:hover .pirwa-machine-menu,"
+                                         "row:selected .pirwa-machine-menu,"
+                                         "row:focus-within .pirwa-machine-menu { opacity: 1; }"
+                                         ".pirwa-machine-actions modelbutton:nth-child(2)"
+                                         ":not(:disabled) { color: @destructive_color; }"
                                          "searchbar.pirwa-search > revealer > box { padding: 0; }"
-                                         ".pirwa-detached { background: #000; color: #fff; }");
+                                         "button.pirwa-shutdown {"
+                                         " background-color: @warning_bg_color;"
+                                         " color: @warning_fg_color; }");
       gtk_style_context_add_provider_for_display (display, GTK_STYLE_PROVIDER (provider),
                                                   GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
       g_object_set_data (G_OBJECT (display), "pirwa-collection-styles", GINT_TO_POINTER (1));
     }
   self->lifetime = g_cancellable_new ();
+  self->preferences = pirwa_preferences_new ();
+  g_signal_connect_object (self->preferences, "changed::machine-avatars",
+                           G_CALLBACK (avatars_changed), self, 0);
   self->machines = g_list_store_new (PIRWA_TYPE_MACHINE);
   const char *actions[] = { "new",          "refresh",       "start",          "shutdown",
                             "reboot",       "pause",         "resume",         "force-stop",
                             "console",      "edit",          "remove",         "search",
                             "import-boxes", "machine-edit",  "machine-remove", "machine-force-stop",
                             "pop-out",      "return-viewer", "release-input",  "preferences",
-                            "about" };
+                            "about",        "eject" };
   for (guint i = 0; i < G_N_ELEMENTS (actions); i++)
     {
       GSimpleAction *action = g_simple_action_new (
@@ -1633,23 +1876,23 @@ pirwa_window_init (PirwaWindow *self)
   GtkWidget *header = adw_header_bar_new ();
   adw_header_bar_set_show_end_title_buttons (ADW_HEADER_BAR (sidebar_header), FALSE);
   adw_header_bar_set_show_start_title_buttons (ADW_HEADER_BAR (header), FALSE);
+  adw_header_bar_set_show_end_title_buttons (ADW_HEADER_BAR (header), FALSE);
   adw_header_bar_set_title_widget (ADW_HEADER_BAR (sidebar_header),
                                    gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
   g_autoptr (GtkSizeGroup) headers = gtk_size_group_new (GTK_SIZE_GROUP_VERTICAL);
   gtk_size_group_add_widget (headers, sidebar_header);
   gtk_size_group_add_widget (headers, header);
-  adw_header_bar_set_title_widget (ADW_HEADER_BAR (header),
-                                   gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+  GtkWidget *header_row = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+  gtk_widget_set_hexpand (header_row, TRUE);
+  adw_header_bar_set_title_widget (ADW_HEADER_BAR (header), header_row);
   self->header_state = GTK_LABEL (gtk_label_new (NULL));
   gtk_label_set_xalign (self->header_state, 1);
   gtk_label_set_ellipsize (self->header_state, PANGO_ELLIPSIZE_END);
   gtk_widget_add_css_class (GTK_WIDGET (self->header_state), "dim-label");
-  GtkWidget *header_info = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8);
+  GtkWidget *header_info = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
   gtk_widget_set_valign (header_info, GTK_ALIGN_CENTER);
-  gtk_widget_set_margin_start (header_info, 6);
   g_object_bind_property (self->header_state, "label", self->header_state, "tooltip-text",
                           G_BINDING_SYNC_CREATE);
-  adw_header_bar_pack_end (ADW_HEADER_BAR (header), header_info);
   GtkWidget *new_button = gtk_button_new_from_icon_name ("list-add-symbolic");
   gtk_widget_set_valign (new_button, GTK_ALIGN_CENTER);
   gtk_actionable_set_action_name (GTK_ACTIONABLE (new_button), "win.new");
@@ -1659,23 +1902,32 @@ pirwa_window_init (PirwaWindow *self)
   gtk_widget_add_css_class (new_button, "suggested-action");
   adw_header_bar_pack_start (ADW_HEADER_BAR (sidebar_header), new_button);
   self->machine_controls = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
-  const char *control_labels[]
-      = { _ ("Start"),  _ ("Shut Down"),    _ ("Restart"),       _ ("Pause"),
-          _ ("Resume"), _ ("Open Console"), _ ("Release Input"), _ ("Open in Separate Window") };
-  const char *control_actions[]
-      = { "win.start",  "win.shutdown", "win.reboot",        "win.pause",
-          "win.resume", "win.console",  "win.release-input", "win.pop-out" };
-  const char *control_icons[] = { "media-playback-start-symbolic", "system-shutdown-symbolic",
-                                  "system-reboot-symbolic",        "media-playback-pause-symbolic",
-                                  "media-playback-start-symbolic", "video-display-symbolic",
-                                  "input-keyboard-symbolic",       "window-new-symbolic" };
+  const char *control_labels[] = { _ ("Shut Down"),
+                                   _ ("Restart"),
+                                   _ ("Pause"),
+                                   _ ("Resume"),
+                                   _ ("Open Console"),
+                                   _ ("Release Input"),
+                                   _ ("Open in Separate Window") };
+  const char *control_actions[] = { "win.shutdown", "win.reboot",        "win.pause",  "win.resume",
+                                    "win.console",  "win.release-input", "win.pop-out" };
+  const char *control_icons[] = { "system-shutdown-symbolic",
+                                  "system-reboot-symbolic",
+                                  "media-playback-pause-symbolic",
+                                  "media-playback-start-symbolic",
+                                  "video-display-symbolic",
+                                  "input-keyboard-symbolic",
+                                  "window-new-symbolic" };
   for (guint i = 0; i < G_N_ELEMENTS (control_labels); i++)
     {
-      GtkWidget *button = i < 2 ? gtk_button_new_with_label (control_labels[i])
-                                : gtk_button_new_from_icon_name (control_icons[i]);
-      if (i < 2)
+      GtkWidget *button = i == 0 ? gtk_button_new_with_label (control_labels[i])
+                                 : gtk_button_new_from_icon_name (control_icons[i]);
+      if (i == 0)
         {
-          gtk_widget_add_css_class (button, "suggested-action");
+          gtk_label_set_ellipsize (GTK_LABEL (gtk_button_get_child (GTK_BUTTON (button))),
+                                   PANGO_ELLIPSIZE_END);
+          gtk_widget_add_css_class (button, "opaque");
+          gtk_widget_add_css_class (button, "pirwa-shutdown");
           gtk_widget_set_margin_end (button, 6);
         }
       gtk_actionable_set_action_name (GTK_ACTIONABLE (button), control_actions[i]);
@@ -1684,22 +1936,41 @@ pirwa_window_init (PirwaWindow *self)
                                       control_labels[i], -1);
       gtk_box_append (GTK_BOX (self->machine_controls), button);
       if (i == 0)
-        self->start_button = button;
-      else if (i == 1)
         self->shutdown_button = button;
-      else if (i == 2)
+      else if (i == 1)
         self->restart_button = button;
-      else if (i == 3)
+      else if (i == 2)
         self->pause_button = button;
-      else if (i == 4)
+      else if (i == 3)
         self->resume_button = button;
-      else if (i == 5)
+      else if (i == 4)
         self->external_button = button;
     }
+  self->eject_button = gtk_button_new ();
+  GtkWidget *media = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  self->media_name = GTK_LABEL (gtk_label_new (NULL));
+  gtk_label_set_ellipsize (self->media_name, PANGO_ELLIPSIZE_END);
+  gtk_label_set_max_width_chars (self->media_name, 18);
+  gtk_box_append (GTK_BOX (media), GTK_WIDGET (self->media_name));
+  gtk_box_append (GTK_BOX (media), gtk_image_new_from_icon_name ("media-eject-symbolic"));
+  gtk_button_set_child (GTK_BUTTON (self->eject_button), media);
+  gtk_widget_add_css_class (self->eject_button, "text-button");
+  gtk_widget_set_margin_end (self->eject_button, 6);
+  gtk_actionable_set_action_name (GTK_ACTIONABLE (self->eject_button), "win.eject");
+  gtk_box_insert_child_after (GTK_BOX (self->machine_controls), self->eject_button,
+                              self->shutdown_button);
   gtk_widget_set_valign (self->machine_controls, GTK_ALIGN_CENTER);
   gtk_widget_set_margin_end (self->machine_controls, 6);
-  gtk_widget_set_halign (self->machine_controls, GTK_ALIGN_START);
-  adw_header_bar_pack_start (ADW_HEADER_BAR (header), self->machine_controls);
+  gtk_widget_set_halign (self->machine_controls, GTK_ALIGN_FILL);
+  gtk_box_append (GTK_BOX (header_row), self->machine_controls);
+  GtkWidget *header_space = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+  gtk_widget_set_hexpand (header_space, TRUE);
+  gtk_box_append (GTK_BOX (header_row), header_space);
+  gtk_box_append (GTK_BOX (header_row), header_info);
+  /* Include window buttons in the row so title centering cannot inset controls. */
+  GtkWidget *window_controls = gtk_window_controls_new (GTK_PACK_END);
+  gtk_widget_set_margin_start (window_controls, 6);
+  gtk_box_append (GTK_BOX (header_row), window_controls);
   g_autoptr (GMenu) menu = g_menu_new ();
   g_autoptr (GMenu) connection_section = g_menu_new ();
   g_autoptr (GMenuItem) connection_item = g_menu_item_new (NULL, NULL);
@@ -1761,8 +2032,10 @@ pirwa_window_init (PirwaWindow *self)
   adw_toast_overlay_set_child (self->toasts, paned);
   adw_toolbar_view_set_content (ADW_TOOLBAR_VIEW (toolbar), GTK_WIDGET (self->toasts));
   GtkWidget *loading = adw_status_page_new ();
-  adw_status_page_set_title (ADW_STATUS_PAGE (loading), _ ("Connecting to libvirt"));
   self->loading_spinner = GTK_SPINNER (gtk_spinner_new ());
+  gtk_accessible_update_property (GTK_ACCESSIBLE (self->loading_spinner),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL, _ ("Loading virtual machines"),
+                                  -1);
   adw_status_page_set_child (ADW_STATUS_PAGE (loading), GTK_WIDGET (self->loading_spinner));
   gtk_stack_add_named (self->stack, loading, "loading");
   GtkWidget *empty = adw_status_page_new ();
@@ -1795,6 +2068,8 @@ pirwa_window_init (PirwaWindow *self)
                           G_BINDING_BIDIRECTIONAL | G_BINDING_SYNC_CREATE);
   gtk_box_append (GTK_BOX (left), GTK_WIDGET (self->search_bar));
   g_signal_connect (self->search, "search-changed", G_CALLBACK (search_changed), self);
+  g_signal_connect_object (self->search_bar, "notify::search-mode-enabled",
+                           G_CALLBACK (search_mode_changed), self, 0);
   self->filter = gtk_custom_filter_new (matches_search, self, NULL);
   GtkFilterListModel *filtered = gtk_filter_list_model_new (
       G_LIST_MODEL (g_object_ref (self->machines)), GTK_FILTER (self->filter));
@@ -1803,8 +2078,8 @@ pirwa_window_init (PirwaWindow *self)
   gtk_single_selection_set_can_unselect (self->selection, TRUE);
   g_signal_connect (self->selection, "notify::selected-item", G_CALLBACK (selection_changed), self);
   GtkListItemFactory *factory = gtk_signal_list_item_factory_new ();
-  g_signal_connect (factory, "setup", G_CALLBACK (factory_setup), NULL);
-  g_signal_connect (factory, "bind", G_CALLBACK (factory_bind), NULL);
+  g_signal_connect (factory, "setup", G_CALLBACK (factory_setup), self);
+  g_signal_connect (factory, "bind", G_CALLBACK (factory_bind), self);
   g_signal_connect (factory, "unbind", G_CALLBACK (factory_unbind), NULL);
   GtkWidget *list
       = gtk_list_view_new (GTK_SELECTION_MODEL (g_object_ref (self->selection)), factory);
@@ -1829,47 +2104,75 @@ pirwa_window_init (PirwaWindow *self)
   gtk_stack_add_named (self->viewer_stack, GTK_WIDGET (self->viewer_host), "viewer");
 
   self->viewer_status = ADW_STATUS_PAGE (adw_status_page_new ());
-  adw_status_page_set_icon_name (self->viewer_status, "computer-symbolic");
   GtkWidget *information = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+  self->avatar = pirwa_avatar_new (NULL, 96);
+  gtk_box_append (GTK_BOX (information), self->avatar);
   self->name = GTK_LABEL (gtk_label_new (_ ("Select a Virtual Machine")));
   gtk_widget_add_css_class (GTK_WIDGET (self->name), "title-1");
   gtk_label_set_wrap (self->name, TRUE);
   gtk_label_set_wrap_mode (self->name, PANGO_WRAP_WORD_CHAR);
+  self->start_progress = GTK_PROGRESS_BAR (gtk_progress_bar_new ());
+  gtk_widget_set_halign (GTK_WIDGET (self->start_progress), GTK_ALIGN_CENTER);
+  gtk_widget_set_size_request (GTK_WIDGET (self->start_progress), 150, -1);
+  gtk_widget_set_visible (GTK_WIDGET (self->start_progress), FALSE);
+  gtk_accessible_update_property (GTK_ACCESSIBLE (self->start_progress),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL, _ ("Starting virtual machine"),
+                                  -1);
   self->state = GTK_LABEL (gtk_label_new (NULL));
   gtk_label_set_wrap (self->state, TRUE);
   self->resources = GTK_LABEL (gtk_label_new (NULL));
   gtk_label_set_wrap (self->resources, TRUE);
   gtk_widget_add_css_class (GTK_WIDGET (self->resources), "dim-label");
   gtk_box_append (GTK_BOX (information), GTK_WIDGET (self->name));
+  gtk_box_append (GTK_BOX (information), GTK_WIDGET (self->start_progress));
   gtk_box_append (GTK_BOX (information), GTK_WIDGET (self->state));
   gtk_box_append (GTK_BOX (information), GTK_WIDGET (self->resources));
+  self->start_button = gtk_button_new ();
+  gtk_actionable_set_action_name (GTK_ACTIONABLE (self->start_button), "win.start");
+  GtkWidget *start_content = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+  gtk_box_append (GTK_BOX (start_content),
+                  gtk_image_new_from_icon_name ("system-shutdown-symbolic"));
+  gtk_box_append (GTK_BOX (start_content), gtk_label_new (_ ("Start")));
+  gtk_button_set_child (GTK_BUTTON (self->start_button), start_content);
+  gtk_accessible_update_property (GTK_ACCESSIBLE (self->start_button),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL, _ ("Start"), -1);
+  gtk_widget_add_css_class (self->start_button, "text-button");
+  gtk_widget_add_css_class (self->start_button, "suggested-action");
+  gtk_widget_add_css_class (self->start_button, "pill");
+  gtk_widget_set_halign (self->start_button, GTK_ALIGN_CENTER);
+  gtk_widget_set_margin_top (self->start_button, 6);
+  gtk_box_append (GTK_BOX (information), self->start_button);
   adw_status_page_set_child (self->viewer_status, information);
   gtk_stack_add_named (self->viewer_stack, GTK_WIDGET (self->viewer_status), "status");
 
   GtkWidget *detached = gtk_overlay_new ();
-  gtk_widget_add_css_class (detached, "pirwa-detached");
   self->preview = GTK_PICTURE (gtk_picture_new ());
+  gtk_widget_set_margin_start (GTK_WIDGET (self->preview), 6);
+  gtk_widget_set_margin_end (GTK_WIDGET (self->preview), 6);
+  gtk_widget_set_margin_top (GTK_WIDGET (self->preview), 6);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (self->preview), 6);
   gtk_picture_set_content_fit (self->preview, GTK_CONTENT_FIT_CONTAIN);
   gtk_widget_set_opacity (GTK_WIDGET (self->preview), 0.45);
   gtk_overlay_set_child (GTK_OVERLAY (detached), GTK_WIDGET (self->preview));
+  GtkWidget *detached_content = gtk_box_new (GTK_ORIENTATION_VERTICAL, 18);
+  gtk_widget_set_halign (detached_content, GTK_ALIGN_CENTER);
+  gtk_widget_set_valign (detached_content, GTK_ALIGN_CENTER);
+  gtk_widget_set_margin_start (detached_content, 18);
+  gtk_widget_set_margin_end (detached_content, 18);
   GtkWidget *detached_label = gtk_label_new (_ ("Viewer is in a separate window"));
   gtk_widget_add_css_class (detached_label, "title-2");
   gtk_label_set_wrap (GTK_LABEL (detached_label), TRUE);
   gtk_label_set_justify (GTK_LABEL (detached_label), GTK_JUSTIFY_CENTER);
-  gtk_widget_set_margin_start (detached_label, 18);
-  gtk_widget_set_margin_end (detached_label, 18);
   gtk_widget_set_halign (detached_label, GTK_ALIGN_CENTER);
-  gtk_widget_set_valign (detached_label, GTK_ALIGN_CENTER);
-  gtk_overlay_add_overlay (GTK_OVERLAY (detached), detached_label);
+  gtk_box_append (GTK_BOX (detached_content), detached_label);
   GtkWidget *bring_back = action_button (_ ("Bring Viewer Back"), "win.return-viewer");
   gtk_widget_add_css_class (bring_back, "suggested-action");
   gtk_widget_add_css_class (bring_back, "pill");
   gtk_widget_set_halign (bring_back, GTK_ALIGN_CENTER);
-  gtk_widget_set_valign (bring_back, GTK_ALIGN_START);
-  gtk_widget_set_margin_top (bring_back, 18);
   gtk_widget_set_margin_start (bring_back, 12);
   gtk_widget_set_margin_end (bring_back, 12);
-  gtk_overlay_add_overlay (GTK_OVERLAY (detached), bring_back);
+  gtk_box_append (GTK_BOX (detached_content), bring_back);
+  gtk_overlay_add_overlay (GTK_OVERLAY (detached), detached_content);
   gtk_stack_add_named (self->viewer_stack, detached, "detached");
   gtk_stack_set_visible_child_name (self->viewer_stack, "status");
   gtk_stack_add_named (self->stack, GTK_WIDGET (self->viewer_stack), "machines");
@@ -1893,41 +2196,39 @@ pirwa_window_init (PirwaWindow *self)
   gtk_widget_set_margin_start (self->operation_bar, 12);
   gtk_widget_set_margin_end (self->operation_bar, 12);
   adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (content_toolbar), self->operation_bar);
-  /* Readings can shrink below an ellipsis to keep controls usable with large text. */
-  self->status
-      = g_object_new (GTK_TYPE_INSCRIPTION, "text", _ ("Local virtual machines managed by libvirt"),
-                      "min-chars", 0, "nat-chars", 28, "text-overflow",
-                      GTK_INSCRIPTION_OVERFLOW_ELLIPSIZE_END, "valign", GTK_ALIGN_CENTER, NULL);
-  gtk_widget_add_css_class (GTK_WIDGET (self->status), "dim-label");
-  gtk_widget_add_css_class (GTK_WIDGET (self->status), "caption");
-  gtk_inscription_set_xalign (self->status, 0);
-  g_object_bind_property (self->status, "text", self->status, "tooltip-text",
+  /* Fit readings to their text; allow zero minimum width to keep controls usable. */
+  self->header_resources = g_object_new (GTK_TYPE_LABEL, "ellipsize", PANGO_ELLIPSIZE_END, "valign",
+                                         GTK_ALIGN_CENTER, NULL);
+  gtk_widget_add_css_class (GTK_WIDGET (self->header_resources), "dim-label");
+  gtk_widget_add_css_class (GTK_WIDGET (self->header_resources), "caption");
+  gtk_label_set_xalign (self->header_resources, 0);
+  g_object_bind_property (self->resources, "label", self->header_resources, "label",
                           G_BINDING_SYNC_CREATE);
-  gtk_accessible_update_property (GTK_ACCESSIBLE (self->status),
+  g_object_bind_property (self->header_resources, "label", self->header_resources, "tooltip-text",
+                          G_BINDING_SYNC_CREATE);
+  gtk_accessible_update_property (GTK_ACCESSIBLE (self->header_resources),
                                   GTK_ACCESSIBLE_PROPERTY_DESCRIPTION,
-                                  _ ("Host architecture, CPU count, and total memory"), -1);
-  self->usage = g_object_new (
-      GTK_TYPE_INSCRIPTION, "text", _ ("Sampling usage…"), "min-chars", 0, "nat-chars", 28,
-      "text-overflow", GTK_INSCRIPTION_OVERFLOW_ELLIPSIZE_END, "valign", GTK_ALIGN_CENTER, NULL);
+                                  _ ("Selected VM’s configured CPU count and memory"), -1);
+  self->usage = g_object_new (GTK_TYPE_LABEL, "label", _ ("Sampling usage…"), "ellipsize",
+                              PANGO_ELLIPSIZE_END, "valign", GTK_ALIGN_CENTER, NULL);
   gtk_widget_add_css_class (GTK_WIDGET (self->usage), "dim-label");
   gtk_widget_add_css_class (GTK_WIDGET (self->usage), "caption");
-  gtk_inscription_set_xalign (self->usage, 1);
+  gtk_label_set_xalign (self->usage, 1);
   gtk_widget_set_visible (GTK_WIDGET (self->usage), FALSE);
-  g_object_bind_property (self->usage, "text", self->usage, "tooltip-text", G_BINDING_SYNC_CREATE);
+  g_object_bind_property (self->usage, "label", self->usage, "tooltip-text", G_BINDING_SYNC_CREATE);
   gtk_accessible_update_property (
       GTK_ACCESSIBLE (self->usage), GTK_ACCESSIBLE_PROPERTY_DESCRIPTION,
       _ ("Selected VM usage. CPU 100% equals one host CPU; multiple CPUs can exceed 100%. "
          "RAM is the VM process’s resident memory (RSS), including overhead. "
          "Updates every two seconds while this window is visible."),
       -1);
-  self->network = g_object_new (
-      GTK_TYPE_INSCRIPTION, "text", _ ("NET …"), "min-chars", 0, "nat-chars", 24, "text-overflow",
-      GTK_INSCRIPTION_OVERFLOW_ELLIPSIZE_END, "valign", GTK_ALIGN_CENTER, NULL);
+  self->network = g_object_new (GTK_TYPE_LABEL, "label", _ ("NET …"), "ellipsize",
+                                PANGO_ELLIPSIZE_END, "valign", GTK_ALIGN_CENTER, NULL);
   gtk_widget_add_css_class (GTK_WIDGET (self->network), "dim-label");
   gtk_widget_add_css_class (GTK_WIDGET (self->network), "caption");
-  gtk_inscription_set_xalign (self->network, 1);
+  gtk_label_set_xalign (self->network, 1);
   gtk_widget_set_visible (GTK_WIDGET (self->network), FALSE);
-  g_object_bind_property (self->network, "text", self->network, "tooltip-text",
+  g_object_bind_property (self->network, "label", self->network, "tooltip-text",
                           G_BINDING_SYNC_CREATE);
   gtk_accessible_update_property (
       GTK_ACCESSIBLE (self->network), GTK_ACCESSIBLE_PROPERTY_DESCRIPTION,
@@ -1935,7 +2236,16 @@ pirwa_window_init (PirwaWindow *self)
          "Up arrow: transmitted bytes per second. Rates include all VM interfaces. "
          "Updates every two seconds while this window is visible."),
       -1);
-  gtk_box_append (GTK_BOX (header_info), GTK_WIDGET (self->status));
+  GtkWidget *readings[] = { GTK_WIDGET (self->header_resources), GTK_WIDGET (self->usage),
+                            GTK_WIDGET (self->network) };
+  for (guint i = 0; i < G_N_ELEMENTS (readings); i++)
+    {
+      gtk_widget_set_layout_manager (
+          readings[i], gtk_custom_layout_new (NULL, measure_header_reading,
+                                              GTK_WIDGET_GET_CLASS (readings[i])->size_allocate));
+      gtk_widget_set_overflow (readings[i], GTK_OVERFLOW_HIDDEN);
+    }
+  gtk_box_append (GTK_BOX (header_info), GTK_WIDGET (self->header_resources));
   gtk_box_append (GTK_BOX (header_info), GTK_WIDGET (self->usage));
   gtk_box_append (GTK_BOX (header_info), GTK_WIDGET (self->network));
   gtk_box_append (GTK_BOX (header_info), GTK_WIDGET (self->header_state));

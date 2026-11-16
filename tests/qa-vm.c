@@ -87,7 +87,7 @@ main (int argc, char **argv)
     }
   if (argc < 4)
     {
-      g_printerr ("Usage: qa-vm URI create|import NAME SOURCE POOL\n"
+      g_printerr ("Usage: qa-vm URI create|import NAME SOURCE POOL [MEMORY_MB]\n"
                   "       qa-vm URI start|stop|remove|console UUID\n"
                   "       qa-vm URI benchmark-start UUID PAIRS\n"
                   "Names must be pirwa-qa- followed by a UUID. Resources are not auto-removed.\n");
@@ -101,7 +101,12 @@ main (int argc, char **argv)
   if (!connection)
     goto out;
   gboolean create = g_str_equal (argv[2], "create") || g_str_equal (argv[2], "import");
-  if (create ? argc != 6 || !fixture_name (argv[3]) : !g_uuid_string_is_valid (argv[3]))
+  guint64 memory_mb = 4096;
+  if (create ? (argc != 6 && argc != 7) || !fixture_name (argv[3])
+             : !g_uuid_string_is_valid (argv[3]))
+    goto out;
+  if (create && argc == 7
+      && !g_ascii_string_to_unsigned (argv[6], 10, 2048, 8192, &memory_mb, &error))
     goto out;
   if (!create)
     {
@@ -130,7 +135,7 @@ main (int argc, char **argv)
                                       .source = argv[4],
                                       .pool = argv[5],
                                       .cpus = 4,
-                                      .memory_mb = 4096,
+                                      .memory_mb = (guint)memory_mb,
                                       .disk_gb = 16,
                                       .import_image = i == 5 };
         g_autoptr (PirwaReply) reply = request (backend, &op, &error);

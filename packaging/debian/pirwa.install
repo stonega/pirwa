@@ -1,0 +1,8 @@
+usr/bin/pirwa
+usr/libexec/pirwa-network
+usr/share/applications/io.github.stonega.Pirwa.desktop
+usr/share/metainfo/io.github.stonega.Pirwa.metainfo.xml
+usr/share/icons/hicolor/scalable/apps/io.github.stonega.Pirwa.svg
+usr/share/icons/hicolor/symbolic/apps/io.github.stonega.Pirwa-symbolic.svg
+usr/share/glib-2.0/schemas/io.github.stonega.Pirwa.gschema.xml
+usr/share/doc/pirwa/avatars

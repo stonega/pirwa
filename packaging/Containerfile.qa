@@ -1,0 +1,15 @@
+# Native dependency validation, without the developer's extracted SDK.
+FROM registry.fedoraproject.org/fedora:45
+RUN dnf install -y --setopt=install_weak_deps=False \
+      gcc meson ninja-build gettext pkgconf-pkg-config git \
+      glib2-devel gtk4-devel libadwaita-devel libvirt-devel libvirt-glib-devel \
+      libxml2-devel libosinfo-devel spice-glib-devel clang-tools-extra \
+      desktop-file-utils appstream libasan libubsan rpm-build \
+    && dnf clean all
+WORKDIR /work
+RUN dnf install -y --setopt=install_weak_deps=False \
+      redhat-rpm-config qemu-kvm libvirt-daemon-driver-qemu osinfo-db libslirp-devel \
+    && dnf clean all
+RUN dnf install -y --setopt=install_weak_deps=False \
+      libvirt-daemon-driver-storage-core gsettings-desktop-schemas \
+    && dnf clean all

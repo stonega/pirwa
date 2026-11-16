@@ -1,0 +1,2 @@
+# Preserve the required context and signature whitespace in upstream patches.
+packaging/flatpak/*.patch -whitespace

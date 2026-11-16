@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <!-- Keep the pre-release storage path so existing preferences survive the ID change. -->
+  <schema id="io.github.stonega.Pirwa" path="/io/github/pirwa/Pirwa/">
+    <key name="machine-avatars" type="a{sa{ss}}">
+      <default>{}</default>
+      <summary>Machine icon presets</summary>
+      <description>Map libvirt connection URIs and machine UUIDs to bundled icon preset identifiers.</description>
+    </key>
+    <key name="selected-machines" type="a{ss}">
+      <default>{}</default>
+      <summary>Last selected machine for each connection</summary>
+      <description>Map libvirt connection URIs to selected machine UUIDs.</description>
+    </key>
+    <key name="use-host-proxy" type="b">
+      <default>true</default>
+      <summary>Use the host proxy for Session machines</summary>
+      <description>Route IPv4 TCP and DNS through the manual desktop proxy on the next start.</description>
+    </key>
+    <key name="proxy-dns-address" type="s">
+      <default>'1.1.1.1'</default>
+      <summary>DNS resolver for proxied machines</summary>
+      <description>IPv4 DNS resolver reached through the proxy over TCP port 53.</description>
+    </key>
+    <key name="auto-resize-display" type="b">
+      <default>false</default>
+      <summary>Automatically adjust guest resolution</summary>
+      <description>Resize agent-enabled guest displays to fit the viewer.</description>
+    </key>
+  </schema>
+</schemalist>

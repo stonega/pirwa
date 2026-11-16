@@ -4,6 +4,7 @@
 #include "pirwa-console.h"
 #include "pirwa-display.h"
 #include "pirwa-frame.h"
+#include "qa-frame-feedback.h"
 #include <glib/gstdio.h>
 #include <libvirt/libvirt.h>
 #include <time.h>
@@ -11,23 +12,30 @@
 typedef struct
 {
   gint64 wall_us, cpu_us, damage_to_paint_us;
+  guint64 full_copies, tile_copies, compactions, texture_appends, previous_texture_appends;
+  gint64 copy_cpu_us;
 } Frame;
 
 static GtkWindow *window;
 static GMainLoop *loop;
 static GdkFrameClock *frame_clock;
 static GArray *frames;
+static GArray *feedback;
 static char *output, *label;
-static int seconds = 10, width, height, format;
+static int seconds = 10, width, height, format, stride;
 static gboolean measuring, force_full;
 static guint64 invalidations, damaged_pixels, full_copies, tile_copies, copied_bytes;
 static gint64 copy_cpu_us, first_damage, paint_start, paint_cpu_start, start_wall, start_cpu;
 static guint64 copies_before_paint;
+static guint64 full_before_paint, tiles_before_paint, compactions_before_paint;
+static guint64 compactions, texture_appends, appends_before_paint, previous_appends;
+static gint64 copy_cpu_before_paint;
 static guint measurement_source;
 static gulong before_handler, after_handler;
 static PirwaDisplay *guest_display; /* Borrowed from the window's child tree. */
 static guint primary_changes;
 static gboolean agent_connected;
+static gboolean tiles_cached;
 
 static void
 write_ready (void)
@@ -73,6 +81,16 @@ GdkTexture *__real_pirwa_frame_texture (const SpiceDisplayPrimary *, GdkTexture 
                                         cairo_region_t *);
 GdkTexture *__real_pirwa_frame_texture_rect (const SpiceDisplayPrimary *,
                                              const cairo_rectangle_int_t *);
+void __real_gtk_snapshot_append_texture (GtkSnapshot *, GdkTexture *, const graphene_rect_t *);
+
+void
+__wrap_gtk_snapshot_append_texture (GtkSnapshot *snapshot, GdkTexture *texture,
+                                    const graphene_rect_t *bounds)
+{
+  if (measuring)
+    texture_appends++;
+  __real_gtk_snapshot_append_texture (snapshot, texture, bounds);
+}
 
 static void
 channel_new (SpiceSession *session, SpiceChannel *channel, gpointer data)
@@ -112,6 +130,7 @@ __wrap_pirwa_display_set_primary (PirwaDisplay *display, const SpiceDisplayPrima
   width = primary->width;
   height = primary->height;
   format = primary->format;
+  stride = primary->stride;
   gboolean valid = __real_pirwa_display_set_primary (display, primary);
   if (valid)
     write_ready ();
@@ -144,9 +163,13 @@ __wrap_pirwa_frame_texture (const SpiceDisplayPrimary *primary, GdkTexture *prev
   if (measuring && texture)
     {
       full_copies++;
+      if (tiles_cached)
+        compactions++;
       copied_bytes += (guint64)primary->width * primary->height * 4;
       copy_cpu_us += cpu_time (CLOCK_THREAD_CPUTIME_ID) - before;
     }
+  if (texture)
+    tiles_cached = FALSE;
   return texture;
 }
 
@@ -162,6 +185,8 @@ __wrap_pirwa_frame_texture_rect (const SpiceDisplayPrimary *primary,
       copied_bytes += (guint64)rect->width * rect->height * 4;
       copy_cpu_us += cpu_time (CLOCK_THREAD_CPUTIME_ID) - before;
     }
+  if (texture)
+    tiles_cached = TRUE;
   return texture;
 }
 
@@ -173,6 +198,11 @@ before_paint (GdkFrameClock *clock, gpointer data)
   paint_start = g_get_monotonic_time ();
   paint_cpu_start = cpu_time (CLOCK_THREAD_CPUTIME_ID);
   copies_before_paint = full_copies + tile_copies;
+  full_before_paint = full_copies;
+  tiles_before_paint = tile_copies;
+  compactions_before_paint = compactions;
+  appends_before_paint = texture_appends;
+  copy_cpu_before_paint = copy_cpu_us;
 }
 
 static void
@@ -183,10 +213,21 @@ after_paint (GdkFrameClock *clock, gpointer data)
   if (!measuring || full_copies + tile_copies == copies_before_paint)
     return;
   gint64 now = g_get_monotonic_time ();
-  Frame frame = { now - paint_start, cpu_time (CLOCK_THREAD_CPUTIME_ID) - paint_cpu_start,
-                  first_damage ? now - first_damage : 0 };
+  Frame frame = { .wall_us = now - paint_start,
+                  .cpu_us = cpu_time (CLOCK_THREAD_CPUTIME_ID) - paint_cpu_start,
+                  .damage_to_paint_us = first_damage ? now - first_damage : 0,
+                  .full_copies = full_copies - full_before_paint,
+                  .tile_copies = tile_copies - tiles_before_paint,
+                  .compactions = compactions - compactions_before_paint,
+                  .texture_appends = texture_appends - appends_before_paint,
+                  .previous_texture_appends = previous_appends,
+                  .copy_cpu_us = copy_cpu_us - copy_cpu_before_paint };
+  previous_appends = frame.texture_appends;
   if (frames->len < 10000)
-    g_array_append_val (frames, frame);
+    {
+      g_array_append_val (frames, frame);
+      qa_frame_feedback_record (feedback, clock, paint_start, now, first_damage);
+    }
   first_damage = 0;
 }
 
@@ -201,14 +242,14 @@ finish_measurement (gpointer data)
   g_autoptr (GString) json = g_string_new (NULL);
   g_string_append_printf (
       json,
-      "{\"label\":\"%s\",\"force_full\":%s,\"width\":%d,\"height\":%d,\"format\":%d,"
+      "{\"label\":\"%s\",\"force_full\":%s,\"width\":%d,\"height\":%d,\"format\":%d,\"stride\":%d,"
       "\"renderer\":\"%s\",\"scale\":%d,\"wall_us\":%" G_GINT64_FORMAT
       ",\"cpu_us\":%" G_GINT64_FORMAT ",\"pss_kib\":%" G_GINT64_FORMAT
       ",\"invalidations\":%" G_GUINT64_FORMAT ",\"damaged_pixels_sum\":%" G_GUINT64_FORMAT
       ",\"full_copies\":%" G_GUINT64_FORMAT ",\"tile_copies\":%" G_GUINT64_FORMAT
       ",\"copied_bytes\":%" G_GUINT64_FORMAT ",\"copy_cpu_us\":%" G_GINT64_FORMAT
       ",\"primary_changes\":%u,\"suspended\":%s,\"view_width\":%d,\"view_height\":%d,\"samples\":[",
-      label, force_full ? "true" : "false", width, height, format,
+      label, force_full ? "true" : "false", width, height, format, stride,
       G_OBJECT_TYPE_NAME (gtk_native_get_renderer (GTK_NATIVE (window))),
       gtk_widget_get_scale_factor (GTK_WIDGET (window)), wall, cpu, pss (), invalidations,
       damaged_pixels, full_copies, tile_copies, copied_bytes, copy_cpu_us, primary_changes,
@@ -218,11 +259,18 @@ finish_measurement (gpointer data)
   for (guint i = 0; i < frames->len; i++)
     {
       Frame *frame = &g_array_index (frames, Frame, i);
-      g_string_append_printf (
-          json, "%s[%" G_GINT64_FORMAT ",%" G_GINT64_FORMAT ",%" G_GINT64_FORMAT "]", i ? "," : "",
-          frame->wall_us, frame->cpu_us, frame->damage_to_paint_us);
+      g_string_append_printf (json,
+                              "%s[%" G_GINT64_FORMAT ",%" G_GINT64_FORMAT ",%" G_GINT64_FORMAT
+                              ",%" G_GUINT64_FORMAT ",%" G_GUINT64_FORMAT ",%" G_GUINT64_FORMAT
+                              ",%" G_GUINT64_FORMAT ",%" G_GUINT64_FORMAT ",%" G_GINT64_FORMAT "]",
+                              i ? "," : "", frame->wall_us, frame->cpu_us,
+                              frame->damage_to_paint_us, frame->full_copies, frame->tile_copies,
+                              frame->compactions, frame->texture_appends,
+                              frame->previous_texture_appends, frame->copy_cpu_us);
     }
-  g_string_append (json, "]}\n");
+  g_string_append (json, "],\"frame_feedback\":");
+  qa_frame_feedback_json (feedback, json);
+  g_string_append (json, "}\n");
   g_autofree char *filename = g_strconcat (label, ".json", NULL);
   g_autofree char *path = g_build_filename (output, filename, NULL);
   g_assert_true (g_file_set_contents (path, json->str, json->len, NULL));
@@ -251,9 +299,11 @@ action (GSimpleAction *simple, GVariant *parameter, gpointer data)
       label = g_strdup (value);
       /* Clear measurements after renderer caches have settled in this mode. */
       g_array_set_size (frames, 0);
+      g_array_set_size (feedback, 0);
       invalidations = damaged_pixels = full_copies = tile_copies = copied_bytes = 0;
       copy_cpu_us = first_damage = 0;
       primary_changes = 0;
+      compactions = texture_appends = previous_appends = 0;
       start_wall = g_get_monotonic_time ();
       start_cpu = cpu_time (CLOCK_PROCESS_CPUTIME_ID);
       measuring = TRUE;
@@ -321,7 +371,7 @@ main (int argc, char **argv)
     return 2;
   adw_init ();
   g_autoptr (GtkApplication) application
-      = gtk_application_new ("io.github.pirwa.ConsoleProfile", G_APPLICATION_DEFAULT_FLAGS);
+      = gtk_application_new ("io.github.stonega.ConsoleProfile", G_APPLICATION_DEFAULT_FLAGS);
   if (!g_application_register (G_APPLICATION (application), NULL, NULL)
       || g_application_get_is_remote (G_APPLICATION (application)))
     return 2;
@@ -332,6 +382,7 @@ main (int argc, char **argv)
   g_action_map_add_action_entries (G_ACTION_MAP (application), entries, G_N_ELEMENTS (entries),
                                    NULL);
   frames = g_array_new (FALSE, FALSE, sizeof (Frame));
+  feedback = qa_frame_feedback_new ();
   loop = g_main_loop_new (NULL, FALSE);
   window = GTK_WINDOW (adw_window_new ());
   gtk_window_set_application (window, application);
@@ -353,6 +404,7 @@ main (int argc, char **argv)
     }
   gtk_window_destroy (window);
   g_array_unref (frames);
+  g_array_unref (feedback);
   g_main_loop_unref (loop);
   g_free (output);
   g_free (label);

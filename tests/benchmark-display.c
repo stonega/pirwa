@@ -2,6 +2,7 @@
 /* Explicit GUI QA; never registered in the default, display-free test suite. */
 #define _POSIX_C_SOURCE 200809L
 #include "pirwa-display.h"
+#include "qa-frame-feedback.h"
 #include <time.h>
 
 typedef struct
@@ -20,6 +21,7 @@ typedef struct
   GMainLoop *loop;
   SpiceDisplayPrimary primary;
   GArray *samples;
+  GArray *feedback;
   const char *mode;
   const char *png;
   guint tick;
@@ -49,6 +51,7 @@ typedef struct
   int frames;
   int expect_scale;
   gboolean force_full_compare;
+  gboolean fullscreen;
   int width;
   int height;
 } Run;
@@ -100,6 +103,8 @@ render_display (Run *run, PirwaDisplay *display)
   g_autoptr (GskRenderNode) node = gtk_snapshot_free_to_node (snapshot);
   graphene_rect_t bounds = GRAPHENE_RECT_INIT (0, 0, gtk_widget_get_width (widget) * scale,
                                                gtk_widget_get_height (widget) * scale);
+  if (!node)
+    node = gsk_color_node_new (&(GdkRGBA){ 0, 0, 0, 0 }, &bounds);
   return gsk_renderer_render_texture (gtk_native_get_renderer (GTK_NATIVE (run->window)), node,
                                       &bounds);
 }
@@ -116,9 +121,29 @@ compare_full_frame (Run *run, PirwaDisplay *reference)
   run->verification_step++;
   if (run->force_full_compare)
     pirwa_display_invalidate (run->display, 0, 0, run->width, run->height);
+  /* An opaque ARGB reference keeps the compositor path even when the RGB
+   * display can use its direct rounded clip. Both represent the same pixels. */
+  g_autofree guint32 *opaque = NULL;
+  if (run->primary.format == SPICE_SURFACE_FMT_32_xRGB)
+    {
+      opaque = g_malloc_n ((gsize)run->width * run->height, 4);
+      for (int y = 0; y < run->height; y++)
+        {
+          const guint32 *row = (guint32 *)(run->primary.data + (gsize)y * run->primary.stride);
+          for (int x = 0; x < run->width; x++)
+            opaque[y * run->width + x] = row[x] | 0xff000000;
+        }
+      SpiceDisplayPrimary primary = run->primary;
+      primary.format = SPICE_SURFACE_FMT_32_ARGB;
+      primary.stride = run->width * 4;
+      primary.data = (guint8 *)opaque;
+      g_assert_true (pirwa_display_set_primary (reference, &primary));
+    }
   pirwa_display_invalidate (reference, 0, 0, run->width, run->height);
   g_autoptr (GdkTexture) tiled = render (run);
   g_autoptr (GdkTexture) full = render_display (run, reference);
+  if (opaque)
+    pirwa_display_clear (reference);
   int width = gdk_texture_get_width (tiled), height = gdk_texture_get_height (tiled);
   gsize size = (gsize)width * height * 4;
   g_autofree guint8 *a = g_malloc (size);
@@ -191,9 +216,11 @@ verify_center (Run *run, GdkTexture *texture, guint32 expected)
   gdk_texture_download (texture, pixels, (gsize)width * 4);
   const guint8 *center = pixels + ((gsize)(height / 2) * width + width / 2) * 4;
 #if G_BYTE_ORDER == G_LITTLE_ENDIAN
-  const guint8 wanted[] = { expected & 255, (expected >> 8) & 255, (expected >> 16) & 255, 255 };
+  const guint8 wanted[]
+      = { expected & 255, (expected >> 8) & 255, (expected >> 16) & 255, (expected >> 24) & 255 };
 #else
-  const guint8 wanted[] = { 255, (expected >> 16) & 255, (expected >> 8) & 255, expected & 255 };
+  const guint8 wanted[]
+      = { (expected >> 24) & 255, (expected >> 16) & 255, (expected >> 8) & 255, expected & 255 };
 #endif
   (void)run;
   for (guint i = 0; i < 4; i++)
@@ -215,7 +242,7 @@ finish (gpointer data)
   run->produced = 173;
   write_rect (run, run->width / 2 - 16, run->height / 2 - 16, 32, 32);
   g_autoptr (GdkTexture) texture = render (run);
-  verify_center (run, texture, color (run->width / 2, run->height / 2, run->produced));
+  verify_center (run, texture, 0xff000000 | color (run->width / 2, run->height / 2, run->produced));
   if (run->png)
     g_assert_true (gdk_texture_save_to_png (texture, run->png));
   pirwa_display_clear (run->display);
@@ -223,7 +250,7 @@ finish (gpointer data)
   g_autoptr (GdkTexture) empty = render (run);
   verify_center (run, empty, 0);
   /* Already-rendered textures remain valid after transport memory is freed. */
-  verify_center (run, texture, color (run->width / 2, run->height / 2, run->produced));
+  verify_center (run, texture, 0xff000000 | color (run->width / 2, run->height / 2, run->produced));
   guint8 invalid = 0;
   SpiceDisplayPrimary bad = { .width = 8193, .height = 1, .stride = 1, .data = &invalid };
   g_assert_false (pirwa_display_set_primary (run->display, &bad));
@@ -236,7 +263,7 @@ finish (gpointer data)
                                       .data = (guint8 *)rgb565 };
   g_assert_true (pirwa_display_set_primary (run->display, &replacement));
   g_autoptr (GdkTexture) recreated = render (run);
-  verify_center (run, recreated, 0x00ff00);
+  verify_center (run, recreated, 0xff00ff00);
   pirwa_display_clear (run->display);
   g_main_loop_quit (run->loop);
   return G_SOURCE_REMOVE;
@@ -278,6 +305,7 @@ after_paint (GdkFrameClock *clock, Run *run)
                         .producer_cpu_us = run->producer_cpu,
                         .interval_us = now - run->last_paint };
       g_array_append_val (run->samples, sample);
+      qa_frame_feedback_record (run->feedback, clock, run->paint_start, now, 0);
       if (run->samples->len == (guint)run->frames)
         {
           run->sample_end = now;
@@ -315,8 +343,16 @@ update (GtkWidget *widget, GdkFrameClock *clock, gpointer data)
   Run *run = data;
   run->produced++;
   gint64 start = cpu_time (CLOCK_THREAD_CPUTIME_ID);
-  if (g_str_equal (run->mode, "full"))
+  if (g_str_equal (run->mode, "invalidate-full"))
+    {
+      /* Isolate renderer work from the synthetic full-frame pixel producer. */
+      ((guint32 *)run->primary.data)[0] = color (0, 0, run->produced);
+      pirwa_display_invalidate (run->display, 0, 0, run->width, run->height);
+    }
+  else if (g_str_equal (run->mode, "full"))
     write_rect (run, 0, 0, run->width, run->height);
+  else if (g_str_equal (run->mode, "bands"))
+    write_rect (run, 0, (run->produced * 31) % (run->height - 31), run->width, 32);
   else
     {
       int x = run->width / 2 - 32;
@@ -358,6 +394,8 @@ main (int argc, char **argv)
             "PIXELS" },
           { "force-full-compare", 0, 0, G_OPTION_ARG_NONE, &run.force_full_compare,
             "Sanity control: compare two full-frame renderings", NULL },
+          { "fullscreen", 0, 0, G_OPTION_ARG_NONE, &run.fullscreen,
+            "Use the full virtual monitor instead of a scaled window", NULL },
           { "expect-scale", 0, 0, G_OPTION_ARG_INT, &run.expect_scale,
             "Fail unless the mapped surface has this actual scale (1–4)", "FACTOR" },
           { "height", 0, 0, G_OPTION_ARG_INT, &run.height, "Source framebuffer height (64–8192)",
@@ -365,8 +403,8 @@ main (int argc, char **argv)
           { "idle-seconds", 0, 0, G_OPTION_ARG_INT, &run.idle_seconds,
             "Passive idle sample after rendering (0–60)", "SECONDS" },
           { "frames", 0, 0, G_OPTION_ARG_INT, &run.frames, "Measured frames (30–1800)", "COUNT" },
-          { "mode", 0, 0, G_OPTION_ARG_STRING, &mode_arg, "Damage pattern: full, small, burst",
-            "PATTERN" },
+          { "mode", 0, 0, G_OPTION_ARG_STRING, &mode_arg,
+            "Damage pattern: full, invalidate-full, small, burst, bands", "PATTERN" },
           { "snapshot", 0, 0, G_OPTION_ARG_STRING, &png_arg,
             "Save a correctness snapshot after timing", "PNG" },
           { 0 } };
@@ -380,8 +418,9 @@ main (int argc, char **argv)
   if (!parsed || run.expect_scale < 0 || run.expect_scale > 4 || run.idle_seconds < 0
       || run.idle_seconds > 60 || run.width < 64 || run.width > 8192 || run.height < 64
       || run.height > 8192 || run.frames < 30 || run.frames > 1800
-      || (!g_str_equal (run.mode, "full") && !g_str_equal (run.mode, "small")
-          && !g_str_equal (run.mode, "burst")))
+      || (!g_str_equal (run.mode, "full") && !g_str_equal (run.mode, "invalidate-full")
+          && !g_str_equal (run.mode, "small") && !g_str_equal (run.mode, "burst")
+          && !g_str_equal (run.mode, "bands")))
     {
       g_printerr ("%s\n", error ? error->message : "Invalid display benchmark arguments");
       return 2;
@@ -389,11 +428,16 @@ main (int argc, char **argv)
   gtk_init ();
   run.loop = g_main_loop_new (NULL, FALSE);
   run.samples = g_array_new (FALSE, FALSE, sizeof (Sample));
+  run.feedback = qa_frame_feedback_new ();
   run.primary = (SpiceDisplayPrimary){ .format = SPICE_SURFACE_FMT_32_xRGB,
                                        .width = run.width,
                                        .height = run.height,
                                        .stride = run.width * 4,
                                        .data = g_malloc0_n ((gsize)run.width * run.height, 4) };
+  if (g_str_equal (run.mode, "invalidate-full"))
+    for (int y = 0; y < run.height; y++)
+      for (int x = 0; x < run.width; x++)
+        ((guint32 *)run.primary.data)[y * run.width + x] = color (x, y, (x / 32 + y / 32) & 255);
   run.window = GTK_WINDOW (gtk_window_new ());
   gtk_window_set_title (run.window, "Pirwa Console Renderer QA");
   gtk_window_set_default_size (run.window, 960, 640);
@@ -402,6 +446,8 @@ main (int argc, char **argv)
   g_assert_true (pirwa_display_set_primary (run.display, &run.primary));
   g_signal_connect (run.window, "map", G_CALLBACK (mapped), &run);
   run.timeout = g_timeout_add_seconds (180 + run.idle_seconds, timed_out, NULL);
+  if (run.fullscreen)
+    gtk_window_fullscreen (run.window);
   gtk_window_present (run.window);
   g_main_loop_run (run.loop);
   GdkSurface *surface = gtk_native_get_surface (GTK_NATIVE (run.window));
@@ -429,14 +475,18 @@ main (int argc, char **argv)
                i ? "," : "", sample->paint_wall_us, sample->paint_cpu_us, sample->producer_cpu_us,
                sample->interval_us);
     }
+  g_autoptr (GString) feedback_json = g_string_new (NULL);
+  qa_frame_feedback_json (run.feedback, feedback_json);
   g_print ("],\"idle_wall_us\":%" G_GINT64_FORMAT ",\"idle_cpu_us\":%" G_GINT64_FORMAT
-           ",\"idle_paints\":%u,\"max_channel_error\":%u}\n",
-           run.idle_wall_us, run.idle_cpu_us, run.idle_paints, run.max_channel_error);
+           ",\"idle_paints\":%u,\"max_channel_error\":%u,\"frame_feedback\":%s}\n",
+           run.idle_wall_us, run.idle_cpu_us, run.idle_paints, run.max_channel_error,
+           feedback_json->str);
   g_source_remove (run.timeout);
   g_signal_handlers_disconnect_by_data (run.clock, &run);
   g_object_unref (run.clock);
   gtk_window_destroy (run.window);
   g_array_unref (run.samples);
+  g_array_unref (run.feedback);
   g_main_loop_unref (run.loop);
   return 0;
 }

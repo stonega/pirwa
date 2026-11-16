@@ -189,7 +189,7 @@ class Desktop:
         elif action == 'app-action':
             if request['name'] not in ('console', 'search', 'refresh', 'new'):
                 raise ValueError('Use native UI or an identity-checked fixture command for mutations')
-            self.call('io.github.pirwa.Pirwa', '/io/github/pirwa/Pirwa/window/1',
+            self.call('io.github.stonega.Pirwa', '/io/github/stonega/Pirwa/window/1',
                       'org.gtk.Actions', 'Activate', '(sava{sv})', (request['name'], [], {}))
         elif action != 'exit':
             raise ValueError('Unknown controller action')

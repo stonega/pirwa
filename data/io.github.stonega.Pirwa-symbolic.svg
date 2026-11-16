@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <title>Pirwa</title>
+  <desc>Two layered monitors with friendly eyes and a smile on the front screen.</desc>
+  <g fill="#241f31">
+    <path d="M6 0h8a2 2 0 0 1 2 2v7a2 2 0 0 1-1 1.73V3a2 2 0 0 0-2-2H4.27A2 2 0 0 1 6 0z"/>
+    <path fill-rule="evenodd" d="M2 2h10a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H8v1h3a1 1 0 0 1 1 1v1H2v-1a1 1 0 0 1 1-1h3v-1H2a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm0 2v7h10V4z"/>
+    <rect x="4" y="5" width="2" height="3" rx="1"/>
+    <rect x="8" y="5" width="2" height="3" rx="1"/>
+    <path d="M5 8.5q2 2 4 0v1q-2 2-4 0z"/>
+  </g>
+</svg>

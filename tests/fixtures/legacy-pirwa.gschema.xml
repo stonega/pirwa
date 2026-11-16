@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <!-- Uninstalled pre-release schema: compatibility fixture, not a second app identity. -->
+  <schema id="io.github.pirwa.Pirwa" path="/io/github/pirwa/Pirwa/">
+    <key name="selected-machines" type="a{ss}"><default>{}</default></key>
+    <key name="use-host-proxy" type="b"><default>true</default></key>
+    <key name="proxy-dns-address" type="s"><default>'1.1.1.1'</default></key>
+    <key name="auto-resize-display" type="b"><default>false</default></key>
+  </schema>
+</schemalist>

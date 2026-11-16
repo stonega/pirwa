@@ -2,6 +2,7 @@
 #define _GNU_SOURCE
 #include "pirwa-provision.h"
 #include "pirwa-import.h"
+#include "pirwa-network.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <glib/gstdio.h>
@@ -198,6 +199,8 @@ pirwa_provision_create (virConnectPtr connection, const PirwaCreate *o, GCancell
   virStoragePoolPtr pool = NULL;
   virStorageVolPtr volume = NULL;
   virDomainPtr domain = NULL;
+  int driver_fd = -1;
+  struct stat driver_stat;
   char *result = NULL;
   g_autofree char *uuid = g_uuid_string_random ();
   g_autofree char *caps = NULL;
@@ -221,12 +224,17 @@ pirwa_provision_create (virConnectPtr connection, const PirwaCreate *o, GCancell
   if (!pirwa_config_supports (
           caps, "/domainCapabilities/cpu/mode[@name='host-passthrough'][@supported='yes']")
       || !pirwa_config_supports (
-          caps, "/domainCapabilities/devices/graphics/enum[@name='type']/value[.='spice']"))
+          caps, "/domainCapabilities/devices/graphics/enum[@name='type']/value[.='spice']")
+      || !pirwa_config_supports (
+          caps, "/domainCapabilities/devices/video/enum[@name='modelType']/value[.='qxl']"))
     {
-      g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
-                           "This host must support KVM host-passthrough CPU and SPICE graphics");
+      g_set_error_literal (
+          error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+          "This host must support KVM host-passthrough CPU, SPICE and QXL graphics");
       goto out;
     }
+  if (!pirwa_config_check_host (o, caps, error))
+    goto out;
   if (o->import_image)
     {
       if (!pirwa_qcow2_inspect (fd, &capacity, error))
@@ -247,13 +255,47 @@ pirwa_provision_create (virConnectPtr connection, const PirwaCreate *o, GCancell
             os_id = g_strdup (osinfo_entity_get_id (OSINFO_ENTITY (os)));
         }
       const char *arch = osinfo_media_get_architecture (media);
-      if (arch && !g_str_equal (arch, "x86_64") && !g_str_equal (arch, "i686")
-          && !g_str_equal (arch, "all"))
+      if (arch && !g_str_equal (arch, "x86_64") && !g_str_equal (arch, "all")
+          && (o->guest != PIRWA_GUEST_LINUX || !g_str_equal (arch, "i686")))
         g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
-                             "Select x86_64 Linux installation media");
+                             "Select x86_64 installation media for this guest profile");
       g_object_unref (loader);
       g_object_unref (media);
       if (*error)
+        goto out;
+    }
+  if (o->guest == PIRWA_GUEST_LINUX && os_id
+      && g_str_has_prefix (os_id, "http://microsoft.com/win/"))
+    {
+      g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT,
+                           "Windows media detected. Choose the matching Windows profile and "
+                           "a virtio-win driver ISO in Configuration.");
+      goto out;
+    }
+  if (o->guest != PIRWA_GUEST_LINUX)
+    {
+      const char *expected = o->guest == PIRWA_GUEST_WINDOWS_11 ? "http://microsoft.com/win/11"
+                                                                : "http://microsoft.com/win/10";
+      if (os_id && g_strcmp0 (os_id, expected) != 0)
+        {
+          g_set_error_literal (
+              error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT,
+              "The detected installation media does not match the Windows profile");
+          goto out;
+        }
+      if (!os_id)
+        os_id = g_strdup (expected);
+      driver_fd = open (o->driver_iso, O_RDONLY | O_CLOEXEC | O_NOFOLLOW);
+      if (driver_fd < 0 || fstat (driver_fd, &driver_stat) < 0 || !S_ISREG (driver_stat.st_mode))
+        {
+          g_set_error_literal (
+              error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT,
+              "The driver ISO must be a readable regular file, not a symbolic link");
+          goto out;
+        }
+      g_autoptr (OsinfoMedia) drivers
+          = osinfo_media_create_from_location_with_flags (o->driver_iso, cancellable, 0, error);
+      if (!drivers)
         goto out;
     }
   pool = get_pool (connection, o->pool && *o->pool ? o->pool : "pirwa", error);
@@ -285,6 +327,15 @@ pirwa_provision_create (virConnectPtr connection, const PirwaCreate *o, GCancell
     {
       g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_FAILED,
                            "Source changed during creation; try again with a stable copy");
+      goto out;
+    }
+  if (driver_fd >= 0
+      && (fstat (driver_fd, &after) < 0 || after.st_size != driver_stat.st_size
+          || after.st_mtim.tv_sec != driver_stat.st_mtim.tv_sec
+          || after.st_mtim.tv_nsec != driver_stat.st_mtim.tv_nsec))
+    {
+      g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                           "Driver ISO changed during creation; try again with a stable copy");
       goto out;
     }
   path = virStorageVolGetPath (volume);
@@ -320,11 +371,8 @@ pirwa_provision_create (virConnectPtr connection, const PirwaCreate *o, GCancell
     goto out;
   if (g_cancellable_set_error_if_cancelled (cancellable, error))
     goto out;
-  if (virDomainCreate (domain) < 0)
-    {
-      pirwa_libvirt_error (error, "Cannot start virtual machine");
-      goto out;
-    }
+  if (!pirwa_network_start (connection, domain, cancellable, error))
+    goto out;
   result = g_strdup (uuid);
   if (progress)
     progress (1.0, "Virtual machine is running", data);
@@ -347,6 +395,8 @@ out:
     virStorageVolFree (volume);
   if (pool)
     virStoragePoolFree (pool);
+  if (driver_fd >= 0)
+    close (driver_fd);
   close (fd);
   return result;
 }
@@ -832,8 +882,10 @@ pirwa_provision_rollback (virConnectPtr connection, virDomainPtr domain, virStor
     }
   if (volume && !volume_unused (connection, volume, domain ? uuid : NULL, NULL, error))
     return FALSE;
-  if (domain
-      && virDomainUndefineFlags (domain, details->has_nvram ? VIR_DOMAIN_UNDEFINE_NVRAM : 0) < 0)
+  unsigned int flags = details && details->has_nvram ? VIR_DOMAIN_UNDEFINE_NVRAM : 0;
+  if (details && details->has_tpm)
+    flags |= VIR_DOMAIN_UNDEFINE_TPM;
+  if (domain && virDomainUndefineFlags (domain, flags) < 0)
     {
       pirwa_libvirt_error (error, "Cannot remove rollback definition");
       return FALSE;
@@ -898,7 +950,13 @@ pirwa_provision_remove (virConnectPtr connection, virDomainPtr domain, const cha
     }
   if (g_cancellable_set_error_if_cancelled (cancellable, error))
     goto out;
-  if (virDomainUndefineFlags (domain, details->has_nvram ? VIR_DOMAIN_UNDEFINE_NVRAM : 0) < 0)
+  unsigned int flags = details->has_nvram
+                           ? (details->has_tpm && !delete_disk ? VIR_DOMAIN_UNDEFINE_KEEP_NVRAM
+                                                               : VIR_DOMAIN_UNDEFINE_NVRAM)
+                           : 0;
+  if (details->has_tpm)
+    flags |= delete_disk ? VIR_DOMAIN_UNDEFINE_TPM : VIR_DOMAIN_UNDEFINE_KEEP_TPM;
+  if (virDomainUndefineFlags (domain, flags) < 0)
     {
       pirwa_libvirt_error (error, "Cannot remove virtual machine");
       goto out;

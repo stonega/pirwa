@@ -1,0 +1,129 @@
+{
+  "status": "inconclusive-baseline-changed",
+  "accepted_performance_comparison": false,
+  "reason": "An existing running machine disappeared from the session inventory during the paired run; the baseline check failed.",
+  "measurements_saved": 12,
+  "preflight_memory": {
+    "available_kib": 4386808,
+    "required_kib": 4194304
+  },
+  "guest_resources": {
+    "cpus": 4,
+    "memory_mb": 3072,
+    "disk_gb": 16
+  },
+  "compared_binaries": {
+    "current": {
+      "path": "/home/stone/Gnome/pirwa/build/qa/rounded-real/followup-guest/benchmark-console",
+      "sha256": "a2c7f854b6c110b08dd0e5e05c333971d1bbd14800b277c1e4a5385318357fd1"
+    },
+    "baseline": {
+      "path": "/home/stone/Gnome/pirwa/build/qa/rounded-real/followup-guest/baseline-console",
+      "sha256": "c1ff7bfc5b12ccadec0c5996039347979dc5622f4ab101b40fc2e69f7370e297"
+    }
+  },
+  "source_sha256": {
+    "src/pirwa-console.c": "e12aed2e0e6b38936fec64bc5d380da3eed69c2ba02ceffa5d803429c12899c4",
+    "src/pirwa-display.c": "2b121efb057bde7fa52dd0066f486c883af12624a151215630e84f2a8cd862f4",
+    "src/pirwa-frame.c": "0c319d33e13230c94b62b71df10be4e7f935e378af3286fd20ed59698d3e122c",
+    "tests/benchmark-console.c": "8e720a9c35e4da9d4cb0bcbeb0ea04d1ec02d976bbec69cd253b914674512633",
+    "tests/qa-frame-feedback.c": "4e1a472d882dc4e380f266a2fe00fae223e44021ebc7ab5d5073afb2747b2463",
+    "tests/qa-frame-feedback.h": "9c40c0fc9ae030d353f13f391986455ebd1eaa5840249299da5b9667912728cd",
+    "tests/fixtures/qa-display-workload.py": "cfd314fda7b3d254fb1b79fb05c91991556ad6b1009e58923664309b9b19621a",
+    "scripts/profile-console.py": "26c36079b4cb30b4b40b04cf51b7bc747eed82c3423103a4178c0149626aa40a"
+  },
+  "existing_domain_deltas": {
+    "9904ab62-3bc3-4707-bbec-92c8ca6057bd": {
+      "before": {
+        "name": "Fedora-COSMIC",
+        "state": "running",
+        "xml_sha256": "c95c4c33f582ba1178015945f54d777fe660d7bbc216535adf88eb600ffd5c3c"
+      },
+      "after": null
+    }
+  },
+  "guest_cleanup": {
+    "stop": {
+      "code": 0,
+      "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n"
+    },
+    "remove": {
+      "code": 0,
+      "stderr": "libvirt: Domain Config error : metadata not found: Requested metadata element is not present\nlibvirt: Domain Config error : metadata not found: Requested metadata element is not present\n"
+    },
+    "pool_destroy": 0,
+    "pool_undefine": 0,
+    "remaining_pool_files": [],
+    "domain_absent": true,
+    "pool_absent": true,
+    "baseline_unchanged": false
+  },
+  "desktop_report": {
+    "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+    "source_dirty": true,
+    "gnome_shell": "GNOME Shell 51.1",
+    "shell_command": [
+      "gnome-shell",
+      "--headless",
+      "--wayland",
+      "--no-x11",
+      "--virtual-monitor",
+      "3840x2160@60",
+      "--wayland-display",
+      "pirwa-qa-wayland"
+    ],
+    "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
+    "scope": "Custom command in an isolated desktop; inspect the command's own results",
+    "cases": [
+      {
+        "name": "command",
+        "command": [
+          "python3",
+          "scripts/profile-console.py",
+          "--uri",
+          "qemu+unix:///session?socket=/run/user/1000/libvirt/virtqemud-sock",
+          "--iso",
+          "/home/stone/Downloads/Fedora-Workstation-Live-43-1.6.x86_64.iso",
+          "--build",
+          "/home/stone/Gnome/pirwa/build/qa/rounded-real/frozen",
+          "--baseline-binary",
+          "/home/stone/Gnome/pirwa/build/qa/rounded-real/frozen/baseline-console",
+          "--expect-size",
+          "3840x2160",
+          "--modes",
+          "full,small",
+          "--runs",
+          "3",
+          "--seconds",
+          "10",
+          "--memory-mb",
+          "3072",
+          "--setup-seconds",
+          "60",
+          "--output",
+          "/home/stone/Gnome/pirwa/build/qa/rounded-real/followup-guest"
+        ],
+        "returncode": 1
+      }
+    ],
+    "passed": false,
+    "error": "command failed (1); see /home/stone/Gnome/pirwa/build/qa/rounded-real/followup-desktop",
+    "shell_exitcode": 0
+  },
+  "desktop_process_cleanup": {
+    "signalled": [],
+    "remaining": {}
+  },
+  "launcher_cleanup": {
+    "outer_launcher_exitcode": 143,
+    "inner_desktop_completed": true,
+    "private_runtime": "/tmp/pirwa-gnome-eq2k_ooe",
+    "runtime_removed": true,
+    "manual_cleanup_reason": "Outer launcher exited before its cleanup; inner runner and compositor had already finished."
+  },
+  "raw_results": "real-console-followup-results.json.gz",
+  "raw_results_sha256": "b085a693c6d3ffecc4736cafa8e9a735f2d5123397c3ad5f853467c2d0e67324",
+  "run_sources": "real-console-followup-sources.tar.gz",
+  "control": "Same frozen console/frame/core and recorder; only masked versus guarded direct rounded rendering differs. The prepared comparison manifest and build commands remain in real-console-preflight.json.",
+  "conclusion": "No accepted real-guest result for the rounded renderer. Retest on a stable host with sufficient memory; existing real-guest packed-copy evidence remains separate."
+}

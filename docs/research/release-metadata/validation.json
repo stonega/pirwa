@@ -1,0 +1,1398 @@
+{
+  "recorded_utc": "2026-11-16T09:36:55.708020+00:00",
+  "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+  "source_dirty": true,
+  "application_id": "io.github.stonega.Pirwa",
+  "previous_application_id": "io.github.pirwa.Pirwa",
+  "settings_storage_path": "/io/github/pirwa/Pirwa/",
+  "legacy_schema_installed": false,
+  "repository_verification": {
+    "recorded_utc": "2026-11-16T09:13:44.056987+00:00",
+    "source": "Read-only connected GitHub get_repo and get_user_login",
+    "authenticated_login": "stonega",
+    "repository": "stonega/pirwa",
+    "owner": "stonega",
+    "repository_id": "1457793688",
+    "admin": true,
+    "visibility": "private",
+    "canonical_url": "https://github.com/stonega/pirwa",
+    "public_reachability_verified": false
+  },
+  "publication": {
+    "repository_visibility_changed": false,
+    "remote_content_changed": false,
+    "public_url_reachability_verified": false,
+    "screenshot_published": false,
+    "tag_created": false,
+    "release_kind": "snapshot",
+    "version": "0.1.0-dev"
+  },
+  "metadata_validation": {
+    "strict": true,
+    "network": false,
+    "severity_overrides": [],
+    "pedantic_hint": "cid-contains-uppercase-letter (conventional application ID capitalization)",
+    "controls": [
+      {
+        "control": "current",
+        "returncode": 0,
+        "stdout": "Metadata agrees: io.github.stonega.Pirwa 0.1.0-dev\n",
+        "stderr": ""
+      },
+      {
+        "control": "desktop-icon",
+        "returncode": 1,
+        "stdout": "",
+        "stderr": "Metadata mismatch: Desktop icon ID differs from application ID\n"
+      },
+      {
+        "control": "release-version",
+        "returncode": 1,
+        "stdout": "",
+        "stderr": "Metadata mismatch: Newest AppStream release must match the Meson version\n"
+      },
+      {
+        "control": "missing-screenshot",
+        "returncode": 1,
+        "stdout": "",
+        "stderr": "Metadata mismatch: [Errno 2] No such file or directory: '/tmp/pirwa-metadata-controls-x02zqkv9/missing-screenshot/data/screenshots/collection.png'\n"
+      },
+      {
+        "control": "rpm-source-0.1.0-dev",
+        "returncode": 0,
+        "stdout": "pirwa-0.1.0-dev.tar.xz\n",
+        "stderr": ""
+      },
+      {
+        "control": "rpm-source-0.1.0",
+        "returncode": 0,
+        "stdout": "pirwa-0.1.0.tar.xz\n",
+        "stderr": ""
+      },
+      {
+        "control": "appstream",
+        "command": [
+          "appstreamcli",
+          "validate",
+          "--strict",
+          "--no-net",
+          "data/io.github.stonega.Pirwa.metainfo.xml"
+        ],
+        "returncode": 0,
+        "stdout": "\n\u2714 Validation was successful: pedantic: 1\n",
+        "stderr": ""
+      },
+      {
+        "control": "staged-tree",
+        "command": [
+          "appstreamcli",
+          "validate-tree",
+          "--strict",
+          "--no-net",
+          "/home/stone/Gnome/pirwa/build/qa/release-metadata-20261116/stage/usr/local"
+        ],
+        "returncode": 0,
+        "stdout": "io.github.stonega.Pirwa.metainfo.xml\n\n\u2714 Validation was successful: pedantic: 1\n",
+        "stderr": ""
+      },
+      {
+        "control": "resources",
+        "command": [
+          "gresource",
+          "list",
+          "build/src/pirwa"
+        ],
+        "returncode": 0,
+        "stdout": "/io/github/stonega/Pirwa/icons/scalable/apps/io.github.stonega.Pirwa-symbolic.svg\n/io/github/stonega/Pirwa/icons/scalable/apps/io.github.stonega.Pirwa.svg\n",
+        "stderr": ""
+      }
+    ]
+  },
+  "asset_renames": {
+    "io.github.stonega.Pirwa.svg": {
+      "old_name": "io.github.pirwa.Pirwa.svg",
+      "sha256": "701a485223e1c7fd19a5b9903cb0ac908fba3db3216c102fdbf8541f95cb50c5",
+      "content_unchanged": true
+    },
+    "io.github.stonega.Pirwa-symbolic.svg": {
+      "old_name": "io.github.pirwa.Pirwa-symbolic.svg",
+      "sha256": "57b5b9eb43191e414821bb4013dc14871d912aa987a40c371e232dd25b479334",
+      "content_unchanged": true
+    },
+    "io.github.stonega.Pirwa.png": {
+      "old_name": "io.github.pirwa.Pirwa.png",
+      "sha256": "f3b7ec62227ca8ae201dd6de01519e34b4bf7eb8bc51b2914535f81eaae08029",
+      "content_unchanged": true
+    }
+  },
+  "screenshot": {
+    "command": [
+      "/home/stone/Gnome/pirwa/build/tests/test-ui",
+      "--uri",
+      "test:///home/stone/Gnome/pirwa/build/qa/release-metadata-20261116/screenshot-node.xml",
+      "--width",
+      "1088",
+      "--duration",
+      "1",
+      "--snapshot",
+      "/home/stone/Gnome/pirwa/data/screenshots/collection.png"
+    ],
+    "returncode": 0,
+    "scope": "Actual Pirwa window with three stopped synthetic test-driver machines; no real guests",
+    "binary_sha256": "9e009bfe5cbc7d76d1f831feff7bb0076dc6b2a0757eeb30083de208f798e2c5",
+    "fixture_sha256": "0c66ccafb25571d0c957a9c58a4fb56b1ff91516784aa2d078db9aeb5800eadb",
+    "screenshot_sha256": "3e21d552df4543af335df16568cb97d585cd8175daa078ae23fa4945376fc320",
+    "metrics": {
+      "main_monotonic_us": 21881425010,
+      "first_paint_monotonic_us": 21882285885,
+      "ready_monotonic_us": 21882285918,
+      "main_to_first_paint_ms": 860.875,
+      "sample_wall_ms": 998.99,
+      "sample_cpu_percent": 0.0372,
+      "sample_frames": 0,
+      "pss_kib": 77488,
+      "exercise_steps": 0,
+      "domains": 3,
+      "renderer": "GskVulkanRenderer",
+      "sample_start_monotonic_us": 21884997043,
+      "sample_end_monotonic_us": 21885996033,
+      "text_scale": 1,
+      "scroll": false,
+      "focus_kind": "GtkListItemWidget",
+      "initial_focus_kind": "GtkListItemWidget",
+      "active": false,
+      "refresh_millihz": 60000,
+      "surface_scale": 1,
+      "frame_work_us": [],
+      "frame_cpu_us": [],
+      "form_focus_steps": 0,
+      "chooser_reached": false,
+      "reverse_focus": false,
+      "windows_observed": 1,
+      "windows_painted": 1,
+      "scans_finished": 0,
+      "first_presentation_monotonic_us": 0,
+      "feedback_dropped": 0,
+      "presentation_feedback": null,
+      "startup_stage_us": {
+        "gtk_init": 15087,
+        "adw_init": 63872,
+        "application_register": 12629,
+        "window_new": 13587,
+        "window_present": 239976
+      }
+    }
+  },
+  "screenshot_review": "Final actual app-only PNG inspected; resources ready, light theme, no clipping. Initial loading-state capture retained separately.",
+  "preference_compatibility": "Old and new schema IDs share the memory backend storage path; proxy, DNS, auto-resize, per-URI selection and reverse updates pass",
+  "headless": {
+    "normal": [
+      {
+        "name": "pirwa:desktop-file",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.30898284912109375
+      },
+      {
+        "name": "pirwa:appstream",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.302534818649292
+      },
+      {
+        "name": "pirwa:release-metadata",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.2976357936859131
+      },
+      {
+        "name": "pirwa:usage",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.3537254333496094
+      },
+      {
+        "name": "pirwa:config",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.3487410545349121
+      },
+      {
+        "name": "pirwa:model",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.28905463218688965
+      },
+      {
+        "name": "pirwa:preferences",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.20066452026367188
+      },
+      {
+        "name": "pirwa:proxy-settings",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.19556379318237305
+      },
+      {
+        "name": "pirwa:backend",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.3714487552642822
+      },
+      {
+        "name": "pirwa:provision",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.2979309558868408
+      },
+      {
+        "name": "pirwa:console-frame",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.29056477546691895
+      },
+      {
+        "name": "pirwa:network-definition",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.19805574417114258
+      },
+      {
+        "name": "pirwa:backend-lifetime",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.371065616607666
+      },
+      {
+        "name": "pirwa:boxes",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.29868435859680176
+      },
+      {
+        "name": "pirwa:boxes-import",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.3040177822113037
+      },
+      {
+        "name": "pirwa:network-start",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.3887765407562256
+      },
+      {
+        "name": "pirwa:ui-profile-guards",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.5081899166107178
+      },
+      {
+        "name": "pirwa:inventory",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.7033367156982422
+      },
+      {
+        "name": "pirwa:backend-faults",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.7774152755737305
+      },
+      {
+        "name": "pirwa:scale-1000",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.9452002048492432
+      },
+      {
+        "name": "pirwa:network-gateway",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 2.941723108291626
+      }
+    ],
+    "sanitizer": [
+      {
+        "name": "pirwa:desktop-file",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.4085085391998291
+      },
+      {
+        "name": "pirwa:appstream",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.4062831401824951
+      },
+      {
+        "name": "pirwa:release-metadata",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.40430688858032227
+      },
+      {
+        "name": "pirwa:usage",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.3909285068511963
+      },
+      {
+        "name": "pirwa:config",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.38849592208862305
+      },
+      {
+        "name": "pirwa:model",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.3805091381072998
+      },
+      {
+        "name": "pirwa:preferences",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.2966606616973877
+      },
+      {
+        "name": "pirwa:proxy-settings",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.2943706512451172
+      },
+      {
+        "name": "pirwa:console-frame",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 0.4121272563934326
+      },
+      {
+        "name": "pirwa:ui-profile-guards",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 1.209463357925415
+      },
+      {
+        "name": "pirwa:network-definition",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 1.9926791191101074
+      },
+      {
+        "name": "pirwa:provision",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 2.1793642044067383
+      },
+      {
+        "name": "pirwa:boxes",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 2.287029504776001
+      },
+      {
+        "name": "pirwa:backend",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 2.41713547706604
+      },
+      {
+        "name": "pirwa:boxes-import",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 2.4302420616149902
+      },
+      {
+        "name": "pirwa:backend-lifetime",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 2.920541524887085
+      },
+      {
+        "name": "pirwa:network-start",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 2.809880018234253
+      },
+      {
+        "name": "pirwa:inventory",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 3.5670197010040283
+      },
+      {
+        "name": "pirwa:backend-faults",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 4.1377174854278564
+      },
+      {
+        "name": "pirwa:network-gateway",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 4.22937798500061
+      },
+      {
+        "name": "pirwa:scale-1000",
+        "result": "OK",
+        "returncode": 0,
+        "duration": 4.726502180099487
+      }
+    ]
+  },
+  "desktop": {
+    "normal": {
+      "passed": true,
+      "cases": 10,
+      "graphics_environment": {}
+    },
+    "sanitizer": {
+      "passed": true,
+      "cases": 10,
+      "graphics_environment": {
+        "VK_DRIVER_FILES": "/usr/share/vulkan/icd.d/intel_icd.x86_64.json"
+      }
+    }
+  },
+  "production_smoke": {
+    "completed": true,
+    "warmups": 1,
+    "measured_launches": 1,
+    "scope": "Startup correctness only; no latency percentile acceptance"
+  },
+  "clean_native": {
+    "passed": true,
+    "rootless": true,
+    "network_during_checks": "none",
+    "image_id": "e6441e8a7ebc287a3e4216344c4ac645d86b1960888914853c0448dff20e75b9",
+    "last_stage": "complete",
+    "headless": {
+      "normal": [
+        {
+          "name": "pirwa:desktop-file",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.30898284912109375
+        },
+        {
+          "name": "pirwa:appstream",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.302534818649292
+        },
+        {
+          "name": "pirwa:release-metadata",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.2976357936859131
+        },
+        {
+          "name": "pirwa:usage",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.3537254333496094
+        },
+        {
+          "name": "pirwa:config",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.3487410545349121
+        },
+        {
+          "name": "pirwa:model",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.28905463218688965
+        },
+        {
+          "name": "pirwa:preferences",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.20066452026367188
+        },
+        {
+          "name": "pirwa:proxy-settings",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.19556379318237305
+        },
+        {
+          "name": "pirwa:backend",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.3714487552642822
+        },
+        {
+          "name": "pirwa:provision",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.2979309558868408
+        },
+        {
+          "name": "pirwa:console-frame",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.29056477546691895
+        },
+        {
+          "name": "pirwa:network-definition",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.19805574417114258
+        },
+        {
+          "name": "pirwa:backend-lifetime",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.371065616607666
+        },
+        {
+          "name": "pirwa:boxes",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.29868435859680176
+        },
+        {
+          "name": "pirwa:boxes-import",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.3040177822113037
+        },
+        {
+          "name": "pirwa:network-start",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.3887765407562256
+        },
+        {
+          "name": "pirwa:ui-profile-guards",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.5081899166107178
+        },
+        {
+          "name": "pirwa:inventory",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.7033367156982422
+        },
+        {
+          "name": "pirwa:backend-faults",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.7774152755737305
+        },
+        {
+          "name": "pirwa:scale-1000",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.9452002048492432
+        },
+        {
+          "name": "pirwa:network-gateway",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 2.941723108291626
+        }
+      ],
+      "sanitizer": [
+        {
+          "name": "pirwa:desktop-file",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.4085085391998291
+        },
+        {
+          "name": "pirwa:appstream",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.4062831401824951
+        },
+        {
+          "name": "pirwa:release-metadata",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.40430688858032227
+        },
+        {
+          "name": "pirwa:usage",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.3909285068511963
+        },
+        {
+          "name": "pirwa:config",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.38849592208862305
+        },
+        {
+          "name": "pirwa:model",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.3805091381072998
+        },
+        {
+          "name": "pirwa:preferences",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.2966606616973877
+        },
+        {
+          "name": "pirwa:proxy-settings",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.2943706512451172
+        },
+        {
+          "name": "pirwa:console-frame",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 0.4121272563934326
+        },
+        {
+          "name": "pirwa:ui-profile-guards",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 1.209463357925415
+        },
+        {
+          "name": "pirwa:network-definition",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 1.9926791191101074
+        },
+        {
+          "name": "pirwa:provision",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 2.1793642044067383
+        },
+        {
+          "name": "pirwa:boxes",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 2.287029504776001
+        },
+        {
+          "name": "pirwa:backend",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 2.41713547706604
+        },
+        {
+          "name": "pirwa:boxes-import",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 2.4302420616149902
+        },
+        {
+          "name": "pirwa:backend-lifetime",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 2.920541524887085
+        },
+        {
+          "name": "pirwa:network-start",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 2.809880018234253
+        },
+        {
+          "name": "pirwa:inventory",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 3.5670197010040283
+        },
+        {
+          "name": "pirwa:backend-faults",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 4.1377174854278564
+        },
+        {
+          "name": "pirwa:network-gateway",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 4.22937798500061
+        },
+        {
+          "name": "pirwa:scale-1000",
+          "result": "OK",
+          "returncode": 0,
+          "duration": 4.726502180099487
+        }
+      ]
+    },
+    "source_drift_since_snapshot": []
+  },
+  "source_drift_at_recording": [
+    "docs/implementation/setup.md",
+    "docs/release/v0.1.0-readiness.md",
+    "docs/research/v0.1-validation.md",
+    "scripts/test-gnome.py",
+    "src/pirwa-backend.c",
+    "src/pirwa-config.c",
+    "src/pirwa-config.h",
+    "src/pirwa-create-dialog.c",
+    "src/pirwa-provision.c",
+    "tests/meson.build",
+    "tests/test-config.c",
+    "tests/test-create-ui.c"
+  ],
+  "working_tree_scope": "Later concurrent source changes are preserved and excluded from the accepted frozen candidate; this record is not a validation of those changes.",
+  "rpm_payload": {
+    "rpm": "build/qa/release-metadata-clean-20261116/results/rpms/pirwa-0.1.0-0.1.dev.fc45.x86_64.rpm",
+    "files": [
+      "/usr/bin/pirwa",
+      "/usr/lib/.build-id",
+      "/usr/lib/.build-id/50",
+      "/usr/lib/.build-id/50/240095953868bac523914c6cdafc2b18046d24",
+      "/usr/lib/.build-id/ef",
+      "/usr/lib/.build-id/ef/dde00b88ffca557e98c28ba61180e37b9b308b",
+      "/usr/libexec/pirwa-network",
+      "/usr/share/applications/io.github.stonega.Pirwa.desktop",
+      "/usr/share/doc/pirwa",
+      "/usr/share/doc/pirwa/README.md",
+      "/usr/share/glib-2.0/schemas/io.github.stonega.Pirwa.gschema.xml",
+      "/usr/share/icons/hicolor/scalable/apps/io.github.stonega.Pirwa.svg",
+      "/usr/share/icons/hicolor/symbolic/apps/io.github.stonega.Pirwa-symbolic.svg",
+      "/usr/share/licenses/pirwa",
+      "/usr/share/licenses/pirwa/COPYING",
+      "/usr/share/metainfo/io.github.stonega.Pirwa.metainfo.xml"
+    ],
+    "metadata": "pirwa 0.1.0-0.1.dev.fc45\nhttps://github.com/stonega/pirwa\n"
+  },
+  "source_sha256": {
+    ".github/workflows/check.yml": "1e763a1be51f39512f5b8cda40a37a6fd82ea725dd4d30db32759fb3c8ae9b7a",
+    "data/io.github.stonega.Pirwa-symbolic.svg": "57b5b9eb43191e414821bb4013dc14871d912aa987a40c371e232dd25b479334",
+    "data/io.github.stonega.Pirwa.desktop": "c828114eb3f85440b0eb8011fdcf2fe4099eb979ac6a62b4c1696444ec991eb5",
+    "data/io.github.stonega.Pirwa.gschema.xml": "f50b0ffd6d2bc3593ce2db7a2011a594a9147bc46e2a9760d899233c464acd20",
+    "data/io.github.stonega.Pirwa.metainfo.xml": "796e6999a4e323a0aa973d8643c77ce30a33f65168a3b5d3a77f5c459ff74fae",
+    "data/io.github.stonega.Pirwa.png": "f3b7ec62227ca8ae201dd6de01519e34b4bf7eb8bc51b2914535f81eaae08029",
+    "data/io.github.stonega.Pirwa.svg": "701a485223e1c7fd19a5b9903cb0ac908fba3db3216c102fdbf8541f95cb50c5",
+    "data/meson.build": "e3f944026efd1b1669e251adc73fddcae8dd73d191a9fdb53cc8331708f084e3",
+    "data/pirwa.gresource.xml": "5e8c437afa8e07934ba2b4ef6d4e5de410396517d0c0e8b15596d573cfa2626d",
+    "data/screenshots/README.md": "93fcfc80fe2826a8933a69d69c8b5171cef5112fcd62161df2b376e6f977da4b",
+    "data/screenshots/collection.png": "3e21d552df4543af335df16568cb97d585cd8175daa078ae23fa4945376fc320",
+    "examples/run-test-driver.sh": "5f03ce3a8dedf9c84eaf2a19b6d356e4ae5e872b1ffe49fcab57c2335e6cf52c",
+    "examples/screenshot-machines.xml": "0c66ccafb25571d0c957a9c58a4fb56b1ff91516784aa2d078db9aeb5800eadb",
+    "packaging/Containerfile.qa": "34d85d78c647a454f3955c40e530c52a530e0e75d66ff9417febcaf8329c215b",
+    "packaging/pirwa.spec": "ad9290629739144181efcd9abb380dbaac4259f0b562e15dd7581de520ce272d",
+    "po/LINGUAS": "ddeb5b6d9ee9836541a0421310cda30641aab5aae3257c04a472af0186bffded",
+    "po/POTFILES.in": "662d5ec8599a3bfe2dca197887134ca412d18c0f32825f83a8c5e55888e4da2a",
+    "po/README.md": "451e1be443d7151fc760fff1a75553cc9fcddf64f7691c95ffe935ca84711051",
+    "po/meson.build": "8aa419861e006911b355e09defc18f500513487a0dcca0682df5adaa751531f0",
+    "po/pirwa.pot": "5256cb6a50026281e75654206bf5936fef284f8c106378d33dfbf036f2c44c36",
+    "scripts/benchmark.sh": "df086197ea91925dce361f5f8fcfb9a86112359d0f18eb04d3f1af0a902444b6",
+    "scripts/check-clean-build.py": "01ab382c389c2f5554f45fab0301c271540348b1260baa02b2f4f551d61b9e27",
+    "scripts/check-native-build.sh": "958ef1ed2291d33ee4a183b4cf47d7dc13f1cf697dc36455c8af0a31d6f12d85",
+    "scripts/check-release-metadata.py": "f58f071dba667a1e4436c70fbcdfa99d1558782e5fc915ccb6a08582c21a816e",
+    "scripts/console-session.py": "c28ca1d6baf075f0142bcde9bffc4c03f1a9b7d4e21204cd8b6cfaee4662b3c8",
+    "scripts/profile-console.py": "7618d65a1b8bb1101bcbd1c64ba3b046a76cc773abb18c1dcf80b5b869736823",
+    "scripts/profile-display.py": "04be731cc34e626193e8e66b75e4c4d9ad9f43cc7a4e360a73819bcb4689c3d1",
+    "scripts/profile-guest.py": "f9878660a0d61dfc7edbb14da8f360dadeeb9b9281255c15291776caa2257617",
+    "scripts/profile-renderer-memory.py": "8c7d74e3a2f650820a7707282299b5169ae3c8ff32d9877d1fb933e53fcfa311",
+    "scripts/profile-ui.py": "c615bfd96eaa24c61b0e166a5ccc6d8667c5ce4560d662a260bc0bda6dab8eab",
+    "scripts/qa-display-scale.py": "e38a4d261af7258e72e9be219a222096287df1847181b45333e43a43e5b3ea7d",
+    "scripts/run-dev.sh": "e9b57c6ff21ee39cb7b5f7dc9cb32499b6136dad919004ded126494c1db4f019",
+    "scripts/test-gnome.py": "0589c05140af66751c9ad9562a8f11c8b0029839e235b79cc922e54889458b78",
+    "scripts/test-guest-recovery.py": "b98a74fb5ceda23059c182ba2aa3292765a02772ec439b23e1505c5aeaaff426",
+    "scripts/test-libvirt-daemon.py": "9d17eb51a66cebf95e8ad53b3f2b420153d484deec365da4670aab985722b76b",
+    "src/main.c": "3a92167e52b73db67ad8a703a9804a60a07df783ff983bb51b76571448863654",
+    "src/meson.build": "d1047bf37babfb3beec873aca78b31a846cb64e162936b557cb30b9dd6c3870d",
+    "src/pirwa-backend.c": "d797faf0f63582b2671152fcc2e7f7369f965ad62a9950aaef853fc6b7ae8a97",
+    "src/pirwa-backend.h": "9ea1592f45acf8c38db157e4210df860905b01cbbcd59221cc6ad7d67abb1db2",
+    "src/pirwa-boxes-dialog.c": "f9bd14d2c88739d4b6b78f54e9e75a4f73ffdec9427f7f3bfbba428d2e463b9b",
+    "src/pirwa-boxes-dialog.h": "36fccca7274066a9289a608fdf6140cabebfdc3a36c4221af4fb0c243aca20a0",
+    "src/pirwa-boxes.c": "85f1fb16574bc57116363386388c41aa57586f03e2249398d51ecb68cb3bb160",
+    "src/pirwa-boxes.h": "e2ec79c2abb0d0f2bf9063fa0f66cde6ffdf235b5d3e00ca3d308647509085f7",
+    "src/pirwa-config.c": "5c43a3739737615642ea8bb7791f63e5d8a4a8bfd4363f7b083949c8cdf26fa2",
+    "src/pirwa-config.h": "bed38f80afd86996d5544a9907a2b48d47f1947642dea1d14d6db9807624e5a8",
+    "src/pirwa-console.c": "01121b5b30728ec5c5000bd633e67c7dcc4571a2d9889a27478aff3a1af49e00",
+    "src/pirwa-console.h": "b0470c77756effb734fefc50799611ca698594b118d0b5bfe92c2d991c61f3f4",
+    "src/pirwa-create-dialog.c": "c28b3e9e955d39744264f5a181432e657ae32bcf37f1405160c88743ddd967a5",
+    "src/pirwa-create-dialog.h": "328f3a338adee425c41087a9abaf91d8d17d28e9e567ceff1326757c7ec80f7e",
+    "src/pirwa-display.c": "b8c36fcee44e615a6bf3010ef4bcd63335d79d40c4e1c0c533f387f52b369038",
+    "src/pirwa-display.h": "7181f67d78751f0ba01ad6d491956ab1c74f8f6c366e827ce35ed6607fc6d142",
+    "src/pirwa-frame.c": "83863d6d451cbe76cc00c7a5290fd47cb6cf121c12e96e0a8de9c726ac10f7ea",
+    "src/pirwa-frame.h": "18155860a3a25564fd34d57f4888f12480a4219addf8b777f0d1fea977c20130",
+    "src/pirwa-gateway.c": "89e1952f56c1c241811e75b108da74fc7a0d285809089f5629534436a225c3d3",
+    "src/pirwa-import.c": "a6eb59558365a28764fce3f42b8e00cb160430ddfafabe366191ba2767be1fcd",
+    "src/pirwa-import.h": "fb30f61bcc10da9f8ac6c52da04024e29cd731533cc95ca37b4b9963ee88b81c",
+    "src/pirwa-inventory.c": "e7c5e88bbd6aab26e98eef025fce6176625bddbae5a8f9bc58903c243106d36c",
+    "src/pirwa-inventory.h": "549ebabd3a04fd381185deab06978055d622e6fd39bbac54b5b2c6caa0a9b804",
+    "src/pirwa-libvirt.h": "6b20112325bc4afcda34654d4cc1c5ac9e2529045a7f1b7c004cac495120f739",
+    "src/pirwa-machine.c": "3874c8c27e9c3fd88dd69731c592a5bc3ed6297b20c9f77d77e76a3028abd902",
+    "src/pirwa-machine.h": "c0dfaa631ef74fb163cab05b6e22cc25dd9792bd8817ddf89d45a7a245ce8411",
+    "src/pirwa-model.c": "2383ab0620a507c297e53ee715f625acd1abeeda932e0bc22db8e6e0ea61f94d",
+    "src/pirwa-model.h": "919dd6fcf72c86780c1c442063e18bc67eef0a8c6009d9cdaa1927bea90888d3",
+    "src/pirwa-network.c": "7ba491dbcd4eb8a087d80b91ae0026a853c7eb666741103415a4b768e4cbfc25",
+    "src/pirwa-network.h": "e837b3f579d6c815bb38e105743d47b1c8ef46d4077d29c2478be48ca62310c2",
+    "src/pirwa-preferences.c": "ad10c87316e0a143e657f086cf3bb0fb5456bc3591384a359c5626ed595058da",
+    "src/pirwa-preferences.h": "33f6a010dcdc533d7a3ce7ced90cd3214a51aed77e3dece668a3e234a00a7ec3",
+    "src/pirwa-provision.c": "765e41dd0b8c697a30293b9b3e1ad73e9c8d1ae188687c8d8ec788dc0f2e8e58",
+    "src/pirwa-provision.h": "d9826cc3f48dcc1926820dfd7b98d9af4edc02353c32821d3cd64ac2975aceb0",
+    "src/pirwa-proxy.c": "09e5fd424793239096025092ad9ccc6077ce058b0aa911916bf131ddd7310454",
+    "src/pirwa-proxy.h": "d72d07d950ac9ab2912112c98152ce9abfb42b107321e44314eb5cb35d7a11e5",
+    "src/pirwa-usage.c": "9199e3dcf56d5f61044d3ddf58a1ee856225128deb6adc9981ca6c93bfbd43d1",
+    "src/pirwa-usage.h": "4d863f2a0820d8867da38f6aff543f1f254fb4042cbd19b425dd22fb342d0550",
+    "src/pirwa-window.c": "3e3321dcf4171dcd18eafdbea44255ed30004248130d031b35f026ed88431a87",
+    "src/pirwa-window.h": "e764cbd1307547c74b4624a36e3a8ade1c9c9b3519faab973704c27dfeb8a496",
+    "tests/benchmark-console.c": "4c06f98907ad499da6527bd766e927fdb633c5c226964a6db05ac9356a02a067",
+    "tests/benchmark-display-memory.c": "2709b3c1114664f8f0f5a2722e6abc2d45cbd1a1a22ae62265b53ba75d5da531",
+    "tests/benchmark-display.c": "d28a82d3a725664a7caba583ca7be8083245e065c836565dcfebcccf07605bff",
+    "tests/benchmark-frame.c": "14268f5c4911036bcf4cde0ae6b8de03e265cfae30e67c884dabd2c0bab9aba8",
+    "tests/benchmark-inventory.c": "187e446c0bd7b184396a60c7830b5b92028ded725091150e1565381ff24c4158",
+    "tests/benchmark-scale.c": "d7345715ef35257b7dd12af6115683500ff30e2b0ec6d765ee216591a54ff174",
+    "tests/fixtures/legacy-pirwa.gschema.xml": "40841bccd75a9e233f7c2d02b7660df505380baecab89ab7097312ef2b4a551a",
+    "tests/fixtures/meson.build": "46164bfc709b1911d68dde73b0cd3942ffdf236ee2c70a700851f64dcd286845",
+    "tests/fixtures/proxy.gschema.xml": "deb18846d54b5506b818cb17d1908bbba694c4bdec33a5b9419a39bd3dbf9f89",
+    "tests/fixtures/qa-channel-agent.py": "070ceb62237f72af9844318b4c7ebfefc197b08ee795b8850a236635d38f59c1",
+    "tests/fixtures/qa-display-workload.py": "cfd314fda7b3d254fb1b79fb05c91991556ad6b1009e58923664309b9b19621a",
+    "tests/fixtures/virt-viewer": "606252c798657cfbe4dce233c6025a99baaac79b348f06a30b0a436126e32998",
+    "tests/lsan.supp": "2c3a67d8608604e1daabef37bcf9bd23918732befaed12c8fdf6f24642e6d9f8",
+    "tests/meson.build": "296cfbba70a9ad6b8e11274962320e8e1bf139d29239320ab9b5d2433e478a5c",
+    "tests/qa-application-profile.c": "7f5a00f543c616da67f844c78c4d74d80dc43b8940a1cdbd4d0bf0b55349cbcf",
+    "tests/qa-frame-feedback.c": "c9526c202fa1231cd4afe9c02d7b3d65cbefe807f6c4abd4ee8ca8404dc3a03c",
+    "tests/qa-frame-feedback.h": "556fb4c8c7f9c39bbbbc8da66b1b6bc826dd62eb3e2d39ae764496f335dc5c71",
+    "tests/qa-guest-init-start.S": "69a32859b1a60ecd2362f45b0249ce38b1072bd04c7b8680c5d8358433948912",
+    "tests/qa-guest-init.c": "c8cbf910a89c96f5a14b5422ec3cdd2a26581c282dbb2c77a45c9a3a62ccdd50",
+    "tests/qa-vm.c": "6a1bae787822df50eed08f37bcefde1d09a73c43a45755a21b983f8ddbc941e7",
+    "tests/test-backend-daemon.c": "e29bf0ccf2828368d82b40150540ea6c19e287b87a2de971ec4a34559a07abcc",
+    "tests/test-backend-faults.c": "eb116e85f5b055a50faa5edba893fc3156492d0ca7d09d5de314ba8c0a959f2e",
+    "tests/test-backend-lifetime.c": "e825aa42eee6b081473be2804a57b26d251cfa0b847b729425aeda9b800b0680",
+    "tests/test-backend.c": "bae5f138f9ed901084faecfa83c3d4f7b57a53ff7cffb251ad366f80aa467467",
+    "tests/test-boxes.c": "b019b900409e0dce89ddff52b3c3b0efa27149117ee6e01a448ff16c53e432e5",
+    "tests/test-config.c": "40d7bc2b21bec93083a04c1c4f2a036c95a234a5f2e73c66d165a0665324a5e3",
+    "tests/test-console-connect.c": "a1d2952345c1f94b7add81ef2690469e1b750a66bc573063cfea0a96835c5675",
+    "tests/test-console-profile.py": "465ee9e9b0fad6b406be2c8b1aca4076a33308374daf555009cc9a9e62389121",
+    "tests/test-console-ui.c": "915381efd4c281628b08421bad625a7ce0a3c4e0e527a3bd80211954c5120833",
+    "tests/test-create-ui.c": "a4028538b1586ba25a7f43cbddcf34c39bc7febc944495f6eb24002e4c5a4493",
+    "tests/test-frame.c": "dca02ed66e4879645c219a2bae0557d35025f76f4d7c22ea461837cdbef78e6d",
+    "tests/test-import.c": "14faaf8c796e65ca21053fc9f93b2e88b09c40d606b6011a4098bf31c948a62c",
+    "tests/test-inventory.c": "8b67c8e326bdaac3ddd68ecbd9f148a8adbf1f42cd6c34534a7857a2447a6bef",
+    "tests/test-kvm.c": "e524138f927e2b42cbf6ed24a4d2e467244d7daca022f03a7fc72b8c80ef6199",
+    "tests/test-model.c": "a8d92778c34ac6745d3146b4495549a47d517fcd4a4b55ce94dd6c5c921f8499",
+    "tests/test-network-gateway.py": "32161af6f432275d86bc52de7edb538c7f0eefc0b01e6dd0f26e1cc90fd628dc",
+    "tests/test-network-start.c": "709f473ad7f1e54f3cfabf8f92969ce929c0d5b00e55b1e56aabb6412dcdd72a",
+    "tests/test-network-ui.c": "b612da4b329592f255d5d96141f2050f39392aeec12ebfe4c3256d3245e7185c",
+    "tests/test-network.c": "80dfa9f6454b04b7a0bac77510cc02e88f02e94684c205285ab351da92c6a2e5",
+    "tests/test-preferences.c": "26e13aa0fc9163abac2a3ad268fbbe1fc734ebbb907b3dd4e6852eb3011c1c7b",
+    "tests/test-provision.c": "77be4030d3b65c0b83a25e970a666734975a7cb34cf8e81c1720fd9f6c5ca3da",
+    "tests/test-proxy.c": "2cf9bf18acb70f71573c66d1a7eea3f68173abe4bb3d30ef5ce6464b532e7ba7",
+    "tests/test-ui-lifetime.c": "938f9fc2ceadc6be8992e901b0f4c0a9a99a7bbe64a6c6e74267626111e5161d",
+    "tests/test-ui-profile.py": "ad725c4525ff10eb00119722b9d9beb3b919cb7f81beb7b10b49ed5429433dd9",
+    "tests/test-ui.c": "6f4185dfb8e09e40e5eb1a63d351d311be370f9cbb58a5fc8d017e74ffc8e7bf",
+    "tests/test-usage.c": "b685a264cff9aa4f525526352caa2278dd163c0f147f7add16799dfaf96f037d"
+  },
+  "frozen_binary_sha256": {
+    "normal/src/pirwa": "10860d988947030c2048478f0dc2207dff3347b9f0f43a3717542c1401166aad",
+    "normal/tests/test-backend-daemon": "76705f9ef322a0a4e1b53a6cc502ca8ae3929f8fc042c7642a28ef7c27848ece",
+    "normal/tests/test-ui": "0a876239540edbff0927c0d71decdec0e1bffe9b6cf29d7833d2d920c777b134",
+    "normal/tests/test-console-ui": "a65737dda4b1151ef435c39da8eaa9f7f486582dfd40a8c9fe0a02c77c35087b",
+    "normal/tests/test-ui-lifetime": "5541352f8c7f0e1ce16e590aad3818556ee5a36d74cab50cf390612c4f946c9a",
+    "normal/data/gschemas.compiled": "69156e5ecbd488c6f0e318d975f1b752dc976f9d52a4e8fd51de5cefc49ebd27",
+    "sanitizer/src/pirwa": "f9e084eda0a2ae890881caadcf3da352ae303b0f9509acd5b1ca4ac29411ac66",
+    "sanitizer/tests/test-backend-daemon": "0fe193175ee19de2e137efc11a60ba24ce5757a291d92cdda9fc79a289e4a52c",
+    "sanitizer/tests/test-ui": "c2a0a11c71edfff1b59fe246c314abfe823c6a02fec05c314eb2a9db44a27383",
+    "sanitizer/tests/test-console-ui": "4661e505c77f8094aeb23d1bbb60dd549b847a370e11aebf34b7cce86eace3f6",
+    "sanitizer/tests/test-ui-lifetime": "a1cac238d90988cadcb2a6df92d4e4e05d554e83d047d153afe6756866f951ef",
+    "sanitizer/data/gschemas.compiled": "69156e5ecbd488c6f0e318d975f1b752dc976f9d52a4e8fd51de5cefc49ebd27"
+  },
+  "verified_qa_script_sha256": "4c524976340630ce53cc0371c3f2e1283626aa716aa2eaa3b9ddd609f5129385",
+  "frozen_export_initial_failure": "QA wrapper omitted the exported schema directory and reached a nonexistent /work/build/data fallback; fixed in the wrapper, with the original failed run retained",
+  "source_archive_manifest": {
+    "candidate/.clang-format": {
+      "sha256": "5dbf64889919577a7bbe047ebac70f0b1df1c329ec0b3711ffea7f38db224d13"
+    },
+    "candidate/.editorconfig": {
+      "sha256": "faf9dd42993b57dd5870dda0deadf47e14ea97529884994a073f8fc58b984d2f"
+    },
+    "candidate/.github/workflows/check.yml": {
+      "sha256": "1e763a1be51f39512f5b8cda40a37a6fd82ea725dd4d30db32759fb3c8ae9b7a"
+    },
+    "candidate/.gitignore": {
+      "sha256": "5d84442361fb5a72488848d8d8b4975836b02f9f95b45e7e050109dfffe7c558"
+    },
+    "candidate/AGENTS.md": {
+      "sha256": "ff7a419e22d9da532bbe9c0f0b9af1a334ed9d84cc6462ef5d12b7e693de3f28"
+    },
+    "candidate/COPYING": {
+      "sha256": "fb981668c18a279e285fc4d83fba1e836cc84dd4daa73c9697d3cfd2d8aca6e0"
+    },
+    "candidate/README.md": {
+      "sha256": "499addcb8f834d077a4731592c4d948bbfeade49b94e5f65acd39148624142bc"
+    },
+    "candidate/data/io.github.stonega.Pirwa-symbolic.svg": {
+      "sha256": "57b5b9eb43191e414821bb4013dc14871d912aa987a40c371e232dd25b479334"
+    },
+    "candidate/data/io.github.stonega.Pirwa.desktop": {
+      "sha256": "c828114eb3f85440b0eb8011fdcf2fe4099eb979ac6a62b4c1696444ec991eb5"
+    },
+    "candidate/data/io.github.stonega.Pirwa.gschema.xml": {
+      "sha256": "f50b0ffd6d2bc3593ce2db7a2011a594a9147bc46e2a9760d899233c464acd20"
+    },
+    "candidate/data/io.github.stonega.Pirwa.metainfo.xml": {
+      "sha256": "796e6999a4e323a0aa973d8643c77ce30a33f65168a3b5d3a77f5c459ff74fae"
+    },
+    "candidate/data/io.github.stonega.Pirwa.png": {
+      "sha256": "f3b7ec62227ca8ae201dd6de01519e34b4bf7eb8bc51b2914535f81eaae08029"
+    },
+    "candidate/data/io.github.stonega.Pirwa.svg": {
+      "sha256": "701a485223e1c7fd19a5b9903cb0ac908fba3db3216c102fdbf8541f95cb50c5"
+    },
+    "candidate/data/meson.build": {
+      "sha256": "e3f944026efd1b1669e251adc73fddcae8dd73d191a9fdb53cc8331708f084e3"
+    },
+    "candidate/data/pirwa.gresource.xml": {
+      "sha256": "5e8c437afa8e07934ba2b4ef6d4e5de410396517d0c0e8b15596d573cfa2626d"
+    },
+    "candidate/data/screenshots/README.md": {
+      "sha256": "93fcfc80fe2826a8933a69d69c8b5171cef5112fcd62161df2b376e6f977da4b"
+    },
+    "candidate/data/screenshots/collection.png": {
+      "sha256": "3e21d552df4543af335df16568cb97d585cd8175daa078ae23fa4945376fc320"
+    },
+    "candidate/examples/run-test-driver.sh": {
+      "sha256": "5f03ce3a8dedf9c84eaf2a19b6d356e4ae5e872b1ffe49fcab57c2335e6cf52c"
+    },
+    "candidate/examples/screenshot-machines.xml": {
+      "sha256": "0c66ccafb25571d0c957a9c58a4fb56b1ff91516784aa2d078db9aeb5800eadb"
+    },
+    "candidate/meson.build": {
+      "sha256": "84a08e5c5d84d9605a0672f279d0c502670833c088f4653acc77b6ab02cea0c4"
+    },
+    "candidate/packaging/Containerfile.qa": {
+      "sha256": "34d85d78c647a454f3955c40e530c52a530e0e75d66ff9417febcaf8329c215b"
+    },
+    "candidate/packaging/pirwa.spec": {
+      "sha256": "ad9290629739144181efcd9abb380dbaac4259f0b562e15dd7581de520ce272d"
+    },
+    "candidate/po/LINGUAS": {
+      "sha256": "ddeb5b6d9ee9836541a0421310cda30641aab5aae3257c04a472af0186bffded"
+    },
+    "candidate/po/POTFILES.in": {
+      "sha256": "662d5ec8599a3bfe2dca197887134ca412d18c0f32825f83a8c5e55888e4da2a"
+    },
+    "candidate/po/README.md": {
+      "sha256": "451e1be443d7151fc760fff1a75553cc9fcddf64f7691c95ffe935ca84711051"
+    },
+    "candidate/po/meson.build": {
+      "sha256": "8aa419861e006911b355e09defc18f500513487a0dcca0682df5adaa751531f0"
+    },
+    "candidate/po/pirwa.pot": {
+      "sha256": "5256cb6a50026281e75654206bf5936fef284f8c106378d33dfbf036f2c44c36"
+    },
+    "candidate/scripts/benchmark.sh": {
+      "sha256": "df086197ea91925dce361f5f8fcfb9a86112359d0f18eb04d3f1af0a902444b6"
+    },
+    "candidate/scripts/check-clean-build.py": {
+      "sha256": "01ab382c389c2f5554f45fab0301c271540348b1260baa02b2f4f551d61b9e27"
+    },
+    "candidate/scripts/check-native-build.sh": {
+      "sha256": "958ef1ed2291d33ee4a183b4cf47d7dc13f1cf697dc36455c8af0a31d6f12d85"
+    },
+    "candidate/scripts/check-release-metadata.py": {
+      "sha256": "f58f071dba667a1e4436c70fbcdfa99d1558782e5fc915ccb6a08582c21a816e"
+    },
+    "candidate/scripts/console-session.py": {
+      "sha256": "c28ca1d6baf075f0142bcde9bffc4c03f1a9b7d4e21204cd8b6cfaee4662b3c8"
+    },
+    "candidate/scripts/profile-console.py": {
+      "sha256": "7618d65a1b8bb1101bcbd1c64ba3b046a76cc773abb18c1dcf80b5b869736823"
+    },
+    "candidate/scripts/profile-display.py": {
+      "sha256": "04be731cc34e626193e8e66b75e4c4d9ad9f43cc7a4e360a73819bcb4689c3d1"
+    },
+    "candidate/scripts/profile-guest.py": {
+      "sha256": "f9878660a0d61dfc7edbb14da8f360dadeeb9b9281255c15291776caa2257617"
+    },
+    "candidate/scripts/profile-renderer-memory.py": {
+      "sha256": "8c7d74e3a2f650820a7707282299b5169ae3c8ff32d9877d1fb933e53fcfa311"
+    },
+    "candidate/scripts/profile-ui.py": {
+      "sha256": "c615bfd96eaa24c61b0e166a5ccc6d8667c5ce4560d662a260bc0bda6dab8eab"
+    },
+    "candidate/scripts/qa-display-scale.py": {
+      "sha256": "e38a4d261af7258e72e9be219a222096287df1847181b45333e43a43e5b3ea7d"
+    },
+    "candidate/scripts/run-dev.sh": {
+      "sha256": "e9b57c6ff21ee39cb7b5f7dc9cb32499b6136dad919004ded126494c1db4f019"
+    },
+    "candidate/scripts/test-gnome.py": {
+      "sha256": "0589c05140af66751c9ad9562a8f11c8b0029839e235b79cc922e54889458b78"
+    },
+    "candidate/scripts/test-guest-recovery.py": {
+      "sha256": "b98a74fb5ceda23059c182ba2aa3292765a02772ec439b23e1505c5aeaaff426"
+    },
+    "candidate/scripts/test-libvirt-daemon.py": {
+      "sha256": "9d17eb51a66cebf95e8ad53b3f2b420153d484deec365da4670aab985722b76b"
+    },
+    "candidate/src/main.c": {
+      "sha256": "3a92167e52b73db67ad8a703a9804a60a07df783ff983bb51b76571448863654"
+    },
+    "candidate/src/meson.build": {
+      "sha256": "d1047bf37babfb3beec873aca78b31a846cb64e162936b557cb30b9dd6c3870d"
+    },
+    "candidate/src/pirwa-backend.c": {
+      "sha256": "d797faf0f63582b2671152fcc2e7f7369f965ad62a9950aaef853fc6b7ae8a97"
+    },
+    "candidate/src/pirwa-backend.h": {
+      "sha256": "9ea1592f45acf8c38db157e4210df860905b01cbbcd59221cc6ad7d67abb1db2"
+    },
+    "candidate/src/pirwa-boxes-dialog.c": {
+      "sha256": "f9bd14d2c88739d4b6b78f54e9e75a4f73ffdec9427f7f3bfbba428d2e463b9b"
+    },
+    "candidate/src/pirwa-boxes-dialog.h": {
+      "sha256": "36fccca7274066a9289a608fdf6140cabebfdc3a36c4221af4fb0c243aca20a0"
+    },
+    "candidate/src/pirwa-boxes.c": {
+      "sha256": "85f1fb16574bc57116363386388c41aa57586f03e2249398d51ecb68cb3bb160"
+    },
+    "candidate/src/pirwa-boxes.h": {
+      "sha256": "e2ec79c2abb0d0f2bf9063fa0f66cde6ffdf235b5d3e00ca3d308647509085f7"
+    },
+    "candidate/src/pirwa-config.c": {
+      "sha256": "5c43a3739737615642ea8bb7791f63e5d8a4a8bfd4363f7b083949c8cdf26fa2"
+    },
+    "candidate/src/pirwa-config.h": {
+      "sha256": "bed38f80afd86996d5544a9907a2b48d47f1947642dea1d14d6db9807624e5a8"
+    },
+    "candidate/src/pirwa-console.c": {
+      "sha256": "01121b5b30728ec5c5000bd633e67c7dcc4571a2d9889a27478aff3a1af49e00"
+    },
+    "candidate/src/pirwa-console.h": {
+      "sha256": "b0470c77756effb734fefc50799611ca698594b118d0b5bfe92c2d991c61f3f4"
+    },
+    "candidate/src/pirwa-create-dialog.c": {
+      "sha256": "c28b3e9e955d39744264f5a181432e657ae32bcf37f1405160c88743ddd967a5"
+    },
+    "candidate/src/pirwa-create-dialog.h": {
+      "sha256": "328f3a338adee425c41087a9abaf91d8d17d28e9e567ceff1326757c7ec80f7e"
+    },
+    "candidate/src/pirwa-display.c": {
+      "sha256": "b8c36fcee44e615a6bf3010ef4bcd63335d79d40c4e1c0c533f387f52b369038"
+    },
+    "candidate/src/pirwa-display.h": {
+      "sha256": "7181f67d78751f0ba01ad6d491956ab1c74f8f6c366e827ce35ed6607fc6d142"
+    },
+    "candidate/src/pirwa-frame.c": {
+      "sha256": "83863d6d451cbe76cc00c7a5290fd47cb6cf121c12e96e0a8de9c726ac10f7ea"
+    },
+    "candidate/src/pirwa-frame.h": {
+      "sha256": "18155860a3a25564fd34d57f4888f12480a4219addf8b777f0d1fea977c20130"
+    },
+    "candidate/src/pirwa-gateway.c": {
+      "sha256": "89e1952f56c1c241811e75b108da74fc7a0d285809089f5629534436a225c3d3"
+    },
+    "candidate/src/pirwa-import.c": {
+      "sha256": "a6eb59558365a28764fce3f42b8e00cb160430ddfafabe366191ba2767be1fcd"
+    },
+    "candidate/src/pirwa-import.h": {
+      "sha256": "fb30f61bcc10da9f8ac6c52da04024e29cd731533cc95ca37b4b9963ee88b81c"
+    },
+    "candidate/src/pirwa-inventory.c": {
+      "sha256": "e7c5e88bbd6aab26e98eef025fce6176625bddbae5a8f9bc58903c243106d36c"
+    },
+    "candidate/src/pirwa-inventory.h": {
+      "sha256": "549ebabd3a04fd381185deab06978055d622e6fd39bbac54b5b2c6caa0a9b804"
+    },
+    "candidate/src/pirwa-libvirt.h": {
+      "sha256": "6b20112325bc4afcda34654d4cc1c5ac9e2529045a7f1b7c004cac495120f739"
+    },
+    "candidate/src/pirwa-machine.c": {
+      "sha256": "3874c8c27e9c3fd88dd69731c592a5bc3ed6297b20c9f77d77e76a3028abd902"
+    },
+    "candidate/src/pirwa-machine.h": {
+      "sha256": "c0dfaa631ef74fb163cab05b6e22cc25dd9792bd8817ddf89d45a7a245ce8411"
+    },
+    "candidate/src/pirwa-model.c": {
+      "sha256": "2383ab0620a507c297e53ee715f625acd1abeeda932e0bc22db8e6e0ea61f94d"
+    },
+    "candidate/src/pirwa-model.h": {
+      "sha256": "919dd6fcf72c86780c1c442063e18bc67eef0a8c6009d9cdaa1927bea90888d3"
+    },
+    "candidate/src/pirwa-network.c": {
+      "sha256": "7ba491dbcd4eb8a087d80b91ae0026a853c7eb666741103415a4b768e4cbfc25"
+    },
+    "candidate/src/pirwa-network.h": {
+      "sha256": "e837b3f579d6c815bb38e105743d47b1c8ef46d4077d29c2478be48ca62310c2"
+    },
+    "candidate/src/pirwa-preferences.c": {
+      "sha256": "ad10c87316e0a143e657f086cf3bb0fb5456bc3591384a359c5626ed595058da"
+    },
+    "candidate/src/pirwa-preferences.h": {
+      "sha256": "33f6a010dcdc533d7a3ce7ced90cd3214a51aed77e3dece668a3e234a00a7ec3"
+    },
+    "candidate/src/pirwa-provision.c": {
+      "sha256": "765e41dd0b8c697a30293b9b3e1ad73e9c8d1ae188687c8d8ec788dc0f2e8e58"
+    },
+    "candidate/src/pirwa-provision.h": {
+      "sha256": "d9826cc3f48dcc1926820dfd7b98d9af4edc02353c32821d3cd64ac2975aceb0"
+    },
+    "candidate/src/pirwa-proxy.c": {
+      "sha256": "09e5fd424793239096025092ad9ccc6077ce058b0aa911916bf131ddd7310454"
+    },
+    "candidate/src/pirwa-proxy.h": {
+      "sha256": "d72d07d950ac9ab2912112c98152ce9abfb42b107321e44314eb5cb35d7a11e5"
+    },
+    "candidate/src/pirwa-usage.c": {
+      "sha256": "9199e3dcf56d5f61044d3ddf58a1ee856225128deb6adc9981ca6c93bfbd43d1"
+    },
+    "candidate/src/pirwa-usage.h": {
+      "sha256": "4d863f2a0820d8867da38f6aff543f1f254fb4042cbd19b425dd22fb342d0550"
+    },
+    "candidate/src/pirwa-window.c": {
+      "sha256": "3e3321dcf4171dcd18eafdbea44255ed30004248130d031b35f026ed88431a87"
+    },
+    "candidate/src/pirwa-window.h": {
+      "sha256": "e764cbd1307547c74b4624a36e3a8ade1c9c9b3519faab973704c27dfeb8a496"
+    },
+    "candidate/tests/benchmark-console.c": {
+      "sha256": "4c06f98907ad499da6527bd766e927fdb633c5c226964a6db05ac9356a02a067"
+    },
+    "candidate/tests/benchmark-display-memory.c": {
+      "sha256": "2709b3c1114664f8f0f5a2722e6abc2d45cbd1a1a22ae62265b53ba75d5da531"
+    },
+    "candidate/tests/benchmark-display.c": {
+      "sha256": "d28a82d3a725664a7caba583ca7be8083245e065c836565dcfebcccf07605bff"
+    },
+    "candidate/tests/benchmark-frame.c": {
+      "sha256": "14268f5c4911036bcf4cde0ae6b8de03e265cfae30e67c884dabd2c0bab9aba8"
+    },
+    "candidate/tests/benchmark-inventory.c": {
+      "sha256": "187e446c0bd7b184396a60c7830b5b92028ded725091150e1565381ff24c4158"
+    },
+    "candidate/tests/benchmark-scale.c": {
+      "sha256": "d7345715ef35257b7dd12af6115683500ff30e2b0ec6d765ee216591a54ff174"
+    },
+    "candidate/tests/fixtures/legacy-pirwa.gschema.xml": {
+      "sha256": "40841bccd75a9e233f7c2d02b7660df505380baecab89ab7097312ef2b4a551a"
+    },
+    "candidate/tests/fixtures/meson.build": {
+      "sha256": "46164bfc709b1911d68dde73b0cd3942ffdf236ee2c70a700851f64dcd286845"
+    },
+    "candidate/tests/fixtures/proxy.gschema.xml": {
+      "sha256": "deb18846d54b5506b818cb17d1908bbba694c4bdec33a5b9419a39bd3dbf9f89"
+    },
+    "candidate/tests/fixtures/qa-channel-agent.py": {
+      "sha256": "070ceb62237f72af9844318b4c7ebfefc197b08ee795b8850a236635d38f59c1"
+    },
+    "candidate/tests/fixtures/qa-display-workload.py": {
+      "sha256": "cfd314fda7b3d254fb1b79fb05c91991556ad6b1009e58923664309b9b19621a"
+    },
+    "candidate/tests/fixtures/virt-viewer": {
+      "sha256": "606252c798657cfbe4dce233c6025a99baaac79b348f06a30b0a436126e32998"
+    },
+    "candidate/tests/lsan.supp": {
+      "sha256": "2c3a67d8608604e1daabef37bcf9bd23918732befaed12c8fdf6f24642e6d9f8"
+    },
+    "candidate/tests/meson.build": {
+      "sha256": "296cfbba70a9ad6b8e11274962320e8e1bf139d29239320ab9b5d2433e478a5c"
+    },
+    "candidate/tests/qa-application-profile.c": {
+      "sha256": "7f5a00f543c616da67f844c78c4d74d80dc43b8940a1cdbd4d0bf0b55349cbcf"
+    },
+    "candidate/tests/qa-frame-feedback.c": {
+      "sha256": "c9526c202fa1231cd4afe9c02d7b3d65cbefe807f6c4abd4ee8ca8404dc3a03c"
+    },
+    "candidate/tests/qa-frame-feedback.h": {
+      "sha256": "556fb4c8c7f9c39bbbbc8da66b1b6bc826dd62eb3e2d39ae764496f335dc5c71"
+    },
+    "candidate/tests/qa-guest-init-start.S": {
+      "sha256": "69a32859b1a60ecd2362f45b0249ce38b1072bd04c7b8680c5d8358433948912"
+    },
+    "candidate/tests/qa-guest-init.c": {
+      "sha256": "c8cbf910a89c96f5a14b5422ec3cdd2a26581c282dbb2c77a45c9a3a62ccdd50"
+    },
+    "candidate/tests/qa-vm.c": {
+      "sha256": "6a1bae787822df50eed08f37bcefde1d09a73c43a45755a21b983f8ddbc941e7"
+    },
+    "candidate/tests/test-backend-daemon.c": {
+      "sha256": "e29bf0ccf2828368d82b40150540ea6c19e287b87a2de971ec4a34559a07abcc"
+    },
+    "candidate/tests/test-backend-faults.c": {
+      "sha256": "eb116e85f5b055a50faa5edba893fc3156492d0ca7d09d5de314ba8c0a959f2e"
+    },
+    "candidate/tests/test-backend-lifetime.c": {
+      "sha256": "e825aa42eee6b081473be2804a57b26d251cfa0b847b729425aeda9b800b0680"
+    },
+    "candidate/tests/test-backend.c": {
+      "sha256": "bae5f138f9ed901084faecfa83c3d4f7b57a53ff7cffb251ad366f80aa467467"
+    },
+    "candidate/tests/test-boxes.c": {
+      "sha256": "b019b900409e0dce89ddff52b3c3b0efa27149117ee6e01a448ff16c53e432e5"
+    },
+    "candidate/tests/test-config.c": {
+      "sha256": "40d7bc2b21bec93083a04c1c4f2a036c95a234a5f2e73c66d165a0665324a5e3"
+    },
+    "candidate/tests/test-console-connect.c": {
+      "sha256": "a1d2952345c1f94b7add81ef2690469e1b750a66bc573063cfea0a96835c5675"
+    },
+    "candidate/tests/test-console-profile.py": {
+      "sha256": "465ee9e9b0fad6b406be2c8b1aca4076a33308374daf555009cc9a9e62389121"
+    },
+    "candidate/tests/test-console-ui.c": {
+      "sha256": "915381efd4c281628b08421bad625a7ce0a3c4e0e527a3bd80211954c5120833"
+    },
+    "candidate/tests/test-create-ui.c": {
+      "sha256": "a4028538b1586ba25a7f43cbddcf34c39bc7febc944495f6eb24002e4c5a4493"
+    },
+    "candidate/tests/test-frame.c": {
+      "sha256": "dca02ed66e4879645c219a2bae0557d35025f76f4d7c22ea461837cdbef78e6d"
+    },
+    "candidate/tests/test-import.c": {
+      "sha256": "14faaf8c796e65ca21053fc9f93b2e88b09c40d606b6011a4098bf31c948a62c"
+    },
+    "candidate/tests/test-inventory.c": {
+      "sha256": "8b67c8e326bdaac3ddd68ecbd9f148a8adbf1f42cd6c34534a7857a2447a6bef"
+    },
+    "candidate/tests/test-kvm.c": {
+      "sha256": "e524138f927e2b42cbf6ed24a4d2e467244d7daca022f03a7fc72b8c80ef6199"
+    },
+    "candidate/tests/test-model.c": {
+      "sha256": "a8d92778c34ac6745d3146b4495549a47d517fcd4a4b55ce94dd6c5c921f8499"
+    },
+    "candidate/tests/test-network-gateway.py": {
+      "sha256": "32161af6f432275d86bc52de7edb538c7f0eefc0b01e6dd0f26e1cc90fd628dc"
+    },
+    "candidate/tests/test-network-start.c": {
+      "sha256": "709f473ad7f1e54f3cfabf8f92969ce929c0d5b00e55b1e56aabb6412dcdd72a"
+    },
+    "candidate/tests/test-network-ui.c": {
+      "sha256": "b612da4b329592f255d5d96141f2050f39392aeec12ebfe4c3256d3245e7185c"
+    },
+    "candidate/tests/test-network.c": {
+      "sha256": "80dfa9f6454b04b7a0bac77510cc02e88f02e94684c205285ab351da92c6a2e5"
+    },
+    "candidate/tests/test-preferences.c": {
+      "sha256": "26e13aa0fc9163abac2a3ad268fbbe1fc734ebbb907b3dd4e6852eb3011c1c7b"
+    },
+    "candidate/tests/test-provision.c": {
+      "sha256": "77be4030d3b65c0b83a25e970a666734975a7cb34cf8e81c1720fd9f6c5ca3da"
+    },
+    "candidate/tests/test-proxy.c": {
+      "sha256": "2cf9bf18acb70f71573c66d1a7eea3f68173abe4bb3d30ef5ce6464b532e7ba7"
+    },
+    "candidate/tests/test-ui-lifetime.c": {
+      "sha256": "938f9fc2ceadc6be8992e901b0f4c0a9a99a7bbe64a6c6e74267626111e5161d"
+    },
+    "candidate/tests/test-ui-profile.py": {
+      "sha256": "ad725c4525ff10eb00119722b9d9beb3b919cb7f81beb7b10b49ed5429433dd9"
+    },
+    "candidate/tests/test-ui.c": {
+      "sha256": "6f4185dfb8e09e40e5eb1a63d351d311be370f9cbb58a5fc8d017e74ffc8e7bf"
+    },
+    "candidate/tests/test-usage.c": {
+      "sha256": "b685a264cff9aa4f525526352caa2278dd163c0f147f7add16799dfaf96f037d"
+    },
+    "before/README.md": {
+      "sha256": "299ae6ef6a1b2d2a54c1593a89cff04d7f33dbbead3f6e3ade486f642ea2992b"
+    },
+    "before/data/io.github.pirwa.Pirwa.desktop": {
+      "sha256": "cd20d24fc8c43b40ae5a323467555ead563fee8cb2767cd7daba8393838e86cc"
+    },
+    "before/data/io.github.pirwa.Pirwa.gschema.xml": {
+      "sha256": "93b89b15fff231b637bfd5c9ca72b4c782c96fcf56a448e220d0a397f72629b0"
+    },
+    "before/data/io.github.pirwa.Pirwa.metainfo.xml": {
+      "sha256": "599de2f04e6d5755d05e5a66e9a0cf1bfa7dcf018ec7ad11012d46a07c70d3f6"
+    },
+    "before/data/io.github.pirwa.Pirwa.png": {
+      "sha256": "f3b7ec62227ca8ae201dd6de01519e34b4bf7eb8bc51b2914535f81eaae08029"
+    },
+    "before/data/meson.build": {
+      "sha256": "3e79da24aed767ae4c7f601d5f84c94b767f1290f368c2623b93cada5fe36631"
+    },
+    "before/data/pirwa.gresource.xml": {
+      "sha256": "64877cfe05479d9855eed7d39decd318405b2c26ebc59cbbb40b95eb18d4dd43"
+    },
+    "before/docs/design/app-icon.md": {
+      "sha256": "0c0d51ebecc96ad65bc9f8dea9b8bb78d7207a9ce6b79ecbe1be753f79496c90"
+    },
+    "before/docs/user/getting-started.md": {
+      "sha256": "dd7e77686ea8bed8ced7924512d16fa5c39e5acb6c14c9664ea288156d73da6b"
+    },
+    "before/meson.build": {
+      "sha256": "e89f6384f5657f52b3ef90b71802e46b9c31d0ec80800c79d2b42d7d42946027"
+    },
+    "before/packaging/pirwa.spec": {
+      "sha256": "47bc28028cf5a8b0519f457fd63bc4fa9b54da3be8aa5b08f697d0ac9b0bfbc5"
+    },
+    "before/scripts/console-session.py": {
+      "sha256": "515e1d5fdb25b6753720e05a15115a0aa09645a061fb41787f5c13c3b958aa61"
+    },
+    "before/scripts/profile-console.py": {
+      "sha256": "26c36079b4cb30b4b40b04cf51b7bc747eed82c3423103a4178c0149626aa40a"
+    },
+    "before/src/pirwa-window.c": {
+      "sha256": "b23cb87b854264e3353432754b15d1cf90d2ae1398a928ebd4001c976f2c8664"
+    },
+    "before/tests/benchmark-console.c": {
+      "sha256": "8e720a9c35e4da9d4cb0bcbeb0ea04d1ec02d976bbec69cd253b914674512633"
+    },
+    "before/tests/test-console-ui.c": {
+      "sha256": "4cdfa0ea2fc27e603f45cf8879d2cfc2b5d28ac69a3fc2c36a2dfec3034b442d"
+    },
+    "before/tests/test-network-ui.c": {
+      "sha256": "43fcf330fc7bfccd0c172b526a80dee14e196c849f0f07ed73caafc47aa79870"
+    },
+    "before/tests/test-ui-lifetime.c": {
+      "sha256": "58206764ca3ce519c3e1afc783dc92143fae66a4199488cd0f25cdb994f7f99f"
+    },
+    "before/tests/test-ui.c": {
+      "sha256": "491285e893ff494bde747c48861b1582ac4515ea285e080ef567267412a4e59e"
+    },
+    "diagnostics/capture-screenshot.py": {
+      "sha256": "bf476a9b3d73a54d1be288b33fcb47275beac281afcb64d7c79982fdba8789ac"
+    },
+    "diagnostics/check-controls.py": {
+      "sha256": "0ac3481dfd505190501801d3340c903a689e3bed46fb5ba86dcf7d7f36a13287"
+    },
+    "diagnostics/package-evidence.py": {
+      "sha256": "959eab7b507bb9d0cb4e7c2c47c58b7315bd7381e325f553460d493b40a07506"
+    },
+    "diagnostics/screenshot-node.xml": {
+      "sha256": "0c66ccafb25571d0c957a9c58a4fb56b1ff91516784aa2d078db9aeb5800eadb"
+    },
+    "diagnostics/initial-collection.png": {
+      "sha256": "b6c5e34a432c795731f35a0dab28397fc9cca3e6c292f806d6066a15531b4a45"
+    },
+    "diagnostics/before-manifest.json": {
+      "sha256": "439796dd04e9001a6e5dba4740caa32d19809e1c8450ff2f9c04e1385a8ccaba"
+    },
+    "evidence/README.md": {
+      "sha256": "81002b0a1acf26a587e1701985681e1bdd8794e60a377b4a11dba1e087dc7a52"
+    },
+    "verified-qa/scripts/test-gnome.py": {
+      "sha256": "4c524976340630ce53cc0371c3f2e1283626aa716aa2eaa3b9ddd609f5129385"
+    }
+  },
+  "artifacts": {
+    "raw-results.json.gz": {
+      "sha256": "57b7be3d3d3d294da8ae0a16176349723808752ed698d804679dc1545412daa0",
+      "bytes": 68231
+    },
+    "sources.tar.gz": {
+      "sha256": "77e74c51bb7db5198db2c0def5772936b70230b2b525fd779a56bb39a3c178a0",
+      "bytes": 436201
+    }
+  },
+  "reference_sources": [
+    "https://www.freedesktop.org/software/appstream/docs/chap-Metadata.html",
+    "https://docs.gtk.org/gio/class.Settings.html",
+    "https://github.com/rpm-software-management/rpm/blob/master/docs/manual/autosetup.md"
+  ],
+  "limitations": [
+    "Private repository and uncommitted assets; public page/image reachability and committed-candidate CI remain open",
+    "Stable release promotion, source review and remaining release acceptance are not completed",
+    "Concurrent Windows-profile work appeared after the source snapshot; the frozen candidate and its binaries are the accepted inputs",
+    "No new performance-budget claim from smoke launches or settled screenshot capture",
+    "GUI uses test accessibility and explicit Intel Vulkan for ASan/UBSan; toolkit/font-stack heap and physical-input acceptance remain open",
+    "RPM source-version queries test both development/stable archive forms, not publication of a stable package"
+  ]
+}

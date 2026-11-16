@@ -4,6 +4,7 @@
 #include "pirwa-backend.h"
 #include "pirwa-display.h"
 #include "pirwa-frame.h"
+#include "pirwa-preferences.h"
 #include <glib/gi18n.h>
 #include <math.h>
 #include <unistd.h>
@@ -18,6 +19,15 @@ struct _PirwaConsole
   SpiceInputsChannel *inputs;
   SpiceChannel *display_channel;
   SpiceDisplayPrimary primary;
+  cairo_rectangle_int_t monitor_area;
+  int guest_width;
+  int guest_height;
+  gboolean initial_mode_sent;
+  gboolean display_configured;
+  gboolean auto_resize;
+  int configured_width;
+  int configured_height;
+  GSettings *preferences;
   GtkWidget *display;
   GtkWidget *release;
   AdwToolbarView *toolbar;
@@ -26,16 +36,22 @@ struct _PirwaConsole
   AdwStatusPage *status;
   GtkWindow *host;  /* Borrowed from the widget root. */
   GtkWindow *popup; /* Owns this widget while detached. */
+  int popup_bounds_width;
+  int popup_bounds_height;
   GdkTexture *preview;
   char *name;
   char *uuid;
   guint generation;
   guint reconnect_source;
-  guint resize_source;
-  guint retries;
+  guint connect_source;
+  guint activate_source;
+  guint configure_source;
+  guint fit_source;
+  guint retry_delay;
   guint buttons;
   gboolean keys[512];
   gboolean input_ready;
+  gboolean display_activated;
   gboolean captured;
   gboolean closed;
   gboolean running;
@@ -49,12 +65,76 @@ G_DEFINE_FINAL_TYPE (PirwaConsole, pirwa_console, GTK_TYPE_BOX)
 static void start_session (PirwaConsole *self);
 static void disconnect_session (PirwaConsole *self);
 
+static gboolean
+fit_popup (gpointer data)
+{
+  PirwaConsole *self = data;
+  self->fit_source = 0;
+  if (!self->popup || self->closed || gtk_window_is_fullscreen (self->popup)
+      || gtk_window_is_maximized (self->popup))
+    return G_SOURCE_REMOVE;
+
+  int width = self->monitor_area.width > 0 ? self->monitor_area.width : self->guest_width;
+  int height = self->monitor_area.height > 0 ? self->monitor_area.height : self->guest_height;
+  int minimum_width, header_height;
+  gtk_widget_measure (GTK_WIDGET (self), GTK_ORIENTATION_HORIZONTAL, -1, &minimum_width, NULL, NULL,
+                      NULL);
+  gtk_widget_measure (self->header, GTK_ORIENTATION_VERTICAL, MAX (width, minimum_width), NULL,
+                      &header_height, NULL, NULL);
+  if (adw_toolbar_view_get_top_bar_height (self->toolbar) > 0)
+    header_height = adw_toolbar_view_get_top_bar_height (self->toolbar);
+
+  double scale = 1.0;
+  /* Leave desktop space around the popup. GNOME automatically maximizes new
+   * windows covering over 80% of the work area, losing the guest aspect fit. */
+  if (self->popup_bounds_width > 0)
+    scale = MIN (scale, self->popup_bounds_width * 0.88 / width);
+  if (self->popup_bounds_height > header_height)
+    scale = MIN (scale, MAX (1.0, self->popup_bounds_height * 0.88 - header_height) / height);
+  gtk_window_set_default_size (self->popup, MAX (minimum_width, (int)(width * scale + 0.5)),
+                               (int)(height * scale + 0.5) + header_height);
+  return G_SOURCE_REMOVE;
+}
+
 static void
-show_status (PirwaConsole *self, const char *title, const char *description)
+schedule_popup_fit (PirwaConsole *self)
+{
+  if (self->popup && !self->closed && !self->fit_source)
+    self->fit_source = g_idle_add (fit_popup, self);
+}
+
+static void
+popup_chrome_changed (AdwToolbarView *toolbar, GParamSpec *spec, PirwaConsole *self)
+{
+  (void)toolbar;
+  (void)spec;
+  if (!self->auto_resize)
+    schedule_popup_fit (self);
+}
+
+static void
+popup_bounds_changed (GdkToplevel *surface, GdkToplevelSize *size, PirwaConsole *self)
+{
+  (void)surface;
+  int width, height;
+  gdk_toplevel_size_get_bounds (size, &width, &height);
+  if (width == self->popup_bounds_width && height == self->popup_bounds_height)
+    return;
+  self->popup_bounds_width = width;
+  self->popup_bounds_height = height;
+  /* Wait until GTK has finished computing this frame's window geometry. */
+  schedule_popup_fit (self);
+}
+
+static void
+show_status (PirwaConsole *self, const char *title, const char *description, gboolean connecting)
 {
   adw_status_page_set_title (self->status, title);
   g_autofree char *escaped = g_markup_escape_text (description, -1);
   adw_status_page_set_description (self->status, escaped);
+  GtkWidget *spinner = adw_status_page_get_child (self->status);
+  gtk_spinner_set_spinning (GTK_SPINNER (spinner), connecting);
+  gtk_widget_set_visible (spinner, connecting);
   gtk_stack_set_visible_child_name (self->stack, "status");
 }
 
@@ -101,30 +181,91 @@ release_clicked (GtkButton *button, PirwaConsole *self)
 }
 
 static gboolean
-send_resize (gpointer data)
+initial_display_size (PirwaConsole *self)
+{
+  /* Wait for the host window, not a guest frame or display allocation. */
+  if (!gtk_widget_get_mapped (GTK_WIDGET (self)))
+    return FALSE;
+  GdkToplevel *surface = toplevel (self);
+  GdkMonitor *monitor
+      = surface ? gdk_display_get_monitor_at_surface (
+                      gdk_surface_get_display (GDK_SURFACE (surface)), GDK_SURFACE (surface))
+                : NULL;
+  if (!monitor)
+    return FALSE;
+  GdkRectangle bounds;
+  gdk_monitor_get_geometry (monitor, &bounds);
+  if (bounds.width <= 0 || bounds.height <= 0)
+    return FALSE;
+  double scale = gdk_monitor_get_scale (monitor);
+  self->guest_width = (int)CLAMP (bounds.width * scale + 0.5, 320, 8192);
+  self->guest_height = (int)CLAMP (bounds.height * scale + 0.5, 200, 8192);
+  return TRUE;
+}
+
+static gboolean
+configure_display (gpointer data)
 {
   PirwaConsole *self = data;
-  self->resize_source = 0;
-  gboolean connected = FALSE;
-  if (self->main)
-    g_object_get (self->main, "agent-connected", &connected, NULL);
-  int width = gtk_widget_get_width (self->display);
-  int height = gtk_widget_get_height (self->display);
-  if (!self->closed && connected && width >= 320 && height >= 200)
+  self->configure_source = 0;
+  if (!self->closed && self->main && (!self->display_configured || self->auto_resize))
     {
+      /* Match the host monitor once. Reconnects retain the last guest-selected
+       * mode; resizing or reparenting the viewer only scales the image. */
+      if (!self->initial_mode_sent && !initial_display_size (self))
+        return G_SOURCE_REMOVE;
+      int width = self->guest_width;
+      int height = self->guest_height;
+      if (self->auto_resize)
+        {
+          int viewport_width = gtk_widget_get_width (GTK_WIDGET (self->stack))
+                               - gtk_widget_get_margin_start (self->display)
+                               - gtk_widget_get_margin_end (self->display);
+          int viewport_height = gtk_widget_get_height (GTK_WIDGET (self->stack))
+                                - gtk_widget_get_margin_top (self->display)
+                                - gtk_widget_get_margin_bottom (self->display);
+          if (viewport_width >= 320 && viewport_height >= 200)
+            {
+              width = MIN (viewport_width, 8192);
+              height = MIN (viewport_height, 8192);
+            }
+        }
+      if (self->display_configured && width == self->configured_width
+          && height == self->configured_height)
+        return G_SOURCE_REMOVE;
+      self->initial_mode_sent = TRUE;
+      self->display_configured = TRUE;
+      self->configured_width = width;
+      self->configured_height = height;
+      self->guest_width = width;
+      self->guest_height = height;
       spice_main_channel_update_display_enabled (self->main, 0, TRUE, FALSE);
-      spice_main_channel_update_display (self->main, 0, 0, 0, MIN (width, 8192), MIN (height, 8192),
-                                         TRUE);
+      spice_main_channel_update_display (self->main, 0, 0, 0, width, height, TRUE);
     }
   return G_SOURCE_REMOVE;
 }
 
 static void
-schedule_resize (PirwaConsole *self)
+schedule_display_configuration (PirwaConsole *self)
 {
-  if (self->resize_source)
-    g_source_remove (self->resize_source);
-  self->resize_source = g_timeout_add (200, send_resize, self);
+  if (self->closed || (self->display_configured && !self->auto_resize))
+    return;
+  g_clear_handle_id (&self->configure_source, g_source_remove);
+  self->configure_source = g_timeout_add (200, configure_display, self);
+}
+
+static void
+auto_resize_changed (GSettings *settings, const char *key, PirwaConsole *self)
+{
+  self->auto_resize = g_settings_get_boolean (settings, key);
+  if (self->auto_resize)
+    schedule_display_configuration (self);
+  else
+    {
+      g_clear_handle_id (&self->configure_source, g_source_remove);
+      if (!self->display_configured)
+        schedule_display_configuration (self);
+    }
 }
 
 static void
@@ -133,15 +274,26 @@ display_resized (PirwaDisplay *display, int width, int height, PirwaConsole *sel
   (void)display;
   (void)width;
   (void)height;
-  if (!self->closed)
-    schedule_resize (self);
+  if (self->auto_resize)
+    schedule_display_configuration (self);
+}
+
+static void
+set_display_inset (PirwaConsole *self, int inset)
+{
+  gtk_widget_set_margin_start (self->display, inset);
+  gtk_widget_set_margin_end (self->display, inset);
+  gtk_widget_set_margin_top (self->display, inset);
+  gtk_widget_set_margin_bottom (self->display, inset);
 }
 
 static void
 invalidate (SpiceChannel *channel, int x, int y, int width, int height, PirwaConsole *self)
 {
   if (channel == self->display_channel)
-    pirwa_display_invalidate (PIRWA_DISPLAY (self->display), x, y, width, height);
+    pirwa_display_invalidate (PIRWA_DISPLAY (self->display),
+                              MAX ((gint64)x - self->monitor_area.x, G_MININT),
+                              MAX ((gint64)y - self->monitor_area.y, G_MININT), width, height);
 }
 
 static void
@@ -150,13 +302,80 @@ primary_destroy (SpiceChannel *channel, PirwaConsole *self)
   if (channel != self->display_channel)
     return;
   memset (&self->primary, 0, sizeof self->primary);
+  self->monitor_area = (cairo_rectangle_int_t){ 0 };
   pirwa_display_clear (PIRWA_DISPLAY (self->display));
+}
+
+static gboolean
+update_monitor_area (PirwaConsole *self)
+{
+  g_autoptr (GArray) monitors = NULL;
+  SpiceDisplayMonitorConfig *monitor = NULL;
+  g_object_get (self->display_channel, "monitors", &monitors, NULL);
+  for (guint i = 0; monitors && i < monitors->len; i++)
+    {
+      SpiceDisplayMonitorConfig *candidate
+          = &g_array_index (monitors, SpiceDisplayMonitorConfig, i);
+      if (candidate->id == 0)
+        {
+          monitor = candidate;
+          break;
+        }
+    }
+  /* A single head's surface starts at zero, even if its desktop position does not. */
+  SpiceDisplayMonitorConfig single;
+  if (monitor && monitors->len == 1)
+    {
+      single = *monitor;
+      single.x = single.y = 0;
+      monitor = &single;
+    }
+  cairo_rectangle_int_t area = pirwa_frame_monitor_area (&self->primary, monitor);
+  if (area.width == 0 || area.height == 0)
+    return FALSE;
+  if (monitor && (guint)area.width == monitor->width && (guint)area.height == monitor->height
+      && area.width >= 320 && area.height >= 200)
+    {
+      self->guest_width = area.width;
+      self->guest_height = area.height;
+    }
+  if (area.x == self->monitor_area.x && area.y == self->monitor_area.y
+      && area.width == self->monitor_area.width && area.height == self->monitor_area.height)
+    return TRUE;
+  gboolean resized
+      = area.width != self->monitor_area.width || area.height != self->monitor_area.height;
+  self->monitor_area = area;
+  SpiceDisplayPrimary visible = self->primary;
+  int pixel_size
+      = visible.format == SPICE_SURFACE_FMT_32_xRGB || visible.format == SPICE_SURFACE_FMT_32_ARGB
+            ? 4
+            : 2;
+  visible.data += (gsize)area.y * visible.stride + (gsize)area.x * pixel_size;
+  visible.width = area.width;
+  visible.height = area.height;
+  gboolean valid = pirwa_display_set_primary (PIRWA_DISPLAY (self->display), &visible);
+  /* With automatic guest adjustment enabled, the viewport drives the guest,
+   * rather than feeding its response back into the window size. */
+  if (valid && resized && !self->auto_resize)
+    schedule_popup_fit (self);
+  return valid;
+}
+
+static void
+monitor_changed (SpiceChannel *channel, GParamSpec *spec, PirwaConsole *self)
+{
+  (void)spec;
+  if (channel == self->display_channel && self->primary.data)
+    update_monitor_area (self);
 }
 
 static void
 primary_create (SpiceChannel *channel, int format, int width, int height, int stride, int shmid,
                 gpointer data, PirwaConsole *self)
 {
+  g_clear_handle_id (&self->connect_source, g_source_remove);
+  g_clear_handle_id (&self->activate_source, g_source_remove);
+  g_clear_handle_id (&self->reconnect_source, g_source_remove);
   primary_destroy (channel, self);
   self->primary = (SpiceDisplayPrimary){ .format = format,
                                          .width = width,
@@ -166,15 +385,16 @@ primary_create (SpiceChannel *channel, int format, int width, int height, int st
                                          .data = data };
   /* Validate before exposing the display; malformed/unimplemented formats are
    * reported rather than leaving a permanently blank window. */
-  if (!pirwa_display_set_primary (PIRWA_DISPLAY (self->display), &self->primary))
+  if (!update_monitor_area (self))
     {
       show_status (self, _ ("Unsupported display"),
-                   _ ("This console supports RGB displays up to 8192 × 8192 pixels."));
+                   _ ("This console supports RGB displays up to 8192 × 8192 pixels."), FALSE);
       return;
     }
-  self->retries = 0;
+  self->retry_delay = 0;
+  gtk_spinner_stop (GTK_SPINNER (adw_status_page_get_child (self->status)));
   gtk_stack_set_visible_child_name (self->stack, "display");
-  schedule_resize (self);
+  schedule_display_configuration (self);
 }
 
 static void
@@ -212,16 +432,76 @@ retry_session (gpointer data)
   PirwaConsole *self = data;
   self->reconnect_source = 0;
   disconnect_session (self);
-  if (!self->closed && self->running && self->retries++ < 3)
+  if (!self->closed && self->running)
     start_session (self);
   return G_SOURCE_REMOVE;
+}
+
+static void
+schedule_reconnect (PirwaConsole *self, const char *reason)
+{
+  if (self->closed || !self->running || self->reconnect_source)
+    return;
+  g_clear_handle_id (&self->connect_source, g_source_remove);
+  release_input (self);
+  g_autofree char *description
+      = reason ? g_strdup_printf (_ ("%s\nReconnecting automatically…"), reason)
+               : g_strdup (_ ("Reconnecting automatically…"));
+  show_status (self, _ ("Connecting to display"), description, TRUE);
+  self->retry_delay = self->retry_delay ? MIN (self->retry_delay * 2, 16u) : 1;
+  /* One pending attempt per console, with bounded backoff while the VM runs. */
+  self->reconnect_source = g_timeout_add_seconds (self->retry_delay, retry_session, self);
+}
+
+static gboolean
+first_frame_timeout (gpointer data)
+{
+  PirwaConsole *self = data;
+  self->connect_source = 0;
+  schedule_reconnect (self, _ ("The machine has not sent a display frame yet."));
+  return G_SOURCE_REMOVE;
+}
+
+static gboolean
+activate_display (gpointer data)
+{
+  PirwaConsole *self = data;
+  self->activate_source = 0;
+  if (self->closed || self->primary.data || !self->input_ready || !self->inputs
+      || !gtk_widget_get_mapped (GTK_WIDGET (self)))
+    return G_SOURCE_REMOVE;
+  int width = gtk_widget_get_width (GTK_WIDGET (self->stack));
+  int height = gtk_widget_get_height (GTK_WIDGET (self->stack));
+  if (width < 320 || height < 200)
+    return G_SOURCE_REMOVE;
+  /* Some idle QXL guests send no primary surface until pointer activity.
+   * Two adjacent positions guarantee motion without clicking or pressing keys.
+   * Do this once per connection, only when its first frame is still missing. */
+  int x = self->guest_width / 2;
+  int y = self->guest_height / 2;
+  self->display_activated = TRUE;
+  spice_inputs_channel_position (self->inputs, x - 1, y, 0, 0);
+  spice_inputs_channel_position (self->inputs, x, y, 0, 0);
+  return G_SOURCE_REMOVE;
+}
+
+static void
+schedule_display_activation (PirwaConsole *self)
+{
+  if (!self->closed && !self->primary.data && self->input_ready && !self->display_activated
+      && !self->activate_source && gtk_widget_get_mapped (GTK_WIDGET (self)))
+    self->activate_source = g_timeout_add (500, activate_display, self);
 }
 
 static void
 channel_event (SpiceChannel *channel, SpiceChannelEvent event, PirwaConsole *self)
 {
   if (channel == SPICE_CHANNEL (self->inputs))
-    self->input_ready = event == SPICE_CHANNEL_OPENED;
+    {
+      self->input_ready = event == SPICE_CHANNEL_OPENED;
+      if (self->input_ready)
+        schedule_display_activation (self);
+    }
   if (event == SPICE_CHANNEL_OPENED || event == SPICE_CHANNEL_SWITCHING)
     {
       if (event == SPICE_CHANNEL_OPENED && SPICE_IS_MAIN_CHANNEL (channel))
@@ -231,14 +511,10 @@ channel_event (SpiceChannel *channel, SpiceChannelEvent event, PirwaConsole *sel
     }
   if ((SPICE_IS_MAIN_CHANNEL (channel) || channel == self->display_channel) && !self->closed)
     {
-      release_input (self);
       const GError *error = spice_channel_get_error (channel);
-      show_status (self, _ ("Display disconnected"),
-                   error ? error->message : _ ("Waiting for the machine. You can also reconnect."));
       /* Disconnect outside the SPICE signal/coroutine. Lifecycle events handle
-       * stopped guests; transient disconnects get at most three retries. */
-      if (!self->reconnect_source)
-        self->reconnect_source = g_timeout_add (1000, retry_session, self);
+       * stopped guests; transient disconnects reconnect automatically. */
+      schedule_reconnect (self, error ? error->message : NULL);
     }
 }
 
@@ -264,12 +540,16 @@ socket_done (GObject *source, GAsyncResult *result, gpointer data)
           int fd = g_unix_fd_list_get (reply->graphics_fds, 0, &error);
           /* The channel takes ownership of a valid fd even when connect fails. */
           if (fd >= 0 && !spice_channel_open_fd (request->channel, fd))
-            spice_channel_disconnect (request->channel, SPICE_CHANNEL_ERROR_CONNECT);
+            {
+              spice_channel_disconnect (request->channel, SPICE_CHANNEL_NONE);
+              schedule_reconnect (self, NULL);
+            }
         }
       if (error && !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
         {
-          show_status (self, _ ("Cannot open display"), error->message);
           spice_channel_disconnect (request->channel, SPICE_CHANNEL_NONE);
+          /* NONE suppresses channel-event, so this path must schedule retry. */
+          schedule_reconnect (self, error->message);
         }
     }
   g_weak_ref_clear (&request->window);
@@ -295,7 +575,7 @@ static void
 agent_update (SpiceChannel *channel, PirwaConsole *self)
 {
   (void)channel;
-  schedule_resize (self);
+  schedule_display_configuration (self);
 }
 
 static void
@@ -321,11 +601,13 @@ channel_new (SpiceSession *session, SpiceChannel *channel, PirwaConsole *self)
     {
       self->main = SPICE_MAIN_CHANNEL (channel);
       g_signal_connect_object (channel, "main-agent-update", G_CALLBACK (agent_update), self, 0);
+      schedule_display_configuration (self);
       return; /* spice_session_open_fd connects the main channel. */
     }
   if (SPICE_IS_DISPLAY_CHANNEL (channel))
     {
       self->display_channel = channel;
+      g_signal_connect_object (channel, "notify::monitors", G_CALLBACK (monitor_changed), self, 0);
       g_signal_connect_object (channel, "display-primary-create", G_CALLBACK (primary_create), self,
                                0);
       g_signal_connect_object (channel, "display-primary-destroy", G_CALLBACK (primary_destroy),
@@ -366,6 +648,11 @@ channel_destroy (SpiceSession *session, SpiceChannel *channel, PirwaConsole *sel
 static void
 disconnect_session (PirwaConsole *self)
 {
+  g_clear_handle_id (&self->connect_source, g_source_remove);
+  g_clear_handle_id (&self->activate_source, g_source_remove);
+  self->display_activated = FALSE;
+  self->display_configured = FALSE;
+  g_clear_handle_id (&self->configure_source, g_source_remove);
   release_input (self);
   self->generation++;
   if (self->pending)
@@ -392,7 +679,7 @@ disconnect_session (PirwaConsole *self)
 static void
 start_session (PirwaConsole *self)
 {
-  if (self->closed || self->session)
+  if (self->closed || !self->running || self->session || self->reconnect_source)
     return;
   self->pending = g_cancellable_new ();
   self->session = spice_session_new ();
@@ -400,9 +687,11 @@ start_session (PirwaConsole *self)
   g_signal_connect_object (self->session, "channel-new", G_CALLBACK (channel_new), self, 0);
   g_signal_connect_object (self->session, "channel-destroy", G_CALLBACK (channel_destroy), self, 0);
   spice_audio_get (self->session, NULL);
-  show_status (self, _ ("Connecting to display"), _ ("Waiting for the machine’s first frame…"));
+  show_status (self, _ ("Connecting to display"), _ ("Waiting for the machine’s first frame…"),
+               TRUE);
+  self->connect_source = g_timeout_add_seconds (15, first_frame_timeout, self);
   if (!spice_session_open_fd (self->session, -1))
-    show_status (self, _ ("Cannot open display"), _ ("Choose Reconnect to try again."));
+    schedule_reconnect (self, _ ("Cannot open display"));
 }
 
 static void
@@ -426,24 +715,15 @@ inventory_changed (PirwaBackend *backend, PirwaReply *reply, PirwaConsole *self)
       if (self->reconnect_source)
         g_clear_handle_id (&self->reconnect_source, g_source_remove);
       disconnect_session (self);
-      show_status (self, _ ("Machine is stopped"),
-                   _ ("The display will reconnect when it starts."));
+      self->retry_delay = 0;
+      show_status (self, _ ("Machine is stopped"), _ ("The display will reconnect when it starts."),
+                   FALSE);
     }
-  else if (!self->session)
+  else if (!self->session && !self->reconnect_source)
     {
-      self->retries = 0;
+      self->retry_delay = 0;
       start_session (self);
     }
-}
-
-static void
-reconnect_clicked (GtkButton *button, PirwaConsole *self)
-{
-  (void)button;
-  g_clear_handle_id (&self->reconnect_source, g_source_remove);
-  disconnect_session (self);
-  self->retries = 0;
-  start_session (self);
 }
 
 static gboolean
@@ -491,8 +771,8 @@ pointer_position (PirwaConsole *self, double x, double y)
     return FALSE;
   int guest_x, guest_y;
   if (!pirwa_frame_position (gtk_widget_get_width (self->display),
-                             gtk_widget_get_height (self->display), self->primary.width,
-                             self->primary.height, x, y, &guest_x, &guest_y))
+                             gtk_widget_get_height (self->display), self->monitor_area.width,
+                             self->monitor_area.height, x, y, &guest_x, &guest_y))
     return FALSE;
   int mode = SPICE_MOUSE_MODE_CLIENT;
   if (self->main)
@@ -623,10 +903,23 @@ fullscreen_changed (GtkWindow *window, GParamSpec *spec, PirwaConsole *self)
 {
   (void)spec;
   gboolean fullscreen = self->popup && gtk_window_is_fullscreen (window);
+  pirwa_display_set_rounded (PIRWA_DISPLAY (self->display), !fullscreen);
   adw_toolbar_view_set_top_bar_style (self->toolbar,
                                       fullscreen ? ADW_TOOLBAR_RAISED : ADW_TOOLBAR_FLAT);
   adw_toolbar_view_set_extend_content_to_top_edge (self->toolbar, !self->popup || fullscreen);
   adw_toolbar_view_set_reveal_top_bars (self->toolbar, self->popup && !fullscreen);
+  if (!self->auto_resize)
+    schedule_popup_fit (self);
+}
+
+static void
+pirwa_console_map (GtkWidget *widget)
+{
+  GTK_WIDGET_CLASS (pirwa_console_parent_class)->map (widget);
+  /* Agent/channel events can precede the first usable viewport allocation. */
+  PirwaConsole *self = PIRWA_CONSOLE_VIEW (widget);
+  schedule_display_configuration (self);
+  schedule_display_activation (self);
 }
 
 static void
@@ -641,6 +934,7 @@ pirwa_console_root (GtkWidget *widget)
       g_signal_connect_object (root, "notify::is-active", G_CALLBACK (active_changed), self, 0);
       g_signal_connect_object (root, "notify::fullscreened", G_CALLBACK (fullscreen_changed), self,
                                0);
+      g_signal_connect_object (root, "notify::maximized", G_CALLBACK (fullscreen_changed), self, 0);
       fullscreen_changed (self->host, NULL, self);
     }
 }
@@ -683,8 +977,9 @@ stop_console (PirwaConsole *self)
   if (self->closed)
     return;
   self->closed = TRUE;
+  g_clear_handle_id (&self->fit_source, g_source_remove);
   g_clear_handle_id (&self->reconnect_source, g_source_remove);
-  g_clear_handle_id (&self->resize_source, g_source_remove);
+  g_clear_handle_id (&self->configure_source, g_source_remove);
   disconnect_session (self);
   if (self->backend)
     pirwa_backend_stop (self->backend);
@@ -708,6 +1003,7 @@ pirwa_console_dispose (GObject *object)
   PirwaConsole *self = PIRWA_CONSOLE_VIEW (object);
   stop_console (self);
   g_clear_object (&self->backend);
+  g_clear_object (&self->preferences);
   g_clear_object (&self->preview);
   G_OBJECT_CLASS (pirwa_console_parent_class)->dispose (object);
 }
@@ -725,6 +1021,7 @@ pirwa_console_class_init (PirwaConsoleClass *klass)
 {
   G_OBJECT_CLASS (klass)->dispose = pirwa_console_dispose;
   G_OBJECT_CLASS (klass)->finalize = pirwa_console_finalize;
+  GTK_WIDGET_CLASS (klass)->map = pirwa_console_map;
   GTK_WIDGET_CLASS (klass)->root = pirwa_console_root;
   GTK_WIDGET_CLASS (klass)->unroot = pirwa_console_unroot;
   g_signal_new ("return-requested", G_TYPE_FROM_CLASS (klass), G_SIGNAL_RUN_LAST, 0, NULL, NULL,
@@ -734,10 +1031,19 @@ pirwa_console_class_init (PirwaConsoleClass *klass)
 static void
 pirwa_console_init (PirwaConsole *self)
 {
+  self->preferences = pirwa_preferences_new ();
+  self->auto_resize = g_settings_get_boolean (self->preferences, "auto-resize-display");
+  g_signal_connect_object (self->preferences, "changed::auto-resize-display",
+                           G_CALLBACK (auto_resize_changed), self, 0);
+  /* Placeholder for popup fitting before mapping selects the host monitor. */
+  self->guest_width = 1280;
+  self->guest_height = 720;
   gtk_orientable_set_orientation (GTK_ORIENTABLE (self), GTK_ORIENTATION_VERTICAL);
   gtk_widget_set_hexpand (GTK_WIDGET (self), TRUE);
   gtk_widget_set_vexpand (GTK_WIDGET (self), TRUE);
   self->toolbar = ADW_TOOLBAR_VIEW (adw_toolbar_view_new ());
+  g_signal_connect_object (self->toolbar, "notify::top-bar-height",
+                           G_CALLBACK (popup_chrome_changed), self, 0);
   self->header = adw_header_bar_new ();
   self->release = gtk_button_new_with_label (_ ("Release Input"));
   gtk_widget_set_tooltip_text (self->release, _ ("Release keyboard and pointer (Ctrl+Alt)"));
@@ -750,14 +1056,14 @@ pirwa_console_init (PirwaConsole *self)
   adw_toolbar_view_add_top_bar (self->toolbar, self->header);
   self->stack = GTK_STACK (gtk_stack_new ());
   self->display = pirwa_display_new ();
+  set_display_inset (self, 6);
   g_signal_connect_object (self->display, "resize", G_CALLBACK (display_resized), self, 0);
   gtk_stack_add_named (self->stack, self->display, "display");
   self->status = ADW_STATUS_PAGE (adw_status_page_new ());
   adw_status_page_set_icon_name (self->status, "video-display-symbolic");
-  GtkWidget *reconnect = gtk_button_new_with_label (_ ("Reconnect"));
-  gtk_widget_set_halign (reconnect, GTK_ALIGN_CENTER);
-  g_signal_connect (reconnect, "clicked", G_CALLBACK (reconnect_clicked), self);
-  adw_status_page_set_child (self->status, reconnect);
+  GtkWidget *spinner = gtk_spinner_new ();
+  gtk_widget_set_halign (spinner, GTK_ALIGN_CENTER);
+  adw_status_page_set_child (self->status, spinner);
   gtk_stack_add_named (self->stack, GTK_WIDGET (self->status), "status");
   adw_toolbar_view_set_content (self->toolbar, GTK_WIDGET (self->stack));
   gtk_widget_set_vexpand (GTK_WIDGET (self->toolbar), TRUE);
@@ -851,14 +1157,27 @@ pirwa_console_pop_out (PirwaConsole *self, GtkApplication *application)
   release_input (self);
   g_clear_object (&self->preview);
   if (self->primary.data)
-    self->preview = pirwa_frame_texture (&self->primary, NULL, NULL);
+    self->preview = pirwa_frame_texture_rect (&self->primary, &self->monitor_area);
+  set_display_inset (self, 0);
   self->popup = GTK_WINDOW (adw_window_new ());
   gtk_window_set_application (self->popup, application);
   gtk_window_set_title (self->popup, self->name);
-  gtk_window_set_default_size (self->popup, 1024, 768);
   g_object_set_data (G_OBJECT (self->popup), "pirwa-console", self);
   g_signal_connect_object (self->popup, "close-request", G_CALLBACK (close_requested), self, 0);
   adw_window_set_content (ADW_WINDOW (self->popup), GTK_WIDGET (self));
+  gtk_widget_realize (GTK_WIDGET (self->popup));
+  GdkSurface *surface = gtk_native_get_surface (GTK_NATIVE (self->popup));
+  GdkMonitor *monitor
+      = gdk_display_get_monitor_at_surface (gdk_surface_get_display (surface), surface);
+  GdkRectangle bounds = { 0 };
+  if (monitor)
+    gdk_monitor_get_geometry (monitor, &bounds);
+  self->popup_bounds_width = bounds.width;
+  self->popup_bounds_height = bounds.height;
+  g_signal_connect_object (surface, "compute-size", G_CALLBACK (popup_bounds_changed), self,
+                           G_CONNECT_AFTER);
+  g_clear_handle_id (&self->fit_source, g_source_remove);
+  fit_popup (self);
   gtk_window_present (self->popup);
 }
 
@@ -869,6 +1188,9 @@ pirwa_console_return (PirwaConsole *self)
   release_input (self);
   GtkWindow *popup = self->popup;
   self->popup = NULL;
+  g_clear_handle_id (&self->fit_source, g_source_remove);
+  pirwa_display_set_rounded (PIRWA_DISPLAY (self->display), TRUE);
+  set_display_inset (self, 6);
   adw_window_set_content (ADW_WINDOW (popup), NULL);
   g_object_set_data (G_OBJECT (popup), "pirwa-console", NULL);
   gtk_window_destroy (popup);

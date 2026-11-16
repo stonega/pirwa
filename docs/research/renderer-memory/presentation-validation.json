@@ -1,0 +1,1334 @@
+{
+  "normal_tests": [
+    {
+      "name": "pirwa:desktop-file",
+      "result": "OK",
+      "returncode": 0
+    },
+    {
+      "name": "pirwa:appstream",
+      "result": "OK",
+      "returncode": 0
+    },
+    {
+      "name": "pirwa:usage",
+      "result": "OK",
+      "returncode": 0
+    },
+    {
+      "name": "pirwa:config",
+      "result": "OK",
+      "returncode": 0
+    },
+    {
+      "name": "pirwa:model",
+      "result": "OK",
+      "returncode": 0
+    },
+    {
+      "name": "pirwa:backend",
+      "result": "OK",
+      "returncode": 0
+    },
+    {
+      "name": "pirwa:provision",
+      "result": "OK",
+      "returncode": 0
+    },
+    {
+      "name": "pirwa:boxes",
+      "result": "OK",
+      "returncode": 0
+    },
+    {
+      "name": "pirwa:boxes-import",
+      "result": "OK",
+      "returncode": 0
+    },
+    {
+      "name": "pirwa:console-frame",
+      "result": "OK",
+      "returncode": 0
+    },
+    {
+      "name": "pirwa:inventory",
+      "result": "OK",
+      "returncode": 0
+    },
+    {
+      "name": "pirwa:scale-1000",
+      "result": "OK",
+      "returncode": 0
+    }
+  ],
+  "sanitizer_tests": [
+    {
+      "name": "pirwa:desktop-file",
+      "result": "OK",
+      "returncode": 0
+    },
+    {
+      "name": "pirwa:appstream",
+      "result": "OK",
+      "returncode": 0
+    },
+    {
+      "name": "pirwa:usage",
+      "result": "OK",
+      "returncode": 0
+    },
+    {
+      "name": "pirwa:config",
+      "result": "OK",
+      "returncode": 0
+    },
+    {
+      "name": "pirwa:model",
+      "result": "OK",
+      "returncode": 0
+    },
+    {
+      "name": "pirwa:boxes",
+      "result": "OK",
+      "returncode": 0
+    },
+    {
+      "name": "pirwa:console-frame",
+      "result": "OK",
+      "returncode": 0
+    },
+    {
+      "name": "pirwa:backend",
+      "result": "OK",
+      "returncode": 0
+    },
+    {
+      "name": "pirwa:provision",
+      "result": "OK",
+      "returncode": 0
+    },
+    {
+      "name": "pirwa:boxes-import",
+      "result": "OK",
+      "returncode": 0
+    },
+    {
+      "name": "pirwa:inventory",
+      "result": "OK",
+      "returncode": 0
+    },
+    {
+      "name": "pirwa:scale-1000",
+      "result": "OK",
+      "returncode": 0
+    }
+  ],
+  "desktop_cases": [
+    {
+      "path": "build/qa/rounded-real-presentation-probe",
+      "report": {
+        "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+        "source_dirty": true,
+        "gnome_shell": "GNOME Shell 51.1",
+        "shell_command": [
+          "gnome-shell",
+          "--headless",
+          "--wayland",
+          "--no-x11",
+          "--virtual-monitor",
+          "1280x800@60",
+          "--wayland-display",
+          "pirwa-qa-wayland"
+        ],
+        "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
+        "scope": "Custom command in an isolated desktop; inspect the command's own results",
+        "cases": [
+          {
+            "name": "command",
+            "command": [
+              "env",
+              "GTK_A11Y=test",
+              "WAYLAND_DEBUG=client",
+              "build-perf/tests/benchmark-display",
+              "--width",
+              "1280",
+              "--height",
+              "800",
+              "--frames",
+              "30",
+              "--mode",
+              "invalidate-full",
+              "--fullscreen"
+            ],
+            "returncode": 0,
+            "metrics": {
+              "width": 1280,
+              "height": 800,
+              "mode": "invalidate-full",
+              "warmup_frames": 30,
+              "renderer": "GskVulkanRenderer",
+              "scale": 1,
+              "view_width": 1280,
+              "view_height": 800,
+              "refresh_millihz": 60000,
+              "pss_start_kib": 104909,
+              "pss_end_kib": 104909,
+              "cpu_percent_one_core": 29.099341,
+              "elapsed_us": 500922,
+              "correctness_passed": true,
+              "samples": [
+                {
+                  "paint_wall_us": 4253,
+                  "paint_cpu_us": 4229,
+                  "producer_cpu_us": 18,
+                  "interval_us": 15763
+                },
+                {
+                  "paint_wall_us": 3940,
+                  "paint_cpu_us": 3910,
+                  "producer_cpu_us": 13,
+                  "interval_us": 16611
+                },
+                {
+                  "paint_wall_us": 3870,
+                  "paint_cpu_us": 3833,
+                  "producer_cpu_us": 13,
+                  "interval_us": 16141
+                },
+                {
+                  "paint_wall_us": 4450,
+                  "paint_cpu_us": 4368,
+                  "producer_cpu_us": 17,
+                  "interval_us": 17605
+                },
+                {
+                  "paint_wall_us": 4024,
+                  "paint_cpu_us": 3987,
+                  "producer_cpu_us": 15,
+                  "interval_us": 15903
+                },
+                {
+                  "paint_wall_us": 5909,
+                  "paint_cpu_us": 5816,
+                  "producer_cpu_us": 23,
+                  "interval_us": 19479
+                },
+                {
+                  "paint_wall_us": 4804,
+                  "paint_cpu_us": 4765,
+                  "producer_cpu_us": 20,
+                  "interval_us": 14998
+                },
+                {
+                  "paint_wall_us": 4831,
+                  "paint_cpu_us": 4719,
+                  "producer_cpu_us": 23,
+                  "interval_us": 17242
+                },
+                {
+                  "paint_wall_us": 4960,
+                  "paint_cpu_us": 4923,
+                  "producer_cpu_us": 22,
+                  "interval_us": 16469
+                },
+                {
+                  "paint_wall_us": 4826,
+                  "paint_cpu_us": 4784,
+                  "producer_cpu_us": 17,
+                  "interval_us": 16465
+                },
+                {
+                  "paint_wall_us": 4074,
+                  "paint_cpu_us": 4030,
+                  "producer_cpu_us": 16,
+                  "interval_us": 15420
+                },
+                {
+                  "paint_wall_us": 5862,
+                  "paint_cpu_us": 5717,
+                  "producer_cpu_us": 37,
+                  "interval_us": 19529
+                },
+                {
+                  "paint_wall_us": 4661,
+                  "paint_cpu_us": 4620,
+                  "producer_cpu_us": 21,
+                  "interval_us": 14663
+                },
+                {
+                  "paint_wall_us": 4381,
+                  "paint_cpu_us": 4314,
+                  "producer_cpu_us": 16,
+                  "interval_us": 16695
+                },
+                {
+                  "paint_wall_us": 4017,
+                  "paint_cpu_us": 3982,
+                  "producer_cpu_us": 17,
+                  "interval_us": 15707
+                },
+                {
+                  "paint_wall_us": 4993,
+                  "paint_cpu_us": 4893,
+                  "producer_cpu_us": 14,
+                  "interval_us": 17853
+                },
+                {
+                  "paint_wall_us": 5269,
+                  "paint_cpu_us": 5139,
+                  "producer_cpu_us": 23,
+                  "interval_us": 19502
+                },
+                {
+                  "paint_wall_us": 3511,
+                  "paint_cpu_us": 3490,
+                  "producer_cpu_us": 19,
+                  "interval_us": 12249
+                },
+                {
+                  "paint_wall_us": 3213,
+                  "paint_cpu_us": 3189,
+                  "producer_cpu_us": 14,
+                  "interval_us": 16398
+                },
+                {
+                  "paint_wall_us": 3828,
+                  "paint_cpu_us": 3708,
+                  "producer_cpu_us": 14,
+                  "interval_us": 17269
+                },
+                {
+                  "paint_wall_us": 3325,
+                  "paint_cpu_us": 3301,
+                  "producer_cpu_us": 13,
+                  "interval_us": 16111
+                },
+                {
+                  "paint_wall_us": 5026,
+                  "paint_cpu_us": 4892,
+                  "producer_cpu_us": 15,
+                  "interval_us": 18979
+                },
+                {
+                  "paint_wall_us": 4256,
+                  "paint_cpu_us": 4230,
+                  "producer_cpu_us": 15,
+                  "interval_us": 15329
+                },
+                {
+                  "paint_wall_us": 6250,
+                  "paint_cpu_us": 6190,
+                  "producer_cpu_us": 25,
+                  "interval_us": 19694
+                },
+                {
+                  "paint_wall_us": 4046,
+                  "paint_cpu_us": 4005,
+                  "producer_cpu_us": 15,
+                  "interval_us": 13648
+                },
+                {
+                  "paint_wall_us": 4278,
+                  "paint_cpu_us": 4251,
+                  "producer_cpu_us": 21,
+                  "interval_us": 17399
+                },
+                {
+                  "paint_wall_us": 5218,
+                  "paint_cpu_us": 5194,
+                  "producer_cpu_us": 24,
+                  "interval_us": 17524
+                },
+                {
+                  "paint_wall_us": 5082,
+                  "paint_cpu_us": 5040,
+                  "producer_cpu_us": 23,
+                  "interval_us": 16290
+                },
+                {
+                  "paint_wall_us": 6160,
+                  "paint_cpu_us": 5985,
+                  "producer_cpu_us": 21,
+                  "interval_us": 17913
+                },
+                {
+                  "paint_wall_us": 5572,
+                  "paint_cpu_us": 5479,
+                  "producer_cpu_us": 21,
+                  "interval_us": 16074
+                }
+              ],
+              "idle_wall_us": 0,
+              "idle_cpu_us": 0,
+              "idle_paints": 0,
+              "max_channel_error": 1,
+              "frame_feedback": {
+                "scope": "GDK feedback for measured updates, read after sampling; zero timestamps are unavailable. Only complete presented results identify accurate compositor feedback. Virtual monitors do not measure physical presentation.",
+                "columns": [
+                  "frame_counter",
+                  "before_paint_us",
+                  "after_paint_us",
+                  "damage_received_us",
+                  "complete",
+                  "presentation_us",
+                  "refresh_interval_us",
+                  "result"
+                ],
+                "samples": [
+                  [
+                    30,
+                    351141338719,
+                    351141342972,
+                    0,
+                    true,
+                    351141355450,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    31,
+                    351141355643,
+                    351141359583,
+                    0,
+                    true,
+                    351141371651,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    32,
+                    351141371854,
+                    351141375724,
+                    0,
+                    true,
+                    351141388666,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    33,
+                    351141388879,
+                    351141393329,
+                    0,
+                    true,
+                    351141404981,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    34,
+                    351141405208,
+                    351141409232,
+                    0,
+                    true,
+                    351141422509,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    35,
+                    351141422802,
+                    351141428711,
+                    0,
+                    true,
+                    351141438631,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    36,
+                    351141438905,
+                    351141443709,
+                    0,
+                    true,
+                    351141455801,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    37,
+                    351141456120,
+                    351141460951,
+                    0,
+                    true,
+                    351141472135,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    38,
+                    351141472460,
+                    351141477420,
+                    0,
+                    true,
+                    351141488811,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    39,
+                    351141489059,
+                    351141493885,
+                    0,
+                    true,
+                    351141505032,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    40,
+                    351141505231,
+                    351141509305,
+                    0,
+                    true,
+                    351141522649,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    41,
+                    351141522972,
+                    351141528834,
+                    0,
+                    true,
+                    351141538570,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    42,
+                    351141538836,
+                    351141543497,
+                    0,
+                    true,
+                    351141555599,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    43,
+                    351141555811,
+                    351141560192,
+                    0,
+                    true,
+                    351141571684,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    44,
+                    351141571882,
+                    351141575899,
+                    0,
+                    true,
+                    351141588556,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    45,
+                    351141588759,
+                    351141593752,
+                    0,
+                    true,
+                    351141607767,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    46,
+                    351141607985,
+                    351141613254,
+                    0,
+                    true,
+                    351141621827,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    47,
+                    351141621992,
+                    351141625503,
+                    0,
+                    true,
+                    351141638494,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    48,
+                    351141638688,
+                    351141641901,
+                    0,
+                    true,
+                    351141655155,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    49,
+                    351141655342,
+                    351141659170,
+                    0,
+                    true,
+                    351141671752,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    50,
+                    351141671956,
+                    351141675281,
+                    0,
+                    true,
+                    351141688983,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    51,
+                    351141689234,
+                    351141694260,
+                    0,
+                    true,
+                    351141705118,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    52,
+                    351141705333,
+                    351141709589,
+                    0,
+                    true,
+                    351141722696,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    53,
+                    351141723033,
+                    351141729283,
+                    0,
+                    true,
+                    351141738629,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    54,
+                    351141738885,
+                    351141742931,
+                    0,
+                    true,
+                    351141755739,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    55,
+                    351141756052,
+                    351141760330,
+                    0,
+                    true,
+                    351141772338,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    56,
+                    351141772636,
+                    351141777854,
+                    0,
+                    true,
+                    351141788738,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    57,
+                    351141789062,
+                    351141794144,
+                    0,
+                    true,
+                    351141805535,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    58,
+                    351141805897,
+                    351141812057,
+                    0,
+                    true,
+                    351141822272,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    59,
+                    351141822559,
+                    351141828131,
+                    0,
+                    false,
+                    0,
+                    0,
+                    "outstanding"
+                  ]
+                ]
+              }
+            }
+          }
+        ],
+        "passed": true,
+        "shell_exitcode": 0
+      },
+      "process_cleanup": {
+        "signalled": [],
+        "remaining": {}
+      }
+    },
+    {
+      "path": "build/qa/rounded-feedback-asan",
+      "report": {
+        "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+        "source_dirty": true,
+        "gnome_shell": "GNOME Shell 51.1",
+        "shell_command": [
+          "gnome-shell",
+          "--headless",
+          "--wayland",
+          "--no-x11",
+          "--virtual-monitor",
+          "1280x800@60",
+          "--wayland-display",
+          "pirwa-qa-wayland"
+        ],
+        "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
+        "scope": "Custom command in an isolated desktop; inspect the command's own results",
+        "cases": [
+          {
+            "name": "command",
+            "command": [
+              "env",
+              "GTK_A11Y=test",
+              "ASAN_OPTIONS=detect_leaks=0",
+              "build-sanitize/tests/benchmark-display",
+              "--width",
+              "1280",
+              "--height",
+              "800",
+              "--frames",
+              "30",
+              "--mode",
+              "invalidate-full",
+              "--fullscreen"
+            ],
+            "returncode": 0,
+            "metrics": {
+              "width": 1280,
+              "height": 800,
+              "mode": "invalidate-full",
+              "warmup_frames": 30,
+              "renderer": "GskVulkanRenderer",
+              "scale": 1,
+              "view_width": 1280,
+              "view_height": 800,
+              "refresh_millihz": 60000,
+              "pss_start_kib": 434025,
+              "pss_end_kib": 466993,
+              "cpu_percent_one_core": 60.118631,
+              "elapsed_us": 507791,
+              "correctness_passed": true,
+              "samples": [
+                {
+                  "paint_wall_us": 14429,
+                  "paint_cpu_us": 14169,
+                  "producer_cpu_us": 27,
+                  "interval_us": 29552
+                },
+                {
+                  "paint_wall_us": 8894,
+                  "paint_cpu_us": 8680,
+                  "producer_cpu_us": 13,
+                  "interval_us": 9004
+                },
+                {
+                  "paint_wall_us": 8408,
+                  "paint_cpu_us": 8137,
+                  "producer_cpu_us": 13,
+                  "interval_us": 14057
+                },
+                {
+                  "paint_wall_us": 10297,
+                  "paint_cpu_us": 10092,
+                  "producer_cpu_us": 24,
+                  "interval_us": 19028
+                },
+                {
+                  "paint_wall_us": 9257,
+                  "paint_cpu_us": 9171,
+                  "producer_cpu_us": 16,
+                  "interval_us": 15149
+                },
+                {
+                  "paint_wall_us": 8024,
+                  "paint_cpu_us": 7969,
+                  "producer_cpu_us": 17,
+                  "interval_us": 15498
+                },
+                {
+                  "paint_wall_us": 8036,
+                  "paint_cpu_us": 7893,
+                  "producer_cpu_us": 15,
+                  "interval_us": 16329
+                },
+                {
+                  "paint_wall_us": 14586,
+                  "paint_cpu_us": 14458,
+                  "producer_cpu_us": 26,
+                  "interval_us": 23739
+                },
+                {
+                  "paint_wall_us": 8093,
+                  "paint_cpu_us": 7983,
+                  "producer_cpu_us": 24,
+                  "interval_us": 9724
+                },
+                {
+                  "paint_wall_us": 9537,
+                  "paint_cpu_us": 9451,
+                  "producer_cpu_us": 19,
+                  "interval_us": 18598
+                },
+                {
+                  "paint_wall_us": 9187,
+                  "paint_cpu_us": 8881,
+                  "producer_cpu_us": 17,
+                  "interval_us": 15949
+                },
+                {
+                  "paint_wall_us": 9782,
+                  "paint_cpu_us": 9701,
+                  "producer_cpu_us": 17,
+                  "interval_us": 17492
+                },
+                {
+                  "paint_wall_us": 9105,
+                  "paint_cpu_us": 8716,
+                  "producer_cpu_us": 14,
+                  "interval_us": 15918
+                },
+                {
+                  "paint_wall_us": 10105,
+                  "paint_cpu_us": 9721,
+                  "producer_cpu_us": 62,
+                  "interval_us": 17835
+                },
+                {
+                  "paint_wall_us": 11459,
+                  "paint_cpu_us": 11139,
+                  "producer_cpu_us": 15,
+                  "interval_us": 17523
+                },
+                {
+                  "paint_wall_us": 15288,
+                  "paint_cpu_us": 15164,
+                  "producer_cpu_us": 28,
+                  "interval_us": 21290
+                },
+                {
+                  "paint_wall_us": 7361,
+                  "paint_cpu_us": 7306,
+                  "producer_cpu_us": 16,
+                  "interval_us": 7933
+                },
+                {
+                  "paint_wall_us": 8367,
+                  "paint_cpu_us": 8215,
+                  "producer_cpu_us": 22,
+                  "interval_us": 18274
+                },
+                {
+                  "paint_wall_us": 8509,
+                  "paint_cpu_us": 8440,
+                  "producer_cpu_us": 22,
+                  "interval_us": 16738
+                },
+                {
+                  "paint_wall_us": 6702,
+                  "paint_cpu_us": 6554,
+                  "producer_cpu_us": 16,
+                  "interval_us": 14743
+                },
+                {
+                  "paint_wall_us": 7895,
+                  "paint_cpu_us": 7728,
+                  "producer_cpu_us": 13,
+                  "interval_us": 17387
+                },
+                {
+                  "paint_wall_us": 9190,
+                  "paint_cpu_us": 8943,
+                  "producer_cpu_us": 20,
+                  "interval_us": 18557
+                },
+                {
+                  "paint_wall_us": 11942,
+                  "paint_cpu_us": 11720,
+                  "producer_cpu_us": 15,
+                  "interval_us": 19320
+                },
+                {
+                  "paint_wall_us": 8830,
+                  "paint_cpu_us": 8652,
+                  "producer_cpu_us": 20,
+                  "interval_us": 13695
+                },
+                {
+                  "paint_wall_us": 9091,
+                  "paint_cpu_us": 8975,
+                  "producer_cpu_us": 25,
+                  "interval_us": 16841
+                },
+                {
+                  "paint_wall_us": 8196,
+                  "paint_cpu_us": 8079,
+                  "producer_cpu_us": 30,
+                  "interval_us": 16171
+                },
+                {
+                  "paint_wall_us": 7847,
+                  "paint_cpu_us": 7767,
+                  "producer_cpu_us": 47,
+                  "interval_us": 16091
+                },
+                {
+                  "paint_wall_us": 10066,
+                  "paint_cpu_us": 9978,
+                  "producer_cpu_us": 29,
+                  "interval_us": 19363
+                },
+                {
+                  "paint_wall_us": 8461,
+                  "paint_cpu_us": 8382,
+                  "producer_cpu_us": 26,
+                  "interval_us": 14172
+                },
+                {
+                  "paint_wall_us": 13347,
+                  "paint_cpu_us": 13207,
+                  "producer_cpu_us": 26,
+                  "interval_us": 21821
+                }
+              ],
+              "idle_wall_us": 0,
+              "idle_cpu_us": 0,
+              "idle_paints": 0,
+              "max_channel_error": 1,
+              "frame_feedback": {
+                "scope": "GDK feedback for measured updates, read after sampling; zero timestamps are unavailable. Only complete presented results identify accurate compositor feedback. Virtual monitors do not measure physical presentation.",
+                "columns": [
+                  "frame_counter",
+                  "before_paint_us",
+                  "after_paint_us",
+                  "damage_received_us",
+                  "complete",
+                  "presentation_us",
+                  "refresh_interval_us",
+                  "result"
+                ],
+                "samples": [
+                  [
+                    30,
+                    351306172160,
+                    351306186589,
+                    0,
+                    true,
+                    351306184343,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    31,
+                    351306186699,
+                    351306195593,
+                    0,
+                    true,
+                    351306200997,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    32,
+                    351306201242,
+                    351306209650,
+                    0,
+                    true,
+                    351306218131,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    33,
+                    351306218381,
+                    351306228678,
+                    0,
+                    true,
+                    351306234338,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    34,
+                    351306234570,
+                    351306243827,
+                    0,
+                    true,
+                    351306251095,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    35,
+                    351306251301,
+                    351306259325,
+                    0,
+                    true,
+                    351306267422,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    36,
+                    351306267618,
+                    351306275654,
+                    0,
+                    true,
+                    351306284552,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    37,
+                    351306284807,
+                    351306299393,
+                    0,
+                    true,
+                    351306300846,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    38,
+                    351306301024,
+                    351306309117,
+                    0,
+                    true,
+                    351306317932,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    39,
+                    351306318178,
+                    351306327715,
+                    0,
+                    true,
+                    351306334279,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    40,
+                    351306334477,
+                    351306343664,
+                    0,
+                    true,
+                    351306351148,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    41,
+                    351306351374,
+                    351306361156,
+                    0,
+                    true,
+                    351306367771,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    42,
+                    351306367969,
+                    351306377074,
+                    0,
+                    true,
+                    351306384564,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    43,
+                    351306384804,
+                    351306394909,
+                    0,
+                    true,
+                    351306400786,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    44,
+                    351306400973,
+                    351306412432,
+                    0,
+                    true,
+                    351306418165,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    45,
+                    351306418434,
+                    351306433722,
+                    0,
+                    true,
+                    351306434140,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    46,
+                    351306434294,
+                    351306441655,
+                    0,
+                    true,
+                    351306451321,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    47,
+                    351306451562,
+                    351306459929,
+                    0,
+                    true,
+                    351306467910,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    48,
+                    351306468158,
+                    351306476667,
+                    0,
+                    true,
+                    351306484509,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    49,
+                    351306484708,
+                    351306491410,
+                    0,
+                    true,
+                    351306500750,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    50,
+                    351306500902,
+                    351306508797,
+                    0,
+                    true,
+                    351306517918,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    51,
+                    351306518164,
+                    351306527354,
+                    0,
+                    true,
+                    351306534534,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    52,
+                    351306534732,
+                    351306546674,
+                    0,
+                    true,
+                    351306551331,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    53,
+                    351306551539,
+                    351306560369,
+                    0,
+                    true,
+                    351306567854,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    54,
+                    351306568119,
+                    351306577210,
+                    0,
+                    true,
+                    351306584831,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    55,
+                    351306585185,
+                    351306593381,
+                    0,
+                    true,
+                    351306601326,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    56,
+                    351306601625,
+                    351306609472,
+                    0,
+                    true,
+                    351306618494,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    57,
+                    351306618769,
+                    351306628835,
+                    0,
+                    true,
+                    351306634355,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    58,
+                    351306634546,
+                    351306643007,
+                    0,
+                    true,
+                    351306651253,
+                    16667,
+                    "presented"
+                  ],
+                  [
+                    59,
+                    351306651481,
+                    351306664828,
+                    0,
+                    false,
+                    0,
+                    0,
+                    "outstanding"
+                  ]
+                ]
+              }
+            }
+          }
+        ],
+        "passed": true,
+        "shell_exitcode": 0
+      },
+      "process_cleanup": {
+        "signalled": [],
+        "remaining": {}
+      }
+    },
+    {
+      "path": "build/qa/rounded-feedback/desktop",
+      "report": {
+        "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+        "source_dirty": true,
+        "gnome_shell": "GNOME Shell 51.1",
+        "shell_command": [
+          "gnome-shell",
+          "--headless",
+          "--wayland",
+          "--no-x11",
+          "--virtual-monitor",
+          "3840x2160@60",
+          "--wayland-display",
+          "pirwa-qa-wayland"
+        ],
+        "isolation": "Private D-Bus, runtime/config/data/cache/state directories; memory GSettings",
+        "scope": "Custom command in an isolated desktop; inspect the command's own results",
+        "cases": [
+          {
+            "name": "command",
+            "command": [
+              "env",
+              "GTK_A11Y=test",
+              "python3",
+              "scripts/profile-display.py",
+              "--build",
+              "build/qa/rounded-feedback/frozen",
+              "--baseline-binary",
+              "build/qa/rounded-feedback/frozen/baseline",
+              "--sizes",
+              "3840x2160",
+              "--modes",
+              "invalidate-full,small",
+              "--fullscreen",
+              "--frames",
+              "60",
+              "--runs",
+              "2",
+              "--idle-seconds",
+              "0",
+              "--output",
+              "build/qa/rounded-feedback/results.json"
+            ],
+            "returncode": 0
+          }
+        ],
+        "passed": true,
+        "shell_exitcode": 0
+      },
+      "process_cleanup": {
+        "signalled": [
+          {
+            "pid": 3123454,
+            "name": "evolution-sourc",
+            "signal": "SIGTERM"
+          }
+        ],
+        "remaining": {}
+      }
+    }
+  ],
+  "profiler_tests": {
+    "command": [
+      "python3",
+      "tests/test-console-profile.py"
+    ],
+    "passed": 8
+  },
+  "lint": {
+    "ruff": "passed",
+    "clang_format": "passed",
+    "git_diff_check": "passed"
+  },
+  "protocol_probe": {
+    "log": "presentation-protocol.log",
+    "wp_presentation_observed": true,
+    "presented_events": 58
+  }
+}

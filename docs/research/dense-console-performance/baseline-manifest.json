@@ -1,0 +1,14 @@
+{
+  "source_commit": "f332a02dfa52690eb54105ee61fedffef8ef812c",
+  "source_sha256": {
+    "src/pirwa-display.c": "45e9c71db46f89016f25a5445119eaeaeac108ceb701ca574e8da6088ab5971a",
+    "src/pirwa-frame.c": "c496be6f3b17744558c857959b9fe5d236d15769b11c5fa108ecb1b45494fe76",
+    "src/pirwa-console.c": "ee75bc41701e5a52a8c621d590df1cc0adea9f04be6208db1505b01941621362",
+    "tests/benchmark-console.c": "23f91289a725771edbe01bcff208e9d76647b1756578aebf130e3c64af7acd26",
+    "tests/benchmark-display.c": "9778d852c45e7e9e2652c2fb8a31c19fd6e288d3b94237a5b40780a7b8f58cd7"
+  },
+  "binary_sha256": {
+    "benchmark-console": "ebc2e9c39a6e636cdfcb77f331f36ab3a34f171b46726915e7b3d4c7733f3638",
+    "benchmark-display": "c53e4f7e9952ea6cd104eb5a893b6ad5e75baa99be8494f145aed4df452060c8"
+  }
+}
