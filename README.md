@@ -6,10 +6,10 @@ libadwaita, libvirt/libvirt-glib, SPICE GLib, libxml2, libosinfo, and Meson.
 
 ![Pirwa showing a running Ubuntu virtual machine in its embedded console](data/screenshots/ubuntu-console.png)
 
-**Status: v0.1.0.** A full Fedora installation,
+**Status: v0.1.1.** A full Fedora installation,
 ISO eject, and installed-disk boot passed in virtual GNOME. Broader
 console/audio/accessibility validation and the complete performance contract
-remain ongoing. See the [release notes](docs/release/v0.1.0.md) and
+remain ongoing. See the [release notes](docs/release/v0.1.1.md) and
 [installation evidence](docs/research/linux-install/README.md).
 The [console/performance follow-up](docs/research/console-performance/README.md)
 records resize, input, digital audio, reconnect, startup/idle measurements, and
@@ -44,7 +44,7 @@ covers the GTK 4 replacement and its current limits.
 ## Install
 
 Download the amd64 DEB, Fedora 45 x86_64 RPM, or Flatpak bundle from
-[GitHub Releases](https://github.com/stonega/pirwa/releases/tag/v0.1.0).
+[GitHub Releases](https://github.com/stonega/pirwa/releases/tag/v0.1.1).
 The DEB uses standard shared-library dependency checks. The Flatpak requires
 host QEMU/KVM and active libvirt sockets; see the
 [package compatibility guide](docs/release/publishing.md#package-compatibility).

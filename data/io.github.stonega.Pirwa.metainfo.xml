@@ -24,6 +24,12 @@
     </screenshot>
   </screenshots>
   <releases>
+    <release version="0.1.1" type="stable" date="2026-11-16">
+      <description>
+        <p>Restore the machine display when returning to Pirwa after inactivity,
+        and recover automatically when a SPICE display surface disappears.</p>
+      </description>
+    </release>
     <release version="0.1.0" type="stable" date="2026-11-16">
       <description>
         <p>Initial release with local VM creation and import, power controls,
