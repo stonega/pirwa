@@ -4,6 +4,8 @@ A native GNOME virtual machine manager built around libvirt. Performance and
 responsiveness come first. Inspired by GNOME Boxes, built with C17, GTK 4,
 libadwaita, libvirt/libvirt-glib, SPICE GLib, libxml2, libosinfo, and Meson.
 
+![Pirwa showing a running Ubuntu virtual machine in its embedded console](data/screenshots/ubuntu-console.png)
+
 **Status: functional v0.1 development build.** A full Fedora installation,
 ISO eject, and installed-disk boot passed in virtual GNOME. Release acceptance
 remains open for the broader console/audio/accessibility matrix and the complete
