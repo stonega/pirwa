@@ -1,7 +1,7 @@
 Name:           pirwa
 Version:        0.1.0
-Release:        0.1.dev%{?dist}
-%{!?pirwa_source_version:%global pirwa_source_version %{version}-dev}
+Release:        1%{?dist}
+%{!?pirwa_source_version:%global pirwa_source_version %{version}}
 Summary:        Native GNOME virtual machine manager
 License:        GPL-3.0-or-later
 URL:            https://github.com/stonega/pirwa
@@ -68,5 +68,8 @@ appstreamcli validate-tree --strict --no-net %{buildroot}%{_prefix}
 %{_datadir}/glib-2.0/schemas/io.github.stonega.Pirwa.gschema.xml
 
 %changelog
+* Mon Nov 16 2026 Pirwa Contributors - 0.1.0-1
+- First public release with native and Flatpak distribution.
+
 * Fri Nov 13 2026 Pirwa Contributors - 0.1.0-0.1.dev
 - Initial development package.

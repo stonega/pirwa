@@ -6,10 +6,11 @@ libadwaita, libvirt/libvirt-glib, SPICE GLib, libxml2, libosinfo, and Meson.
 
 ![Pirwa showing a running Ubuntu virtual machine in its embedded console](data/screenshots/ubuntu-console.png)
 
-**Status: functional v0.1 development build.** A full Fedora installation,
-ISO eject, and installed-disk boot passed in virtual GNOME. Release acceptance
-remains open for the broader console/audio/accessibility matrix and the complete
-performance contract. See the [installation evidence](docs/research/linux-install/README.md).
+**Status: v0.1.0.** A full Fedora installation,
+ISO eject, and installed-disk boot passed in virtual GNOME. Broader
+console/audio/accessibility validation and the complete performance contract
+remain ongoing. See the [release notes](docs/release/v0.1.0.md) and
+[installation evidence](docs/research/linux-install/README.md).
 The [console/performance follow-up](docs/research/console-performance/README.md)
 records resize, input, digital audio, reconnect, startup/idle measurements, and
 the remaining storage measurement uncertainty. The [native console record](docs/research/native-console/README.md)
@@ -39,6 +40,21 @@ covers the GTK 4 replacement and its current limits.
   matching domain/volume metadata, and checks for references from other VMs.
 - Desktop/AppStream integration, gettext infrastructure, DEB/RPM/Flatpak recipes,
   headless tests, native desktop QA, sanitizer checks, and CI configuration.
+
+## Install
+
+Download the amd64 DEB, Fedora 45 x86_64 RPM, or Flatpak bundle from
+[GitHub Releases](https://github.com/stonega/pirwa/releases/tag/v0.1.0).
+The DEB uses standard shared-library dependency checks. The Flatpak requires
+host QEMU/KVM and active libvirt sockets; see the
+[package compatibility guide](docs/release/publishing.md#package-compatibility).
+
+Fedora users can install from COPR:
+
+```sh
+sudo dnf copr enable stonegate/pirwa
+sudo dnf install pirwa
+```
 
 ## Build and run
 
@@ -129,5 +145,5 @@ recommended.
 
 GPL-3.0-or-later. Pirwa is independent of GNOME Boxes. Its application ID is
 `io.github.stonega.Pirwa`, under the repository owner's GitHub namespace.
-The project repository is currently private; public project URLs and screenshot
-assets must be reachable before public distribution. See the release checklist.
+Source code, screenshots and release downloads are available from the public
+[GitHub repository](https://github.com/stonega/pirwa).

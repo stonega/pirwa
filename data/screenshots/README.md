@@ -18,5 +18,5 @@ The PNG is app-only, at scale 1, 1088×680 (16:10), with the default light theme
 Inspect the image after capture. This is not a startup timing run.
 
 The metadata points at the matching path on the repository's default branch.
-The repository is private and the asset is not published yet; public URL/image
-reachability remains a release gate. An offline schema check does not close it.
+The repository and screenshot are public. Release checks verify the URL in
+addition to offline schema validation.

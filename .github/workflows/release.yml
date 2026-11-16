@@ -184,4 +184,4 @@ jobs:
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
           gh release create "$RELEASE_TAG" dist/release/* \
-            --verify-tag --title "Pirwa $RELEASE_TAG" --generate-notes
+            --verify-tag --title "Pirwa $RELEASE_TAG" --notes-file "docs/release/$RELEASE_TAG.md"

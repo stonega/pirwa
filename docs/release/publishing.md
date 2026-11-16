@@ -11,10 +11,11 @@ On 2026-11-16 the empty COPR project and GitHub `release` environment were
 created, and its `COPR_CONFIG` secret was configured. No development package
 was submitted or release published during this setup.
 
-This is preparation for v0.1.0. The development version cannot be published by
-the helper. Complete the [readiness gates](v0.1.0-readiness.md), make the project
-URLs and screenshot reachable, update Meson/AppStream/RPM versions and release
-date together, review and commit the candidate, then create its matching tag.
+The first release is v0.1.0; see its [release notes](v0.1.0.md) for scope and
+known limitations. The development version cannot be published by the helper.
+For subsequent releases, review the [acceptance record](v0.1.0-readiness.md),
+update Meson/AppStream/RPM versions and release date together, write
+`docs/release/v<version>.md`, commit the candidate, then create its matching tag.
 
 ## Package compatibility
 
@@ -88,7 +89,8 @@ Before the first tag:
 The publish job requires a clean stable version, checks that source provenance
 matches the triggering commit/tag, submits the verified SRPM through copr-cli,
 and waits for the Fedora build to succeed. Only then does GitHub CLI create a
-release with every verified asset. A failed COPR build prevents GitHub
+release with every verified asset and the version's committed release notes.
+A failed COPR build prevents GitHub
 publication. An existing GitHub release is not overwritten. Check COPR and any
 remaining draft before retrying a failed publish job; a retry can submit another
 COPR build. Do not delete or retag a public release to retry it.

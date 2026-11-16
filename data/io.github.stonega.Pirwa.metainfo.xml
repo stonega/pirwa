@@ -24,10 +24,10 @@
     </screenshot>
   </screenshots>
   <releases>
-    <release version="0.1.0-dev" type="snapshot" date="2026-11-16">
+    <release version="0.1.0" type="stable" date="2026-11-16">
       <description>
-        <p>Development preview with local VM creation and import, power controls,
-        resource settings, and an embedded or detached native SPICE console.</p>
+        <p>Initial release with local VM creation and import, power controls,
+        resource settings, machine avatars, and embedded or detached native SPICE consoles.</p>
       </description>
     </release>
   </releases>

@@ -4,6 +4,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     container: fedora:45
+    defaults:
+      run:
+        shell: bash
     steps:
       - name: Install build dependencies
         run: >
@@ -13,6 +16,8 @@ jobs:
           python3 gsettings-desktop-schemas
           libasan libubsan git rpm-build redhat-rpm-config
       - uses: actions/checkout@v4
+      - name: Trust this container checkout
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - run: meson setup build
       - run: meson compile -C build -j 2
       - run: meson test -C build --print-errorlogs
@@ -26,5 +31,6 @@ jobs:
         run: |
           pirwa_version=$(meson introspect --projectinfo build | python3 -c 'import json,sys; print(json.load(sys.stdin)["version"])')
           mkdir -p "$RUNNER_TEMP/rpmbuild/SOURCES"
-          git archive --format=tar --prefix="pirwa-$pirwa_version/" HEAD | xz > "$RUNNER_TEMP/rpmbuild/SOURCES/pirwa-$pirwa_version.tar.xz"
+          git archive --format=tar --prefix="pirwa-$pirwa_version/" --output="$RUNNER_TEMP/rpmbuild/SOURCES/pirwa-$pirwa_version.tar" HEAD
+          xz -T2 "$RUNNER_TEMP/rpmbuild/SOURCES/pirwa-$pirwa_version.tar"
           rpmbuild --define "_topdir $RUNNER_TEMP/rpmbuild" --define "pirwa_source_version $pirwa_version" --define '_smp_mflags -j2' --define '_smp_build_ncpus 2' -bb packaging/pirwa.spec
