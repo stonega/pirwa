@@ -44,7 +44,8 @@
         "-Dvapi=false",
         "-Dman=false",
         "-Dgtk_doc=false",
-        "-Dbash_completion=false"
+        "-Dbash_completion=false",
+        "-Dlibdir=lib"
       ],
       "sources": [
         {
@@ -80,7 +81,8 @@
         "-Dsasl=enabled",
         "-Ddocs=disabled",
         "-Dtests=disabled",
-        "-Drpath=enabled"
+        "-Drpath=enabled",
+        "-Dlibdir=lib"
       ],
       "sources": [
         {
@@ -97,7 +99,8 @@
         "-Dintrospection=disabled",
         "-Dvapi=disabled",
         "-Ddocs=disabled",
-        "-Dtests=disabled"
+        "-Dtests=disabled",
+        "-Dlibdir=lib"
       ],
       "sources": [
         {
@@ -110,7 +113,9 @@
     {
       "name": "spice-protocol",
       "buildsystem": "meson",
-      "config-opts": [],
+      "config-opts": [
+        "-Dlibdir=lib"
+      ],
       "sources": [
         {
           "type": "archive",
@@ -148,7 +153,8 @@
         "-Dpolkit=disabled",
         "-Dintrospection=disabled",
         "-Dvapi=disabled",
-        "-Dgtk_doc=disabled"
+        "-Dgtk_doc=disabled",
+        "-Dlibdir=lib"
       ],
       "sources": [
         {
@@ -166,7 +172,8 @@
         "-Denable-introspection=disabled",
         "-Denable-vala=disabled",
         "-Denable-tests=false",
-        "-Dlibsoup-abi=3.0"
+        "-Dlibsoup-abi=3.0",
+        "-Dlibdir=lib"
       ],
       "sources": [
         {
@@ -198,7 +205,9 @@
     {
       "name": "libslirp",
       "buildsystem": "meson",
-      "config-opts": [],
+      "config-opts": [
+        "-Dlibdir=lib"
+      ],
       "sources": [
         {
           "type": "archive",
@@ -212,7 +221,8 @@
       "buildsystem": "meson",
       "config-opts": [
         "--buildtype=release",
-        "-Dlibexecdir=libexec"
+        "-Dlibexecdir=libexec",
+        "-Dlibdir=lib"
       ],
       "run-tests": true,
       "test-rule": "test",
