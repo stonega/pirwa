@@ -301,7 +301,10 @@ preserves a custom name.
 Step navigation retains all inputs. Configuration requires a storage pool, and
 the final review submits one create request through the existing backend queue.
 During creation the inputs are disabled, progress remains visible, and Cancel
-requests the existing rollback. Failed creation keeps the review open for retry.
+requests the existing rollback. The content panel uses a centered, 150-pixel
+pulsing accent bar matching the machine-start indicator in place of its wide
+foreground strip. The dialog retains its progress text and cancellation controls.
+Failed creation stops the pulse and keeps the review open for retry.
 The dialog checks file extensions without filesystem I/O; source inspection and
 bootability checks remain on the backend worker.
 

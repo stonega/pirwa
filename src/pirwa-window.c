@@ -54,7 +54,8 @@ struct _PirwaWindow
   AdwStatusPage *error_page;
   GtkLabel *name;
   GtkProgressBar *start_progress;
-  guint start_progress_source;
+  GtkProgressBar *create_progress;
+  guint progress_source;
   char *starting_uuid;
   GtkLabel *state;
   GtkLabel *resources;
@@ -872,8 +873,9 @@ request_done (GObject *source, GAsyncResult *result, gpointer data)
     }
   self->busy = FALSE;
   g_clear_pointer (&self->ejecting_uuid, g_free);
-  g_clear_handle_id (&self->start_progress_source, g_source_remove);
+  g_clear_handle_id (&self->progress_source, g_source_remove);
   g_clear_pointer (&self->starting_uuid, g_free);
+  gtk_widget_set_visible (GTK_WIDGET (self->create_progress), FALSE);
   gtk_widget_set_visible (self->operation_bar, FALSE);
   if (context->dialog)
     {
@@ -978,11 +980,11 @@ request_done (GObject *source, GAsyncResult *result, gpointer data)
 }
 
 static gboolean
-pulse_start_progress (gpointer data)
+pulse_progress (gpointer data)
 {
-  PirwaWindow *self = data;
-  if (gtk_widget_get_mapped (GTK_WIDGET (self->start_progress)))
-    gtk_progress_bar_pulse (self->start_progress);
+  GtkProgressBar *progress = data;
+  if (gtk_widget_get_mapped (GTK_WIDGET (progress)))
+    gtk_progress_bar_pulse (progress);
   return G_SOURCE_CONTINUE;
 }
 
@@ -996,6 +998,7 @@ submit (PirwaWindow *self, const PirwaRequest *request, AdwDialog *dialog)
   self->operation_cancel = g_cancellable_new ();
   gtk_widget_set_visible (self->operation_bar, request->operation > PIRWA_RECONNECT
                                                    && request->operation != PIRWA_START
+                                                   && request->operation != PIRWA_CREATE
                                                    && request->operation != PIRWA_EJECT);
   if (request->operation == PIRWA_EJECT)
     self->ejecting_uuid = g_strdup (request->uuid);
@@ -1004,7 +1007,14 @@ submit (PirwaWindow *self, const PirwaRequest *request, AdwDialog *dialog)
       self->starting_uuid = g_strdup (request->uuid);
       gtk_progress_bar_set_fraction (self->start_progress, 0);
       gtk_progress_bar_pulse (self->start_progress);
-      self->start_progress_source = g_timeout_add (100, pulse_start_progress, self);
+      self->progress_source = g_timeout_add (100, pulse_progress, self->start_progress);
+    }
+  gtk_widget_set_visible (GTK_WIDGET (self->create_progress), request->operation == PIRWA_CREATE);
+  if (request->operation == PIRWA_CREATE)
+    {
+      gtk_progress_bar_set_fraction (self->create_progress, 0);
+      gtk_progress_bar_pulse (self->create_progress);
+      self->progress_source = g_timeout_add (100, pulse_progress, self->create_progress);
     }
   gtk_progress_bar_set_fraction (self->progress, 0);
   gtk_label_set_text (self->stage, _ ("Working…"));
@@ -1739,7 +1749,7 @@ static void
 cancel_window_work (PirwaWindow *self)
 {
   g_clear_pointer (&self->edit_uuid, g_free);
-  g_clear_handle_id (&self->start_progress_source, g_source_remove);
+  g_clear_handle_id (&self->progress_source, g_source_remove);
   g_clear_pointer (&self->starting_uuid, g_free);
   reset_usage (self);
   clear_console (self);
@@ -2231,6 +2241,16 @@ pirwa_window_init (PirwaWindow *self)
   gtk_widget_set_margin_start (self->operation_bar, 12);
   gtk_widget_set_margin_end (self->operation_bar, 12);
   adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (content_toolbar), self->operation_bar);
+  self->create_progress = GTK_PROGRESS_BAR (gtk_progress_bar_new ());
+  gtk_widget_set_halign (GTK_WIDGET (self->create_progress), GTK_ALIGN_CENTER);
+  gtk_widget_set_size_request (GTK_WIDGET (self->create_progress), 150, -1);
+  gtk_widget_set_margin_top (GTK_WIDGET (self->create_progress), 6);
+  gtk_widget_set_margin_bottom (GTK_WIDGET (self->create_progress), 6);
+  gtk_widget_set_visible (GTK_WIDGET (self->create_progress), FALSE);
+  gtk_accessible_update_property (GTK_ACCESSIBLE (self->create_progress),
+                                  GTK_ACCESSIBLE_PROPERTY_LABEL, _ ("Preparing machine…"), -1);
+  adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (content_toolbar),
+                                GTK_WIDGET (self->create_progress));
   /* Fit readings to their text; allow zero minimum width to keep controls usable. */
   self->header_resources = g_object_new (GTK_TYPE_LABEL, "ellipsize", PANGO_ELLIPSIZE_END, "valign",
                                          GTK_ALIGN_CENTER, NULL);
