@@ -24,6 +24,14 @@
     </screenshot>
   </screenshots>
   <releases>
+    <release version="0.1.2" type="stable" date="2026-11-17">
+      <description>
+        <p>Allow machines to share a display name while keeping independent
+        identities and storage. Fix installation media ejection, disable Secure
+        Boot by default for new Linux guests, and improve creation navigation,
+        progress, heading readability, machine icons and power menus.</p>
+      </description>
+    </release>
     <release version="0.1.1" type="stable" date="2026-11-16">
       <description>
         <p>Restore the machine display when returning to Pirwa after inactivity,
