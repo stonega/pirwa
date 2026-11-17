@@ -24,6 +24,13 @@
     </screenshot>
   </screenshots>
   <releases>
+    <release version="0.1.3" type="stable" date="2026-11-17">
+      <description>
+        <p>Report network traffic for Session machines using the host proxy.
+        Simplify the header to monospace live CPU, RAM and network readings,
+        and show machine removal progress beneath its name.</p>
+      </description>
+    </release>
     <release version="0.1.2" type="stable" date="2026-11-17">
       <description>
         <p>Allow machines to share a display name while keeping independent

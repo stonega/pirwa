@@ -1,5 +1,5 @@
 Name:           pirwa
-Version:        0.1.2
+Version:        0.1.3
 Release:        1%{?dist}
 %{!?pirwa_source_version:%global pirwa_source_version %{version}}
 Summary:        Native GNOME virtual machine manager
@@ -68,6 +68,11 @@ appstreamcli validate-tree --strict --no-net %{buildroot}%{_prefix}
 %{_datadir}/glib-2.0/schemas/io.github.stonega.Pirwa.gschema.xml
 
 %changelog
+* Tue Nov 17 2026 Pirwa Contributors - 0.1.3-1
+- Report Session proxy traffic when libvirt omits network counters.
+- Simplify the header to monospace live CPU, RAM and network readings.
+- Show machine removal progress beneath its name with destructive styling.
+
 * Tue Nov 17 2026 Pirwa Contributors - 0.1.2-1
 - Allow duplicate machine display names with independent identities and storage.
 - Fix installation media ejection and default Linux UEFI to Secure Boot off.
