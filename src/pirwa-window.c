@@ -575,8 +575,8 @@ create_row_menu (GtkMenuButton *button, gpointer data)
   if (!uuid)
     return;
   g_autoptr (GMenu) menu = g_menu_new ();
-  const char *labels[] = { _ ("Settings"), _ ("Remove"), _ ("Force Stop") };
-  const char *actions[] = { "win.machine-edit", "win.machine-remove", "win.machine-force-stop" };
+  const char *labels[] = { _ ("Settings"), _ ("Force Stop"), _ ("Remove") };
+  const char *actions[] = { "win.machine-edit", "win.machine-force-stop", "win.machine-remove" };
   for (guint i = 0; i < G_N_ELEMENTS (labels); i++)
     {
       g_autoptr (GMenuItem) entry = g_menu_item_new (labels[i], NULL);
@@ -1877,7 +1877,7 @@ pirwa_window_init (PirwaWindow *self)
                                          "row:hover .pirwa-machine-menu,"
                                          "row:selected .pirwa-machine-menu,"
                                          "row:focus-within .pirwa-machine-menu { opacity: 1; }"
-                                         ".pirwa-machine-actions modelbutton:nth-child(2)"
+                                         ".pirwa-machine-actions modelbutton:nth-child(n+2)"
                                          ":not(:disabled) { color: @destructive_color; }"
                                          "searchbar.pirwa-search > revealer > box { padding: 0; }"
                                          "button.pirwa-shutdown {"

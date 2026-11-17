@@ -129,7 +129,8 @@ while paused, and disappears when no media remains or the machine is stopped. If
 discs are mounted, the next disc appears after ejection. Add, Search,
 and the main menu fill the sidebar header. The three-dot
 button appears when you hover over a row, select it, or move keyboard focus into
-it. It opens **Settings**, **Remove**, and **Force Stop** for that VM.
+it. It opens **Settings**, **Force Stop**, and **Remove** for that VM, in that order.
+Force Stop and Remove use the theme's danger color when available.
 Power controls ask libvirt to perform the operation. Shut Down depends on
 guest cooperation. Pirwa never automatically
 turns a slow shutdown into Force Stop. Force Stop has a separate confirmation.

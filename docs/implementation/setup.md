@@ -251,7 +251,7 @@ This executable is deliberately excluded from the headless Meson test command.
 
 The row-menu checks include on-demand popup creation, filtering a row out while
 holding its button, clearing its old popup, and restoring the original selection
-before checking Settings/Remove/Force Stop targets. With a multi-machine test
+before checking Settings/Force Stop/Remove targets. With a multi-machine test
 fixture, filtering to the second machine also verifies every new menu target
 before restoring the first. These checks use only synthetic domains.
 

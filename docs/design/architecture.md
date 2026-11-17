@@ -91,7 +91,8 @@ The search bar uses libadwaita's inline style so its surrounding area blends
 with the sidebar in light, dark, and inactive-window states.
 Its header and collection use libadwaita's sidebar background and foreground
 colors, including the inactive-window variant, in both light and dark themes.
-Remove in the machine options menu uses the theme's destructive text color.
+Force Stop and Remove in the machine options menu use the theme's destructive
+text color when enabled.
 Each pane owns its header, so Add, Search, and the main menu span the sidebar
 width, while machine controls sit at the left of the
 content header while a machine is running or paused. A powered-off or crashed
@@ -149,7 +150,7 @@ padding from rendered pixels, input mapping, and preview snapshots.
 The existing application SVG is embedded as a GResource so native About dialogs
 can show it in both development builds and installed copies.
 Each row's three-dot menu selects that VM and carries its UUID for Settings,
-Remove, and Force Stop. A stale target cannot act on a different selection.
+Force Stop, and Remove, in that order. A stale target cannot act on a different selection.
 The row stores only the bound UUID until its menu is first opened; GTK's
 create-popup callback then builds the model and popover. Unbinding closes and
 discards the menu and UUID, so recycled rows cannot retain another VM's targets.
