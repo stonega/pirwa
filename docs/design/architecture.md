@@ -115,8 +115,10 @@ The selected VM's configured resources and live usage share a compact group on t
 right. Each reading sizes to its text with a small gap between readings and
 ellipsizes when space is limited; the selected machine's state appears there only
 for non-stopped states other than Running.
-Start in the status view includes a power icon beside its label. Its progress
-bar is centered at a compact 150 logical pixels wide. Start and
+Start in the status view includes a power icon beside its label. Starting and
+removing a machine share a pulsing progress bar beneath its name, centered at a
+compact 150 logical pixels wide. Removal uses the theme's destructive background
+color and does not show the global progress row. Start and
 Shut Down use prominent text buttons;
 Shut Down uses the theme's warning background and foreground colors.
 When a CD/DVD has media, a button immediately after Shut Down shows its filename

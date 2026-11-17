@@ -53,10 +53,10 @@ struct _PirwaWindow
   AdwToastOverlay *toasts;
   AdwStatusPage *error_page;
   GtkLabel *name;
-  GtkProgressBar *start_progress;
+  GtkProgressBar *machine_progress;
   GtkProgressBar *create_progress;
   guint progress_source;
-  char *starting_uuid;
+  char *machine_progress_uuid;
   GtkLabel *state;
   GtkLabel *resources;
   GtkLabel *header_resources;
@@ -434,9 +434,9 @@ update_actions (PirwaWindow *self)
   gtk_widget_set_visible (GTK_WIDGET (self->state), state != 5);
   gtk_widget_set_visible (self->machine_controls, machine != NULL && !stopped);
   gtk_widget_set_visible (
-      GTK_WIDGET (self->start_progress),
-      self->busy && machine && self->starting_uuid
-          && g_str_equal (self->starting_uuid, pirwa_machine_get_uuid (machine)));
+      GTK_WIDGET (self->machine_progress),
+      self->busy && machine && self->machine_progress_uuid
+          && g_str_equal (self->machine_progress_uuid, pirwa_machine_get_uuid (machine)));
   gtk_widget_set_visible (GTK_WIDGET (self->header_resources),
                           self->connected && machine != NULL && !stopped);
   gtk_widget_set_visible (GTK_WIDGET (self->header_state),
@@ -874,7 +874,7 @@ request_done (GObject *source, GAsyncResult *result, gpointer data)
   self->busy = FALSE;
   g_clear_pointer (&self->ejecting_uuid, g_free);
   g_clear_handle_id (&self->progress_source, g_source_remove);
-  g_clear_pointer (&self->starting_uuid, g_free);
+  g_clear_pointer (&self->machine_progress_uuid, g_free);
   gtk_widget_set_visible (GTK_WIDGET (self->create_progress), FALSE);
   gtk_widget_set_visible (self->operation_bar, FALSE);
   if (context->dialog)
@@ -998,16 +998,25 @@ submit (PirwaWindow *self, const PirwaRequest *request, AdwDialog *dialog)
   self->operation_cancel = g_cancellable_new ();
   gtk_widget_set_visible (self->operation_bar, request->operation > PIRWA_RECONNECT
                                                    && request->operation != PIRWA_START
+                                                   && request->operation != PIRWA_REMOVE
                                                    && request->operation != PIRWA_CREATE
                                                    && request->operation != PIRWA_EJECT);
   if (request->operation == PIRWA_EJECT)
     self->ejecting_uuid = g_strdup (request->uuid);
-  if (request->operation == PIRWA_START)
+  if (request->operation == PIRWA_START || request->operation == PIRWA_REMOVE)
     {
-      self->starting_uuid = g_strdup (request->uuid);
-      gtk_progress_bar_set_fraction (self->start_progress, 0);
-      gtk_progress_bar_pulse (self->start_progress);
-      self->progress_source = g_timeout_add (100, pulse_progress, self->start_progress);
+      gboolean removing = request->operation == PIRWA_REMOVE;
+      self->machine_progress_uuid = g_strdup (request->uuid);
+      if (removing)
+        gtk_widget_add_css_class (GTK_WIDGET (self->machine_progress), "pirwa-remove-progress");
+      else
+        gtk_widget_remove_css_class (GTK_WIDGET (self->machine_progress), "pirwa-remove-progress");
+      gtk_accessible_update_property (
+          GTK_ACCESSIBLE (self->machine_progress), GTK_ACCESSIBLE_PROPERTY_LABEL,
+          removing ? _ ("Removing virtual machine") : _ ("Starting virtual machine"), -1);
+      gtk_progress_bar_set_fraction (self->machine_progress, 0);
+      gtk_progress_bar_pulse (self->machine_progress);
+      self->progress_source = g_timeout_add (100, pulse_progress, self->machine_progress);
     }
   gtk_widget_set_visible (GTK_WIDGET (self->create_progress), request->operation == PIRWA_CREATE);
   if (request->operation == PIRWA_CREATE)
@@ -1750,7 +1759,7 @@ cancel_window_work (PirwaWindow *self)
 {
   g_clear_pointer (&self->edit_uuid, g_free);
   g_clear_handle_id (&self->progress_source, g_source_remove);
-  g_clear_pointer (&self->starting_uuid, g_free);
+  g_clear_pointer (&self->machine_progress_uuid, g_free);
   reset_usage (self);
   clear_console (self);
   if (self->operation_cancel)
@@ -1883,6 +1892,8 @@ pirwa_window_init (PirwaWindow *self)
                                          "button.pirwa-shutdown {"
                                          " background-color: @warning_bg_color;"
                                          " color: @warning_fg_color; }"
+                                         "progressbar.pirwa-remove-progress progress {"
+                                         " background-color: @destructive_bg_color; }"
                                          "button.pirwa-eject spinner:disabled {"
                                          " color: @window_fg_color; opacity: 1; }");
       gtk_style_context_add_provider_for_display (display, GTK_STYLE_PROVIDER (provider),
@@ -2156,20 +2167,17 @@ pirwa_window_init (PirwaWindow *self)
   gtk_widget_add_css_class (GTK_WIDGET (self->name), "title-1");
   gtk_label_set_wrap (self->name, TRUE);
   gtk_label_set_wrap_mode (self->name, PANGO_WRAP_WORD_CHAR);
-  self->start_progress = GTK_PROGRESS_BAR (gtk_progress_bar_new ());
-  gtk_widget_set_halign (GTK_WIDGET (self->start_progress), GTK_ALIGN_CENTER);
-  gtk_widget_set_size_request (GTK_WIDGET (self->start_progress), 150, -1);
-  gtk_widget_set_visible (GTK_WIDGET (self->start_progress), FALSE);
-  gtk_accessible_update_property (GTK_ACCESSIBLE (self->start_progress),
-                                  GTK_ACCESSIBLE_PROPERTY_LABEL, _ ("Starting virtual machine"),
-                                  -1);
+  self->machine_progress = GTK_PROGRESS_BAR (gtk_progress_bar_new ());
+  gtk_widget_set_halign (GTK_WIDGET (self->machine_progress), GTK_ALIGN_CENTER);
+  gtk_widget_set_size_request (GTK_WIDGET (self->machine_progress), 150, -1);
+  gtk_widget_set_visible (GTK_WIDGET (self->machine_progress), FALSE);
   self->state = GTK_LABEL (gtk_label_new (NULL));
   gtk_label_set_wrap (self->state, TRUE);
   self->resources = GTK_LABEL (gtk_label_new (NULL));
   gtk_label_set_wrap (self->resources, TRUE);
   gtk_widget_add_css_class (GTK_WIDGET (self->resources), "dim-label");
   gtk_box_append (GTK_BOX (information), GTK_WIDGET (self->name));
-  gtk_box_append (GTK_BOX (information), GTK_WIDGET (self->start_progress));
+  gtk_box_append (GTK_BOX (information), GTK_WIDGET (self->machine_progress));
   gtk_box_append (GTK_BOX (information), GTK_WIDGET (self->state));
   gtk_box_append (GTK_BOX (information), GTK_WIDGET (self->resources));
   self->start_button = gtk_button_new ();
