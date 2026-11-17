@@ -156,6 +156,10 @@ msgstr ""
 msgid "Restart requested. Waiting for the guest."
 msgstr ""
 
+#: src/pirwa-window.c:937
+msgid "Media ejected."
+msgstr ""
+
 #: src/pirwa-window.c:957
 msgid ""
 "Machine imported into Session. Select Start to check it. The original stays "

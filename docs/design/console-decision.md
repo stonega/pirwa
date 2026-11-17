@@ -117,6 +117,9 @@ disconnects retry automatically after 1/2/4/8/16 seconds, capped at 16 seconds
 while the guest is running. A 15-second first-frame timeout also schedules a
 retry, so an initiated connection cannot leave the viewer waiting indefinitely.
 A spinner accompanies connection status; no Reconnect button is needed.
+Connection and stopped status show the machine's chosen icon, matching the
+sidebar's expression and running-state screen fill. Changes saved in Settings
+also update inline and detached consoles without reconnecting.
 The first valid frame resets backoff and cancels the timeout. Stopping the guest
 or disposing its console cancels pending connection and retry timers.
 Disposing a console closes its sockets and stops its backend, while the VM keeps running.

@@ -218,6 +218,21 @@ find_type (GtkWidget *widget, GType type)
   return NULL;
 }
 
+static GtkWidget *
+find_label (GtkWidget *widget, const char *text)
+{
+  if (GTK_IS_LABEL (widget) && g_strcmp0 (gtk_label_get_text (GTK_LABEL (widget)), text) == 0)
+    return widget;
+  for (GtkWidget *child = gtk_widget_get_first_child (widget); child;
+       child = gtk_widget_get_next_sibling (child))
+    {
+      GtkWidget *found = find_label (child, text);
+      if (found)
+        return found;
+    }
+  return NULL;
+}
+
 static void
 iterate_for (guint milliseconds)
 {
@@ -551,8 +566,9 @@ main (void)
   AdwStatusPage *status = ADW_STATUS_PAGE (find_type (GTK_WIDGET (console), ADW_TYPE_STATUS_PAGE));
   g_assert_nonnull (stack);
   g_assert_nonnull (status);
-  g_assert_true (GTK_IS_SPINNER (adw_status_page_get_child (status)));
-  g_assert_true (gtk_spinner_get_spinning (GTK_SPINNER (adw_status_page_get_child (status))));
+  GtkSpinner *spinner = GTK_SPINNER (find_type (GTK_WIDGET (status), GTK_TYPE_SPINNER));
+  g_assert_nonnull (spinner);
+  g_assert_true (gtk_spinner_get_spinning (spinner));
   g_assert_cmpuint (attempts, ==, 1); /* Construction starts the connection without input. */
   wait_for_display (stack);
   g_assert_cmpuint (attempts, ==, 7);
@@ -571,8 +587,8 @@ main (void)
 
   g_signal_emit_by_name (display, "channel-event", SPICE_CHANNEL_CLOSED);
   inventory_state (5);
-  g_assert_cmpstr (adw_status_page_get_title (status), ==, "Machine is stopped");
-  g_assert_false (gtk_widget_get_visible (adw_status_page_get_child (status)));
+  g_assert_nonnull (find_label (GTK_WIDGET (status), "Machine is stopped"));
+  g_assert_false (gtk_widget_get_visible (GTK_WIDGET (spinner)));
   iterate_for (300);
   g_assert_cmpuint (attempts, ==, 8); /* Stopping cancels an already queued retry. */
   inventory_state (1);

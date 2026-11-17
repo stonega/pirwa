@@ -933,6 +933,8 @@ request_done (GObject *source, GAsyncResult *result, gpointer data)
         toast (self, _ ("Shutdown requested. Waiting for the guest."));
       if (context->operation == PIRWA_REBOOT)
         toast (self, _ ("Restart requested. Waiting for the guest."));
+      if (context->operation == PIRWA_EJECT)
+        toast (self, _ ("Media ejected."));
       apply_inventory (self, reply);
       if (reply->native_console)
         update_console (self);

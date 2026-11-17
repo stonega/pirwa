@@ -229,7 +229,8 @@ enabled. Existing machines keep their configured graphics device.
 
 After installation finishes, use the filename-and-eject button in the content
 header to eject the installation media. The button shows a circular spinner
-while removing the disc and becomes available again if removal fails. Eject also
+while removing the disc and becomes available again if removal fails. A “Media
+ejected.” notification confirms successful removal. Eject also
 releases media locked by the guest, so finish using the installation media before
 ejecting it. You can also shut down the guest, open
 **Settings**, enable **Eject installation media**, and choose **Save Changes**.

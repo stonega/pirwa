@@ -116,6 +116,7 @@ shows the first one, then the next after ejection. While ejecting, a circular
 spinner replaces the eject icon inside the disabled button, retaining its size
 and filename. The tooltip and accessible label report ejection in progress, and
 the button exposes its busy state. Ejection does not show the global progress row.
+A toast confirms successful media ejection after the backend operation completes.
 The worker checks the displayed source and target against fresh XML before
 ejecting, updates live and persistent
 configuration where applicable, and uses `VIR_DOMAIN_DEVICE_MODIFY_FORCE` for a

@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 #include "pirwa-console.h"
 #include "config.h"
+#include "pirwa-avatar.h"
 #include "pirwa-backend.h"
 #include "pirwa-display.h"
 #include "pirwa-frame.h"
@@ -33,7 +34,10 @@ struct _PirwaConsole
   AdwToolbarView *toolbar;
   GtkWidget *header;
   GtkStack *stack;
-  AdwStatusPage *status;
+  GtkWidget *avatar;
+  GtkLabel *status_title;
+  GtkLabel *status_description;
+  GtkSpinner *spinner;
   GtkWindow *host;  /* Borrowed from the widget root. */
   GtkWindow *popup; /* Owns this widget while detached. */
   int popup_bounds_width;
@@ -131,13 +135,20 @@ popup_bounds_changed (GdkToplevel *surface, GdkToplevelSize *size, PirwaConsole 
 static void
 show_status (PirwaConsole *self, const char *title, const char *description, gboolean connecting)
 {
-  adw_status_page_set_title (self->status, title);
-  g_autofree char *escaped = g_markup_escape_text (description, -1);
-  adw_status_page_set_description (self->status, escaped);
-  GtkWidget *spinner = adw_status_page_get_child (self->status);
-  gtk_spinner_set_spinning (GTK_SPINNER (spinner), connecting);
-  gtk_widget_set_visible (spinner, connecting);
+  gtk_label_set_text (self->status_title, title);
+  gtk_label_set_text (self->status_description, description);
+  gtk_spinner_set_spinning (self->spinner, connecting);
+  gtk_widget_set_visible (GTK_WIDGET (self->spinner), connecting);
   gtk_stack_set_visible_child_name (self->stack, "status");
+}
+
+static void
+avatar_changed (GSettings *settings, const char *key, PirwaConsole *self)
+{
+  (void)key;
+  g_autofree char *preset = pirwa_preferences_get_machine_avatar (
+      settings, pirwa_backend_get_uri (self->backend), self->uuid);
+  pirwa_avatar_set_preset (self->avatar, preset);
 }
 
 static GdkToplevel *
@@ -412,7 +423,7 @@ primary_create (SpiceChannel *channel, int format, int width, int height, int st
       return;
     }
   self->retry_delay = 0;
-  gtk_spinner_stop (GTK_SPINNER (adw_status_page_get_child (self->status)));
+  gtk_spinner_stop (self->spinner);
   gtk_stack_set_visible_child_name (self->stack, "display");
   schedule_display_configuration (self);
 }
@@ -731,12 +742,14 @@ inventory_changed (PirwaBackend *backend, PirwaReply *reply, PirwaConsole *self)
         {
           int state = pirwa_machine_get_state_code (machine);
           running = state == 1 || state == 3;
+          pirwa_avatar_set_running (self->avatar, state == 1);
           break;
         }
     }
   self->running = running;
   if (!running)
     {
+      pirwa_avatar_set_running (self->avatar, FALSE);
       if (self->reconnect_source)
         g_clear_handle_id (&self->reconnect_source, g_source_remove);
       disconnect_session (self);
@@ -1110,12 +1123,27 @@ pirwa_console_init (PirwaConsole *self)
   set_display_inset (self, 6);
   g_signal_connect_object (self->display, "resize", G_CALLBACK (display_resized), self, 0);
   gtk_stack_add_named (self->stack, self->display, "display");
-  self->status = ADW_STATUS_PAGE (adw_status_page_new ());
-  adw_status_page_set_icon_name (self->status, "video-display-symbolic");
-  GtkWidget *spinner = gtk_spinner_new ();
-  gtk_widget_set_halign (spinner, GTK_ALIGN_CENTER);
-  adw_status_page_set_child (self->status, spinner);
-  gtk_stack_add_named (self->stack, GTK_WIDGET (self->status), "status");
+  GtkWidget *status = adw_status_page_new ();
+  GtkWidget *information = gtk_box_new (GTK_ORIENTATION_VERTICAL, 12);
+  self->avatar = pirwa_avatar_new (NULL, 96);
+  gtk_box_append (GTK_BOX (information), self->avatar);
+  self->status_title = GTK_LABEL (gtk_label_new (NULL));
+  gtk_widget_add_css_class (GTK_WIDGET (self->status_title), "title-1");
+  gtk_label_set_wrap (self->status_title, TRUE);
+  gtk_label_set_wrap_mode (self->status_title, PANGO_WRAP_WORD_CHAR);
+  gtk_label_set_justify (self->status_title, GTK_JUSTIFY_CENTER);
+  gtk_box_append (GTK_BOX (information), GTK_WIDGET (self->status_title));
+  self->status_description = GTK_LABEL (gtk_label_new (NULL));
+  gtk_widget_add_css_class (GTK_WIDGET (self->status_description), "dim-label");
+  gtk_label_set_wrap (self->status_description, TRUE);
+  gtk_label_set_wrap_mode (self->status_description, PANGO_WRAP_WORD_CHAR);
+  gtk_label_set_justify (self->status_description, GTK_JUSTIFY_CENTER);
+  gtk_box_append (GTK_BOX (information), GTK_WIDGET (self->status_description));
+  self->spinner = GTK_SPINNER (gtk_spinner_new ());
+  gtk_widget_set_halign (GTK_WIDGET (self->spinner), GTK_ALIGN_CENTER);
+  gtk_box_append (GTK_BOX (information), GTK_WIDGET (self->spinner));
+  adw_status_page_set_child (ADW_STATUS_PAGE (status), information);
+  gtk_stack_add_named (self->stack, status, "status");
   adw_toolbar_view_set_content (self->toolbar, GTK_WIDGET (self->stack));
   gtk_widget_set_vexpand (GTK_WIDGET (self->toolbar), TRUE);
   gtk_box_append (GTK_BOX (self), GTK_WIDGET (self->toolbar));
@@ -1157,7 +1185,11 @@ pirwa_console_new (const char *uri, const char *uuid, const char *name)
   self->uuid = g_strdup (uuid);
   self->name = g_strdup (name);
   self->running = TRUE;
+  pirwa_avatar_set_running (self->avatar, TRUE);
   self->backend = pirwa_backend_new (uri);
+  avatar_changed (self->preferences, NULL, self);
+  g_signal_connect_object (self->preferences, "changed::machine-avatars",
+                           G_CALLBACK (avatar_changed), self, 0);
   g_signal_connect_object (self->backend, "inventory", G_CALLBACK (inventory_changed), self, 0);
   start_session (self);
   return self;
