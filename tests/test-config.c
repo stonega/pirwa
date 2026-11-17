@@ -211,6 +211,46 @@ test_embedded_graphics (void)
 }
 
 static void
+test_linux_firmware (void)
+{
+  PirwaCreate options = {
+    .name = "Omarchy", .source = "/tmp/omarchy.iso", .cpus = 2, .memory_mb = 2048, .disk_gb = 32
+  };
+  const char *unsigned_boot = "/domain/os[@firmware='efi']/firmware/feature"
+                              "[@name='enrolled-keys'][@enabled='no']";
+  for (guint import = 0; import < 2; import++)
+    for (guint uefi = 0; uefi < 2; uefi++)
+      {
+        options.import_image = import;
+        options.legacy_bios = !uefi;
+        g_autofree char *xml
+            = pirwa_config_domain (&options, "11111111-1111-4111-8111-111111111111",
+                                   "/tmp/linux.qcow2", "pool", "key", uefi, FALSE, NULL);
+        g_assert_cmpint (pirwa_config_supports (xml, unsigned_boot), ==, uefi);
+        if (!uefi)
+          g_assert_true (pirwa_config_supports (
+              xml, "not(/domain/os/@firmware) and not(/domain/os/firmware)"));
+        /* Firmware capability and paths remain libvirt's choice. */
+        g_assert_true (pirwa_config_supports (
+            xml, "not(/domain/os/firmware/feature[@name='secure-boot']) and "
+                 "not(/domain/os/loader) and not(/domain/os/nvram) and not(/domain/os/varstore)"));
+        g_autoptr (GError) error = NULL;
+        g_autofree char *edited = pirwa_config_edit (xml, "Renamed Linux", 4, 4096, FALSE, &error);
+        g_assert_no_error (error);
+        g_assert_cmpint (pirwa_config_supports (edited, unsigned_boot), ==, uefi);
+      }
+  /* Resource edits must also preserve an existing guest's enrolled keys. */
+  g_autofree char *edited = pirwa_config_edit (
+      "<domain><name>existing</name><os firmware='efi'><firmware>"
+      "<feature name='secure-boot' enabled='yes'/><feature name='enrolled-keys' enabled='yes'/>"
+      "</firmware></os></domain>",
+      "Existing Linux", 2, 2048, FALSE, NULL);
+  g_assert_true (pirwa_config_supports (
+      edited, "/domain/os/firmware[feature[@name='secure-boot'][@enabled='yes']]"
+              "[feature[@name='enrolled-keys'][@enabled='yes']]"));
+}
+
+static void
 test_windows (void)
 {
   PirwaCreate options = { .name = "Windows",
@@ -260,7 +300,7 @@ test_windows (void)
           edited, "count(/domain/devices/disk[@device='cdrom'])=2 and "
                   "/domain/devices/disk[@device='disk']/target[@bus='virtio']"));
     }
-  /* Linux keeps its previous device and firmware defaults even if a caller
+  /* Linux keeps its device and firmware defaults even if a caller
    * happens to retain a driver path while changing profiles. */
   options.guest = PIRWA_GUEST_LINUX;
   g_autofree char *linux_xml
@@ -268,7 +308,8 @@ test_windows (void)
                              "pool", "key", TRUE, FALSE, NULL);
   g_assert_true (pirwa_config_supports (
       linux_xml, "count(/domain/devices/disk[@device='cdrom'])=1 and not(/domain/devices/tpm) and "
-                 "not(/domain/os/firmware) and not(/domain/features/smm)"));
+                 "/domain/os/firmware/feature[@name='enrolled-keys'][@enabled='no'] and "
+                 "not(/domain/features/smm)"));
 }
 
 static void
@@ -403,6 +444,7 @@ main (int argc, char **argv)
   g_test_add_func ("/config/graphics-index", test_graphics_index);
   g_test_add_func ("/config/embedded-graphics", test_embedded_graphics);
   g_test_add_func ("/config/creation-graphics", test_creation_graphics);
+  g_test_add_func ("/config/linux-firmware", test_linux_firmware);
   g_test_add_func ("/config/windows", test_windows);
   g_test_add_func ("/config/windows-validation", test_windows_validation);
   g_test_add_func ("/config/windows-host", test_windows_host);

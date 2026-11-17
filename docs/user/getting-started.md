@@ -223,6 +223,16 @@ For experimental Windows 10/11 installation, choose the matching operating syste
 and supply a VirtIO driver ISO. Follow the [Windows installation guide](windows.md)
 for firmware prerequisites and loading drivers during setup.
 
+New Linux machines use UEFI when available, with Secure Boot off so installers
+with unsigned bootloaders can start. This includes installers such as
+[Omarchy](https://omarchy.org/manual/getting-started/), whose manual requires
+Secure Boot to be disabled. Legacy BIOS remains available for images that need it.
+
+If an existing VM stops with “Access Denied — rejected probably by Secure Boot”,
+disable Secure Boot in that VM's UEFI settings, then reboot with the ISO attached.
+The new creation default does not change existing VMs or their saved firmware
+variables. Changing the VM's CPU or memory will also preserve those settings.
+
 New machines use QXL graphics with the native SPICE viewer, including for the
 Fedora COSMIC live desktop. This uses software rendering; 3D acceleration is not
 enabled. Existing machines keep their configured graphics device.

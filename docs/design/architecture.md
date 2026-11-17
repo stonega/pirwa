@@ -337,8 +337,15 @@ The user explicitly chooses CPU, RAM, and disk capacity. KVM, host-passthrough C
 SPICE, and QXL must appear in domain capabilities before storage is allocated.
 This graphics default applies to new ISO machines and standalone disk imports;
 discovery, resource edits, and Boxes imports preserve existing graphics devices.
-UEFI is selected when available unless legacy BIOS is requested. Passt is used
-when supported and installed; the userspace default is the fallback.
+UEFI is selected when available unless legacy BIOS is requested. New Linux ISO
+machines and standalone disk imports explicitly request `enrolled-keys='no'`,
+so unsigned bootloaders can run even when the host prioritizes firmware with
+Secure Boot keys. The Secure Boot capability itself remains unspecified, allowing
+libvirt to choose either plain firmware or capable firmware with an empty key
+store. Legacy BIOS and Windows profiles retain their separate firmware policy;
+discovery, resource edits, and Boxes imports preserve existing firmware and keys.
+See [libvirt's Secure Boot documentation](https://libvirt.org/kbase/secureboot.html).
+Passt is used when supported and installed; the userspace default is the fallback.
 
 Only active directory pools are supported. The session default can create a
 private Pirwa pool under the user's data directory. System connections require

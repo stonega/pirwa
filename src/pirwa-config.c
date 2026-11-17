@@ -293,6 +293,15 @@ pirwa_config_domain (const PirwaCreate *o, const char *uuid, const char *disk_pa
           attribute (feature, "enabled", "yes");
         }
     }
+  else if (uefi && o->guest == PIRWA_GUEST_LINUX)
+    {
+      /* Empty keys allow unsigned installers with either plain or Secure
+       * Boot-capable firmware. Leave that capability to libvirt's selection. */
+      xmlNode *firmware = element (os, "firmware", NULL);
+      xmlNode *feature = element (firmware, "feature", NULL);
+      attribute (feature, "name", "enrolled-keys");
+      attribute (feature, "enabled", "no");
+    }
   xmlNode *type = element (os, "type", "hvm");
   attribute (type, "arch", "x86_64");
   attribute (type, "machine", "q35");
