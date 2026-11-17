@@ -495,6 +495,7 @@ page_new (PirwaCreateDialog *self, const char *name, const char *title, const ch
   GtkWidget *heading = gtk_box_new (GTK_ORIENTATION_VERTICAL, 8);
   GtkWidget *label = gtk_label_new (title);
   gtk_widget_add_css_class (label, "title-1");
+  gtk_widget_add_css_class (label, "pirwa-create-title");
   gtk_label_set_wrap (GTK_LABEL (label), TRUE);
   gtk_label_set_xalign (GTK_LABEL (label), 0);
   gtk_box_append (GTK_BOX (heading), label);
@@ -718,6 +719,7 @@ pirwa_create_dialog_init (PirwaCreateDialog *self)
       g_autoptr (GtkCssProvider) css = gtk_css_provider_new ();
       gtk_css_provider_load_from_string (
           css,
+          ".pirwa-create-title { font-weight: 700; }"
           ".pirwa-source-drop { border: 2px dashed alpha(@accent_color, .4);"
           "border-radius: 18px; background: alpha(@accent_bg_color, .06); padding: 28px 16px; }"
           ".pirwa-source-drop:drop(active) { border-color: @accent_color;"

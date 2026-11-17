@@ -56,6 +56,16 @@ Use the opt-in test-kvm executable only with PIRWA_RUN_KVM_TESTS=1. It creates u
   requires proven ownership and an explicit user operation.
 - Keep the app native; there is no JavaScript toolchain in this project.
 
+## UI rules
+
+- Keep the desktop font and native libadwaita title sizes. Creation-page headings
+  use `title-1` with `pirwa-create-title` to set bold weight (700); the default
+  extra-bold weight (800) crowds Latin letters with Noto Sans CJK HK.
+- Preserve natural letter spacing. Fix the font weight before adding tracking or
+  replacing the user's font to compensate for crowded headings.
+- Check heading readability with the default font and Noto Sans CJK HK, including
+  dark appearance and 200% text size. Titles must wrap without clipping.
+
 ## Documentation
 
 Architecture belongs in `docs/design/`, implementation in `docs/implementation/`,

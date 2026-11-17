@@ -280,7 +280,10 @@ The backend thread cleans up independently without blocking GTK on join.
 ## Provisioning and ownership
 
 `pirwa-create-dialog.c` provides Image, Name, Configuration, and Boot pages in a
-native libadwaita dialog. A bottom step bar highlights the current page in gray
+native libadwaita dialog. Page headings retain the desktop font and `title-1` size
+with bold weight (700), avoiding the crowded Latin lettering produced by the
+default extra-bold weight with Noto Sans CJK HK. See the UI rules in `AGENTS.md`.
+A bottom step bar highlights the current page in gray
 and lets users return directly to earlier pages; later pages require Continue so
 validation cannot be skipped. One highlight slides between buttons using a 240 ms
 libadwaita animation, starting from its current position when navigation interrupts
