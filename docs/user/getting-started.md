@@ -135,18 +135,25 @@ Power controls ask libvirt to perform the operation. Shut Down depends on
 guest cooperation. Pirwa never automatically
 turns a slow shutdown into Force Stop. Force Stop has a separate confirmation.
 
-While running or paused, the header uses one row, with controls on the left and the selected VM's configured
-CPU count and RAM in a compact group on the right. For a selected running VM,
-live CPU usage, resident memory (RSS), and network usage join this group. The
+While running or paused, the header uses one row, with controls on the left.
+For a selected running VM, live CPU usage, resident memory, and network usage
+form a compact group on the right. Configured CPU count and RAM appear in the
+stopped machine's details, outside the header. The
 Running and Powered off labels are hidden; the stopped view shows Crashed in the center.
 There is no bottom bar. Hover over a
 shortened reading to see its full value. CPU 100% means one host CPU;
-multi-core guests can exceed 100%. RSS is the VM process's physical memory use,
+multi-core guests can exceed 100%. RAM shows the VM process's physical memory use,
 including overhead, rather than its configured RAM or guest-reported free memory.
 Network usage shows receive (↓) and transmit (↑) rates in bytes per second,
-summed across the VM's interfaces. Rates need two samples; the initial reading
-shows “NET …”. Connections that do not report network counters show
-“NET unavailable”.
+summed across the VM's interfaces. The compact header omits the “/s” suffix,
+for example “↓ 0 B ↑ 0 B”. Rates need two samples; the initial reading
+shows “NET …”. Host proxy routing reports traffic through Pirwa's gateway,
+including Ethernet headers. After updating from a version without gateway
+counters, fully shut down the VM and start it again using the updated Pirwa;
+rebooting inside the guest keeps the older gateway running. Other connections
+that do not report network counters show “NET unavailable”. This means traffic
+statistics are unavailable; it does not indicate whether the guest has internet
+access.
 Values update about every two seconds while the main window is visible, including
 when a popped-out viewer has focus. Sampling pauses during dialogs and power
 operations, and when the window is hidden or suspended by the desktop.

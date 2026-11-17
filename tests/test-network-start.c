@@ -1,4 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
+#include "pirwa-libvirt.h"
+#include "pirwa-network-stats.h"
 #include "pirwa-network.h"
 #include "pirwa-preferences.h"
 #include <libxml/parser.h>
@@ -12,6 +14,18 @@ static gboolean reject_start;
 static guint normal_starts, proxy_starts;
 static GSubprocess *gateway;
 static GSocketConnection *peer;
+static guint16 stats_port;
+
+int __real_virDomainListGetStats (virDomainPtr *, unsigned int, virDomainStatsRecordPtr **,
+                                  unsigned int);
+int
+__wrap_virDomainListGetStats (virDomainPtr *domains, unsigned int stats,
+                              virDomainStatsRecordPtr **records, unsigned int flags)
+{
+  /* Socket interfaces have no libvirt byte counters, just like this fixture. */
+  return __real_virDomainListGetStats (domains, stats & ~VIR_DOMAIN_STATS_INTERFACE, records,
+                                       flags);
+}
 
 char *
 __wrap_virConnectGetURI (virConnectPtr connection)
@@ -59,6 +73,7 @@ __wrap_virDomainCreateXML (virConnectPtr connection, const char *xml, unsigned i
   g_assert_nonnull (result);
   guint16 port = g_ascii_strtoull ((const char *)result->stringval, NULL, 10);
   g_assert_cmpuint (port, >, 0);
+  stats_port = port;
   g_autoptr (GSocketClient) client = g_socket_client_new ();
   g_socket_client_set_enable_proxy (client, FALSE);
   g_socket_client_set_timeout (client, 3);
@@ -81,6 +96,7 @@ test_start (gconstpointer data)
                                         : "qemu:///session";
   reject_start = g_str_equal (mode, "failed");
   normal_starts = proxy_starts = 0;
+  stats_port = 0;
   g_autoptr (GSettings) desktop = g_settings_new ("org.gnome.system.proxy");
   g_settings_set_string (desktop, "mode", g_str_equal (mode, "direct") ? "none" : "manual");
   g_autoptr (GSettings) socks = g_settings_new ("org.gnome.system.proxy.socks");
@@ -126,6 +142,27 @@ test_start (gconstpointer data)
       g_assert_true (success);
       g_assert_no_error (error);
       g_assert_cmpint (virDomainIsActive (domain), ==, 1);
+      PirwaUsage usage;
+      g_assert_true (pirwa_usage_read (domain, &usage, &error));
+      g_assert_no_error (error);
+      g_assert_true (usage.running);
+      g_assert_cmpint (usage.has_network, ==, proxy_starts > 0);
+      if (proxy_starts)
+        {
+          g_assert_cmpuint (usage.network_rx_bytes, ==, 0);
+          g_assert_cmpuint (usage.network_tx_bytes, ==, 0);
+          PirwaUsage next;
+          g_assert_true (pirwa_usage_read (domain, &next, &error));
+          g_assert_no_error (error);
+          double rx = -1, tx = -1;
+          g_assert_true (pirwa_usage_network_rates (&usage, &next, &rx, &tx));
+          g_assert_cmpfloat (rx, ==, 0);
+          g_assert_cmpfloat (tx, ==, 0);
+          const char *original_uri = uri;
+          uri = "qemu+ssh://remote/session";
+          g_assert_false (pirwa_network_read_usage (domain, &next));
+          uri = original_uri;
+        }
       g_assert_cmpint (virDomainDestroy (domain), ==, 0);
     }
   gboolean direct = g_str_equal (mode, "direct") || g_str_equal (mode, "disabled")
@@ -142,6 +179,11 @@ test_start (gconstpointer data)
       g_assert_true (g_subprocess_wait_check (gateway, NULL, &error));
       g_assert_no_error (error);
       g_clear_object (&gateway);
+      if (stats_port)
+        {
+          PirwaNetworkStats stats;
+          g_assert_false (pirwa_network_stats_read (stats_port, &stats));
+        }
     }
   virDomainUndefine (domain);
   virDomainFree (domain);

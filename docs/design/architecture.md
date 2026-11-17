@@ -111,10 +111,10 @@ display hint. The center panel hides Powered off and retains Crashed when applic
 Its header hides machine controls and readings while
 retaining the standard window buttons. This status view also replaces an existing
 inline console when the selected machine stops.
-The selected VM's configured resources and live usage share a compact group on the
-right. Each reading sizes to its text with a small gap between readings and
-ellipsizes when space is limited; the selected machine's state appears there only
-for non-stopped states other than Running.
+The selected VM's live CPU, RAM, and network usage share a compact group on the
+right, using the desktop monospace font. Each reading sizes to its text with a
+small gap between readings and ellipsizes when space is limited; the selected
+machine's state appears there only for non-stopped states other than Running.
 Start in the status view includes a power icon beside its label. Starting and
 removing a machine share a pulsing progress bar beneath its name, centered at a
 compact 150 logical pixels wide. Removal uses the theme's destructive background
@@ -187,11 +187,10 @@ Progress carries the foreground request ID; queued
 progress from an earlier job cannot update a later job's dialog.
 
 The right pane has no bottom bar. Its single-row header shows controls on the
-left, with the selected VM's configured CPU count and RAM, live CPU usage, resident
-memory (RSS), and network receive/transmit rates grouped on the right. Configured
-resources come from the selected domain's details and clear when selection changes;
-the header shows a loading message while those details are fetched. Host hardware
-and architecture are not shown. Running and Powered off labels are hidden; other VM
+left, with the selected VM's live CPU usage, resident memory (RSS), and network
+receive/transmit rates grouped on the right. Configured CPU count and RAM appear
+in the stopped machine's details, outside the header. Host hardware and
+architecture are not shown. Running and Powered off labels are hidden; other VM
 states remain visible.
 Usage appears while the VM is
 running. Long readings ellipsize, with full values in
@@ -209,9 +208,21 @@ last displayed value. CPU percentages use cumulative CPU time and monotonic
 elapsed time; 100% represents one host CPU. RSS includes VM-process overhead.
 Network byte counters come from the same bulk sample and are summed across all
 reported VM interfaces. Rates use monotonic elapsed time; the first sample,
-interface-name changes, and decreasing totals establish a new baseline. Missing
-interface counters or overflowing totals make network usage unavailable without
-discarding CPU or RAM readings.
+interface-name changes, and decreasing totals establish a new baseline. Libvirt
+does not supply counters for the socket interface used by host proxy routing.
+When the bulk sample lacks network counters, the worker checks the live XML of
+a local Session machine with one loopback client interface, then reads that
+gateway's counters through a same-user Unix abstract socket keyed by its Ethernet
+port. Both endpoints check peer credentials. The reply has a version marker,
+a per-process identity, and guest receive/transmit totals; a new gateway identity
+resets the rate baseline. The read has a one-second deadline. The helper counts
+Ethernet bytes received from and queued to the guest, excluding the four-byte
+socket framing, with no per-packet I/O for statistics. Its existing poll loop
+serves one fixed-size reply per connection without waiting for the reader.
+The socket disappears when the helper exits, and survives app window closure
+alongside the gateway. No saved domain XML is changed. Missing interface counters,
+unavailable gateways, or overflowing bulk totals make network usage unavailable
+without discarding CPU or RAM readings.
 Missing fields remain unavailable. Failed sampling waits for a selection change
 or manual refresh rather than repeatedly reporting errors.
 

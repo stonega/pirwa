@@ -241,19 +241,15 @@ assert_header_action (const char *name)
 }
 
 static GtkWidget *
-assert_header_resources (const char *text)
+assert_no_header_resources (const char *text)
 {
   GtkWidget *shutdown = find_action (GTK_WIDGET (window), "win.shutdown");
   g_assert_nonnull (shutdown);
   GtkWidget *header = gtk_widget_get_ancestor (shutdown, ADW_TYPE_HEADER_BAR);
   g_assert_nonnull (header);
-  GtkWidget *resources = find_label_prefix (header, text);
-  g_assert_nonnull (resources);
-  g_assert_cmpstr (widget_text (resources), ==, text);
-  g_assert_true (gtk_widget_is_visible (resources));
-  g_assert_nonnull (gtk_widget_get_ancestor (resources, ADW_TYPE_HEADER_BAR));
-  g_assert_cmpstr (gtk_widget_get_tooltip_text (resources), ==, text);
-  return resources;
+  g_assert_null (find_label_prefix (header, text));
+  g_assert_null (find_label_prefix (header, "Loading resources"));
+  return header;
 }
 
 static void
@@ -378,11 +374,8 @@ advance (gpointer data)
         g_assert_cmpfloat_with_epsilon (start_bounds.origin.x + start_bounds.size.width / 2,
                                         gtk_widget_get_width (status) / 2.0, 1);
         GtkWidget *shutdown = find_action (GTK_WIDGET (window), "win.shutdown");
-        GtkWidget *header = gtk_widget_get_ancestor (shutdown, ADW_TYPE_HEADER_BAR);
+        GtkWidget *header = assert_no_header_resources ("1 CPUs · 512 MiB RAM");
         g_assert_false (gtk_widget_is_visible (gtk_widget_get_parent (shutdown)));
-        GtkWidget *resources = find_label_prefix (header, "1 CPUs · 512 MiB RAM");
-        g_assert_nonnull (resources);
-        g_assert_false (gtk_widget_is_visible (resources));
         GtkWidget *eject = find_action (GTK_WIDGET (window), "win.eject");
         g_assert_nonnull (eject);
         g_assert_false (gtk_widget_is_visible (eject));
@@ -394,10 +387,9 @@ advance (gpointer data)
         if (!save_snapshot (window, "stopped.png"))
           break;
         gtk_single_selection_set_selected (selection, GTK_INVALID_LIST_POSITION);
-        g_assert_false (gtk_widget_is_visible (resources));
-        g_assert_cmpstr (widget_text (resources), ==, "");
+        g_assert_cmpstr (widget_text (details), ==, "");
         gtk_single_selection_set_selected (selection, 0);
-        g_assert_cmpstr (widget_text (resources), ==, "Loading resources…");
+        g_assert_cmpstr (widget_text (details), ==, "Loading resources…");
         step++;
       }
       break;
@@ -414,7 +406,7 @@ advance (gpointer data)
         usage = find_label_prefix (GTK_WIDGET (window), "Sampling usage");
       if (!usage)
         break; /* A visible window must complete a real backend sample. */
-      GtkWidget *resources = assert_header_resources ("2 CPUs · 1024 MiB RAM");
+      GtkWidget *header = assert_no_header_resources ("2 CPUs · 1024 MiB RAM");
       g_assert_false (gtk_widget_is_visible (find_action (GTK_WIDGET (window), "win.start")));
       GtkWidget *network = find_label_prefix (GTK_WIDGET (window), "↓ ");
       if (!network)
@@ -425,17 +417,15 @@ advance (gpointer data)
       GtkWidget *sidebar = gtk_paned_get_start_child (paned);
       g_assert_cmpint (gtk_widget_get_height (sidebar), ==,
                        gtk_widget_get_height (GTK_WIDGET (window)));
-      graphene_rect_t resources_bounds, usage_bounds;
-      g_assert_true (gtk_widget_compute_bounds (resources, GTK_WIDGET (window), &resources_bounds));
+      graphene_rect_t usage_bounds, network_bounds;
       g_assert_true (gtk_widget_compute_bounds (usage, GTK_WIDGET (window), &usage_bounds));
-      g_assert_cmpfloat (resources_bounds.origin.x, >=, gtk_widget_get_width (sidebar));
-      g_assert_cmpfloat (resources_bounds.origin.x, <, usage_bounds.origin.x);
+      g_assert_true (gtk_widget_compute_bounds (network, GTK_WIDGET (window), &network_bounds));
+      g_assert_cmpfloat (usage_bounds.origin.x, >=, gtk_widget_get_width (sidebar));
+      g_assert_cmpfloat (usage_bounds.origin.x + usage_bounds.size.width, <=,
+                         network_bounds.origin.x);
       g_assert_cmpfloat (usage_bounds.origin.x + usage_bounds.size.width, <=,
                          gtk_widget_get_width (GTK_WIDGET (window)));
-      g_assert_cmpfloat (gtk_label_get_xalign (GTK_LABEL (resources)), ==, 0);
       g_assert_cmpfloat (gtk_label_get_xalign (GTK_LABEL (usage)), ==, 1);
-      GtkWidget *header = gtk_widget_get_ancestor (resources, ADW_TYPE_HEADER_BAR);
-      g_assert_nonnull (header);
       g_assert_null (find_label_prefix (header, "x86_64"));
       GtkWidget *state = find_label_prefix (header, "Running");
       g_assert_nonnull (state);
@@ -481,7 +471,7 @@ advance (gpointer data)
       GtkWidget *controls = gtk_widget_get_parent (shutdown);
       g_assert_true (gtk_widget_compute_bounds (controls, GTK_WIDGET (window), &controls_bounds));
       g_assert_cmpfloat (controls_bounds.origin.x + controls_bounds.size.width, <=,
-                         resources_bounds.origin.x);
+                         usage_bounds.origin.x);
       g_assert_null (find_action (GTK_WIDGET (window), "win.edit"));
       g_assert_null (find_action (GTK_WIDGET (window), "win.force-stop"));
       g_assert_null (find_action (GTK_WIDGET (window), "win.remove"));
@@ -563,7 +553,7 @@ advance (gpointer data)
         GtkWidget *other = find_type (GTK_WIDGET (window), PIRWA_TYPE_CONSOLE);
         if (!other)
           break;
-        assert_header_resources ("4 CPUs · 2048 MiB RAM");
+        assert_no_header_resources ("4 CPUs · 2048 MiB RAM");
         g_assert_false (gtk_widget_is_visible (find_action (GTK_WIDGET (window), "win.eject")));
         g_assert_true (other != GTK_WIDGET (console));
         g_assert_nonnull (popup ());
@@ -648,7 +638,8 @@ advance (gpointer data)
       g_print ("PASS initial machine selection, remembered selection after reopening, refresh "
                "preservation, missing-machine fallback, centered stopped-machine Start, "
                "hidden stopped header controls and resources, "
-               "VM configuration and state in running header, embedded viewer, header actions, "
+               "live VM usage and state without configuration in running header, "
+               "embedded viewer, header actions, "
                "mounted media name, eject spinner without layout shift or global progress, "
                "eject failure recovery and retry, "
                "pop-out/return identity, fullscreen, "

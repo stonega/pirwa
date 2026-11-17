@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 #include "pirwa-usage.h"
 #include "pirwa-libvirt.h"
+#include "pirwa-network.h"
 #include <string.h>
 
 gboolean
@@ -117,5 +118,7 @@ pirwa_usage_read (virDomainPtr domain, PirwaUsage *usage, GError **error)
     }
   pirwa_usage_from_stats (records[0], g_get_monotonic_time (), usage);
   virDomainStatsRecordListFree (records);
+  if (usage->running && !usage->has_network)
+    pirwa_network_read_usage (domain, usage);
   return TRUE;
 }

@@ -1,5 +1,5 @@
 core = static_library('pirwa-core',
-  ['pirwa-machine.c', 'pirwa-model.c', 'pirwa-inventory.c', 'pirwa-config.c', 'pirwa-provision.c', 'pirwa-import.c', 'pirwa-backend.c', 'pirwa-boxes.c', 'pirwa-usage.c', 'pirwa-preferences.c', 'pirwa-proxy.c', 'pirwa-network.c'],
+  ['pirwa-machine.c', 'pirwa-model.c', 'pirwa-inventory.c', 'pirwa-config.c', 'pirwa-provision.c', 'pirwa-import.c', 'pirwa-backend.c', 'pirwa-boxes.c', 'pirwa-usage.c', 'pirwa-preferences.c', 'pirwa-proxy.c', 'pirwa-network.c', 'pirwa-network-stats.c'],
   dependencies: [glib_dep, gio_dep, gio_unix_dep, libvirt_dep, libvirt_glib_dep, xml_dep, osinfo_dep],
   include_directories: project_includes,
 )
@@ -30,7 +30,7 @@ ui_dep = declare_dependency(
 )
 executable('pirwa', 'main.c', dependencies: ui_dep, install: true)
 
-network_helper = executable('pirwa-network', ['pirwa-gateway.c', 'pirwa-proxy.c'],
+network_helper = executable('pirwa-network', ['pirwa-gateway.c', 'pirwa-proxy.c', 'pirwa-network-stats.c'],
   dependencies: [gio_dep, gio_unix_dep, slirp_dep],
   install: true, install_dir: get_option('libexecdir'),
 )

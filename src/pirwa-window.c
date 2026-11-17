@@ -59,7 +59,6 @@ struct _PirwaWindow
   char *machine_progress_uuid;
   GtkLabel *state;
   GtkLabel *resources;
-  GtkLabel *header_resources;
   GtkLabel *usage;
   GtkLabel *network;
   GtkLabel *stage;
@@ -150,10 +149,9 @@ static char *
 network_rate_text (double rate)
 {
   if (rate < 1024)
-    return g_strdup_printf (_ ("%.0f B/s"), rate);
-  g_autofree char *size = g_format_size_full (rate >= G_MAXUINT64 ? G_MAXUINT64 : (guint64)rate,
-                                              G_FORMAT_SIZE_IEC_UNITS);
-  return g_strdup_printf (_ ("%s/s"), size);
+    return g_strdup_printf (_ ("%.0f B"), rate);
+  return g_format_size_full (rate >= G_MAXUINT64 ? G_MAXUINT64 : (guint64)rate,
+                             G_FORMAT_SIZE_IEC_UNITS);
 }
 
 static char *
@@ -179,11 +177,7 @@ show_usage (PirwaWindow *self, const PirwaUsage *usage)
     cpu = g_strdup (usage->has_cpu_time ? _ ("…") : _ ("unavailable"));
   g_autofree char *ram = NULL;
   if (usage->has_memory_rss)
-    {
-      g_autofree char *size
-          = g_format_size_full (usage->memory_rss_kib * 1024, G_FORMAT_SIZE_IEC_UNITS);
-      ram = g_strdup_printf (_ ("%s RSS"), size);
-    }
+    ram = g_format_size_full (usage->memory_rss_kib * 1024, G_FORMAT_SIZE_IEC_UNITS);
   else
     ram = g_strdup (_ ("unavailable"));
   g_autofree char *text = g_strdup_printf (_ ("CPU %s · RAM %s"), cpu, ram);
@@ -437,8 +431,6 @@ update_actions (PirwaWindow *self)
       GTK_WIDGET (self->machine_progress),
       self->busy && machine && self->machine_progress_uuid
           && g_str_equal (self->machine_progress_uuid, pirwa_machine_get_uuid (machine)));
-  gtk_widget_set_visible (GTK_WIDGET (self->header_resources),
-                          self->connected && machine != NULL && !stopped);
   gtk_widget_set_visible (GTK_WIDGET (self->header_state),
                           machine != NULL && state != 1 && !stopped);
   gtk_widget_set_visible (self->start_button, stopped);
@@ -2260,18 +2252,6 @@ pirwa_window_init (PirwaWindow *self)
   adw_toolbar_view_add_top_bar (ADW_TOOLBAR_VIEW (content_toolbar),
                                 GTK_WIDGET (self->create_progress));
   /* Fit readings to their text; allow zero minimum width to keep controls usable. */
-  self->header_resources = g_object_new (GTK_TYPE_LABEL, "ellipsize", PANGO_ELLIPSIZE_END, "valign",
-                                         GTK_ALIGN_CENTER, NULL);
-  gtk_widget_add_css_class (GTK_WIDGET (self->header_resources), "dim-label");
-  gtk_widget_add_css_class (GTK_WIDGET (self->header_resources), "caption");
-  gtk_label_set_xalign (self->header_resources, 0);
-  g_object_bind_property (self->resources, "label", self->header_resources, "label",
-                          G_BINDING_SYNC_CREATE);
-  g_object_bind_property (self->header_resources, "label", self->header_resources, "tooltip-text",
-                          G_BINDING_SYNC_CREATE);
-  gtk_accessible_update_property (GTK_ACCESSIBLE (self->header_resources),
-                                  GTK_ACCESSIBLE_PROPERTY_DESCRIPTION,
-                                  _ ("Selected VM’s configured CPU count and memory"), -1);
   self->usage = g_object_new (GTK_TYPE_LABEL, "label", _ ("Sampling usage…"), "ellipsize",
                               PANGO_ELLIPSIZE_END, "valign", GTK_ALIGN_CENTER, NULL);
   gtk_widget_add_css_class (GTK_WIDGET (self->usage), "dim-label");
@@ -2299,16 +2279,15 @@ pirwa_window_init (PirwaWindow *self)
          "Up arrow: transmitted bytes per second. Rates include all VM interfaces. "
          "Updates every two seconds while this window is visible."),
       -1);
-  GtkWidget *readings[] = { GTK_WIDGET (self->header_resources), GTK_WIDGET (self->usage),
-                            GTK_WIDGET (self->network) };
+  GtkWidget *readings[] = { GTK_WIDGET (self->usage), GTK_WIDGET (self->network) };
   for (guint i = 0; i < G_N_ELEMENTS (readings); i++)
     {
+      gtk_widget_add_css_class (readings[i], "monospace");
       gtk_widget_set_layout_manager (
           readings[i], gtk_custom_layout_new (NULL, measure_header_reading,
                                               GTK_WIDGET_GET_CLASS (readings[i])->size_allocate));
       gtk_widget_set_overflow (readings[i], GTK_OVERFLOW_HIDDEN);
     }
-  gtk_box_append (GTK_BOX (header_info), GTK_WIDGET (self->header_resources));
   gtk_box_append (GTK_BOX (header_info), GTK_WIDGET (self->usage));
   gtk_box_append (GTK_BOX (header_info), GTK_WIDGET (self->network));
   gtk_box_append (GTK_BOX (header_info), GTK_WIDGET (self->header_state));

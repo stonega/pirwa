@@ -177,6 +177,7 @@ class Gateway:
         listener = socket.socket()
         listener.bind(('127.0.0.1', 0))
         listener.listen(1)
+        self.stats_address = f'\0pirwa-network-stats-{os.getuid()}-{listener.getsockname()[1]}'
         parent, child = socket.socketpair()
         self.process = subprocess.Popen([HELPER, '--listen-fd', str(listener.fileno()),
                                          '--control-fd', str(child.fileno())],
@@ -201,6 +202,14 @@ class Gateway:
     def send(self, frame):
         self.socket.sendall(struct.pack('!I', len(frame)) + frame)
 
+    def stats(self):
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as stats:
+            stats.settimeout(3)
+            stats.connect(self.stats_address)
+            packet = exact(stats, 56)
+            assert packet[:8] == b'PIRWAN01'
+            return packet[8:40], *struct.unpack('!QQ', packet[40:])
+
     def receive(self, predicate, timeout=3):
         deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
@@ -218,6 +227,7 @@ class Gateway:
         self.send(b'\xff' * 6 + GUEST_MAC + b'\x08\x06' + arp)
         frame = self.receive(lambda f: f[12:14] == b'\x08\x06')
         assert frame[20:22] == b'\0\x02'
+        return frame
 
     def open_tcp(self, destination='198.51.100.7', port=443, sport=40000):
         self.send(tcp(sport=sport, dport=port, destination=destination))
@@ -295,6 +305,26 @@ class Tests(unittest.TestCase):
         self.resources.append(gateway)
         gateway.arp()
         return proxy, gateway
+
+    def test_network_stats(self):
+        proxy = Proxy('socks5')
+        self.resources.append(proxy)
+        gateway = Gateway(proxy)
+        self.resources.append(gateway)
+        identity, rx, tx = gateway.stats()
+        self.assertNotEqual(identity, bytes(32))
+        self.assertEqual((rx, tx), (0, 0))
+        self.assertEqual(gateway.stats(), (identity, rx, tx))  # Idle is available zero traffic.
+        reply = gateway.arp()
+        rx, tx = len(reply), 42  # Actual Ethernet bytes, excluding the four-byte framing.
+        self.assertEqual(gateway.stats(), (identity, rx, tx))
+        _, other = self.gateway()
+        self.assertNotEqual(other.stats()[0], identity)  # A fresh helper resets the rate baseline.
+        # A reader that disconnects must not interfere with the guest's traffic.
+        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as reader:
+            reader.connect(gateway.stats_address)
+        reply = gateway.arp()
+        self.assertEqual(gateway.stats(), (identity, rx + len(reply), tx + 42))
 
     def test_dhcp_tcp_dns(self):
         proxy, gateway = self.gateway()

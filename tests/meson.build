@@ -146,7 +146,8 @@ network_test = executable('test-network', 'test-network.c', dependencies: core_d
 test('network-definition', network_test)
 network_start_test = executable('test-network-start', 'test-network-start.c', dependencies: core_dep,
   link_args: ['-Wl,--wrap=virConnectGetURI', '-Wl,--wrap=virDomainCreateXML',
-    '-Wl,--wrap=virDomainCreate', '-Wl,--wrap=g_subprocess_launcher_spawn'])
+    '-Wl,--wrap=virDomainCreate', '-Wl,--wrap=g_subprocess_launcher_spawn',
+    '-Wl,--wrap=virDomainListGetStats'])
 test('network-start', network_start_test, timeout: 20,
   depends: [network_helper, settings_schemas, proxy_test_schemas],
   env: ['GSETTINGS_BACKEND=memory', 'GSETTINGS_SCHEMA_DIR=' + meson.current_build_dir() / 'fixtures'])

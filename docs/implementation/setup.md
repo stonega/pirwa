@@ -323,12 +323,12 @@ It also checks
 automatic embedding, title-bar controls, pop-out/return identity, fullscreen,
 selection changes, popup closure, and collection closure with a surviving popup.
 It also checks a centered Start below the stopped machine's resources, no display
-hint, and hidden header controls and resources while stopped. For a running machine,
-the selected VM's configured resources and usage stay in the right
-pane's header, with no bottom bar. The header uses one row, with controls on the
-left and compact VM configuration and usage on the right. Distinct host and guest
-resource values, selection changes, and clearing selection verify the configuration
-source. Running and Powered off state labels stay hidden. Hidden or
+hint, and hidden header controls while stopped. Configured CPU and RAM values
+stay outside the header across selections; the stopped details clear when the
+selection clears. For a running machine, live CPU, RAM, and network usage stay
+in the right pane's header, with no bottom bar. The header uses one row, with
+controls on the left and compact live usage on the right.
+Running and Powered off state labels stay hidden. Hidden or
 suspended windows retain their last reading or initial sampling status without polling.
 No real SPICE server or guest is needed; display connection errors are expected.
 The media fixture checks an ellipsized ISO filename, full tooltip, eject icon,

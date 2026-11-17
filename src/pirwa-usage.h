@@ -11,7 +11,7 @@ typedef struct
   guint64 memory_rss_kib;
   guint64 network_rx_bytes;
   guint64 network_tx_bytes;
-  guint8 network_identity[32]; /* SHA-256 of the interface names, in stats order. */
+  guint8 network_identity[32]; /* SHA-256 of interface names or the proxy gateway's identity. */
   gboolean running;
   gboolean has_cpu_time;
   gboolean has_memory_rss;

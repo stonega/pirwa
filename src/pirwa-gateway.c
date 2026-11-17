@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 #define _POSIX_C_SOURCE 200809L
+#include "pirwa-network-stats.h"
 #include "pirwa-proxy.h"
 #include <arpa/inet.h>
 #include <errno.h>
@@ -111,6 +112,8 @@ struct Gateway
   GArray *polls;
   GByteArray *input;
   GByteArray *output;
+  GSocket *stats_listener;
+  PirwaNetworkStats stats;
   char *directory;
   int peer;
   int wake[2];
@@ -206,6 +209,7 @@ queue_frame (Gateway *gateway, const guint8 *frame, gsize size)
   guint32 length = GUINT32_TO_BE (size);
   g_byte_array_append (gateway->output, (guint8 *)&length, 4);
   g_byte_array_append (gateway->output, frame, size);
+  gateway->stats.rx_bytes += size;
 }
 
 static slirp_ssize_t
@@ -774,6 +778,10 @@ run_gateway (Gateway *gateway)
             struct pollfd fd = relay_poll (g_ptr_array_index (gateway->relays, i), side);
             g_array_append_val (gateway->polls, fd);
           }
+      guint stats_index = gateway->polls->len;
+      struct pollfd stats
+          = { gateway->stats_listener ? g_socket_get_fd (gateway->stats_listener) : -1, POLLIN, 0 };
+      g_array_append_val (gateway->polls, stats);
       gint64 now = g_get_monotonic_time () / 1000;
       for (guint i = 0; i < gateway->timers->len; i++)
         {
@@ -786,6 +794,8 @@ run_gateway (Gateway *gateway)
       if (result < 0)
         break;
       slirp_pollfds_poll (gateway->slirp, FALSE, get_events, gateway);
+      if (g_array_index (gateway->polls, struct pollfd, stats_index).revents & POLLIN)
+        pirwa_network_stats_reply (gateway->stats_listener, &gateway->stats);
       now = g_get_monotonic_time () / 1000;
       for (guint i = 0; i < gateway->timers->len; i++)
         {
@@ -843,6 +853,7 @@ run_gateway (Gateway *gateway)
                 }
               if (gateway->input->len < length + 4)
                 break;
+              gateway->stats.tx_bytes += length;
               receive_frame (gateway, gateway->input->data + 4, length);
               g_byte_array_remove_range (gateway->input, 0, length + 4);
             }
@@ -872,6 +883,7 @@ gateway_clear (Gateway *gateway)
   g_byte_array_unref (gateway->output);
   g_async_queue_unref (gateway->finished);
   g_object_unref (gateway->cancel);
+  g_clear_object (&gateway->stats_listener);
   if (gateway->directory)
     g_rmdir (gateway->directory);
   g_free (gateway->directory);
@@ -911,6 +923,10 @@ main (int argc, char **argv)
   if (!proxy)
     return 1;
   Gateway gateway = { .proxy = proxy, .peer = -1, .wake = { -1, -1 } };
+  g_autoptr (GSocketAddress) local = g_socket_get_local_address (listener, NULL);
+  if (G_IS_INET_SOCKET_ADDRESS (local))
+    gateway.stats_listener = pirwa_network_stats_listen (
+        g_inet_socket_address_get_port (G_INET_SOCKET_ADDRESS (local)), &gateway.stats);
   gateway.directory = g_dir_make_tmp ("pirwa-network-XXXXXX", NULL);
   gateway.cancel = g_cancellable_new ();
   gateway.targets = g_ptr_array_new_with_free_func (target_free);

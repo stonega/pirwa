@@ -3,6 +3,7 @@
 #include "pirwa-network.h"
 #include "config.h"
 #include "pirwa-libvirt.h"
+#include "pirwa-network-stats.h"
 #include "pirwa-preferences.h"
 #include "pirwa-proxy.h"
 #include <libxml/parser.h>
@@ -10,6 +11,49 @@
 #include <signal.h>
 #include <sys/socket.h>
 #include <unistd.h>
+
+gboolean
+pirwa_network_read_usage (virDomainPtr domain, PirwaUsage *usage)
+{
+  g_autofree char *uri = virConnectGetURI (virDomainGetConnect (domain));
+  if (g_strcmp0 (uri, "qemu:///session") != 0)
+    return FALSE;
+  g_autofree char *xml = virDomainGetXMLDesc (domain, 0);
+  if (!xml)
+    return FALSE;
+  xmlDoc *doc = xmlReadMemory (xml, strlen (xml), NULL, NULL,
+                               XML_PARSE_NONET | XML_PARSE_NOERROR | XML_PARSE_NOWARNING);
+  if (!doc || doc->intSubset || doc->extSubset)
+    {
+      if (doc)
+        xmlFreeDoc (doc);
+      return FALSE;
+    }
+  xmlXPathContext *context = xmlXPathNewContext (doc);
+  xmlXPathObject *source = xmlXPathEvalExpression (
+      BAD_CAST "/domain/devices[count(interface)=1]/interface[@type='client']/source"
+               "[@address='127.0.0.1']",
+      context);
+  xmlChar *port = source && source->nodesetval && source->nodesetval->nodeNr == 1
+                      ? xmlGetProp (source->nodesetval->nodeTab[0], BAD_CAST "port")
+                      : NULL;
+  guint64 number = 0;
+  gboolean valid
+      = port && g_ascii_string_to_unsigned ((const char *)port, 10, 1, 65535, &number, NULL);
+  xmlFree (port);
+  if (source)
+    xmlXPathFreeObject (source);
+  xmlXPathFreeContext (context);
+  xmlFreeDoc (doc);
+  PirwaNetworkStats stats;
+  if (!valid || !pirwa_network_stats_read (number, &stats))
+    return FALSE;
+  usage->network_rx_bytes = stats.rx_bytes;
+  usage->network_tx_bytes = stats.tx_bytes;
+  memcpy (usage->network_identity, stats.identity, sizeof stats.identity);
+  usage->has_network = TRUE;
+  return TRUE;
+}
 
 static gboolean
 plain_source (xmlNode *nic, const char *attribute)
