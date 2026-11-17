@@ -1,4 +1,5 @@
-inventory_test = executable('test-inventory', 'test-inventory.c', dependencies: core_dep)
+inventory_test = executable('test-inventory', 'test-inventory.c', dependencies: core_dep,
+  link_args: ['-Wl,--wrap=virDomainGetMetadata'])
 test('inventory', inventory_test, timeout: 30)
 
 executable('benchmark-inventory', 'benchmark-inventory.c', dependencies: core_dep)

@@ -142,9 +142,14 @@ pirwa_import_prepare (const char *xml, GError **error)
     }
   plan->uuid = g_uuid_string_random ();
   xmlNodeSetContent (node (doc, "/domain/uuid"), BAD_CAST plan->uuid);
-  g_autofree char *name = content (doc, "/domain/name");
-  g_autofree char *new_name = g_strdup_printf ("%s (Imported %.8s)", name, plan->uuid);
-  xmlNodeSetContent (node (doc, "/domain/name"), BAD_CAST new_name);
+  g_autofree char *name = content (doc, "/domain/title");
+  if (!name)
+    name = content (doc, "/domain/name");
+  g_autofree char *title = g_strdup_printf ("%s (Imported %.8s)", name, plan->uuid);
+  g_autofree char *internal_name = g_strdup_printf ("pirwa-%s", plan->uuid);
+  xmlNodeSetContent (node (doc, "/domain/name"), BAD_CAST internal_name);
+  remove_nodes (doc, "/domain/title");
+  xmlNewTextChild (xmlDocGetRootElement (doc), NULL, BAD_CAST "title", BAD_CAST title);
   xmlNode *system_uuid = node (doc, "/domain/sysinfo/system/entry[@name='uuid']");
   if (system_uuid)
     xmlNodeSetContent (system_uuid, BAD_CAST plan->uuid);

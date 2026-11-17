@@ -782,14 +782,24 @@ pirwa_create_dialog_init (PirwaCreateDialog *self)
   self->step_animation
       = adw_timed_animation_new (GTK_WIDGET (self->step_bar), SOURCE, SOURCE, 240, target);
   adw_timed_animation_set_easing (ADW_TIMED_ANIMATION (self->step_animation), ADW_EASE_OUT_CUBIC);
-  const char *labels[] = { _ ("1 Image"), _ ("2 Name"), _ ("3 Config"), _ ("4 Boot") };
+  const char *labels[] = { _ ("Image"), _ ("Name"), _ ("Config"), _ ("Boot") };
+  const char *icons[] = { "media-optical-symbolic", "document-edit-symbolic",
+                          "preferences-system-symbolic", "media-playback-start-symbolic" };
   for (guint i = 0; i < N_STEPS; i++)
     {
-      self->steps[i] = gtk_button_new_with_label (labels[i]);
+      self->steps[i] = gtk_button_new ();
       self->step_bar->steps[i] = self->steps[i];
-      GtkLabel *label = GTK_LABEL (gtk_button_get_child (GTK_BUTTON (self->steps[i])));
+      GtkWidget *content = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
+      gtk_widget_set_halign (content, GTK_ALIGN_CENTER);
+      gtk_box_append (GTK_BOX (content), gtk_image_new_from_icon_name (icons[i]));
+      GtkLabel *label = GTK_LABEL (gtk_label_new (labels[i]));
       gtk_label_set_wrap (label, TRUE);
       gtk_label_set_justify (label, GTK_JUSTIFY_CENTER);
+      gtk_box_append (GTK_BOX (content), GTK_WIDGET (label));
+      gtk_button_set_child (GTK_BUTTON (self->steps[i]), content);
+      gtk_accessible_update_property (GTK_ACCESSIBLE (self->steps[i]),
+                                      GTK_ACCESSIBLE_PROPERTY_LABEL, labels[i], -1);
+      gtk_widget_add_css_class (self->steps[i], "text-button");
       gtk_widget_add_css_class (self->steps[i], "pill");
       gtk_widget_add_css_class (self->steps[i], "flat");
       gtk_widget_add_css_class (self->steps[i], "caption-heading");

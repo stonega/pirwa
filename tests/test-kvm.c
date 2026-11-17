@@ -79,6 +79,7 @@ main (void)
   g_autofree char *pool_xml = g_strdup_printf (
       "<pool type='dir'><name>%s</name><target><path>%s</path></target></pool>", name, escaped);
   g_autofree char *created_uuid = NULL;
+  g_autofree char *duplicate_uuid = NULL;
   g_autofree char *imported_uuid = NULL;
   g_autofree char *shared_uuid = NULL;
   g_autofree char *alias = g_build_filename (directory, "alias.qcow2", NULL);
@@ -109,20 +110,28 @@ main (void)
     created_uuid = g_strdup (reply->uuid);
   }
   g_print ("PASS: real KVM create, firmware boot, and SPICE configuration\n");
-  /* Duplicate name forces a late define failure after allocation. */
+  /* The same display name creates another independent machine. */
   {
     g_autoptr (PirwaReply) duplicate = request (backend, &op, &error);
-    if (duplicate || !error)
+    if (!duplicate)
       goto cleanup;
-    g_clear_error (&error);
-    if (virStoragePoolNumOfVolumes (pool) != 1)
+    duplicate_uuid = g_strdup (duplicate->uuid);
+    if (g_strcmp0 (duplicate_uuid, created_uuid) == 0 || virStoragePoolNumOfVolumes (pool) != 2
+        || !command (backend, PIRWA_FORCE_STOP, duplicate_uuid, &error))
+      goto cleanup;
+    PirwaRequest remove
+        = { .operation = PIRWA_REMOVE, .uuid = duplicate_uuid, .delete_disk = TRUE };
+    g_autoptr (PirwaReply) removed = request (backend, &remove, &error);
+    if (!removed || virStoragePoolNumOfVolumes (pool) != 1)
       {
-        g_set_error_literal (&error, G_IO_ERROR, G_IO_ERROR_FAILED,
-                             "Failed creation left an orphan volume");
+        if (!error)
+          g_set_error_literal (&error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                               "Removing one same-name machine affected the other's storage");
         goto cleanup;
       }
+    g_clear_pointer (&duplicate_uuid, g_free);
   }
-  g_print ("PASS: failed creation rolls back its allocated volume\n");
+  g_print ("PASS: duplicate display names retain independent identities and storage\n");
   if (!command (backend, PIRWA_PAUSE, created_uuid, &error)
       || !command (backend, PIRWA_RESUME, created_uuid, &error)
       || !command (backend, PIRWA_FORCE_STOP, created_uuid, &error))
@@ -238,6 +247,7 @@ cleanup:
   if (connection)
     {
       cleanup_domain (connection, created_uuid);
+      cleanup_domain (connection, duplicate_uuid);
       cleanup_domain (connection, imported_uuid);
       cleanup_domain (connection, shared_uuid);
       if (pool)

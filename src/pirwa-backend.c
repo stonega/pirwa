@@ -317,26 +317,15 @@ edit_domain (virConnectPtr connection, virDomainPtr domain, const PirwaRequest *
       pirwa_libvirt_error (error, "Cannot read definition");
       return FALSE;
     }
-  g_autoptr (PirwaDetails) details = pirwa_config_parse (original, error);
-  if (!details)
-    return FALSE;
   g_autofree char *modified
       = pirwa_config_edit (original, request->options.name, request->options.cpus,
                            request->options.memory_mb, request->eject, error);
   if (!modified)
     return FALSE;
-  gboolean rename = g_strcmp0 (details->name, request->options.name) != 0;
-  if (rename && virDomainRename (domain, request->options.name, 0) < 0)
-    {
-      pirwa_libvirt_error (error, "Cannot rename virtual machine");
-      return FALSE;
-    }
   virDomainPtr updated = virDomainDefineXML (connection, modified);
   if (!updated)
     {
       pirwa_libvirt_error (error, "Cannot save resources");
-      if (rename && virDomainRename (domain, details->name, 0) < 0)
-        g_prefix_error (error, "The name change could not be rolled back. ");
       return FALSE;
     }
   virDomainFree (updated);
@@ -499,6 +488,7 @@ execute (BackendState *state, const PirwaRequest *request, GCancellable *cancell
     case PIRWA_EDIT:
       if (!edit_domain (state->connection, domain, request, error))
         goto fail;
+      pirwa_inventory_cache_clear (state->inventory_cache);
       break;
     case PIRWA_REMOVE:
       if (!pirwa_provision_remove (state->connection, domain, request->uuid, request->delete_disk,
@@ -541,8 +531,11 @@ execute (BackendState *state, const PirwaRequest *request, GCancellable *cancell
             && !pirwa_config_supports (xml,
                                        "/domain/devices/graphics[@type='spice']/gl[@enable='yes']"))
           {
+            g_autoptr (PirwaDetails) details = pirwa_config_parse (xml, error);
+            if (!details)
+              goto fail;
             reply->native_console = TRUE;
-            reply->console_name = g_strdup (virDomainGetName (domain));
+            reply->console_name = g_steal_pointer (&details->name);
             break;
           }
       }

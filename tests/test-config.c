@@ -19,6 +19,8 @@ test_roundtrip (void)
   g_autoptr (PirwaDetails) details = pirwa_config_parse (xml, &error);
   g_assert_no_error (error);
   g_assert_cmpstr (details->name, ==, options.name);
+  g_assert_true (pirwa_config_supports (
+      xml, "/domain[name='pirwa-11111111-1111-4111-8111-111111111111'][title='Linux & <test>']"));
   g_assert_cmpstr (details->disk_path, ==, "/tmp/disk & test.qcow2");
   g_assert_cmpstr (details->volume_key, ==, "key&value");
   g_assert_true (details->managed);
@@ -32,6 +34,8 @@ test_roundtrip (void)
   g_autoptr (PirwaDetails) changed = pirwa_config_parse (edited, &error);
   g_assert_no_error (error);
   g_assert_cmpstr (changed->name, ==, "Renamed & <VM>");
+  g_assert_true (pirwa_config_supports (
+      edited, "/domain/name[.='pirwa-11111111-1111-4111-8111-111111111111']"));
   g_assert_cmpuint (changed->cpus, ==, 4);
   g_assert_cmpuint (changed->memory_mb, ==, 4096);
   g_assert_false (changed->has_cdrom);
@@ -125,6 +129,29 @@ test_validation (void)
       = pirwa_config_parse ("<!DOCTYPE domain [<!ENTITY x 'x'>]><domain/>", &error);
   g_assert_null (invalid);
   g_assert_error (error, G_IO_ERROR, G_IO_ERROR_INVALID_DATA);
+}
+
+static void
+test_display_name (void)
+{
+  const char *legacy
+      = "<domain><name>legacy-id</name><uuid>11111111-1111-4111-8111-111111111111</uuid>"
+        "<vcpu>1</vcpu><memory unit='MiB'>512</memory></domain>";
+  g_autoptr (PirwaDetails) original = pirwa_config_parse (legacy, NULL);
+  g_assert_cmpstr (original->name, ==, "legacy-id");
+  g_autoptr (GError) error = NULL;
+  g_autofree char *renamed = pirwa_config_edit (legacy, "Shared & <VM>", 2, 1024, FALSE, &error);
+  g_assert_no_error (error);
+  g_assert_true (pirwa_config_supports (
+      renamed, "/domain[name='legacy-id'][uuid='11111111-1111-4111-8111-111111111111']"
+               "[title='Shared & <VM>'][count(title)=1]"));
+  g_autoptr (PirwaDetails) details = pirwa_config_parse (renamed, &error);
+  g_assert_no_error (error);
+  g_assert_cmpstr (details->name, ==, "Shared & <VM>");
+  g_autofree char *again = pirwa_config_edit (renamed, "Another VM", 3, 2048, FALSE, &error);
+  g_assert_no_error (error);
+  g_assert_true (pirwa_config_supports (
+      again, "/domain[name='legacy-id'][title='Another VM'][count(title)=1]"));
 }
 
 static void
@@ -452,6 +479,7 @@ main (int argc, char **argv)
   g_test_add_func ("/config/media", test_media);
   g_test_add_func ("/config/media-tray", test_media_tray);
   g_test_add_func ("/config/validation", test_validation);
+  g_test_add_func ("/config/display-name", test_display_name);
   g_test_add_func ("/config/qcow2", test_qcow2);
   return g_test_run ();
 }

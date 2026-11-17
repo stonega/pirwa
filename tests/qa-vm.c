@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /* Explicit disposable-guest tooling. Never registered with meson test. */
 #include "pirwa-backend.h"
+#include "pirwa-provision.h"
 #include <libvirt/libvirt.h>
 
 typedef struct
@@ -34,6 +35,23 @@ static gboolean
 fixture_name (const char *name)
 {
   return name && g_str_has_prefix (name, "pirwa-qa-") && g_uuid_string_is_valid (name + 9);
+}
+
+static gboolean
+fixture_domain (virConnectPtr connection, virDomainPtr domain, const char *uuid)
+{
+  const char *name = virDomainGetName (domain);
+  if (fixture_name (name))
+    return TRUE;
+  g_autofree char *expected = g_strdup_printf ("pirwa-%s", uuid);
+  if (g_strcmp0 (name, expected) != 0)
+    return FALSE;
+  g_autofree char *title = virDomainGetMetadata (domain, VIR_DOMAIN_METADATA_TITLE, NULL, 0);
+  if (!fixture_name (title))
+    return FALSE;
+  g_autofree char *xml = virDomainGetXMLDesc (domain, VIR_DOMAIN_XML_INACTIVE);
+  g_autoptr (PirwaDetails) details = xml ? pirwa_config_parse (xml, NULL) : NULL;
+  return details && pirwa_provision_owned (connection, uuid, details);
 }
 
 static gboolean
@@ -111,7 +129,7 @@ main (int argc, char **argv)
   if (!create)
     {
       domain = virDomainLookupByUUIDString (connection, argv[3]);
-      if (!domain || !fixture_name (virDomainGetName (domain)))
+      if (!domain || !fixture_domain (connection, domain, argv[3]))
         goto out;
     }
   backend = pirwa_backend_new (argv[1]);

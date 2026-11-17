@@ -12,6 +12,7 @@
 struct _PirwaInventoryCache
 {
   GHashTable *os_names;
+  GHashTable *names;
   OsinfoLoader *loader;
 };
 
@@ -20,6 +21,7 @@ pirwa_inventory_cache_new (void)
 {
   PirwaInventoryCache *cache = g_new0 (PirwaInventoryCache, 1);
   cache->os_names = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+  cache->names = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
   return cache;
 }
 
@@ -27,6 +29,7 @@ void
 pirwa_inventory_cache_free (PirwaInventoryCache *cache)
 {
   g_hash_table_unref (cache->os_names);
+  g_hash_table_unref (cache->names);
   g_clear_object (&cache->loader);
   g_free (cache);
 }
@@ -35,6 +38,21 @@ void
 pirwa_inventory_cache_clear (PirwaInventoryCache *cache)
 {
   g_hash_table_remove_all (cache->os_names);
+  g_hash_table_remove_all (cache->names);
+}
+
+static const char *
+display_name (PirwaInventoryCache *cache, virDomainPtr domain, const char *uuid)
+{
+  const char *name = g_hash_table_lookup (cache->names, uuid);
+  if (name)
+    return name;
+  char *title = virDomainGetMetadata (domain, VIR_DOMAIN_METADATA_TITLE, NULL, 0);
+  /* An empty entry caches a missing title; the handle's name remains the fallback. */
+  if (!title)
+    title = g_strdup ("");
+  g_hash_table_insert (cache->names, g_strdup (uuid), title);
+  return title;
 }
 
 static const char *
@@ -153,7 +171,12 @@ pirwa_inventory_read_cached (virConnectPtr connection, PirwaInventoryCache *cach
           goto cleanup;
         }
 
-      PirwaMachine *machine = pirwa_machine_new_full (uuid, name, state_label (state), state);
+      g_autofree char *title
+          = cache ? NULL
+                  : virDomainGetMetadata (records[i]->dom, VIR_DOMAIN_METADATA_TITLE, NULL, 0);
+      const char *label = cache ? display_name (cache, records[i]->dom, uuid) : title;
+      PirwaMachine *machine = pirwa_machine_new_full (uuid, label && *label ? label : name,
+                                                      state_label (state), state);
       if (cache)
         {
           pirwa_machine_set_os_name (machine, os_name (cache, records[i]->dom, uuid));
@@ -166,10 +189,14 @@ pirwa_inventory_read_cached (virConnectPtr connection, PirwaInventoryCache *cach
     {
       GHashTableIter iter;
       gpointer key;
-      g_hash_table_iter_init (&iter, cache->os_names);
-      while (g_hash_table_iter_next (&iter, &key, NULL))
-        if (!g_hash_table_contains (seen, key))
-          g_hash_table_iter_remove (&iter);
+      GHashTable *tables[] = { cache->os_names, cache->names };
+      for (guint i = 0; i < G_N_ELEMENTS (tables); i++)
+        {
+          g_hash_table_iter_init (&iter, tables[i]);
+          while (g_hash_table_iter_next (&iter, &key, NULL))
+            if (!g_hash_table_contains (seen, key))
+              g_hash_table_iter_remove (&iter);
+        }
     }
 
   g_ptr_array_sort (machines, compare_machines);

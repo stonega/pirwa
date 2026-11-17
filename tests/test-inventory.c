@@ -4,6 +4,20 @@
 #include "pirwa-libvirt.h"
 #include <glib/gstdio.h>
 
+static guint title_reads;
+char *__real_virDomainGetMetadata (virDomainPtr domain, int type, const char *uri,
+                                   unsigned int flags);
+char *__wrap_virDomainGetMetadata (virDomainPtr domain, int type, const char *uri,
+                                   unsigned int flags);
+
+char *
+__wrap_virDomainGetMetadata (virDomainPtr domain, int type, const char *uri, unsigned int flags)
+{
+  if (type == VIR_DOMAIN_METADATA_TITLE)
+    title_reads++;
+  return __real_virDomainGetMetadata (domain, type, uri, flags);
+}
+
 typedef struct
 {
   GMainLoop *loop;
@@ -20,6 +34,72 @@ loaded (GObject *source, GAsyncResult *result, gpointer user_data)
   g_assert_true (g_thread_self () == load->caller);
   load->machines = pirwa_inventory_load_finish (result, &load->error);
   g_main_loop_quit (load->loop);
+}
+
+static void
+test_display_names (void)
+{
+  virConnectPtr connection = virConnectOpen ("test:///default");
+  g_assert_nonnull (connection);
+  virDomainPtr domains[2];
+  const char *uuids[]
+      = { "11111111-1111-4111-8111-111111111111", "22222222-2222-4222-8222-222222222222" };
+  for (guint i = 0; i < G_N_ELEMENTS (domains); i++)
+    {
+      g_autofree char *xml = g_strdup_printf (
+          "<domain type='test'><name>pirwa-%s</name><uuid>%s</uuid><title>test</title>"
+          "<memory unit='MiB'>512</memory><vcpu>1</vcpu><os><type>hvm</type></os></domain>",
+          uuids[i], uuids[i]);
+      domains[i] = virDomainDefineXML (connection, xml);
+      g_assert_nonnull (domains[i]);
+    }
+  PirwaInventoryCache *cache = pirwa_inventory_cache_new ();
+  g_autoptr (GError) error = NULL;
+  title_reads = 0;
+  for (guint round = 0; round < 2; round++)
+    {
+      g_autoptr (GPtrArray) machines
+          = pirwa_inventory_read_cached (connection, cache, NULL, &error);
+      g_assert_no_error (error);
+      g_assert_cmpuint (machines->len, ==, 3);
+      g_assert_cmpuint (title_reads, ==, 3);
+      for (guint i = 0; i < machines->len; i++)
+        {
+          PirwaMachine *machine = g_ptr_array_index (machines, i);
+          g_assert_cmpstr (pirwa_machine_get_name (machine), ==, "test");
+          if (i)
+            g_assert_cmpstr (pirwa_machine_get_uuid (g_ptr_array_index (machines, i - 1)), <,
+                             pirwa_machine_get_uuid (machine));
+        }
+    }
+  g_assert_cmpint (
+      virDomainSetMetadata (domains[0], VIR_DOMAIN_METADATA_TITLE, "Renamed & <VM>", NULL, NULL, 0),
+      ==, 0);
+  pirwa_inventory_cache_clear (cache);
+  for (guint round = 0; round < 2; round++)
+    {
+      g_autoptr (GPtrArray) machines
+          = pirwa_inventory_read_cached (connection, round ? NULL : cache, NULL, &error);
+      g_assert_no_error (error);
+      gboolean found = FALSE;
+      for (guint i = 0; i < machines->len; i++)
+        {
+          PirwaMachine *machine = g_ptr_array_index (machines, i);
+          if (g_str_equal (pirwa_machine_get_uuid (machine), uuids[0]))
+            {
+              found = TRUE;
+              g_assert_cmpstr (pirwa_machine_get_name (machine), ==, "Renamed & <VM>");
+            }
+        }
+      g_assert_true (found);
+    }
+  for (guint i = 0; i < G_N_ELEMENTS (domains); i++)
+    {
+      g_assert_cmpint (virDomainUndefine (domains[i]), ==, 0);
+      virDomainFree (domains[i]);
+    }
+  pirwa_inventory_cache_free (cache);
+  virConnectClose (connection);
 }
 
 static void
@@ -154,6 +234,7 @@ main (int argc, char **argv)
   g_setenv ("OSINFO_LOCAL_DIR", empty, TRUE);
   g_setenv ("OSINFO_USER_DIR", empty, TRUE);
   g_test_add_func ("/inventory/os-names-and-cache", test_os_names);
+  g_test_add_func ("/inventory/display-names-and-cache", test_display_names);
   g_test_add_func ("/inventory/discovery", test_discovery);
   g_test_add_func ("/inventory/cancelled", test_cancelled);
   g_test_add_func ("/inventory/connection-failure", test_connection_failure);

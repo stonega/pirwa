@@ -147,17 +147,22 @@ test_controls (void)
       g_assert_cmpint (pirwa_machine_get_state_code (find_test (reply)), ==, states[i]);
     }
   request.operation = PIRWA_EDIT;
-  request.options.name = "test";
+  request.options.name = "Renamed & <VM>";
   request.options.cpus = 3;
   request.options.memory_mb = 2048;
   g_autoptr (PirwaReply) edited = run (backend, &request, NULL, &error);
   g_assert_no_error (error);
   g_assert_nonnull (edited);
+  g_assert_cmpuint (edited->machines->len, ==, 1);
+  PirwaMachine *renamed = g_ptr_array_index (edited->machines, 0);
+  g_assert_cmpstr (pirwa_machine_get_uuid (renamed), ==, uuid);
+  g_assert_cmpstr (pirwa_machine_get_name (renamed), ==, request.options.name);
   request.operation = PIRWA_DETAILS;
   g_autoptr (PirwaReply) details = run (backend, &request, NULL, &error);
   g_assert_no_error (error);
   g_assert_cmpuint (details->details->cpus, ==, 3);
   g_assert_cmpuint (details->details->memory_mb, ==, 2048);
+  g_assert_cmpstr (details->details->name, ==, request.options.name);
   request.operation = PIRWA_REMOVE;
   request.delete_disk = TRUE;
   g_autoptr (PirwaReply) rejected = run (backend, &request, NULL, &error);

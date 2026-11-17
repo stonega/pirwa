@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pirwa\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-14 21:42+0800\n"
+"POT-Creation-Date: 2026-11-17 11:02+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31,7 +31,7 @@ msgstr ""
 msgid "%s/s"
 msgstr ""
 
-#: src/pirwa-window.c:163 src/pirwa-window.c:262 src/pirwa-window.c:2258
+#: src/pirwa-window.c:163 src/pirwa-window.c:262 src/pirwa-window.c:2260
 msgid "NET …"
 msgstr ""
 
@@ -67,7 +67,7 @@ msgstr ""
 msgid "Usage unavailable"
 msgstr ""
 
-#: src/pirwa-window.c:261 src/pirwa-window.c:2245
+#: src/pirwa-window.c:261 src/pirwa-window.c:2247
 msgid "Sampling usage…"
 msgstr ""
 
@@ -79,7 +79,7 @@ msgstr ""
 msgid "Preparing the machine’s display…"
 msgstr ""
 
-#: src/pirwa-window.c:427 src/pirwa-window.c:2143
+#: src/pirwa-window.c:427 src/pirwa-window.c:2145
 msgid "Select a Virtual Machine"
 msgstr ""
 
@@ -111,11 +111,11 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: src/pirwa-window.c:577 src/pirwa-window.c:1135
+#: src/pirwa-window.c:577 src/pirwa-window.c:1137
 msgid "Remove"
 msgstr ""
 
-#: src/pirwa-window.c:577 src/pirwa-window.c:1135
+#: src/pirwa-window.c:577 src/pirwa-window.c:1137
 msgid "Force Stop"
 msgstr ""
 
@@ -127,7 +127,7 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
-#: src/pirwa-window.c:824 src/pirwa-window.c:1170 src/pirwa-window.c:2017
+#: src/pirwa-window.c:824 src/pirwa-window.c:1172 src/pirwa-window.c:2019
 msgid "Preferences"
 msgstr ""
 
@@ -144,7 +144,7 @@ msgstr ""
 msgid "Not Now"
 msgstr ""
 
-#: src/pirwa-window.c:928 src/pirwa-window.c:1392 src/pirwa-window.c:1405
+#: src/pirwa-window.c:928 src/pirwa-window.c:1394 src/pirwa-window.c:1407
 msgid "The machine icon could not be saved."
 msgstr ""
 
@@ -160,278 +160,278 @@ msgstr ""
 msgid "Media ejected."
 msgstr ""
 
-#: src/pirwa-window.c:957
+#: src/pirwa-window.c:959
 msgid ""
 "Machine imported into Session. Select Start to check it. The original stays "
 "in Boxes."
 msgstr ""
 
-#: src/pirwa-window.c:959
+#: src/pirwa-window.c:961
 msgid "Virtual machine created and started."
 msgstr ""
 
-#: src/pirwa-window.c:1008
+#: src/pirwa-window.c:1010
 msgid "Working…"
 msgstr ""
 
-#: src/pirwa-window.c:1019
+#: src/pirwa-window.c:1021
 msgid "Cancel Import"
 msgstr ""
 
-#: src/pirwa-window.c:1024
+#: src/pirwa-window.c:1026
 msgid "Preparing import…"
 msgstr ""
 
-#: src/pirwa-window.c:1078
+#: src/pirwa-window.c:1080
 msgid "Loading resources…"
 msgstr ""
 
-#: src/pirwa-window.c:1130
+#: src/pirwa-window.c:1132
 msgid "Remove Virtual Machine?"
 msgstr ""
 
-#: src/pirwa-window.c:1130
+#: src/pirwa-window.c:1132
 msgid "Force Stop Virtual Machine?"
 msgstr ""
 
-#: src/pirwa-window.c:1131
+#: src/pirwa-window.c:1133
 msgid ""
 "The VM definition will be removed. Its storage is kept unless you explicitly "
 "choose to delete the verified Pirwa disk."
 msgstr ""
 
-#: src/pirwa-window.c:1133
+#: src/pirwa-window.c:1135
 msgid "Force stopping can lose unsaved work in the guest."
 msgstr ""
 
-#: src/pirwa-window.c:1134 src/pirwa-window.c:1548 src/pirwa-window.c:2221
-#: src/pirwa-create-dialog.c:732
+#: src/pirwa-window.c:1136 src/pirwa-window.c:1550 src/pirwa-window.c:2223
+#: src/pirwa-create-dialog.c:734
 msgid "Cancel"
 msgstr ""
 
-#: src/pirwa-window.c:1146
+#: src/pirwa-window.c:1148
 msgid "Also delete the verified Pirwa disk"
 msgstr ""
 
-#: src/pirwa-window.c:1174
+#: src/pirwa-window.c:1176
 msgid "General"
 msgstr ""
 
-#: src/pirwa-window.c:1177
+#: src/pirwa-window.c:1179
 msgid "Appearance"
 msgstr ""
 
-#: src/pirwa-window.c:1179
+#: src/pirwa-window.c:1181
 msgid "Style"
 msgstr ""
 
-#: src/pirwa-window.c:1181
+#: src/pirwa-window.c:1183
 msgid "Applies to all Pirwa windows for this session."
 msgstr ""
 
-#: src/pirwa-window.c:1182 src/pirwa-window.c:2028
+#: src/pirwa-window.c:1184 src/pirwa-window.c:2030
 msgid "System"
 msgstr ""
 
-#: src/pirwa-window.c:1182
+#: src/pirwa-window.c:1184
 msgid "Light"
 msgstr ""
 
-#: src/pirwa-window.c:1182
+#: src/pirwa-window.c:1184
 msgid "Dark"
 msgstr ""
 
-#: src/pirwa-window.c:1194
+#: src/pirwa-window.c:1196
 msgid "Viewer"
 msgstr ""
 
-#: src/pirwa-window.c:1197
+#: src/pirwa-window.c:1199
 msgid "Automatically adjust guest resolution"
 msgstr ""
 
-#: src/pirwa-window.c:1199
+#: src/pirwa-window.c:1201
 msgid ""
 "Match the guest resolution to the viewer when resizing. Requires a SPICE "
 "guest agent."
 msgstr ""
 
-#: src/pirwa-window.c:1206
+#: src/pirwa-window.c:1208
 msgid "Network"
 msgstr ""
 
-#: src/pirwa-window.c:1208
+#: src/pirwa-window.c:1210
 msgid "Use host proxy"
 msgstr ""
 
-#: src/pirwa-window.c:1211
+#: src/pirwa-window.c:1213
 msgid ""
 "Use the manual desktop proxy for Session machines without guest setup. "
 "Applies on the next start. Supports IPv4 TCP and DNS; other UDP is blocked."
 msgstr ""
 
-#: src/pirwa-window.c:1234
+#: src/pirwa-window.c:1236
 msgid "Pirwa Contributors"
 msgstr ""
 
-#: src/pirwa-window.c:1235
+#: src/pirwa-window.c:1237
 msgid "Manage local virtual machines"
 msgstr ""
 
-#: src/pirwa-window.c:1480
+#: src/pirwa-window.c:1482
 msgid "Virtual Machine Settings"
 msgstr ""
 
-#: src/pirwa-window.c:1497 src/pirwa-create-dialog.c:591
+#: src/pirwa-window.c:1499 src/pirwa-create-dialog.c:592
 msgid "Machine Icon"
 msgstr ""
 
-#: src/pirwa-window.c:1506 src/pirwa-create-dialog.c:630
-#: src/pirwa-create-dialog.c:663
+#: src/pirwa-window.c:1508 src/pirwa-create-dialog.c:631
+#: src/pirwa-create-dialog.c:664
 msgid "Resources"
 msgstr ""
 
-#: src/pirwa-window.c:1509
+#: src/pirwa-window.c:1511
 msgid "Power off the machine to change its resources."
 msgstr ""
 
-#: src/pirwa-window.c:1513 src/pirwa-create-dialog.c:582
-#: src/pirwa-create-dialog.c:657
+#: src/pirwa-window.c:1515 src/pirwa-create-dialog.c:583
+#: src/pirwa-create-dialog.c:658 src/pirwa-create-dialog.c:785
 msgid "Name"
 msgstr ""
 
-#: src/pirwa-window.c:1516 src/pirwa-create-dialog.c:631
+#: src/pirwa-window.c:1518 src/pirwa-create-dialog.c:632
 msgid "Virtual CPUs"
 msgstr ""
 
-#: src/pirwa-window.c:1517 src/pirwa-create-dialog.c:632
+#: src/pirwa-window.c:1519 src/pirwa-create-dialog.c:633
 msgid "Memory (MiB)"
 msgstr ""
 
-#: src/pirwa-window.c:1521
+#: src/pirwa-window.c:1523
 msgid "Eject installation media"
 msgstr ""
 
-#: src/pirwa-window.c:1551
+#: src/pirwa-window.c:1553
 msgid "Save Changes"
 msgstr ""
 
-#: src/pirwa-window.c:1927 src/pirwa-window.c:1929 src/pirwa-window.c:2081
+#: src/pirwa-window.c:1929 src/pirwa-window.c:1931 src/pirwa-window.c:2083
 #: src/pirwa-create-dialog.c:203 src/pirwa-create-dialog.c:205
-#: src/pirwa-create-dialog.c:712
+#: src/pirwa-create-dialog.c:713
 msgid "New Virtual Machine"
 msgstr ""
 
-#: src/pirwa-window.c:1933
+#: src/pirwa-window.c:1935
 msgid "Shut Down"
 msgstr ""
 
-#: src/pirwa-window.c:1934
+#: src/pirwa-window.c:1936
 msgid "Restart"
 msgstr ""
 
-#: src/pirwa-window.c:1935
+#: src/pirwa-window.c:1937
 msgid "Pause"
 msgstr ""
 
-#: src/pirwa-window.c:1936
+#: src/pirwa-window.c:1938
 msgid "Resume"
 msgstr ""
 
-#: src/pirwa-window.c:1937
+#: src/pirwa-window.c:1939
 msgid "Open Console"
 msgstr ""
 
-#: src/pirwa-window.c:1938 src/pirwa-console.c:1048
+#: src/pirwa-window.c:1940 src/pirwa-console.c:1112
 msgid "Release Input"
 msgstr ""
 
-#: src/pirwa-window.c:1939
+#: src/pirwa-window.c:1941
 msgid "Open in Separate Window"
 msgstr ""
 
-#: src/pirwa-window.c:2014 src/pirwa-boxes-dialog.c:177
+#: src/pirwa-window.c:2016 src/pirwa-boxes-dialog.c:177
 msgid "Import from Boxes Flatpak"
 msgstr ""
 
-#: src/pirwa-window.c:2018
+#: src/pirwa-window.c:2020
 msgid "About Pirwa"
 msgstr ""
 
-#: src/pirwa-window.c:2024 src/pirwa-window.c:2026
+#: src/pirwa-window.c:2026 src/pirwa-window.c:2028
 msgid "Main Menu"
 msgstr ""
 
-#: src/pirwa-window.c:2028
+#: src/pirwa-window.c:2030
 msgid "Session"
 msgstr ""
 
-#: src/pirwa-window.c:2034 src/pirwa-window.c:2036
+#: src/pirwa-window.c:2036 src/pirwa-window.c:2038
 msgid "Choose the local libvirt connection"
 msgstr ""
 
-#: src/pirwa-window.c:2043
+#: src/pirwa-window.c:2045
 msgid "Connection"
 msgstr ""
 
-#: src/pirwa-window.c:2053 src/pirwa-window.c:2055
+#: src/pirwa-window.c:2055 src/pirwa-window.c:2057
 msgid "Search Virtual Machines"
 msgstr ""
 
-#: src/pirwa-window.c:2070
+#: src/pirwa-window.c:2072
 msgid "Loading virtual machines"
 msgstr ""
 
-#: src/pirwa-window.c:2075
+#: src/pirwa-window.c:2077
 msgid "No Virtual Machines"
 msgstr ""
 
-#: src/pirwa-window.c:2078
+#: src/pirwa-window.c:2080
 msgid "Create a Linux virtual machine or import a standalone qcow2 image."
 msgstr ""
 
-#: src/pirwa-window.c:2084
+#: src/pirwa-window.c:2086
 msgid "Connection Unavailable"
 msgstr ""
 
-#: src/pirwa-window.c:2086
+#: src/pirwa-window.c:2088
 msgid "Reconnect"
 msgstr ""
 
-#: src/pirwa-window.c:2152
+#: src/pirwa-window.c:2154
 msgid "Starting virtual machine"
 msgstr ""
 
-#: src/pirwa-window.c:2168 src/pirwa-window.c:2171
+#: src/pirwa-window.c:2170 src/pirwa-window.c:2173
 msgid "Start"
 msgstr ""
 
-#: src/pirwa-window.c:2195
+#: src/pirwa-window.c:2197
 msgid "Viewer is in a separate window"
 msgstr ""
 
-#: src/pirwa-window.c:2201
+#: src/pirwa-window.c:2203
 msgid "Bring Viewer Back"
 msgstr ""
 
-#: src/pirwa-window.c:2244
+#: src/pirwa-window.c:2246
 msgid "Selected VM’s configured CPU count and memory"
 msgstr ""
 
-#: src/pirwa-window.c:2254
+#: src/pirwa-window.c:2256
 msgid ""
 "Selected VM usage. CPU 100% equals one host CPU; multiple CPUs can exceed "
 "100%. RAM is the VM process’s resident memory (RSS), including overhead. "
 "Updates every two seconds while this window is visible."
 msgstr ""
 
-#: src/pirwa-window.c:2268
+#: src/pirwa-window.c:2270
 msgid ""
 "Selected VM network usage. Down arrow: received bytes per second. Up arrow: "
 "transmitted bytes per second. Rates include all VM interfaces. Updates every "
 "two seconds while this window is visible."
 msgstr ""
 
-#: src/pirwa-window.c:2317
+#: src/pirwa-window.c:2319
 msgid "Test Driver"
 msgstr ""
 
@@ -551,7 +551,7 @@ msgstr ""
 msgid "Drop your disk image here"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:319 src/pirwa-create-dialog.c:543
+#: src/pirwa-create-dialog.c:319 src/pirwa-create-dialog.c:544
 msgid "Drop your ISO here"
 msgstr ""
 
@@ -559,7 +559,7 @@ msgstr ""
 msgid "Import a standalone qcow2 image."
 msgstr ""
 
-#: src/pirwa-create-dialog.c:322 src/pirwa-create-dialog.c:550
+#: src/pirwa-create-dialog.c:322 src/pirwa-create-dialog.c:551
 msgid "Choose a bootable Linux or Windows installation image."
 msgstr ""
 
@@ -567,7 +567,7 @@ msgstr ""
 msgid "Choose a Disk Image…"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:324 src/pirwa-create-dialog.c:556
+#: src/pirwa-create-dialog.c:324 src/pirwa-create-dialog.c:557
 msgid "Choose an ISO…"
 msgstr ""
 
@@ -601,155 +601,147 @@ msgstr ""
 msgid "Create and Boot"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:415 src/pirwa-create-dialog.c:735
+#: src/pirwa-create-dialog.c:415 src/pirwa-create-dialog.c:737
 msgid "Continue"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:469 src/pirwa-create-dialog.c:772
+#: src/pirwa-create-dialog.c:469 src/pirwa-create-dialog.c:774
 msgid "Preparing machine…"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:535
+#: src/pirwa-create-dialog.c:536
 msgid "Choose an Installation Image"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:536
+#: src/pirwa-create-dialog.c:537
 msgid "Start with a local ISO to install your operating system."
 msgstr ""
 
-#: src/pirwa-create-dialog.c:567
+#: src/pirwa-create-dialog.c:568
 msgid "Import an Existing Disk"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:569
+#: src/pirwa-create-dialog.c:570
 msgid "Copy a standalone qcow2 image into a new machine."
 msgstr ""
 
-#: src/pirwa-create-dialog.c:578
+#: src/pirwa-create-dialog.c:579
 msgid "Name Your Machine"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:579
+#: src/pirwa-create-dialog.c:580
 msgid "We’ve suggested a name from your image. Make it your own."
 msgstr ""
 
-#: src/pirwa-create-dialog.c:587
+#: src/pirwa-create-dialog.c:588
 msgid "Use 1–80 characters without slashes."
 msgstr ""
 
-#: src/pirwa-create-dialog.c:600
+#: src/pirwa-create-dialog.c:601
 msgid "Configure Your Machine"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:601
+#: src/pirwa-create-dialog.c:602
 msgid "Adjust its resources before the first boot."
 msgstr ""
 
-#: src/pirwa-create-dialog.c:603
+#: src/pirwa-create-dialog.c:604
 msgid "Guest Operating System"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:606
+#: src/pirwa-create-dialog.c:607
 msgid ""
 "Windows support is experimental. During Windows Setup, load the storage "
 "driver from the virtio-win ISO, then install its network and guest tools."
 msgstr ""
 
-#: src/pirwa-create-dialog.c:609 src/pirwa-create-dialog.c:661
+#: src/pirwa-create-dialog.c:610 src/pirwa-create-dialog.c:662
 msgid "Operating system"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:610
+#: src/pirwa-create-dialog.c:611
 msgid "Linux"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:610
+#: src/pirwa-create-dialog.c:611
 msgid "Windows 10"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:610
+#: src/pirwa-create-dialog.c:611
 msgid "Windows 11"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:615
+#: src/pirwa-create-dialog.c:616
 msgid "VirtIO Driver ISO"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:617
+#: src/pirwa-create-dialog.c:618
 msgid "Choose or drop a local virtio-win ISO."
 msgstr ""
 
-#: src/pirwa-create-dialog.c:618
+#: src/pirwa-create-dialog.c:619
 msgid "Choose…"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:633
+#: src/pirwa-create-dialog.c:634
 msgid "Disk capacity (GiB)"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:636
+#: src/pirwa-create-dialog.c:637
 msgid "Storage and Firmware"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:638
+#: src/pirwa-create-dialog.c:639
 msgid "Directory storage pool"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:643
+#: src/pirwa-create-dialog.c:644
 msgid "Use Legacy BIOS"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:645
+#: src/pirwa-create-dialog.c:646
 msgid "Enable for an image installed with legacy firmware."
 msgstr ""
 
-#: src/pirwa-create-dialog.c:654
+#: src/pirwa-create-dialog.c:655
 msgid "Ready to Boot"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:655
+#: src/pirwa-create-dialog.c:656
 msgid "Create your machine and boot it right away."
 msgstr ""
 
-#: src/pirwa-create-dialog.c:660
+#: src/pirwa-create-dialog.c:661 src/pirwa-create-dialog.c:785
 msgid "Image"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:662
+#: src/pirwa-create-dialog.c:663
 msgid "Driver ISO"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:664
+#: src/pirwa-create-dialog.c:665
 msgid "Storage"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:665
+#: src/pirwa-create-dialog.c:666
 msgid "Firmware"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:667
+#: src/pirwa-create-dialog.c:668
 msgid ""
 "A new disk is allocated in the selected pool. Imported images keep their "
 "original capacity and are copied; the source stays unchanged."
 msgstr ""
 
-#: src/pirwa-create-dialog.c:783
-msgid "1 Image"
+#: src/pirwa-create-dialog.c:785
+msgid "Config"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:783
-msgid "2 Name"
+#: src/pirwa-create-dialog.c:785
+msgid "Boot"
 msgstr ""
 
-#: src/pirwa-create-dialog.c:783
-msgid "3 Config"
-msgstr ""
-
-#: src/pirwa-create-dialog.c:783
-msgid "4 Boot"
-msgstr ""
-
-#: src/pirwa-create-dialog.c:825
+#: src/pirwa-create-dialog.c:837
 msgid "No active directory pool. Add one in libvirt, then refresh."
 msgstr ""
 
@@ -816,86 +808,86 @@ msgstr ""
 msgid "Import Machine"
 msgstr ""
 
-#: src/pirwa-inventory.c:72
+#: src/pirwa-inventory.c:90
 msgid "Running"
 msgstr ""
 
-#: src/pirwa-inventory.c:74
+#: src/pirwa-inventory.c:92
 msgid "Blocked"
 msgstr ""
 
-#: src/pirwa-inventory.c:76
+#: src/pirwa-inventory.c:94
 msgid "Paused"
 msgstr ""
 
-#: src/pirwa-inventory.c:78
+#: src/pirwa-inventory.c:96
 msgid "Shutting down"
 msgstr ""
 
-#: src/pirwa-inventory.c:80
+#: src/pirwa-inventory.c:98
 msgid "Powered off"
 msgstr ""
 
-#: src/pirwa-inventory.c:82
+#: src/pirwa-inventory.c:100
 msgid "Crashed"
 msgstr ""
 
-#: src/pirwa-inventory.c:84
+#: src/pirwa-inventory.c:102
 msgid "Suspended"
 msgstr ""
 
-#: src/pirwa-inventory.c:86
+#: src/pirwa-inventory.c:104
 msgid "Unknown"
 msgstr ""
 
-#: src/pirwa-console.c:390
+#: src/pirwa-console.c:331 src/pirwa-console.c:481 src/pirwa-console.c:726
+msgid "Connecting to display"
+msgstr ""
+
+#: src/pirwa-console.c:331 src/pirwa-console.c:726
+msgid "Waiting for the machine’s first frame…"
+msgstr ""
+
+#: src/pirwa-console.c:421
 msgid "Unsupported display"
 msgstr ""
 
-#: src/pirwa-console.c:391
+#: src/pirwa-console.c:422
 msgid "This console supports RGB displays up to 8192 × 8192 pixels."
 msgstr ""
 
-#: src/pirwa-console.c:448
+#: src/pirwa-console.c:479
 #, c-format
 msgid ""
 "%s\n"
 "Reconnecting automatically…"
 msgstr ""
 
-#: src/pirwa-console.c:449
+#: src/pirwa-console.c:480
 msgid "Reconnecting automatically…"
 msgstr ""
 
-#: src/pirwa-console.c:450 src/pirwa-console.c:690
-msgid "Connecting to display"
-msgstr ""
-
-#: src/pirwa-console.c:461
+#: src/pirwa-console.c:492
 msgid "The machine has not sent a display frame yet."
 msgstr ""
 
-#: src/pirwa-console.c:690
-msgid "Waiting for the machine’s first frame…"
-msgstr ""
-
-#: src/pirwa-console.c:694
+#: src/pirwa-console.c:730
 msgid "Cannot open display"
 msgstr ""
 
-#: src/pirwa-console.c:719
+#: src/pirwa-console.c:757
 msgid "Machine is stopped"
 msgstr ""
 
-#: src/pirwa-console.c:719
+#: src/pirwa-console.c:757
 msgid "The display will reconnect when it starts."
 msgstr ""
 
-#: src/pirwa-console.c:1049
+#: src/pirwa-console.c:1113
 msgid "Release keyboard and pointer (Ctrl+Alt)"
 msgstr ""
 
-#: src/pirwa-console.c:1053
+#: src/pirwa-console.c:1117
 msgid "Toggle Fullscreen"
 msgstr ""
 

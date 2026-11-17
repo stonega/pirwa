@@ -215,11 +215,15 @@ test_copy (Fixture *f, gconstpointer data)
   g_assert_cmpstr (uuid, !=, source_uuid);
   virDomainPtr copy = virDomainLookupByUUIDString (f->destination, uuid);
   g_assert_nonnull (copy);
+  g_autofree char *internal_name = g_strdup_printf ("pirwa-%s", uuid);
+  g_assert_cmpstr (virDomainGetName (copy), ==, internal_name);
   g_assert_cmpint (virDomainIsActive (copy), ==, 0);
   g_autofree char *xml = virDomainGetXMLDesc (copy, VIR_DOMAIN_XML_INACTIVE);
   g_autoptr (PirwaDetails) details = pirwa_config_parse (xml, &error);
   g_assert_no_error (error);
   g_assert_true (pirwa_provision_owned (f->destination, uuid, details));
+  g_autofree char *display_name = g_strdup_printf ("Boxes Example (Imported %.8s)", uuid);
+  g_assert_cmpstr (details->name, ==, display_name);
   g_assert_cmpuint (details->cpus, ==, 2);
   g_assert_cmpuint (details->memory_mb, ==, 512);
   g_assert_cmpstr (details->disk_path, !=, f->disk);

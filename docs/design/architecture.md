@@ -37,6 +37,16 @@ an argument array, connection URI, and domain UUID.
 
 ## Model and work queue
 
+VM identity is the connection URI and UUID. New definitions use `pirwa-<uuid>`
+as libvirt's unique internal name and store the user's display name in `<title>`.
+Display names can repeat. Inventory, settings and native console titles prefer
+`<title>`, falling back to the libvirt name for older or external definitions.
+Renaming changes only the title, including for older machines; discovery never
+rewrites their definitions. Display titles, including missing titles, are cached
+by UUID alongside OS names, so repeated state refreshes add no title queries.
+The cache is cleared on definition events, explicit refresh, reconnect and edits,
+and removed UUIDs are pruned.
+
 Workers produce owned snapshots. The main thread reconciles them against
 canonical GObjects identified by connection and UUID. State changes update
 existing objects; list insertions/removals replace only the differing range.
@@ -243,7 +253,7 @@ progress and cancellation; errors remain visible and allow retry. A foreground
 application hold covers the operation and rollback.
 
 `pirwa-import.c` prepares an independent definition, preserving guest hardware
-and OS metadata while assigning a new UUID/name/MAC, ejecting installation media,
+and OS metadata while assigning a new UUID/internal name/MAC, ejecting installation media,
 and clearing source-specific emulator, security labels and display socket paths.
 The supported layout is one standalone qcow2 disk with user networking. TPM,
 snapshots, backing chains, shared folders, passthrough and custom host dependencies
@@ -285,7 +295,9 @@ The backend thread cleans up independently without blocking GTK on join.
 native libadwaita dialog. Page headings retain the desktop font and `title-1` size
 with bold weight (700), avoiding the crowded Latin lettering produced by the
 default extra-bold weight with Noto Sans CJK HK. See the UI rules in `AGENTS.md`.
-A bottom step bar highlights the current page in gray
+Each bottom step button pairs a symbolic icon with its
+name: a disc for Image, a pencil for Name, settings for Config, and play for Boot.
+The bottom step bar highlights the current page in gray
 and lets users return directly to earlier pages; later pages require Continue so
 validation cannot be skipped. One highlight slides between buttons using a 240 ms
 libadwaita animation, starting from its current position when navigation interrupts
@@ -298,7 +310,8 @@ local ISO through a file picker or file drop, with an explicit qcow2 import mode
 After selection, the filename and full path replace the instructions inside the
 drop area, above Choose Another File. Switching import mode restores the prompts.
 The image basename supplies an editable default name; changing the source
-preserves a custom name.
+preserves a custom name. That name is a display label and may match another VM;
+the worker gives each new machine an independent UUID and internal libvirt name.
 Step navigation retains all inputs. Configuration requires a storage pool, and
 the final review submits one create request through the existing backend queue.
 During creation the inputs are disabled, progress remains visible, and Cancel
@@ -373,8 +386,9 @@ evidence and reports the error.
 Cross-client storage changes cannot be made atomic with libvirt; callers should
 not concurrently reassign disks while confirming deletion.
 
-Resource edits preserve unrelated XML. Renaming rolls back if redefining
-resources fails. CPU topology is normalized to one socket and the chosen core
+Resource edits preserve unrelated XML. The display title and resources are
+saved in one definition update, retaining the internal name and UUID.
+CPU topology is normalized to one socket and the chosen core
 count. Advanced CPU pinning, hotplug layouts, snapshots, or unusual domain
 configuration can be rejected by libvirt rather than silently stripped.
 

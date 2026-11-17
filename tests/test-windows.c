@@ -275,6 +275,49 @@ test_start_rollback (Fixture *fixture, gconstpointer data)
 }
 
 static void
+test_duplicate_names (Fixture *fixture, gconstpointer data)
+{
+  (void)data;
+  fixture->options.name = "test";
+  virDomainPtr original = virDomainLookupByName (fixture->connection, "test");
+  g_assert_nonnull (original);
+  g_autofree char *before = virDomainGetXMLDesc (original, VIR_DOMAIN_XML_INACTIVE);
+  char *uuids[2] = { NULL, NULL };
+  g_autoptr (GError) error = NULL;
+  for (guint i = 0; i < G_N_ELEMENTS (uuids); i++)
+    {
+      uuids[i] = pirwa_provision_create (fixture->connection, &fixture->options, NULL, NULL, NULL,
+                                         &error);
+      g_assert_no_error (error);
+      g_assert_nonnull (uuids[i]);
+      virDomainPtr domain = virDomainLookupByUUIDString (fixture->connection, uuids[i]);
+      g_assert_nonnull (domain);
+      g_autofree char *expected = g_strdup_printf ("pirwa-%s", uuids[i]);
+      g_assert_cmpstr (virDomainGetName (domain), ==, expected);
+      g_autofree char *title = virDomainGetMetadata (domain, VIR_DOMAIN_METADATA_TITLE, NULL, 0);
+      g_assert_cmpstr (title, ==, "test");
+      virDomainFree (domain);
+    }
+  g_assert_cmpstr (uuids[0], !=, uuids[1]);
+  g_assert_cmpuint (allocations, ==, 2);
+  g_assert_cmpint (virStoragePoolNumOfVolumes (fixture->pool), ==, 2);
+  g_autofree char *after = virDomainGetXMLDesc (original, VIR_DOMAIN_XML_INACTIVE);
+  g_assert_cmpstr (after, ==, before);
+  virDomainFree (original);
+  for (guint i = 0; i < G_N_ELEMENTS (uuids); i++)
+    {
+      virDomainPtr domain = virDomainLookupByUUIDString (fixture->connection, uuids[i]);
+      g_assert_nonnull (domain);
+      g_assert_cmpint (virDomainDestroy (domain), ==, 0);
+      g_assert_true (
+          pirwa_provision_remove (fixture->connection, domain, uuids[i], TRUE, NULL, &error));
+      g_assert_no_error (error);
+      virDomainFree (domain);
+      g_free (uuids[i]);
+    }
+}
+
+static void
 test_preflight (Fixture *fixture, gconstpointer data)
 {
   switch (GPOINTER_TO_INT (data))
@@ -322,6 +365,8 @@ main (int argc, char **argv)
   g_test_add ("/windows/create-delete", Fixture, GINT_TO_POINTER (TRUE), setup, test_create_remove,
               teardown);
   g_test_add ("/windows/start-rollback", Fixture, NULL, setup, test_start_rollback, teardown);
+  g_test_add ("/windows/duplicate-display-names", Fixture, NULL, setup, test_duplicate_names,
+              teardown);
   const char *names[]
       = { "host", "architecture", "profile", "linux-profile", "driver-iso", "symlink" };
   for (guint i = 0; i < G_N_ELEMENTS (names); i++)

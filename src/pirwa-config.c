@@ -248,8 +248,10 @@ pirwa_config_domain (const PirwaCreate *o, const char *uuid, const char *disk_pa
   xmlNode *root = xmlNewNode (NULL, BAD_CAST "domain");
   xmlDocSetRootElement (doc, root);
   attribute (root, "type", "kvm");
-  element (root, "name", o->name);
+  g_autofree char *internal_name = g_strdup_printf ("pirwa-%s", uuid);
+  element (root, "name", internal_name);
   element (root, "uuid", uuid);
+  element (root, "title", o->name);
   g_autofree char *ram = g_strdup_printf ("%u", o->memory_mb);
   g_autofree char *cpus = g_strdup_printf ("%u", o->cpus);
   attribute (element (root, "memory", ram), "unit", "MiB");
@@ -450,7 +452,9 @@ pirwa_config_parse (const char *xml, GError **error)
   if (!doc)
     return NULL;
   PirwaDetails *details = g_new0 (PirwaDetails, 1);
-  details->name = value (doc, "/domain/name");
+  details->name = value (doc, "/domain/title");
+  if (!details->name)
+    details->name = value (doc, "/domain/name");
   details->disk_path = value (doc, "/domain/devices/disk[@device='disk']/source/@file");
   details->pool_uuid = value (doc, "/domain/metadata/p:managed[@version='1']/p:volume/@pool");
   details->volume_key = value (doc, "/domain/metadata/p:managed[@version='1']/p:volume/@key");
@@ -500,8 +504,13 @@ pirwa_config_edit (const char *xml, const char *name, guint cpus, guint memory_m
   xmlDoc *doc = parse (xml, error);
   if (!doc)
     return NULL;
-  const char *paths[] = { "/domain/name", "/domain/vcpu", "/domain/memory", "/domain/currentMemory",
-                          "/domain/maxMemory" };
+  xmlXPathObject *title = query (doc, "/domain/title");
+  if (!title || !title->nodesetval || !title->nodesetval->nodeNr)
+    element (xmlDocGetRootElement (doc), "title", NULL);
+  if (title)
+    xmlXPathFreeObject (title);
+  const char *paths[] = { "/domain/title", "/domain/vcpu", "/domain/memory",
+                          "/domain/currentMemory", "/domain/maxMemory" };
   g_autofree char *ram = g_strdup_printf ("%u", memory_mb);
   g_autofree char *count = g_strdup_printf ("%u", cpus);
   for (guint i = 0; i < G_N_ELEMENTS (paths); i++)

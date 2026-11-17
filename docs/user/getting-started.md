@@ -209,7 +209,12 @@ Choose the + button (New Virtual Machine), then follow the four steps:
 3. **Config:** choose the operating system, CPU count, memory, disk capacity, storage pool, and firmware.
 4. **Boot:** review the settings and choose **Create and Boot**.
 
-Choose **Continue** at the top right to advance. A gray highlight in the bottom
+Machine names are display labels, so you can create multiple machines with the
+same name, including from the same installation image. Each has its own identity
+and disk. Renaming a machine later keeps that identity and disk.
+
+Each step in the bottom bar has an icon beside its name. Choose **Continue** at
+the top right to advance. A gray highlight in the bottom
 bar slides to the current step; click an earlier step to return to it. Your edits
 are retained. The session
 connection can create a private pool named pirwa. System mode requires an

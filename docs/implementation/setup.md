@@ -151,6 +151,14 @@ Default checks cover inventory, configuration, stable model reconciliation,
 backend behavior, storage rollback/reference protection, 1,000-domain scale, and
 desktop/AppStream metadata, plus Boxes Flatpak installation detection, discovery,
 preferences, import and cancellation.
+Identity regressions create two synthetic machines with the same display name,
+including a collision with an existing libvirt name, and verify independent
+UUIDs, internal names and storage. Inventory checks cover duplicate labels,
+legacy name fallback and cached title reads; backend edits retain the UUID while
+updating the displayed label. All use the test driver and private fixture files.
+The opt-in KVM test also expects duplicate display names to succeed. `qa-vm`
+accepts its legacy internal name marker, or a UUID-derived internal name with a
+QA display label and verified Pirwa disk ownership.
 None requires a display. `gio-unix-2.0` is an explicit GLib component dependency
 for desktop-entry detection; Fedora's existing glib2-devel package supplies it.
 The usage check covers CPU counter units, idle and multi-core values, network

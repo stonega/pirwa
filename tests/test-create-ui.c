@@ -54,8 +54,12 @@ find_row (GtkWidget *root, const char *title)
 static GtkWidget *
 find_button (GtkWidget *root, const char *label)
 {
-  if (GTK_IS_BUTTON (root) && g_strcmp0 (gtk_button_get_label (GTK_BUTTON (root)), label) == 0)
-    return root;
+  if (GTK_IS_BUTTON (root))
+    {
+      GtkWidget *text = find_type (root, GTK_TYPE_LABEL);
+      if (text && g_strcmp0 (gtk_label_get_text (GTK_LABEL (text)), label) == 0)
+        return root;
+    }
   for (GtkWidget *child = gtk_widget_get_first_child (root); child;
        child = gtk_widget_get_next_sibling (child))
     {
@@ -111,7 +115,7 @@ drop (AdwDialog *dialog, const char *uri, gboolean multiple)
 static void
 assert_step_alignment (AdwDialog *dialog)
 {
-  const char *labels[] = { "1 Image", "2 Name", "3 Config", "4 Boot" };
+  const char *labels[] = { "Image", "Name", "Config", "Boot" };
   GtkWidget *first = find_button (GTK_WIDGET (dialog), labels[0]);
   g_assert_nonnull (first);
   GtkWidget *bar = gtk_widget_get_parent (gtk_widget_get_parent (first));
@@ -216,9 +220,9 @@ test_wizard (void)
   GtkWindow *window = present (dialog);
   GtkWidget *next = g_object_get_data (G_OBJECT (dialog), "apply");
   g_assert_false (gtk_widget_is_sensitive (next));
-  g_assert_false (gtk_widget_is_sensitive (find_button (GTK_WIDGET (dialog), "2 Name")));
-  g_assert_false (gtk_widget_is_sensitive (find_button (GTK_WIDGET (dialog), "3 Config")));
-  g_assert_false (gtk_widget_is_sensitive (find_button (GTK_WIDGET (dialog), "4 Boot")));
+  g_assert_false (gtk_widget_is_sensitive (find_button (GTK_WIDGET (dialog), "Name")));
+  g_assert_false (gtk_widget_is_sensitive (find_button (GTK_WIDGET (dialog), "Config")));
+  g_assert_false (gtk_widget_is_sensitive (find_button (GTK_WIDGET (dialog), "Boot")));
   snapshot (window, "1-image");
   g_assert_false (drop (dialog, "file:///pirwa-ui-fixture/Fedora.iso", TRUE));
   g_assert_false (drop (dialog, "https://example.org/Fedora.iso", FALSE));
@@ -249,13 +253,13 @@ test_wizard (void)
   g_assert_cmpstr (pirwa_create_dialog_get_avatar (PIRWA_CREATE_DIALOG (dialog)), ==, "cheerful");
   settle ();
   snapshot (window, "2-name");
-  GtkWidget *image_step = find_button (GTK_WIDGET (dialog), "1 Image");
+  GtkWidget *image_step = find_button (GTK_WIDGET (dialog), "Image");
   gtk_widget_set_state_flags (image_step, GTK_STATE_FLAG_PRELIGHT, FALSE);
   settle ();
   assert_step_alignment (dialog);
   snapshot (window, "2-name-hover");
   gtk_widget_unset_state_flags (image_step, GTK_STATE_FLAG_PRELIGHT);
-  click (dialog, "1 Image");
+  click (dialog, "Image");
   g_assert_true (drop (dialog, "file:///pirwa-ui-fixture/Replacement.iso", FALSE));
   click (dialog, "Continue");
   g_assert_cmpstr (gtk_editable_get_text (name), ==, "My Fedora <test> & VM");
@@ -270,7 +274,7 @@ test_wizard (void)
       adw_action_row_get_subtitle (ADW_ACTION_ROW (find_row (GTK_WIDGET (dialog), "Name"))), ==,
       "My Fedora <test> & VM");
   snapshot (window, "4-boot");
-  click (dialog, "1 Image");
+  click (dialog, "Image");
   click (dialog, "Continue");
   click (dialog, "Continue");
   g_assert_cmpfloat (
@@ -283,7 +287,7 @@ test_wizard (void)
   click (dialog, "Create and Boot");
   g_assert_cmpuint (requests, ==, 1);
   g_assert_false (gtk_widget_is_sensitive (next));
-  const char *steps[] = { "1 Image", "2 Name", "3 Config", "4 Boot" };
+  const char *steps[] = { "Image", "Name", "Config", "Boot" };
   for (guint i = 0; i < G_N_ELEMENTS (steps); i++)
     g_assert_false (gtk_widget_is_sensitive (find_button (GTK_WIDGET (dialog), steps[i])));
   g_signal_emit_by_name (next, "clicked");
@@ -316,11 +320,11 @@ test_import (void)
   click (dialog, "Continue");
   GtkEditable *name = GTK_EDITABLE (find_row (GTK_WIDGET (dialog), "Name"));
   g_assert_cmpstr (gtk_editable_get_text (name), ==, "Original");
-  click (dialog, "1 Image");
+  click (dialog, "Image");
   g_assert_true (drop (dialog, "file:///pirwa-ui-fixture/Another.iso", FALSE));
   click (dialog, "Continue");
   g_assert_cmpstr (gtk_editable_get_text (name), ==, "Another");
-  click (dialog, "1 Image");
+  click (dialog, "Image");
   adw_switch_row_set_active (
       ADW_SWITCH_ROW (find_row (GTK_WIDGET (dialog), "Import an Existing Disk")), TRUE);
   g_assert_false (gtk_widget_is_sensitive (g_object_get_data (G_OBJECT (dialog), "apply")));
@@ -389,7 +393,7 @@ test_windows (void)
       adw_action_row_get_subtitle (ADW_ACTION_ROW (find_row (GTK_WIDGET (dialog), "Driver ISO"))),
       ==, "/pirwa-ui-fixture/virtio-win.iso");
   snapshot (window, "8-windows-boot");
-  click (dialog, "3 Config");
+  click (dialog, "Config");
   adw_combo_row_set_selected (ADW_COMBO_ROW (guest), PIRWA_GUEST_WINDOWS_10);
   g_assert_true (gtk_widget_is_sensitive (bios));
   adw_combo_row_set_selected (ADW_COMBO_ROW (guest), PIRWA_GUEST_WINDOWS_11);
@@ -411,7 +415,7 @@ test_missing_pool (void)
   click (dialog, "Continue");
   click (dialog, "Continue");
   g_assert_false (gtk_widget_is_sensitive (g_object_get_data (G_OBJECT (dialog), "apply")));
-  click (dialog, "2 Name");
+  click (dialog, "Name");
   click (dialog, "Cancel");
   gtk_window_destroy (window);
 }
