@@ -11,8 +11,8 @@ On 2026-11-16 the empty COPR project and GitHub `release` environment were
 created, and its `COPR_CONFIG` secret was configured. No development package
 was submitted or release published during this setup.
 
-The current patch release is [v0.1.2](v0.1.2.md); its
-[publication record](v0.1.2-validation.md) lists the verified packages and checks.
+The current patch release is [v0.1.3](v0.1.3.md); its
+[publication record](v0.1.3-validation.md) lists the verified packages and checks.
 The first release is v0.1.0;
 see its [release notes](v0.1.0.md) for scope and known limitations.
 The development version cannot be published by the helper.
