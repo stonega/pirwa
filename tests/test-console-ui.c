@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /* Explicit desktop QA with synthetic domains; never opens a real guest. */
+#include "pirwa-backend.h"
 #include "pirwa-console.h"
 #include "pirwa-display.h"
 #include "pirwa-preferences.h"
@@ -22,6 +23,64 @@ static GDBusConnection *desktop_bus;
 static char *keyboard_path;
 static guint focus_source;
 static gint64 focus_requested_at;
+static GTask *pending_eject;
+static PirwaRequest held_eject;
+static guint eject_attempt;
+static gint64 eject_frame;
+static gint64 eject_visible_at;
+static int eject_width;
+
+void __real_pirwa_backend_request_async (PirwaBackend *backend, const PirwaRequest *request,
+                                         GCancellable *cancel, GAsyncReadyCallback callback,
+                                         gpointer data);
+
+void
+__wrap_pirwa_backend_request_async (PirwaBackend *backend, const PirwaRequest *request,
+                                    GCancellable *cancel, GAsyncReadyCallback callback,
+                                    gpointer data)
+{
+  if (request->operation != PIRWA_EJECT)
+    {
+      __real_pirwa_backend_request_async (backend, request, cancel, callback, data);
+      return;
+    }
+  g_assert_null (pending_eject);
+  pending_eject = g_task_new (backend, cancel, callback, data);
+  held_eject = *request;
+  held_eject.uuid = g_strdup (request->uuid);
+  held_eject.media_source = g_strdup (request->media_source);
+  held_eject.media_target = g_strdup (request->media_target);
+  eject_visible_at = g_get_monotonic_time () + 750000;
+}
+
+static void
+eject_done (GObject *source, GAsyncResult *result, gpointer data)
+{
+  g_autoptr (GTask) task = data;
+  g_autoptr (GError) error = NULL;
+  PirwaReply *reply = pirwa_backend_request_finish (PIRWA_BACKEND (source), result, &error);
+  if (reply)
+    g_task_return_pointer (task, reply, (GDestroyNotify)pirwa_reply_free);
+  else
+    g_task_return_error (task, g_steal_pointer (&error));
+}
+
+static void
+complete_eject (gboolean fail)
+{
+  GTask *task = g_steal_pointer (&pending_eject);
+  if (fail)
+    {
+      g_task_return_new_error (task, G_IO_ERROR, G_IO_ERROR_FAILED, "Injected eject failure");
+      g_object_unref (task);
+    }
+  else
+    __real_pirwa_backend_request_async (g_task_get_source_object (task), &held_eject,
+                                        g_task_get_cancellable (task), eject_done, task);
+  g_free ((char *)held_eject.uuid);
+  g_free ((char *)held_eject.media_source);
+  g_free ((char *)held_eject.media_target);
+}
 
 static GVariant *
 keyboard_call (const char *method, GVariant *parameters)
@@ -518,15 +577,60 @@ advance (gpointer data)
         break;
       activate ("return-viewer");
       g_assert_true (find_type (GTK_WIDGET (window), PIRWA_TYPE_CONSOLE) == GTK_WIDGET (console));
+      eject_width = gtk_widget_get_width (find_action (GTK_WIDGET (window), "win.eject"));
       activate ("eject");
+      eject_frame
+          = gdk_frame_clock_get_frame_counter (gtk_widget_get_frame_clock (GTK_WIDGET (window)));
       step++;
       break;
     case 7:
+      if (pending_eject)
+        {
+          if (g_get_monotonic_time () < eject_visible_at)
+            break; /* Let the native spinner finish its initial fade-in. */
+          if (gdk_frame_clock_get_frame_counter (gtk_widget_get_frame_clock (GTK_WIDGET (window)))
+              <= eject_frame)
+            break;
+          GtkWidget *eject = find_action (GTK_WIDGET (window), "win.eject");
+          GtkSpinner *spinner = GTK_SPINNER (find_type (eject, GTK_TYPE_SPINNER));
+          g_assert_true (gtk_spinner_get_spinning (spinner));
+          g_assert_true (gtk_widget_get_mapped (GTK_WIDGET (spinner)));
+          g_assert_cmpint (gtk_widget_get_width (GTK_WIDGET (spinner)), >=, 16);
+          g_assert_cmpint (gtk_widget_get_height (GTK_WIDGET (spinner)), >=, 16);
+          g_autoptr (GdkPaintable) indicator = gtk_widget_paintable_new (GTK_WIDGET (spinner));
+          GtkSnapshot *snapshot = gtk_snapshot_new ();
+          gdk_paintable_snapshot (indicator, GDK_SNAPSHOT (snapshot), 16, 16);
+          g_autoptr (GskRenderNode) node = gtk_snapshot_free_to_node (snapshot);
+          g_assert_nonnull (node);
+          g_assert_false (gtk_widget_is_sensitive (eject));
+          g_assert_cmpint (gtk_widget_get_width (eject), ==, eject_width);
+          g_assert_true (g_str_has_prefix (gtk_widget_get_tooltip_text (eject), "Ejecting "));
+          GtkWidget *stage = find_label_prefix (GTK_WIDGET (window), "Working…");
+          g_assert_nonnull (stage);
+          g_assert_false (gtk_widget_is_visible (stage));
+          if (!save_snapshot (window,
+                              eject_attempt == 0 ? "eject-progress.png" : "eject-retry.png"))
+            break;
+          complete_eject (eject_attempt++ == 0);
+          break;
+        }
       if (!g_action_group_get_action_enabled (G_ACTION_GROUP (window), "new")
           || find_label_prefix (GTK_WIDGET (window), "Loading resources"))
         break;
+      if (eject_attempt == 1)
+        {
+          GtkWidget *eject = find_action (GTK_WIDGET (window), "win.eject");
+          g_assert_null (find_type (eject, GTK_TYPE_SPINNER));
+          g_assert_true (gtk_widget_get_mapped (find_type (eject, GTK_TYPE_IMAGE)));
+          g_assert_true (gtk_widget_is_sensitive (eject));
+          activate ("eject");
+          eject_frame = gdk_frame_clock_get_frame_counter (
+              gtk_widget_get_frame_clock (GTK_WIDGET (window)));
+          break;
+        }
       g_assert_false (gtk_widget_is_visible (find_action (GTK_WIDGET (window), "win.eject")));
       g_assert_false (g_action_group_get_action_enabled (G_ACTION_GROUP (window), "eject"));
+      g_assert_null (find_type (find_action (GTK_WIDGET (window), "win.eject"), GTK_TYPE_SPINNER));
       activate ("pop-out");
       gtk_window_close (window); /* An explicit popup survives its collection. */
       window = NULL;
@@ -545,7 +649,8 @@ advance (gpointer data)
                "preservation, missing-machine fallback, centered stopped-machine Start, "
                "hidden stopped header controls and resources, "
                "VM configuration and state in running header, embedded viewer, header actions, "
-               "mounted media name and eject, "
+               "mounted media name, eject spinner without layout shift or global progress, "
+               "eject failure recovery and retry, "
                "pop-out/return identity, fullscreen, "
                "selection changes, popup close, collection close, final session disposal\n");
       g_main_loop_quit (loop);

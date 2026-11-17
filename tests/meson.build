@@ -3,7 +3,8 @@ test('inventory', inventory_test, timeout: 30)
 
 executable('benchmark-inventory', 'benchmark-inventory.c', dependencies: core_dep)
 
-backend_test = executable('test-backend', 'test-backend.c', dependencies: core_dep)
+backend_test = executable('test-backend', 'test-backend.c', 'qa-media-driver.c', dependencies: core_dep,
+  link_args: ['-Wl,--wrap=virDomainUpdateDeviceFlags'])
 backend_environment = environment()
 backend_environment.prepend('PATH', meson.current_source_dir() / 'fixtures')
 test('backend', backend_test, timeout: 45, env: backend_environment)
@@ -101,7 +102,8 @@ if host_machine.system() == 'linux' and diagnostic_cc.has_function('mallinfo2', 
 endif
 
 # Explicit embedded/detached viewer lifecycle QA with synthetic domains only.
-executable('test-console-ui', 'test-console-ui.c', dependencies: ui_dep)
+executable('test-console-ui', 'test-console-ui.c', 'qa-media-driver.c', dependencies: ui_dep,
+  link_args: ['-Wl,--wrap=virDomainUpdateDeviceFlags', '-Wl,--wrap=pirwa_backend_request_async'])
 
 # Explicit desktop error-layout QA; test driver only, with a rejected proxy start.
 executable('test-network-ui', 'test-network-ui.c', dependencies: ui_dep,

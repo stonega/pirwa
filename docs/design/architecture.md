@@ -112,9 +112,15 @@ When a CD/DVD has media, a button immediately after Shut Down shows its filename
 and an eject icon. Its label ellipsizes to an 18-character width; the tooltip and
 accessible label retain the full filename. It is also available while paused
 and hides when the tray is empty or the machine is stopped. With several mounted discs, it
-shows the first one, then the next after ejection. The worker checks the displayed
-source and target against fresh XML before ejecting, updates live and persistent
-configuration where applicable, and respects guest media locks. Tray events
+shows the first one, then the next after ejection. While ejecting, a circular
+spinner replaces the eject icon inside the disabled button, retaining its size
+and filename. The tooltip and accessible label report ejection in progress, and
+the button exposes its busy state. Ejection does not show the global progress row.
+The worker checks the displayed source and target against fresh XML before
+ejecting, updates live and persistent
+configuration where applicable, and uses `VIR_DOMAIN_DEVICE_MODIFY_FORCE` for a
+live eject so a locked installer tray cannot block removal. Stopped machines
+update only their saved definition without the force flag. Tray events
 refresh selected details without polling. Resources continue to come from the
 saved definition while the displayed media follows the live tray.
 The eject XML removes the media source and preserves the drive's target

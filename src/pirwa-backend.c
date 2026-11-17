@@ -379,6 +379,10 @@ eject_media (virDomainPtr domain, const PirwaRequest *request, GCancellable *can
     return FALSE;
   unsigned int flags
       = (active ? VIR_DOMAIN_AFFECT_LIVE : 0) | (persistent ? VIR_DOMAIN_AFFECT_CONFIG : 0);
+  /* Installers can keep the tray locked, including while paused. The explicit
+   * eject action must open it without waiting for the guest to unlock it. */
+  if (active)
+    flags |= VIR_DOMAIN_DEVICE_MODIFY_FORCE;
   if (virDomainUpdateDeviceFlags (domain, media->media_eject_xml, flags) < 0)
     {
       pirwa_libvirt_error (error, "Cannot eject media");

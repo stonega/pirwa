@@ -325,9 +325,14 @@ suspended windows retain their last reading or initial sampling status without p
 No real SPICE server or guest is needed; display connection errors are expected.
 The media fixture checks an ellipsized ISO filename, full tooltip, eject icon,
 placement immediately after Shut Down, visibility across selections, and hiding
-after a real test-driver eject. Headless backend tests cover running, paused and
-powered-off media removal, persistence across the next start, stale-source
-rejection and cancellation. The test driver does not certify QEMU media locks.
+after a real test-driver eject. It holds ejection pending to check the button's
+circular spinner, unchanged width, hidden global progress row, and recovery
+after an injected failure followed by a successful retry.
+Headless backend tests cover running, paused and powered-off media removal,
+persistence across the next start, stale-source
+rejection and cancellation. Both executables verify the force flag on live
+ejection, then strip it in a test-only adapter because libvirt's test driver does
+not accept it. The test driver does not certify QEMU media locks.
 Run it inside the isolated desktop with:
 
 ```sh

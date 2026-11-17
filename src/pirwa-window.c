@@ -41,6 +41,9 @@ struct _PirwaWindow
   GtkWidget *start_button;
   GtkWidget *shutdown_button;
   GtkWidget *eject_button;
+  GtkStack *eject_indicator;
+  GtkSpinner *eject_spinner;
+  char *ejecting_uuid;
   GtkLabel *media_name;
   GtkWidget *restart_button;
   GtkWidget *pause_button;
@@ -440,10 +443,28 @@ update_actions (PirwaWindow *self)
   gtk_widget_set_visible (self->start_button, stopped);
   gtk_widget_set_visible (self->shutdown_button, state == 1);
   gtk_widget_set_visible (self->eject_button, have_media);
+  gboolean ejecting = self->busy && machine && have_media
+                      && g_strcmp0 (self->ejecting_uuid, pirwa_machine_get_uuid (machine)) == 0;
+  if (ejecting && !self->eject_spinner)
+    {
+      self->eject_spinner = GTK_SPINNER (gtk_spinner_new ());
+      gtk_widget_set_size_request (GTK_WIDGET (self->eject_spinner), 16, 16);
+      gtk_spinner_start (self->eject_spinner);
+      gtk_stack_add_named (self->eject_indicator, GTK_WIDGET (self->eject_spinner), "progress");
+    }
+  gtk_stack_set_visible_child_name (self->eject_indicator, ejecting ? "progress" : "icon");
+  if (!ejecting && self->eject_spinner)
+    {
+      gtk_stack_remove (self->eject_indicator, GTK_WIDGET (self->eject_spinner));
+      self->eject_spinner = NULL;
+    }
+  gtk_accessible_update_state (GTK_ACCESSIBLE (self->eject_button), GTK_ACCESSIBLE_STATE_BUSY,
+                               ejecting, -1);
   if (have_media)
     {
       g_autofree char *name = g_filename_display_basename (self->details->media_source);
-      g_autofree char *label = g_strdup_printf (_ ("Eject %s"), name);
+      g_autofree char *label
+          = g_strdup_printf (ejecting ? _ ("Ejecting %s…") : _ ("Eject %s"), name);
       gtk_label_set_text (self->media_name, name);
       gtk_widget_set_tooltip_text (self->eject_button, label);
       gtk_accessible_update_property (GTK_ACCESSIBLE (self->eject_button),
@@ -850,6 +871,7 @@ request_done (GObject *source, GAsyncResult *result, gpointer data)
       return;
     }
   self->busy = FALSE;
+  g_clear_pointer (&self->ejecting_uuid, g_free);
   g_clear_handle_id (&self->start_progress_source, g_source_remove);
   g_clear_pointer (&self->starting_uuid, g_free);
   gtk_widget_set_visible (self->operation_bar, FALSE);
@@ -971,7 +993,10 @@ submit (PirwaWindow *self, const PirwaRequest *request, AdwDialog *dialog)
   g_clear_object (&self->operation_cancel);
   self->operation_cancel = g_cancellable_new ();
   gtk_widget_set_visible (self->operation_bar, request->operation > PIRWA_RECONNECT
-                                                   && request->operation != PIRWA_START);
+                                                   && request->operation != PIRWA_START
+                                                   && request->operation != PIRWA_EJECT);
+  if (request->operation == PIRWA_EJECT)
+    self->ejecting_uuid = g_strdup (request->uuid);
   if (request->operation == PIRWA_START)
     {
       self->starting_uuid = g_strdup (request->uuid);
@@ -1763,6 +1788,7 @@ pirwa_window_finalize (GObject *object)
   PirwaWindow *self = PIRWA_WINDOW (object);
   g_free (self->search_text);
   g_free (self->edit_uuid);
+  g_free (self->ejecting_uuid);
   g_strfreev (self->pools);
   pirwa_details_free (self->details);
   pirwa_boxes_paths_free (self->boxes_paths);
@@ -1844,7 +1870,9 @@ pirwa_window_init (PirwaWindow *self)
                                          "searchbar.pirwa-search > revealer > box { padding: 0; }"
                                          "button.pirwa-shutdown {"
                                          " background-color: @warning_bg_color;"
-                                         " color: @warning_fg_color; }");
+                                         " color: @warning_fg_color; }"
+                                         "button.pirwa-eject spinner:disabled {"
+                                         " color: @window_fg_color; opacity: 1; }");
       gtk_style_context_add_provider_for_display (display, GTK_STYLE_PROVIDER (provider),
                                                   GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
       g_object_set_data (G_OBJECT (display), "pirwa-collection-styles", GINT_TO_POINTER (1));
@@ -1952,9 +1980,14 @@ pirwa_window_init (PirwaWindow *self)
   gtk_label_set_ellipsize (self->media_name, PANGO_ELLIPSIZE_END);
   gtk_label_set_max_width_chars (self->media_name, 18);
   gtk_box_append (GTK_BOX (media), GTK_WIDGET (self->media_name));
-  gtk_box_append (GTK_BOX (media), gtk_image_new_from_icon_name ("media-eject-symbolic"));
+  self->eject_indicator = GTK_STACK (gtk_stack_new ());
+  gtk_stack_add_named (self->eject_indicator, gtk_image_new_from_icon_name ("media-eject-symbolic"),
+                       "icon");
+  gtk_widget_set_valign (GTK_WIDGET (self->eject_indicator), GTK_ALIGN_CENTER);
+  gtk_box_append (GTK_BOX (media), GTK_WIDGET (self->eject_indicator));
   gtk_button_set_child (GTK_BUTTON (self->eject_button), media);
   gtk_widget_add_css_class (self->eject_button, "text-button");
+  gtk_widget_add_css_class (self->eject_button, "pirwa-eject");
   gtk_widget_set_margin_end (self->eject_button, 6);
   gtk_actionable_set_action_name (GTK_ACTIONABLE (self->eject_button), "win.eject");
   gtk_box_insert_child_after (GTK_BOX (self->machine_controls), self->eject_button,

@@ -228,7 +228,10 @@ Fedora COSMIC live desktop. This uses software rendering; 3D acceleration is not
 enabled. Existing machines keep their configured graphics device.
 
 After installation finishes, use the filename-and-eject button in the content
-header to eject the installation media. You can also shut down the guest, open
+header to eject the installation media. The button shows a circular spinner
+while removing the disc and becomes available again if removal fails. Eject also
+releases media locked by the guest, so finish using the installation media before
+ejecting it. You can also shut down the guest, open
 **Settings**, enable **Eject installation media**, and choose **Save Changes**.
 Shut down and choose **Start** to boot the installed system from its disk and
 finish the distribution's first-run setup. This workflow has been exercised with Fedora
